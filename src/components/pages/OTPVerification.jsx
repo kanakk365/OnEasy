@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import apiClient from '../../utils/api'
 import logo from '../../assets/logo.png'
 import bgImage from '../../assets/bg.png'
 
@@ -68,23 +69,28 @@ function OTPVerification() {
         throw new Error('Please enter the complete 4-digit OTP')
       }
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Call backend API to verify OTP
+      const result = await apiClient.verifyOTP(phoneNumber, otpString)
+
+      if (!result.success) {
+        throw new Error(result.message || 'OTP verification failed')
+      }
+
+      console.log('✅ OTP verification successful')
       
-      // For demo purposes, accept any 4-digit OTP
-      console.log('OTP verification successful:', otpString)
+      // Navigate to appropriate dashboard based on user role
+      const userRole = result.user?.role_id
       
-      // Store user data and redirect to referral page
-      localStorage.setItem('user', JSON.stringify({
-        phoneNumber: phoneNumber,
-        loginMethod: 'phone',
-        verified: true
-      }))
-      
-      navigate('/referral')
+      if (userRole === '1' || userRole === '2') {
+        navigate('/admin')
+      } else if (userRole === '3') {
+        navigate('/partner')
+      } else {
+        navigate('/client')
+      }
       
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'OTP verification failed')
     } finally {
       setIsLoading(false)
     }
@@ -98,10 +104,13 @@ function OTPVerification() {
     setError('')
 
     try {
-      // Simulate resend API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Call backend API to resend OTP using apiClient
+      const data = await apiClient.phoneLogin(phoneNumber)
       
-      setOtp(['', '', '', ''])
+      // OTP will be sent via SMS (MSG91)
+      console.log("✅ OTP resent - check your phone for SMS")
+      
+      setOtp(['', '', '', '', '', ''])
       setCanResend(false)
       setResendTimer(30)
       
@@ -117,10 +126,10 @@ function OTPVerification() {
         })
       }, 1000)
       
-      console.log('OTP resent successfully')
+      console.log('✅ OTP resent successfully')
       
     } catch (err) {
-      setError('Failed to resend OTP. Please try again.')
+      setError(err.message || 'Failed to resend OTP. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -165,9 +174,9 @@ function OTPVerification() {
           {/* Main Heading */}
           <div className="text-center mb-6 md:mb-8">
             <h2 className="text-2xl md:text-4xl font-semibold text-gray-800 mb-2">Verify Your Mobile</h2>
-            <p className="text-sm md:text-base text-gray-600">
-              We've sent a 4-digit OTP to {phoneNumber} via SMS
-            </p>
+          <p className="text-sm md:text-base text-gray-600">
+            We've sent a 4-digit OTP to {phoneNumber} via SMS
+          </p>
           </div>
 
           {/* Error Message */}
@@ -180,7 +189,7 @@ function OTPVerification() {
           {/* OTP Form */}
           <form onSubmit={handleVerifyOtp} className="space-y-4 md:space-y-6">
             {/* OTP Input Fields */}
-            <div className="flex justify-center space-x-2 md:space-x-3 mb-6">
+            <div className="flex justify-center space-x-2 mb-6">
               {otp.map((digit, index) => (
                 <input
                   key={index}
@@ -192,7 +201,7 @@ function OTPVerification() {
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   onPaste={index === 0 ? handlePaste : undefined}
-                  className="w-12 h-12 md:w-14 md:h-14 text-center text-xl md:text-2xl font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                  className="w-10 h-10 md:w-12 md:h-12 text-center text-lg md:text-xl font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
                   disabled={isLoading}
                 />
               ))}

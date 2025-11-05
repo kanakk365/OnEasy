@@ -4,6 +4,9 @@ import './index.css'
 import App from './App.jsx'
 
 // Register service worker for PWA
+// DISABLED: Service worker was blocking API calls
+// Uncomment when you need PWA features
+/*
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
@@ -15,6 +18,7 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+*/
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

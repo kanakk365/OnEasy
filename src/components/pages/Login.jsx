@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import apiClient from "../../utils/api";
 import logo from "../../assets/logo.png";
 import bgImage from "../../assets/bg.png";
 
@@ -22,14 +23,20 @@ function Login() {
         throw new Error("Please enter your phone number");
       }
 
-      // Simulate API call - replace with your actual authentication logic
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const fullPhoneNumber = countryCode + phoneNumber;
+
+      // Call backend API to send OTP using apiClient
+      const data = await apiClient.phoneLogin(fullPhoneNumber);
+
+      console.log("✅ OTP sent successfully to:", fullPhoneNumber);
+      
+      // OTP will be sent via SMS (MSG91)
+      // Check your phone for the OTP message
 
       // Redirect to OTP verification page with phone number
-      console.log("Phone login:", countryCode + phoneNumber);
       navigate("/verify-otp", {
         state: {
-          phoneNumber: countryCode + phoneNumber,
+          phoneNumber: fullPhoneNumber,
         },
       });
     } catch (err) {
@@ -73,29 +80,25 @@ function Login() {
   };
 
   // Handle Google authentication callback
-  const handleGoogleCallback = (response) => {
+  const handleGoogleCallback = async (response) => {
     try {
-      // Decode the JWT token
-      const payload = JSON.parse(atob(response.credential.split(".")[1]));
+      // Send credential to backend
+      const result = await apiClient.googleLogin(response.credential);
 
-      console.log("Google login successful:", payload);
+      console.log("✅ Google login successful");
 
-      // Store user data (in real app, you'd send this to your backend)
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          name: payload.name,
-          email: payload.email,
-          picture: payload.picture,
-          loginMethod: "google",
-        })
-      );
-
-      // Redirect to appropriate dashboard based on user role
-      // For demo, redirect to client dashboard
-      navigate("/client");
+      // Navigate to appropriate dashboard based on role
+      const userRole = result.user?.role_id;
+      
+      if (userRole === '1' || userRole === '2') {
+        navigate("/admin");
+      } else if (userRole === '3') {
+        navigate("/partner");
+      } else {
+        navigate("/client");
+      }
     } catch (err) {
-      setError("Failed to process Google login");
+      setError(err.message || "Failed to process Google login");
       setIsLoading(false);
     }
   };
