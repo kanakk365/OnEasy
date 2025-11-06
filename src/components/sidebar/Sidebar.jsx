@@ -28,7 +28,11 @@ function Sidebar() {
   const isRegistrationsActive =
     location.pathname === "/registrations" ||
     location.pathname === "/company-categories" ||
-    location.pathname.startsWith("/company/");
+    location.pathname.startsWith("/company/") ||
+    location.pathname === "/private-limited-form" ||
+    location.pathname === "/private-limited-dashboard" ||
+    location.pathname.startsWith("/private-limited/view/") ||
+    location.pathname === "/company-form";
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const [userData, setUserData] = React.useState(null);
   const { showLogoutModal, setShowLogoutModal, closeLogoutModal, handleLogout } = useLogoutModalStore();

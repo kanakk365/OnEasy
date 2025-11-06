@@ -11,6 +11,9 @@ import CompanyCategories from "../pages/CompanyCategories";
 import CompanyDetails from "../pages/CompanyDetails";
 import BusinessDetailsForm from "../pages/BusinessDetailsForm";
 import Settings from "../pages/Settings";
+import PrivateLimitedForm from "../forms/PrivateLimitedForm";
+import PrivateLimitedDashboard from "../pages/PrivateLimitedDashboard";
+import PrivateLimitedDetails from "../pages/PrivateLimitedDetails";
 
 function Routers() {
   return (
@@ -25,6 +28,9 @@ function Routers() {
       <Route path="/company-categories" element={<CompanyCategories />} />
       <Route path="/company/:type" element={<CompanyDetails />} />
       <Route path="/company-form" element={<BusinessDetailsForm />} />
+      <Route path="/private-limited-form" element={<PrivateLimitedForm />} />
+      <Route path="/private-limited-dashboard" element={<PrivateLimitedDashboard />} />
+      <Route path="/private-limited/view/:ticketId" element={<PrivateLimitedDetails />} />
       <Route path="/settings" element={<Settings />} />
     </Routes>
   );

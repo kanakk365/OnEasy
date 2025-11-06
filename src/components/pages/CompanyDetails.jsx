@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 // import { useParams } from "react-router-dom";
 import building from "../../assets/building.png";
@@ -11,6 +11,8 @@ import AboutSection from "./company-details/AboutSection";
 import FAQSection from "./company-details/FAQSection";
 import TopTabs from "./company-details/TopTabs";
 import { initPayment } from "../../utils/payment";
+import PrivateLimitedForm from "../forms/PrivateLimitedForm";
+import { getMyRegistrations } from "../../utils/privateLimitedApi";
 
 function CompanyDetails() {
   // const { type } = useParams();
@@ -19,6 +21,46 @@ function CompanyDetails() {
   const [expandedSection, setExpandedSection] = useState("");
   const [hidePackagesTab, setHidePackagesTab] = useState(false);
   const [isInFlow, setIsInFlow] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [checkingRegistrations, setCheckingRegistrations] = useState(true);
+
+  // Check if user already has a registration on mount
+  useEffect(() => {
+    checkExistingRegistrations();
+  }, []);
+
+  const checkExistingRegistrations = async () => {
+    try {
+      const result = await getMyRegistrations();
+      if (result.success && result.data && result.data.length > 0) {
+        // User has existing registrations, redirect to dashboard
+        console.log('User has existing registrations, redirecting to dashboard');
+        navigate('/private-limited-dashboard');
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking registrations:', error);
+      // Continue to show packages if check fails
+    } finally {
+      setCheckingRegistrations(false);
+    }
+  };
+
+  // Listen for payment success event
+  useEffect(() => {
+    const handlePaymentSuccess = (event) => {
+      const { packageData } = event.detail;
+      setSelectedPackage(packageData);
+      setShowForm(true);
+    };
+
+    window.addEventListener('paymentSuccess', handlePaymentSuccess);
+    
+    return () => {
+      window.removeEventListener('paymentSuccess', handlePaymentSuccess);
+    };
+  }, []);
 
   // Define the sequential flow steps
   const flowSteps = ["process", "documents", "prerequisites", "about", "faq"];
@@ -274,12 +316,12 @@ function CompanyDetails() {
   const packages = [
     {
       name: "Starter",
-      price: "1,299",
-      priceValue: 1299,
+      price: "12,999",
+      priceValue: 12999,
       period: "Month",
       description: "For solo entrepreneurs",
       icon: "★",
-      originalPrice: "8,999",
+      originalPrice: "18,999",
       features: [
         "2% 3rd-party payment providers",
         "Inventory tracking (7 markets)",
@@ -296,7 +338,7 @@ function CompanyDetails() {
       period: "Month",
       description: "As your business scales",
       icon: "✢",
-      originalPrice: "11,999",
+      originalPrice: "24,999",
       features: [
         "1.9% 3rd-party payment providers",
         "Inventory tracking (15 markets)",
@@ -313,7 +355,7 @@ function CompanyDetails() {
       period: "Month",
       description: "For more complex businesses",
       icon: "✤",
-      originalPrice: "19,999",
+      originalPrice: "34,999",
       features: [
         "Competitive rates for high-volume merchants",
         "Custom reports and analytics",
@@ -377,11 +419,21 @@ function CompanyDetails() {
             onGetStarted={async (selectedPackage) => {
               try {
                 console.log('Initiating payment for:', selectedPackage.name);
-                await initPayment(selectedPackage);
-                // After successful payment, user will be redirected or notified
+                const result = await initPayment(selectedPackage);
+                
+                // If payment successful and needs redirect
+                if (result.success && result.redirect) {
+                  console.log('Payment successful! Redirecting to form...');
+                  // Small delay to ensure modal closes
+                  setTimeout(() => {
+                    navigate('/private-limited-form');
+                  }, 500);
+                }
               } catch (error) {
                 console.error('Payment error:', error);
-                alert(`Payment failed: ${error.message || 'Please try again'}`);
+                if (error.message !== 'Payment cancelled') {
+                  alert(`Payment failed: ${error.message || 'Please try again'}`);
+                }
               }
             }}
           />
@@ -421,6 +473,31 @@ function CompanyDetails() {
   
   // Show Continue button only on FAQ, Next on all other flow steps
   const isLastStep = activeTab === "faq";
+
+  // Show loading while checking registrations
+  if (checkingRegistrations) {
+    return (
+      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show form after successful payment
+  if (showForm && selectedPackage) {
+    return (
+      <PrivateLimitedForm
+        packageDetails={selectedPackage}
+        onClose={() => {
+          setShowForm(false);
+          setSelectedPackage(null);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f3f5f7]">

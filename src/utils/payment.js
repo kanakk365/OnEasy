@@ -23,96 +23,114 @@ const loadRazorpayScript = () => {
 
 // Initialize payment
 export const initPayment = async (packageData) => {
-  try {
+  return new Promise((resolve, reject) => {
     // Load Razorpay script
-    const isScriptLoaded = await loadRazorpayScript();
-    if (!isScriptLoaded) {
-      throw new Error('Failed to load Razorpay SDK');
-    }
-
-    // Get user data
-    const userData = JSON.parse(localStorage.getItem('user') || '{}');
-    if (!userData.phone && !userData.email) {
-      throw new Error('User information not found. Please login again.');
-    }
-
-    // Create order on backend
-    console.log('Creating payment order for:', packageData.name);
-    const orderResponse = await apiClient.post('/payment/create-order', {
-      amount: packageData.priceValue,
-      currency: 'INR',
-      receipt: `receipt_${Date.now()}`,
-      packageName: packageData.name
-    });
-
-    if (!orderResponse.success) {
-      throw new Error(orderResponse.message || 'Failed to create payment order');
-    }
-
-    const { orderId, amount, currency, keyId } = orderResponse.data;
-
-    // Configure Razorpay options
-    const options = {
-      key: keyId,
-      amount: amount,
-      currency: currency,
-      name: 'OnEasy',
-      description: `${packageData.name} Package - Private Limited Company`,
-      order_id: orderId,
-      prefill: {
-        name: userData.name || '',
-        email: userData.email || '',
-        contact: userData.phone || ''
-      },
-      theme: {
-        color: '#01334C'
-      },
-      handler: async function (response) {
-        // Payment successful - verify on backend
-        try {
-          console.log('Payment successful, verifying...');
-          const verifyResponse = await apiClient.post('/payment/verify', {
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature
-          });
-
-          if (verifyResponse.success) {
-            // Payment verified successfully
-            return {
-              success: true,
-              orderId: response.razorpay_order_id,
-              paymentId: response.razorpay_payment_id
-            };
-          } else {
-            throw new Error('Payment verification failed');
-          }
-        } catch (error) {
-          console.error('Payment verification error:', error);
-          throw error;
-        }
-      },
-      modal: {
-        ondismiss: function() {
-          console.log('Payment cancelled by user');
-        }
+    loadRazorpayScript().then(isScriptLoaded => {
+      if (!isScriptLoaded) {
+        reject(new Error('Failed to load Razorpay SDK'));
+        return;
       }
-    };
 
-    // Open Razorpay checkout
-    const razorpay = new window.Razorpay(options);
-    
-    razorpay.on('payment.failed', function (response) {
-      console.error('Payment failed:', response.error);
-      throw new Error(response.error.description || 'Payment failed');
+      // Get user data
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!userData.phone && !userData.email) {
+        reject(new Error('User information not found. Please login again.'));
+        return;
+      }
+
+      // Create order on backend
+      console.log('Creating payment order for:', packageData.name);
+      apiClient.post('/payment/create-order', {
+        amount: packageData.priceValue,
+        currency: 'INR',
+        receipt: `receipt_${Date.now()}`,
+        packageName: packageData.name
+      }).then(orderResponse => {
+        if (!orderResponse.success) {
+          reject(new Error(orderResponse.message || 'Failed to create payment order'));
+          return;
+        }
+
+        const { orderId, amount, currency, keyId } = orderResponse.data;
+
+        // Configure Razorpay options
+        const options = {
+          key: keyId,
+          amount: amount,
+          currency: currency,
+          name: 'OnEasy',
+          description: `${packageData.name} Package - Private Limited Company`,
+          order_id: orderId,
+          prefill: {
+            name: userData.name || '',
+            email: userData.email || '',
+            contact: userData.phone || ''
+          },
+          theme: {
+            color: '#01334C'
+          },
+          handler: function (response) {
+            // Payment successful - verify on backend
+            console.log('Payment successful, verifying...');
+            apiClient.post('/payment/verify', {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            }).then(verifyResponse => {
+              if (verifyResponse.success) {
+                // Payment verified successfully - store package data
+                localStorage.setItem('selectedPackage', JSON.stringify(packageData));
+                localStorage.setItem('paymentDetails', JSON.stringify({
+                  orderId: response.razorpay_order_id,
+                  paymentId: response.razorpay_payment_id,
+                  timestamp: new Date().toISOString()
+                }));
+                
+                console.log('✅ Payment verified! Redirecting to form...');
+                
+                // Resolve promise with success
+                resolve({
+                  success: true,
+                  orderId: response.razorpay_order_id,
+                  paymentId: response.razorpay_payment_id,
+                  redirect: true
+                });
+              } else {
+                reject(new Error('Payment verification failed'));
+              }
+            }).catch(error => {
+              console.error('Payment verification error:', error);
+              reject(error);
+            });
+          },
+          modal: {
+            ondismiss: function() {
+              console.log('Payment cancelled by user');
+              reject(new Error('Payment cancelled'));
+            }
+          }
+        };
+
+        // Open Razorpay checkout
+        const razorpay = new window.Razorpay(options);
+        
+        razorpay.on('payment.failed', function (response) {
+          console.error('Payment failed:', response.error);
+          reject(new Error(response.error.description || 'Payment failed'));
+        });
+
+        razorpay.open();
+
+      }).catch(error => {
+        console.error('Order creation error:', error);
+        reject(error);
+      });
+
+    }).catch(error => {
+      console.error('Script loading error:', error);
+      reject(error);
     });
-
-    razorpay.open();
-
-  } catch (error) {
-    console.error('Payment initialization error:', error);
-    throw error;
-  }
+  });
 };
 
 // Payment handler for testing

@@ -35,7 +35,7 @@ function FileUploadField({ label, buttonLabel, required = false, accept, onFileS
           <button
             type="button"
             onClick={handleFileClick}
-            className="w-full text-left px-4 py-3 rounded-l-lg bg-white outline-none"
+            className="w-full text-left px-4 py-3 rounded-l-lg bg-white outline-none text-gray-400"
           >
             {displayText}
           </button>
