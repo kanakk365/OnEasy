@@ -57,7 +57,7 @@ function PackagesSection({ packages, onGetStarted }) {
               ))}
             </ul>
             <button
-              onClick={onGetStarted}
+              onClick={() => onGetStarted(pkg)}
               className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 mt-auto ${
                 pkg.isHighlighted
                   ? "bg-white/20 text-white shadow-sm hover:bg-white/30"

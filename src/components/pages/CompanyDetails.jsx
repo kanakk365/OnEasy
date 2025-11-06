@@ -10,6 +10,7 @@ import PrerequisitesSection from "./company-details/PrerequisitesSection";
 import AboutSection from "./company-details/AboutSection";
 import FAQSection from "./company-details/FAQSection";
 import TopTabs from "./company-details/TopTabs";
+import { initPayment } from "../../utils/payment";
 
 function CompanyDetails() {
   // const { type } = useParams();
@@ -273,7 +274,8 @@ function CompanyDetails() {
   const packages = [
     {
       name: "Starter",
-      price: "4,999",
+      price: "1,299",
+      priceValue: 1299,
       period: "Month",
       description: "For solo entrepreneurs",
       icon: "★",
@@ -289,7 +291,8 @@ function CompanyDetails() {
     },
     {
       name: "Growth",
-      price: "9,999",
+      price: "16,999",
+      priceValue: 16999,
       period: "Month",
       description: "As your business scales",
       icon: "✢",
@@ -305,7 +308,8 @@ function CompanyDetails() {
     },
     {
       name: "Pro",
-      price: "15,999",
+      price: "25,499",
+      priceValue: 25499,
       period: "Month",
       description: "For more complex businesses",
       icon: "✤",
@@ -370,11 +374,15 @@ function CompanyDetails() {
         return (
           <PackagesSection
             packages={packages}
-            onGetStarted={() => {
-              setActiveTab("process");
-              setHidePackagesTab(true);
-              setIsInFlow(true);
-              window.scrollTo({ top: 0, behavior: "smooth" });
+            onGetStarted={async (selectedPackage) => {
+              try {
+                console.log('Initiating payment for:', selectedPackage.name);
+                await initPayment(selectedPackage);
+                // After successful payment, user will be redirected or notified
+              } catch (error) {
+                console.error('Payment error:', error);
+                alert(`Payment failed: ${error.message || 'Please try again'}`);
+              }
             }}
           />
         );
