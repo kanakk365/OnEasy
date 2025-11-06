@@ -408,7 +408,8 @@ function CompanyDetails() {
 
   // Check if current tab is in the flow steps
   const isInFlowStep = flowSteps.includes(activeTab);
-  const showNavigationButtons = isInFlow && isInFlowStep;
+  // Don't show navigation buttons on FAQ tab (removed Continue button)
+  const showNavigationButtons = isInFlow && isInFlowStep && activeTab !== "faq";
   
   // Show Continue button only on FAQ, Next on all other flow steps
   const isLastStep = activeTab === "faq";
