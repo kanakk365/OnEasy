@@ -46,3 +46,4 @@ If `.env` is not created, these defaults are used:
 - API URL: `http://localhost:3001/api/v1`
 - Google Client ID: `YOUR_GOOGLE_CLIENT_ID`
 
+
