@@ -13,6 +13,7 @@ export const AUTH_CONFIG = {
     GOOGLE_LOGIN: '/auth/google-login',
     REFRESH_TOKEN: '/auth/refresh-token',
     GET_ME: '/auth/me',
+    UPDATE_PROFILE: '/auth/profile',
     LOGOUT: '/auth/logout'
   },
   

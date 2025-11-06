@@ -163,7 +163,16 @@ class APIClient {
 
   // User methods
   async updateProfile(data) {
-    return this.put('/users/profile', data);
+    const response = await this.put(AUTH_CONFIG.ENDPOINTS.UPDATE_PROFILE, data);
+    
+    // Update local storage with new user data
+    if (response.success && response.data) {
+      const existingUser = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || '{}');
+      const updatedUser = { ...existingUser, ...response.data };
+      localStorage.setItem(AUTH_CONFIG.STORAGE_KEYS.USER, JSON.stringify(updatedUser));
+    }
+    
+    return response;
   }
 
   // Company methods

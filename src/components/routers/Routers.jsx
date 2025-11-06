@@ -10,6 +10,7 @@ import Registrations from "../pages/Registrations";
 import CompanyCategories from "../pages/CompanyCategories";
 import CompanyDetails from "../pages/CompanyDetails";
 import BusinessDetailsForm from "../pages/BusinessDetailsForm";
+import Settings from "../pages/Settings";
 
 function Routers() {
   return (
@@ -24,6 +25,7 @@ function Routers() {
       <Route path="/company-categories" element={<CompanyCategories />} />
       <Route path="/company/:type" element={<CompanyDetails />} />
       <Route path="/company-form" element={<BusinessDetailsForm />} />
+      <Route path="/settings" element={<Settings />} />
     </Routes>
   );
 }

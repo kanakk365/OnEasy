@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { RiDashboardLine, RiRobot2Line, RiFileEditLine } from "react-icons/ri";
+import { RiDashboardLine, RiRobot2Line, RiFileEditLine, RiSettings4Line } from "react-icons/ri";
 import {
   MdOutlineSubscriptions,
   MdOutlineArticle,
@@ -18,6 +18,7 @@ import {
 import useSidebarStore from "../../stores/sidebarStore";
 import useLogoutModalStore from "../../stores/logoutModalStore";
 import LogoutModal from "../common/LogoutModal";
+import { AUTH_CONFIG } from "../../config/auth";
 import logo from "../../assets/logo.png";
 
 function Sidebar() {
@@ -29,7 +30,36 @@ function Sidebar() {
     location.pathname === "/company-categories" ||
     location.pathname.startsWith("/company/");
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
+  const [userData, setUserData] = React.useState(null);
   const { showLogoutModal, setShowLogoutModal, closeLogoutModal, handleLogout } = useLogoutModalStore();
+
+  // Load user data from localStorage
+  const loadUserData = React.useCallback(() => {
+    const storedUser = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER);
+    if (storedUser) {
+      try {
+        setUserData(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('Error parsing user data:', e);
+      }
+    }
+  }, []);
+
+  React.useEffect(() => {
+    // Load initial user data
+    loadUserData();
+
+    // Listen for profile updates
+    const handleProfileUpdate = () => {
+      loadUserData();
+    };
+
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+    };
+  }, [loadUserData]);
   const menuItems = [
     { icon: <RiDashboardLine />, text: "Dashboard", path: "/client" },
     {
@@ -47,6 +77,7 @@ function Sidebar() {
       path: "/subscriptions",
     },
     { icon: <BsBuilding />, text: "Organization", path: "/organization" },
+    { icon: <RiSettings4Line />, text: "Settings", path: "/settings" },
   ];
 
   return (
@@ -187,20 +218,32 @@ function Sidebar() {
                   isCollapsed ? "justify-center" : "space-x-3"
                 } cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-all duration-200`}
               >
-                <div
-                  className={`${
-                    isCollapsed ? "w-8 h-8" : "w-6 h-6"
-                  } bg-[#01334C] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
-                >
-                  A
-                </div>
+                {userData?.profile_image ? (
+                  <img
+                    src={userData.profile_image}
+                    alt="Profile"
+                    className={`${
+                      isCollapsed ? "w-8 h-8" : "w-6 h-6"
+                    } rounded-full object-cover transition-all duration-300`}
+                  />
+                ) : (
+                  <div
+                    className={`${
+                      isCollapsed ? "w-8 h-8" : "w-6 h-6"
+                    } bg-[#01334C] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
+                  >
+                    {userData?.name ? userData.name.charAt(0).toUpperCase() : 'A'}
+                  </div>
+                )}
                 {!isCollapsed && (
                   <>
                     <div>
                       <div className="text-[11px] text-gray-500">
                         Welcome 👋
                       </div>
-                      <div className="text-[13px] text-gray-700">Aleena</div>
+                      <div className="text-[13px] text-gray-700">
+                        {userData?.name || 'User'}
+                      </div>
                     </div>
                     <span className="text-base text-gray-400 ml-auto transform transition-transform duration-200 group-hover:rotate-90">
                       ›
@@ -284,12 +327,26 @@ function Sidebar() {
           {/* Mobile Profile Section */}
           <div className="mt-auto p-4 border-t border-gray-200">
             <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg bg-gray-50">
-              <div className="w-8 h-8 bg-[#01334C] text-white rounded-full flex items-center justify-center text-sm font-medium">
-                A
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">Aleena</p>
-                <p className="text-xs text-gray-500">aleena@oneasy.com</p>
+              <div className="flex items-center space-x-3 flex-1">
+                {userData?.profile_image ? (
+                  <img
+                    src={userData.profile_image}
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-[#01334C] text-white rounded-full flex items-center justify-center text-sm font-medium">
+                    {userData?.name ? userData.name.charAt(0).toUpperCase() : 'A'}
+                  </div>
+                )}
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">
+                    {userData?.name || 'User'}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {userData?.email || userData?.phone || ''}
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => {

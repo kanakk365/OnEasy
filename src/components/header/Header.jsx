@@ -4,12 +4,42 @@ import { IoCallOutline, IoMailOutline, IoSearchOutline, IoLogOutOutline } from '
 import { BiSupport } from 'react-icons/bi';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import useLogoutModalStore from '../../stores/logoutModalStore';
+import { AUTH_CONFIG } from '../../config/auth';
 
 function Header() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [userData, setUserData] = React.useState(null);
   const { setShowLogoutModal } = useLogoutModalStore();
   const profileRef = React.useRef();
+
+  // Load user data from localStorage
+  const loadUserData = React.useCallback(() => {
+    const storedUser = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER);
+    if (storedUser) {
+      try {
+        setUserData(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('Error parsing user data:', e);
+      }
+    }
+  }, []);
+
+  React.useEffect(() => {
+    // Load initial user data
+    loadUserData();
+
+    // Listen for profile updates
+    const handleProfileUpdate = () => {
+      loadUserData();
+    };
+
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+    };
+  }, [loadUserData]);
 
   React.useEffect(() => {
     function handleClickOutside(event) {
@@ -83,9 +113,21 @@ function Header() {
             <div className="relative" ref={profileRef}>
               <button 
                 onClick={() => setIsProfileOpen(!isProfileOpen)} 
-                className="w-8 h-8 bg-[#01334C] rounded-full text-white flex items-center justify-center hover:bg-[#00486D] transition-colors duration-200"
+                className="w-8 h-8 rounded-full overflow-hidden hover:ring-2 hover:ring-[#00486D] transition-all duration-200"
               >
-                <span className="text-sm">A</span>
+                {userData?.profile_image ? (
+                  <img
+                    src={userData.profile_image}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#01334C] text-white flex items-center justify-center">
+                    <span className="text-sm">
+                      {userData?.name ? userData.name.charAt(0).toUpperCase() : 'A'}
+                    </span>
+                  </div>
+                )}
               </button>
               {isProfileOpen && (
                 <div 
