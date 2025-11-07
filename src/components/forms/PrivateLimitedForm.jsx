@@ -113,7 +113,7 @@ function PrivateLimitedForm({
       }
       
       // If we have registration data, pre-fill the form
-      if (registrationData) {
+      if (registrationData && registrationData.details) {
         const reg = registrationData.details;
         const dirs = registrationData.directors || [];
             
