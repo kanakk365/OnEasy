@@ -75,7 +75,8 @@ export const initPayment = async (packageData) => {
             apiClient.post('/payment/verify', {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature
+              razorpay_signature: response.razorpay_signature,
+              packageDetails: packageData // Send package details for invoice email
             }).then(verifyResponse => {
               if (verifyResponse.success) {
                 // Payment verified successfully - store package data
