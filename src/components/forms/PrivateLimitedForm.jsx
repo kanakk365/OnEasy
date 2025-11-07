@@ -328,12 +328,19 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
       {isAdminOrSuperadmin && (
         <button
           type="button"
-          onClick={() => {
+          onClick={async () => {
             const newState = !oneasyTeamFill;
             setOneasyTeamFill(newState);
+            
             // Store team fill state in localStorage
             if (newState) {
               localStorage.setItem('oneasyTeamFill', 'true');
+              
+              // Save to team fill requests table
+              const result = await requestTeamFill();
+              if (result.success) {
+                console.log('✅ Team fill request saved for admin');
+              }
             } else {
               localStorage.removeItem('oneasyTeamFill');
             }
