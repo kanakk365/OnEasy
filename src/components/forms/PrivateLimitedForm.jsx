@@ -13,11 +13,24 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
   const [showStep1CompleteModal, setShowStep1CompleteModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [oneasyTeamFill, setOneasyTeamFill] = useState(false);
+  const [isAdminOrSuperadmin, setIsAdminOrSuperadmin] = useState(false);
   const [formData, setFormData] = useState({
     numberOfDirectors: 1,
     numberOfShareholders: 1
   });
   
+  // Check if user is admin or superadmin
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    const userRole = userData.role || userData.role_id;
+    
+    // Check if user is admin (role: 'admin' or role_id: 1 or 2)
+    const isAdmin = userRole === 'admin' || userRole === 1 || userRole === 'superadmin' || userRole === 2;
+    setIsAdminOrSuperadmin(isAdmin);
+    
+    console.log('👤 User role:', userRole, '| Is Admin/Superadmin:', isAdmin);
+  }, []);
+
   // Load package details and existing registration data if editing
   useEffect(() => {
     const loadFormData = async () => {
@@ -230,13 +243,16 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
   };
 
   const renderStepContent = () => {
+    // Admin/Superadmin should be able to fill the form, regular users should see it disabled
+    const isDisabled = oneasyTeamFill && !isAdminOrSuperadmin;
+    
     switch (step) {
       case 1:
-        return <NameApplicationContent formData={formData} setFormData={setFormData} disabled={oneasyTeamFill} />;
+        return <NameApplicationContent formData={formData} setFormData={setFormData} disabled={isDisabled} />;
       case 2:
-        return <StartupInformationContent formData={formData} setFormData={setFormData} disabled={oneasyTeamFill} />;
+        return <StartupInformationContent formData={formData} setFormData={setFormData} disabled={isDisabled} />;
       case 3:
-        return <OfficeAddressContent formData={formData} setFormData={setFormData} disabled={oneasyTeamFill} />;
+        return <OfficeAddressContent formData={formData} setFormData={setFormData} disabled={isDisabled} />;
       default:
         return null;
     }
@@ -262,13 +278,13 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
 
           {/* OnEasy Team Fill Banner */}
           {oneasyTeamFill && (
-            <div className="bg-green-50 border-2 border-green-500 rounded-lg p-4 mb-6 flex items-center gap-3">
-              <svg className="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-blue-50 border-2 border-blue-500 rounded-lg p-4 mb-6 flex items-center gap-3">
+              <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <p className="font-semibold text-green-800">OnEasy Team Will Fill This Form</p>
-                <p className="text-sm text-green-700">All fields are now read-only. Our team will complete this form for you.</p>
+                <p className="font-semibold text-blue-900">Admin Mode: Filling on Behalf of Client</p>
+                <p className="text-sm text-blue-700">You are filling this form on behalf of the client. All form fields are enabled for you to complete the registration.</p>
               </div>
             </div>
           )}
@@ -280,15 +296,15 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
             <button
               type="button"
               onClick={goBack}
-              disabled={isSubmitting || oneasyTeamFill}
-              className={`px-6 py-1.5 rounded-md border border-[#00486D] text-[#00486D] ${(isSubmitting || oneasyTeamFill) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              disabled={isSubmitting || (oneasyTeamFill && !isAdminOrSuperadmin)}
+              className={`px-6 py-1.5 rounded-md border border-[#00486D] text-[#00486D] ${(isSubmitting || (oneasyTeamFill && !isAdminOrSuperadmin)) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
               Back
             </button>
             <button
               type="button"
-              onClick={oneasyTeamFill ? async () => {
-                // Save team fill request to database
+              onClick={(oneasyTeamFill && !isAdminOrSuperadmin) ? async () => {
+                // Regular user: Save team fill request and go to dashboard
                 setIsSubmitting(true);
                 const result = await requestTeamFill();
                 if (result.success) {
@@ -301,48 +317,50 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
               className={`px-6 py-1.5 rounded-md text-white font-medium ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
             >
-              {oneasyTeamFill ? 'Go to Dashboard' : (isSubmitting ? 'Submitting...' : (step === 3 ? 'Submit' : 'Next'))}
+              {(oneasyTeamFill && !isAdminOrSuperadmin) ? 'Go to Dashboard' : (isSubmitting ? 'Submitting...' : (step === 3 ? 'Submit' : 'Next'))}
             </button>
           </div>
           </div>
         </div>
       </div>
 
-      {/* Floating Button - Oneasy Team Fill */}
-      <button
-        type="button"
-        onClick={() => {
-          const newState = !oneasyTeamFill;
-          setOneasyTeamFill(newState);
-          // Store team fill state in localStorage
-          if (newState) {
-            localStorage.setItem('oneasyTeamFill', 'true');
-          } else {
-            localStorage.removeItem('oneasyTeamFill');
-          }
-        }}
-        className={`fixed bottom-8 right-8 px-6 py-4 rounded-full shadow-2xl font-medium text-white transition-all duration-300 hover:scale-105 z-40 ${
-          oneasyTeamFill 
-            ? 'bg-green-600 hover:bg-green-700' 
-            : 'bg-[#01334C] hover:bg-[#00486D]'
-        }`}
-      >
-        {oneasyTeamFill ? (
-          <span className="flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            OnEasy Team Will Fill
-          </span>
-        ) : (
-          <span className="flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            Do you want OnEasy team to fill?
-          </span>
-        )}
-      </button>
+      {/* Floating Button - Oneasy Team Fill (Only for Admin/Superadmin) */}
+      {isAdminOrSuperadmin && (
+        <button
+          type="button"
+          onClick={() => {
+            const newState = !oneasyTeamFill;
+            setOneasyTeamFill(newState);
+            // Store team fill state in localStorage
+            if (newState) {
+              localStorage.setItem('oneasyTeamFill', 'true');
+            } else {
+              localStorage.removeItem('oneasyTeamFill');
+            }
+          }}
+          className={`fixed bottom-8 right-8 px-6 py-4 rounded-full shadow-2xl font-medium text-white transition-all duration-300 hover:scale-105 z-40 ${
+            oneasyTeamFill 
+              ? 'bg-green-600 hover:bg-green-700' 
+              : 'bg-[#01334C] hover:bg-[#00486D]'
+          }`}
+        >
+          {oneasyTeamFill ? (
+            <span className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Filling on Behalf of Client
+            </span>
+          ) : (
+            <span className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              Fill on Behalf of Client
+            </span>
+          )}
+        </button>
+      )}
 
       {/* Step 1 Complete Modal */}
       {showStep1CompleteModal && (
