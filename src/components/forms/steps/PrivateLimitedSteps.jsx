@@ -14,7 +14,7 @@ const fileToBase64 = (file) => {
 };
 
 // Step 1: Name Application (Business Details)
-export function NameApplicationContent({ formData, setFormData }) {
+export function NameApplicationContent({ formData, setFormData, disabled = false }) {
   const step1 = formData.step1 || {};
   const suffix = ' Private Limited';
 
@@ -57,21 +57,23 @@ export function NameApplicationContent({ formData, setFormData }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Field label="Name Option 1">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="Enter first choice of company name"
               value={step1.nameOption1 || ''}
               onChange={(e) => updateStep1('nameOption1', e.target.value)}
               onBlur={(e) => handleBlur('nameOption1', e.target.value)}
+              disabled={disabled}
             />
           </Field>
 
           <Field label="Name Option 2">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="Enter second choice of company name"
               value={step1.nameOption2 || ''}
               onChange={(e) => updateStep1('nameOption2', e.target.value)}
               onBlur={(e) => handleBlur('nameOption2', e.target.value)}
+              disabled={disabled}
             />
           </Field>
         </div>
@@ -82,10 +84,11 @@ export function NameApplicationContent({ formData, setFormData }) {
         <Field label="Mention any reason for the company names, if any">
           <textarea
             rows={3}
-            className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none"
+            className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
             placeholder="Optional: Explain your choice of names"
             value={step1.nameReason || ''}
             onChange={(e) => updateStep1('nameReason', e.target.value)}
+            disabled={disabled}
           />
         </Field>
       </div>
@@ -97,6 +100,7 @@ export function NameApplicationContent({ formData, setFormData }) {
             placeholder="Select Company Type"
             value={step1.companyType || ''}
             onChange={(value) => updateStep1('companyType', value)}
+            disabled={disabled}
           />
         </Field>
 
@@ -107,10 +111,11 @@ export function NameApplicationContent({ formData, setFormData }) {
         <Field label="Nature of the Business">
           <textarea
             rows={4}
-            className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none"
+            className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
             placeholder="Describe the main line of activity in brief"
             value={step1.natureOfBusiness || ''}
             onChange={(e) => updateStep1('natureOfBusiness', e.target.value)}
+            disabled={disabled}
           />
         </Field>
       </div>
@@ -119,7 +124,7 @@ export function NameApplicationContent({ formData, setFormData }) {
 }
 
 // Step 2: Basic Company Details
-export function StartupInformationContent({ formData, setFormData }) {
+export function StartupInformationContent({ formData, setFormData, disabled = false }) {
   const step2 = formData.step2 || {};
 
   const updateStep2 = (field, value) => {
@@ -157,12 +162,13 @@ export function StartupInformationContent({ formData, setFormData }) {
     <div className="grid grid-cols-1 gap-6 mt-6">
       {/* Number of Directors and Shareholders */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Field label="Number of Proposed Directors">
+          <Field label="Number of Proposed Directors">
           <CustomDropdown
             options={['1', '2', '3']}
             placeholder="Select number of directors"
             value={formData.numberOfDirectors.toString()}
             onChange={(value) => setFormData({ ...formData, numberOfDirectors: parseInt(value) })}
+            disabled={disabled}
           />
           <p className="text-xs text-gray-500 mt-1">
             Up to 3 New Directors (additional directors excess of 2 incur a fee of ₹1500 each for digital signature)
@@ -175,6 +181,7 @@ export function StartupInformationContent({ formData, setFormData }) {
             placeholder="Select number of shareholders"
             value={formData.numberOfShareholders.toString()}
             onChange={(value) => setFormData({ ...formData, numberOfShareholders: parseInt(value) })}
+            disabled={disabled}
           />
           <p className="text-xs text-gray-500 mt-1">
             Up to 6 shareholders (additional shareholders will incur a fee)
@@ -187,10 +194,11 @@ export function StartupInformationContent({ formData, setFormData }) {
         <Field label="Authorized Capital of the Company">
           <input
             type="number"
-            className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+            className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
             placeholder="₹1,00,000"
             value={step2.authorizedCapital || '100000'}
             onChange={(e) => updateStep2('authorizedCapital', e.target.value)}
+            disabled={disabled}
           />
           <p className="text-xs text-gray-500 mt-1">
             Default: ₹1,00,000. Additional stamp duty may apply if there's any change in authorized capital.
@@ -200,10 +208,11 @@ export function StartupInformationContent({ formData, setFormData }) {
         <Field label="Paid Up Capital of the Company">
           <input
             type="number"
-            className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+            className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
             placeholder="Enter paid-up capital"
             value={step2.paidUpCapital || ''}
             onChange={(e) => handlePaidUpCapitalChange(e.target.value)}
+            disabled={disabled}
           />
           <p className="text-xs text-red-500 mt-1">
             Note: Cannot exceed Authorized Capital
@@ -216,10 +225,11 @@ export function StartupInformationContent({ formData, setFormData }) {
         <Field label="Company Email Address">
           <input
             type="email"
-            className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+            className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
             placeholder="company@example.com"
             value={step2.companyEmail || ''}
             onChange={(e) => updateStep2('companyEmail', e.target.value)}
+            disabled={disabled}
           />
           <p className="text-xs text-gray-500 mt-1">
             Official email address for government communication
@@ -236,10 +246,11 @@ export function StartupInformationContent({ formData, setFormData }) {
             />
             <input
               type="tel"
-              className="flex-1 px-4 py-3 rounded-lg bg-white outline-none"
+              className="flex-1 px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="Enter contact number"
               value={step2.contactNumber || ''}
               onChange={(e) => updateStep2('contactNumber', e.target.value)}
+              disabled={disabled}
             />
           </div>
           <p className="text-xs text-gray-500 mt-1">
@@ -257,30 +268,33 @@ export function StartupInformationContent({ formData, setFormData }) {
           <Field label="Address Line 1">
             <textarea
               rows="2"
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none"
+              className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="Enter address line 1"
               value={step2.addressLine1 || ''}
               onChange={(e) => updateStep2('addressLine1', e.target.value)}
+              disabled={disabled}
             />
           </Field>
 
           <Field label="Address Line 2">
             <textarea
               rows="2"
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none"
+              className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="Enter address line 2"
               value={step2.addressLine2 || ''}
               onChange={(e) => updateStep2('addressLine2', e.target.value)}
+              disabled={disabled}
             />
           </Field>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Field label="City/Place">
               <input
-                className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="Enter city/place"
                 value={step2.city || ''}
                 onChange={(e) => updateStep2('city', e.target.value)}
+                disabled={disabled}
               />
             </Field>
 
@@ -290,6 +304,7 @@ export function StartupInformationContent({ formData, setFormData }) {
                 placeholder="Select your state"
                 value={step2.state || ''}
                 onChange={(value) => updateStep2('state', value)}
+                disabled={disabled}
               />
             </Field>
           </div>
@@ -297,19 +312,21 @@ export function StartupInformationContent({ formData, setFormData }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Field label="Country">
               <input
-                className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                 value={step2.country || 'India'}
                 onChange={(e) => updateStep2('country', e.target.value)}
+                disabled={disabled}
               />
             </Field>
 
             <Field label="Pin Code">
               <input
                 type="text"
-                className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="Enter pin code"
                 value={step2.pincode || ''}
                 onChange={(e) => updateStep2('pincode', e.target.value)}
+                disabled={disabled}
               />
             </Field>
           </div>
@@ -321,7 +338,7 @@ export function StartupInformationContent({ formData, setFormData }) {
         <div>
           <Field label="Approved Name of the Company">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="Name to be entered by admin - Oneasy"
               value={step2.approvedCompanyName || ''}
               onChange={(e) => updateStep2('approvedCompanyName', e.target.value)}
@@ -357,28 +374,31 @@ export function StartupInformationContent({ formData, setFormData }) {
           <Field label="Date">
             <input
               type="date"
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
               value={step2.nocDate || ''}
               onChange={(e) => updateStep2('nocDate', e.target.value)}
+              disabled={disabled}
             />
           </Field>
 
           <Field label="Name of the Landlord">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="Enter landlord's name"
               value={step2.landlordName || ''}
               onChange={(e) => updateStep2('landlordName', e.target.value)}
+              disabled={disabled}
             />
           </Field>
 
           <Field label="Address of the Registered Premises">
             <textarea
               rows="3"
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none"
+              className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="Enter registered premises address"
               value={step2.registeredPremisesAddress || ''}
               onChange={(e) => updateStep2('registeredPremisesAddress', e.target.value)}
+              disabled={disabled}
             />
           </Field>
         </div>
@@ -394,6 +414,7 @@ export function StartupInformationContent({ formData, setFormData }) {
             const base64 = await fileToBase64(file);
             updateStep2('utilityBill', base64);
           }}
+          disabled={disabled}
         />
         <p className="text-xs text-gray-500 mt-1">
           Upload a recent utility bill (not older than 1 month)
@@ -404,7 +425,7 @@ export function StartupInformationContent({ formData, setFormData }) {
 }
 
 // Step 3: Basic Directors and Shareholders Details
-export function OfficeAddressContent({ formData, setFormData }) {
+export function OfficeAddressContent({ formData, setFormData, disabled = false }) {
   const numberOfDirectors = formData?.numberOfDirectors || 1;
   
   // Initialize directors from formData or create empty array
@@ -471,10 +492,11 @@ export function OfficeAddressContent({ formData, setFormData }) {
         <div className="grid grid-cols-1 gap-6">
           <Field label="Name of Person">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="Enter name as per PAN card"
               value={director.name || ''}
               onChange={(e) => updateDirector(index, 'name', e.target.value)}
+              disabled={disabled}
             />
           </Field>
 
@@ -485,6 +507,7 @@ export function OfficeAddressContent({ formData, setFormData }) {
                 placeholder="Select relation"
                 value={director.relation || ''}
                 onChange={(value) => handleRelationChange(index, value)}
+                disabled={disabled}
               />
             </Field>
 
@@ -495,6 +518,7 @@ export function OfficeAddressContent({ formData, setFormData }) {
                   placeholder="Select designation"
                   value={director.designation || ''}
                   onChange={(value) => updateDirector(index, 'designation', value)}
+                  disabled={disabled}
                 />
               </Field>
             )}
@@ -508,37 +532,41 @@ export function OfficeAddressContent({ formData, setFormData }) {
                 <Field label="Number of Shares Subscribed">
                   <input
                     type="number"
-                    className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                    className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="Enter number of shares"
                     value={director.numberOfShares || ''}
                     onChange={(e) => updateDirector(index, 'numberOfShares', e.target.value)}
+                    disabled={disabled}
                   />
                 </Field>
                 <Field label="Face Value of Each Share">
                   <input
                     type="number"
-                    className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                    className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="Enter face value"
                     value={director.faceValue || ''}
                     onChange={(e) => updateDirector(index, 'faceValue', e.target.value)}
+                    disabled={disabled}
                   />
                 </Field>
                 <Field label="Total Equity Share Capital">
                   <input
                     type="number"
-                    className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                    className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="Enter total equity"
                     value={director.totalEquity || ''}
                     onChange={(e) => updateDirector(index, 'totalEquity', e.target.value)}
+                    disabled={disabled}
                   />
                 </Field>
                 <Field label="% of Share Holding">
                   <input
                     type="number"
-                    className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                    className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="Enter percentage"
                     value={director.sharePercentage || ''}
                     onChange={(e) => updateDirector(index, 'sharePercentage', e.target.value)}
+                    disabled={disabled}
                   />
                 </Field>
               </div>
@@ -560,15 +588,17 @@ export function OfficeAddressContent({ formData, setFormData }) {
                 placeholder="Select qualification"
                 value={director.educationalQualification || ''}
                 onChange={(value) => updateDirector(index, 'educationalQualification', value)}
+                disabled={disabled}
               />
             </Field>
 
             <Field label="Date of Birth">
               <input
                 type="date"
-                className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                 value={director.dateOfBirth || ''}
                 onChange={(e) => updateDirector(index, 'dateOfBirth', e.target.value)}
+                disabled={disabled}
               />
               <p className="text-xs text-gray-500 mt-1">Please match date as per PAN card</p>
             </Field>
@@ -581,6 +611,7 @@ export function OfficeAddressContent({ formData, setFormData }) {
                 placeholder="Select gender"
                 value={director.gender || ''}
                 onChange={(value) => updateDirector(index, 'gender', value)}
+                disabled={disabled}
               />
             </Field>
 
@@ -597,6 +628,7 @@ export function OfficeAddressContent({ formData, setFormData }) {
                 placeholder="Select occupation"
                 value={director.occupationType || ''}
                 onChange={(value) => updateDirector(index, 'occupationType', value)}
+                disabled={disabled}
               />
             </Field>
           </div>
@@ -605,10 +637,11 @@ export function OfficeAddressContent({ formData, setFormData }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Field label="Place of Birth - District">
               <input
-                className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="Enter district"
                 value={director.placeOfBirthDistrict || ''}
                 onChange={(e) => updateDirector(index, 'placeOfBirthDistrict', e.target.value)}
+                disabled={disabled}
               />
             </Field>
 
@@ -618,6 +651,7 @@ export function OfficeAddressContent({ formData, setFormData }) {
                 placeholder="Select state"
                 value={director.placeOfBirthState || ''}
                 onChange={(value) => updateDirector(index, 'placeOfBirthState', value)}
+                disabled={disabled}
               />
             </Field>
           </div>
@@ -626,20 +660,22 @@ export function OfficeAddressContent({ formData, setFormData }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Field label="Income Tax PAN">
               <input
-                className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="Enter PAN number"
                 value={director.panNumber || ''}
                 onChange={(e) => updateDirector(index, 'panNumber', e.target.value)}
+                disabled={disabled}
               />
             </Field>
 
             <Field label="Email ID">
               <input
                 type="email"
-                className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="Enter email address"
                 value={director.email || ''}
                 onChange={(e) => updateDirector(index, 'email', e.target.value)}
+                disabled={disabled}
               />
             </Field>
           </div>
@@ -654,10 +690,11 @@ export function OfficeAddressContent({ formData, setFormData }) {
               />
               <input
                 type="tel"
-                className="flex-1 px-4 py-3 rounded-lg bg-white outline-none"
+                className="flex-1 px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="Enter contact number"
                 value={director.contactNumber || ''}
                 onChange={(e) => updateDirector(index, 'contactNumber', e.target.value)}
+                disabled={disabled}
               />
             </div>
           </Field>
@@ -669,24 +706,33 @@ export function OfficeAddressContent({ formData, setFormData }) {
               <Field label="Address Line 1">
                 <textarea
                   rows="2"
-                  className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none"
+                  className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Enter address line 1"
+                  value={director.permanentAddressLine1 || ''}
+                  onChange={(e) => updateDirector(index, 'permanentAddressLine1', e.target.value)}
+                  disabled={disabled}
                 />
               </Field>
 
               <Field label="Address Line 2 (Optional)">
                 <textarea
                   rows="2"
-                  className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none"
+                  className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Enter address line 2"
+                  value={director.permanentAddressLine2 || ''}
+                  onChange={(e) => updateDirector(index, 'permanentAddressLine2', e.target.value)}
+                  disabled={disabled}
                 />
               </Field>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field label="City">
                   <input
-                    className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                    className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="Enter city"
+                    value={director.permanentCity || ''}
+                    onChange={(e) => updateDirector(index, 'permanentCity', e.target.value)}
+                    disabled={disabled}
                   />
                 </Field>
 
@@ -694,6 +740,9 @@ export function OfficeAddressContent({ formData, setFormData }) {
                   <CustomDropdown
                     options={indianStates}
                     placeholder="Select state"
+                    value={director.permanentState || ''}
+                    onChange={(value) => updateDirector(index, 'permanentState', value)}
+                    disabled={disabled}
                   />
                 </Field>
               </div>
@@ -701,15 +750,20 @@ export function OfficeAddressContent({ formData, setFormData }) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field label="Country">
                   <input
-                    defaultValue="India"
-                    className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                    className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    value={director.permanentCountry || 'India'}
+                    onChange={(e) => updateDirector(index, 'permanentCountry', e.target.value)}
+                    disabled={disabled}
                   />
                 </Field>
 
                 <Field label="Pin Code">
                   <input
-                    className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                    className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="Enter pin code"
+                    value={director.permanentPincode || ''}
+                    onChange={(e) => updateDirector(index, 'permanentPincode', e.target.value)}
+                    disabled={disabled}
                   />
                 </Field>
               </div>
@@ -721,6 +775,7 @@ export function OfficeAddressContent({ formData, setFormData }) {
                   checked={director.isDifferentPresentAddress || false}
                   onChange={(e) => updateDirector(index, 'isDifferentPresentAddress', e.target.checked)}
                   className="w-4 h-4"
+                  disabled={disabled}
                 />
                 <label htmlFor={`different-address-${index}`} className="text-sm text-gray-700">
                   Click here if permanent address is different from present address
@@ -737,24 +792,33 @@ export function OfficeAddressContent({ formData, setFormData }) {
                 <Field label="Address Line 1">
                   <textarea
                     rows="2"
-                    className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none"
+                    className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="Enter address line 1"
+                    value={director.presentAddressLine1 || ''}
+                    onChange={(e) => updateDirector(index, 'presentAddressLine1', e.target.value)}
+                    disabled={disabled}
                   />
                 </Field>
 
                 <Field label="Address Line 2 (Optional)">
                   <textarea
                     rows="2"
-                    className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none"
+                    className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="Enter address line 2"
+                    value={director.presentAddressLine2 || ''}
+                    onChange={(e) => updateDirector(index, 'presentAddressLine2', e.target.value)}
+                    disabled={disabled}
                   />
                 </Field>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Field label="City">
                     <input
-                      className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                      className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                       placeholder="Enter city"
+                      value={director.presentCity || ''}
+                      onChange={(e) => updateDirector(index, 'presentCity', e.target.value)}
+                      disabled={disabled}
                     />
                   </Field>
 
@@ -762,6 +826,9 @@ export function OfficeAddressContent({ formData, setFormData }) {
                     <CustomDropdown
                       options={indianStates}
                       placeholder="Select state"
+                      value={director.presentState || ''}
+                      onChange={(value) => updateDirector(index, 'presentState', value)}
+                      disabled={disabled}
                     />
                   </Field>
                 </div>
@@ -769,15 +836,20 @@ export function OfficeAddressContent({ formData, setFormData }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Field label="Country">
                     <input
-                      defaultValue="India"
-                      className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                      className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      value={director.presentCountry || 'India'}
+                      onChange={(e) => updateDirector(index, 'presentCountry', e.target.value)}
+                      disabled={disabled}
                     />
                   </Field>
 
                   <Field label="Pin Code">
                     <input
-                      className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                      className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                       placeholder="Enter pin code"
+                      value={director.presentPincode || ''}
+                      onChange={(e) => updateDirector(index, 'presentPincode', e.target.value)}
+                      disabled={disabled}
                     />
                   </Field>
                 </div>
@@ -790,10 +862,16 @@ export function OfficeAddressContent({ formData, setFormData }) {
               <CustomDropdown
                 options={Array.from({ length: 51 }, (_, i) => `${i} Years`)}
                 placeholder="Select years"
+                value={director.durationYears || ''}
+                onChange={(value) => updateDirector(index, 'durationYears', value)}
+                disabled={disabled}
               />
               <CustomDropdown
                 options={Array.from({ length: 12 }, (_, i) => `${i} Months`)}
                 placeholder="Select months"
+                value={director.durationMonths || ''}
+                onChange={(value) => updateDirector(index, 'durationMonths', value)}
+                disabled={disabled}
               />
             </div>
           </Field>
@@ -803,7 +881,9 @@ export function OfficeAddressContent({ formData, setFormData }) {
             <CustomDropdown
               options={authorizedSignatorySelected && director.isAuthorizedSignatory !== 'Yes' ? ['No'] : ['Yes', 'No']}
               placeholder="Select option"
+              value={director.isAuthorizedSignatory || ''}
               onChange={(value) => handleAuthorizedSignatoryChange(index, value)}
+              disabled={disabled}
             />
           </Field>
 
@@ -813,6 +893,7 @@ export function OfficeAddressContent({ formData, setFormData }) {
                 label="Specimen Signature for Authorisation"
                 accept=".pdf,.jpg,.jpeg,.png"
                 buttonLabel="Upload Signature"
+                disabled={disabled}
               />
             </div>
           )}
@@ -824,6 +905,7 @@ export function OfficeAddressContent({ formData, setFormData }) {
               placeholder="Select option"
               value={director.isDirectorInOtherCompany || ''}
               onChange={(value) => updateDirector(index, 'isDirectorInOtherCompany', value)}
+              disabled={disabled}
             />
           </Field>
 
@@ -831,14 +913,20 @@ export function OfficeAddressContent({ formData, setFormData }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field label="Company Name">
                 <input
-                  className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                  className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Enter company name"
+                  value={director.otherCompanyName || ''}
+                  onChange={(e) => updateDirector(index, 'otherCompanyName', e.target.value)}
+                  disabled={disabled}
                 />
               </Field>
               <Field label="Position Held">
                 <input
-                  className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                  className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="e.g., Director"
+                  value={director.otherCompanyPosition || ''}
+                  onChange={(e) => updateDirector(index, 'otherCompanyPosition', e.target.value)}
+                  disabled={disabled}
                 />
               </Field>
             </div>
@@ -851,6 +939,7 @@ export function OfficeAddressContent({ formData, setFormData }) {
               placeholder="Select option"
               value={director.isShareholderInOtherCompany || ''}
               onChange={(value) => updateDirector(index, 'isShareholderInOtherCompany', value)}
+              disabled={disabled}
             />
           </Field>
 
@@ -858,22 +947,31 @@ export function OfficeAddressContent({ formData, setFormData }) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Field label="Company Name">
                 <input
-                  className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                  className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Enter company name"
+                  value={director.shareholderCompanyName || ''}
+                  onChange={(e) => updateDirector(index, 'shareholderCompanyName', e.target.value)}
+                  disabled={disabled}
                 />
               </Field>
               <Field label="Number of Shares Held">
                 <input
                   type="number"
-                  className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                  className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Enter shares"
+                  value={director.shareholderCompanyShares || ''}
+                  onChange={(e) => updateDirector(index, 'shareholderCompanyShares', e.target.value)}
+                  disabled={disabled}
                 />
               </Field>
               <Field label="Face Value of Share">
                 <input
                   type="number"
-                  className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                  className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Enter face value"
+                  value={director.shareholderCompanyFaceValue || ''}
+                  onChange={(e) => updateDirector(index, 'shareholderCompanyFaceValue', e.target.value)}
+                  disabled={disabled}
                 />
               </Field>
             </div>
@@ -885,18 +983,21 @@ export function OfficeAddressContent({ formData, setFormData }) {
               label="Aadhaar Card"
               accept=".pdf,.jpg,.jpeg,.png"
               buttonLabel="Upload Aadhaar Card"
+              disabled={disabled}
             />
 
             <FileUploadField
               label="Passport Size Photo"
               accept=".jpg,.jpeg,.png"
               buttonLabel="Upload Photo"
+              disabled={disabled}
             />
 
             <FileUploadField
               label="PAN Card"
               accept=".pdf,.jpg,.jpeg,.png"
               buttonLabel="Upload PAN Card"
+              disabled={disabled}
             />
 
             <div>
@@ -904,6 +1005,7 @@ export function OfficeAddressContent({ formData, setFormData }) {
                 label="Most Recent Bank Statement or Utility Bill"
                 accept=".pdf,.jpg,.jpeg,.png"
                 buttonLabel="Upload Document"
+                disabled={disabled}
               />
               <p className="text-xs text-gray-500 mt-1">
                 Note: Should be within the last month and should have your present residential address

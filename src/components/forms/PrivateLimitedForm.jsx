@@ -11,6 +11,7 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showStep1CompleteModal, setShowStep1CompleteModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [oneasyTeamFill, setOneasyTeamFill] = useState(false);
   const [formData, setFormData] = useState({
     numberOfDirectors: 1,
     numberOfShareholders: 1
@@ -123,11 +124,11 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
   const renderStepContent = () => {
     switch (step) {
       case 1:
-        return <NameApplicationContent formData={formData} setFormData={setFormData} />;
+        return <NameApplicationContent formData={formData} setFormData={setFormData} disabled={oneasyTeamFill} />;
       case 2:
-        return <StartupInformationContent formData={formData} setFormData={setFormData} />;
+        return <StartupInformationContent formData={formData} setFormData={setFormData} disabled={oneasyTeamFill} />;
       case 3:
-        return <OfficeAddressContent formData={formData} setFormData={setFormData} />;
+        return <OfficeAddressContent formData={formData} setFormData={setFormData} disabled={oneasyTeamFill} />;
       default:
         return null;
     }
@@ -150,6 +151,19 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
 
           {/* Stepper */}
           <StepIndicator steps={steps} currentStep={step} />
+
+          {/* OnEasy Team Fill Banner */}
+          {oneasyTeamFill && (
+            <div className="bg-green-50 border-2 border-green-500 rounded-lg p-4 mb-6 flex items-center gap-3">
+              <svg className="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="font-semibold text-green-800">OnEasy Team Will Fill This Form</p>
+                <p className="text-sm text-green-700">All fields are now read-only. Our team will complete this form for you.</p>
+              </div>
+            </div>
+          )}
 
           <div className="rounded-lg p-6">
             {renderStepContent()}
@@ -176,6 +190,33 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
           </div>
         </div>
       </div>
+
+      {/* Floating Button - Oneasy Team Fill */}
+      <button
+        type="button"
+        onClick={() => setOneasyTeamFill(!oneasyTeamFill)}
+        className={`fixed bottom-8 right-8 px-6 py-4 rounded-full shadow-2xl font-medium text-white transition-all duration-300 hover:scale-105 z-40 ${
+          oneasyTeamFill 
+            ? 'bg-green-600 hover:bg-green-700' 
+            : 'bg-[#01334C] hover:bg-[#00486D]'
+        }`}
+      >
+        {oneasyTeamFill ? (
+          <span className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            OnEasy Team Will Fill
+          </span>
+        ) : (
+          <span className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            Do you want OnEasy team to fill?
+          </span>
+        )}
+      </button>
 
       {/* Step 1 Complete Modal */}
       {showStep1CompleteModal && (

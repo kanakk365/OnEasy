@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown } from "lucide-react";
 
-function CustomDropdown({ options = [], placeholder = "Select an option", value, onChange, className = "" }) {
+function CustomDropdown({ options = [], placeholder = "Select an option", value, onChange, className = "", disabled = false }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedValue, setSelectedValue] = useState(value || "");
   const dropdownRef = useRef(null);
@@ -24,6 +24,7 @@ function CustomDropdown({ options = [], placeholder = "Select an option", value,
   }, []);
 
   const handleSelect = (option) => {
+    if (disabled) return;
     setSelectedValue(option);
     setIsOpen(false);
     if (onChange) {
@@ -38,8 +39,11 @@ function CustomDropdown({ options = [], placeholder = "Select an option", value,
     <div className={`relative w-full ${className}`} ref={dropdownRef}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-transparent hover:border-[#CFD6DC] focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D] flex items-center justify-between transition-colors ${displayColor}`}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
+        className={`w-full px-4 py-3 rounded-lg outline-none border border-transparent hover:border-[#CFD6DC] focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D] flex items-center justify-between transition-colors ${displayColor} ${
+          disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : 'bg-white cursor-pointer'
+        }`}
       >
         <span className="text-left truncate">{displayText}</span>
         <ChevronDown

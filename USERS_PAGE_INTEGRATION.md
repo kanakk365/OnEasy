@@ -289,3 +289,5 @@ The Users page is now **fully integrated** with the database:
 
 **Next Step:** Run the SQL migration in Supabase!
 
+
+
