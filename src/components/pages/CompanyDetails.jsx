@@ -423,11 +423,13 @@ function CompanyDetails() {
                 
                 // If payment successful and needs redirect
                 if (result.success && result.redirect) {
-                  console.log('Payment successful! Redirecting to form...');
-                  // Small delay to ensure modal closes
-                  setTimeout(() => {
-                    navigate('/private-limited-form');
-                  }, 500);
+                  console.log('✅ Payment successful! Redirecting to form...');
+                  
+                  // Show success message
+                  alert('Payment successful! Invoice sent to your email. Redirecting to registration form...');
+                  
+                  // Navigate immediately
+                  navigate('/private-limited-form');
                 }
               } catch (error) {
                 console.error('Payment error:', error);
