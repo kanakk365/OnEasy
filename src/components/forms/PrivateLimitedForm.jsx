@@ -5,7 +5,14 @@ import { NameApplicationContent, StartupInformationContent, OfficeAddressContent
 import { submitPrivateLimitedRegistration } from '../../utils/privateLimitedApi';
 import { requestTeamFill } from '../../utils/teamFillApi';
 
-function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
+function PrivateLimitedForm({ 
+  packageDetails: propPackageDetails, 
+  onClose,
+  isAdminFilling = false,
+  clientId = null,
+  ticketId = null,
+  initialData = null
+}) {
   const navigate = useNavigate();
   const [packageDetails, setPackageDetails] = useState(propPackageDetails);
   const [step, setStep] = useState(1);
@@ -14,7 +21,7 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [oneasyTeamFill, setOneasyTeamFill] = useState(false);
   const [isAdminOrSuperadmin, setIsAdminOrSuperadmin] = useState(false);
-  const [isFillingOnBehalf, setIsFillingOnBehalf] = useState(false);
+  const [isFillingOnBehalf, setIsFillingOnBehalf] = useState(isAdminFilling);
   const [formData, setFormData] = useState({
     numberOfDirectors: 1,
     numberOfShareholders: 1
@@ -35,16 +42,22 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
   // Load package details and existing registration data if editing
   useEffect(() => {
     const loadFormData = async () => {
-      // Check if admin is filling on behalf of client (from URL params)
-      const urlParams = new URLSearchParams(window.location.search);
-      const clientId = urlParams.get('clientId');
-      const ticketId = urlParams.get('ticketId');
-      
-      if (clientId && ticketId && isAdminOrSuperadmin) {
-        console.log('🔧 Admin filling form on behalf of client:', clientId, 'Ticket:', ticketId);
+      // If admin is filling from modal (passed as props)
+      if (isAdminFilling && ticketId) {
+        console.log('🔧 Admin filling form from modal for ticket:', ticketId);
         setIsFillingOnBehalf(true);
-        localStorage.setItem('fillingOnBehalfTicketId', ticketId);
-        localStorage.setItem('fillingOnBehalfClientId', clientId);
+      } else {
+        // Check if admin is filling on behalf of client (from URL params)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlClientId = urlParams.get('clientId');
+        const urlTicketId = urlParams.get('ticketId');
+        
+        if (urlClientId && urlTicketId && isAdminOrSuperadmin) {
+          console.log('🔧 Admin filling form on behalf of client:', urlClientId, 'Ticket:', urlTicketId);
+          setIsFillingOnBehalf(true);
+          localStorage.setItem('fillingOnBehalfTicketId', urlTicketId);
+          localStorage.setItem('fillingOnBehalfClientId', urlClientId);
+        }
       }
 
       if (!packageDetails) {
@@ -71,16 +84,34 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
       }
 
       // Check if we're editing an existing registration
-      const editingTicketId = localStorage.getItem('editingTicketId') || localStorage.getItem('fillingOnBehalfTicketId');
-      if (editingTicketId) {
-        console.log('📝 Loading existing registration for editing:', editingTicketId);
-        try {
-          const { getRegistrationByTicketId } = await import('../../utils/privateLimitedApi');
-          const result = await getRegistrationByTicketId(editingTicketId);
-          
-          if (result.success && result.data) {
-            const reg = result.data.details;
-            const dirs = result.data.directors || [];
+      let registrationData = null;
+      
+      // If initialData is provided (admin filling from modal), use it
+      if (initialData) {
+        console.log('📝 Using provided initialData for form');
+        registrationData = initialData;
+      } else {
+        // Otherwise, check localStorage for editing ticket ID
+        const editingTicketId = localStorage.getItem('editingTicketId') || localStorage.getItem('fillingOnBehalfTicketId') || ticketId;
+        if (editingTicketId) {
+          console.log('📝 Loading existing registration for editing:', editingTicketId);
+          try {
+            const { getRegistrationByTicketId } = await import('../../utils/privateLimitedApi');
+            const result = await getRegistrationByTicketId(editingTicketId);
+            
+            if (result.success && result.data) {
+              registrationData = result.data;
+            }
+          } catch (error) {
+            console.error('❌ Error loading existing registration:', error);
+          }
+        }
+      }
+      
+      // If we have registration data, pre-fill the form
+      if (registrationData) {
+        const reg = registrationData.details;
+        const dirs = registrationData.directors || [];
             
             // Pre-fill form data
             setFormData({
@@ -157,11 +188,7 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
               }))
             });
             
-            console.log('✅ Existing registration data loaded for editing');
-          }
-        } catch (error) {
-          console.error('❌ Error loading existing registration:', error);
-        }
+            console.log('✅ Registration data loaded for editing');
       }
     };
 
@@ -232,27 +259,34 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
         // Show success modal
         setShowSuccessModal(true);
         
-        // Wait 3 seconds then redirect to dashboard
+        // Wait 3 seconds then redirect to dashboard or close modal
         setTimeout(() => {
           // Clear stored data after successful submission
-          localStorage.removeItem('selectedPackage');
-          localStorage.removeItem('paymentDetails');
-          localStorage.removeItem('draftTicketId');
-          localStorage.removeItem('editingTicketId');
-          localStorage.removeItem('fillingOnBehalfTicketId');
-          localStorage.removeItem('fillingOnBehalfClientId');
+          if (!isAdminFilling) {
+            localStorage.removeItem('selectedPackage');
+            localStorage.removeItem('paymentDetails');
+            localStorage.removeItem('draftTicketId');
+            localStorage.removeItem('editingTicketId');
+            localStorage.removeItem('fillingOnBehalfTicketId');
+            localStorage.removeItem('fillingOnBehalfClientId');
+          }
           
-          // Navigate to appropriate dashboard based on user role
-          if (isAdminOrSuperadmin && isFillingOnBehalf) {
-            const userData = JSON.parse(localStorage.getItem('user') || '{}');
-            const userRole = userData.role || userData.role_id;
-            if (userRole === 'superadmin' || userRole === 2) {
-              navigate('/superadmin/clients');
-            } else {
-              navigate('/admin/clients');
-            }
+          // If admin filling from modal, close modal
+          if (isAdminFilling && onClose) {
+            onClose();
           } else {
-            navigate('/private-limited-dashboard');
+            // Navigate to appropriate dashboard based on user role
+            if (isAdminOrSuperadmin && isFillingOnBehalf) {
+              const userData = JSON.parse(localStorage.getItem('user') || '{}');
+              const userRole = userData.role || userData.role_id;
+              if (userRole === 'superadmin' || userRole === 2) {
+                navigate('/superadmin/clients');
+              } else {
+                navigate('/admin/clients');
+              }
+            } else {
+              navigate('/private-limited-dashboard');
+            }
           }
         }, 3000);
       } else {

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../../utils/api';
+import PrivateLimitedForm from '../../forms/PrivateLimitedForm';
 
 function SuperAdminClients() {
   const navigate = useNavigate();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, registered, team-fill
+  const [showFormForClient, setShowFormForClient] = useState(null); // { clientId, ticketId, clientName }
 
   useEffect(() => {
     fetchClients();
@@ -237,7 +239,11 @@ function SuperAdminClients() {
                     )}
                     {client.team_fill_requested && !client.registration_submitted && (
                       <button
-                        onClick={() => navigate(`/private-limited-form?clientId=${client.user_id}&ticketId=${client.ticket_id}`)}
+                        onClick={() => setShowFormForClient({ 
+                          clientId: client.user_id, 
+                          ticketId: client.ticket_id,
+                          clientName: client.name || client.phone 
+                        })}
                         className="px-4 py-2 text-sm bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"
                       >
                         Fill Form
@@ -249,6 +255,100 @@ function SuperAdminClients() {
             ))}
         </div>
       )}
+
+      {/* Form Modal Overlay */}
+      {showFormForClient && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
+          <div className="min-h-screen px-4 py-8">
+            <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-2xl">
+              {/* Modal Header */}
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-lg z-10">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Fill Form for Client: {showFormForClient.clientName}
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Ticket ID: {showFormForClient.ticketId}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowFormForClient(null);
+                    fetchClients(); // Refresh clients list
+                  }}
+                  className="text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Form Content */}
+              <div className="p-6">
+                <SuperAdminFormWrapper 
+                  clientId={showFormForClient.clientId}
+                  ticketId={showFormForClient.ticketId}
+                  onClose={() => {
+                    setShowFormForClient(null);
+                    fetchClients(); // Refresh clients list
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Wrapper component to handle admin form logic
+function SuperAdminFormWrapper({ clientId, ticketId, onClose }) {
+  const [formData, setFormData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadClientFormData();
+  }, [ticketId]);
+
+  const loadClientFormData = async () => {
+    try {
+      setLoading(true);
+      const response = await apiClient.get(`/private-limited/registration/${ticketId}`);
+      
+      if (response.success) {
+        setFormData(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading form data:', error);
+      alert('Failed to load form data. Please try again.');
+      onClose();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading form data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="admin-form-wrapper">
+      <PrivateLimitedForm 
+        isAdminFilling={true}
+        clientId={clientId}
+        ticketId={ticketId}
+        initialData={formData}
+        onClose={onClose}
+      />
     </div>
   );
 }
