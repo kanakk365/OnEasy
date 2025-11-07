@@ -256,57 +256,29 @@ function SuperAdminClients() {
         </div>
       )}
 
-      {/* Form Modal Overlay */}
+      {/* Form Modal Overlay - Full Screen */}
       {showFormForClient && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
-          <div className="min-h-screen px-4 py-8">
-            <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-2xl">
-              {/* Modal Header */}
-              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-lg z-10">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    Fill Form for Client: {showFormForClient.clientName}
-                  </h2>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Ticket ID: {showFormForClient.ticketId}
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowFormForClient(null);
-                    fetchClients(); // Refresh clients list
-                  }}
-                  className="text-gray-500 hover:text-gray-700 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Form Content */}
-              <div className="p-6">
-                <SuperAdminFormWrapper 
-                  clientId={showFormForClient.clientId}
-                  ticketId={showFormForClient.ticketId}
-                  onClose={() => {
-                    setShowFormForClient(null);
-                    fetchClients(); // Refresh clients list
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+        <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
+          <SuperAdminFormWrapper 
+            clientId={showFormForClient.clientId}
+            ticketId={showFormForClient.ticketId}
+            clientName={showFormForClient.clientName}
+            onClose={() => {
+              setShowFormForClient(null);
+              fetchClients(); // Refresh clients list
+            }}
+          />
         </div>
       )}
     </div>
   );
 }
 
-// Wrapper component to handle admin form logic
-function SuperAdminFormWrapper({ clientId, ticketId, onClose }) {
+// Wrapper component to handle superadmin form logic with sidebar layout
+function SuperAdminFormWrapper({ clientId, ticketId, clientName, onClose }) {
   const [formData, setFormData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentStep, setCurrentStep] = useState(1);
 
   useEffect(() => {
     loadClientFormData();
@@ -331,7 +303,7 @@ function SuperAdminFormWrapper({ clientId, ticketId, onClose }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading form data...</p>
@@ -340,15 +312,107 @@ function SuperAdminFormWrapper({ clientId, ticketId, onClose }) {
     );
   }
 
+  const steps = [
+    { number: 1, title: "Name Application", description: "Choose your company name" },
+    { number: 2, title: "Basic Company Details", description: "Business information" },
+    { number: 3, title: "Directors & Shareholders", description: "Director details" }
+  ];
+
   return (
-    <div className="admin-form-wrapper">
-      <PrivateLimitedForm 
-        isAdminFilling={true}
-        clientId={clientId}
-        ticketId={ticketId}
-        initialData={formData}
-        onClose={onClose}
-      />
+    <div className="flex h-screen bg-[#f3f5f7]">
+      {/* Left Sidebar */}
+      <div className="w-80 bg-white shadow-lg flex flex-col">
+        {/* Sidebar Header */}
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-[#01334C]">Private Limited Registration</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+              title="Close Form"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
+            <p className="text-sm font-semibold text-blue-900">Filling for Client</p>
+            <p className="text-xs text-blue-700 mt-1">{clientName}</p>
+            <p className="text-xs text-blue-600 mt-0.5">Ticket: {ticketId}</p>
+          </div>
+        </div>
+
+        {/* Steps Navigation */}
+        <div className="flex-1 overflow-y-auto p-6">
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+            Registration Steps
+          </h3>
+          <div className="space-y-4">
+            {steps.map((step, index) => (
+              <div
+                key={step.number}
+                className={`relative ${index !== steps.length - 1 ? 'pb-4' : ''}`}
+              >
+                {index !== steps.length - 1 && (
+                  <div className="absolute left-4 top-10 bottom-0 w-0.5 bg-gray-200"></div>
+                )}
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm ${
+                      currentStep === step.number
+                        ? 'bg-[#01334C] text-white'
+                        : currentStep > step.number
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-200 text-gray-500'
+                    }`}
+                  >
+                    {currentStep > step.number ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      step.number
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={`text-sm font-medium ${
+                        currentStep === step.number ? 'text-[#01334C]' : 'text-gray-600'
+                      }`}
+                    >
+                      {step.title}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">{step.description}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Sidebar Footer */}
+        <div className="p-6 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>All fields are required</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Form Area */}
+      <div className="flex-1 overflow-y-auto">
+        <PrivateLimitedForm 
+          isAdminFilling={true}
+          clientId={clientId}
+          ticketId={ticketId}
+          initialData={formData}
+          onClose={onClose}
+          onStepChange={setCurrentStep}
+        />
+      </div>
     </div>
   );
 }

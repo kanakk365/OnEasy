@@ -11,7 +11,8 @@ function PrivateLimitedForm({
   isAdminFilling = false,
   clientId = null,
   ticketId = null,
-  initialData = null
+  initialData = null,
+  onStepChange = null
 }) {
   const navigate = useNavigate();
   const [packageDetails, setPackageDetails] = useState(propPackageDetails);
@@ -35,6 +36,9 @@ function PrivateLimitedForm({
     // Check if user is admin (role: 'admin' or role_id: 1 or 2)
     const isAdmin = userRole === 'admin' || userRole === 1 || userRole === 'superadmin' || userRole === 2;
     setIsAdminOrSuperadmin(isAdmin);
+    
+    // Notify initial step
+    if (onStepChange) onStepChange(step);
     
     console.log('👤 User role:', userRole, '| Is Admin/Superadmin:', isAdmin);
   }, []);
@@ -203,7 +207,9 @@ function PrivateLimitedForm({
 
   const goBack = () => {
     if (step > 1) {
-      setStep((s) => s - 1);
+      const newStep = step - 1;
+      setStep(newStep);
+      if (onStepChange) onStepChange(newStep);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -223,14 +229,18 @@ function PrivateLimitedForm({
       // Wait 4 seconds then move to step 2
       setTimeout(() => {
         setShowStep1CompleteModal(false);
-        setStep(2);
+        const newStep = 2;
+        setStep(newStep);
+        if (onStepChange) onStepChange(newStep);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }, 4000);
       return;
     }
     
     if (step < 3) {
-      setStep((s) => s + 1);
+      const newStep = step + 1;
+      setStep(newStep);
+      if (onStepChange) onStepChange(newStep);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
