@@ -15,6 +15,12 @@ import Organization from "../pages/Organization";
 import PrivateLimitedForm from "../forms/PrivateLimitedForm";
 import PrivateLimitedDashboard from "../pages/PrivateLimitedDashboard";
 import PrivateLimitedDetails from "../pages/PrivateLimitedDetails";
+import AdminLayout from "../admin/layout/AdminLayout";
+import AdminClients from "../admin/pages/AdminClients";
+import AdminProfile from "../admin/pages/AdminProfile";
+import SuperAdminLayout from "../superadmin/layout/SuperAdminLayout";
+import SuperAdminClients from "../superadmin/pages/SuperAdminClients";
+import SuperAdminProfile from "../superadmin/pages/SuperAdminProfile";
 
 function Routers() {
   return (
@@ -34,6 +40,20 @@ function Routers() {
       <Route path="/private-limited/view/:ticketId" element={<PrivateLimitedDetails />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/organization" element={<Organization />} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route path="clients" element={<AdminClients />} />
+        <Route path="profile" element={<AdminProfile />} />
+        <Route path="client-details/:ticketId" element={<PrivateLimitedDetails />} />
+      </Route>
+      
+      {/* SuperAdmin Routes */}
+      <Route path="/superadmin" element={<SuperAdminLayout />}>
+        <Route path="clients" element={<SuperAdminClients />} />
+        <Route path="profile" element={<SuperAdminProfile />} />
+        <Route path="client-details/:ticketId" element={<PrivateLimitedDetails />} />
+      </Route>
     </Routes>
   );
 }

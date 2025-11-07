@@ -23,29 +23,6 @@ function CompanyDetails() {
   const [isInFlow, setIsInFlow] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
-  const [checkingRegistrations, setCheckingRegistrations] = useState(true);
-
-  // Check if user already has a registration on mount
-  useEffect(() => {
-    checkExistingRegistrations();
-  }, []);
-
-  const checkExistingRegistrations = async () => {
-    try {
-      const result = await getMyRegistrations();
-      if (result.success && result.data && result.data.length > 0) {
-        // User has existing registrations, redirect to dashboard
-        console.log('User has existing registrations, redirecting to dashboard');
-        navigate('/private-limited-dashboard');
-        return;
-      }
-    } catch (error) {
-      console.error('Error checking registrations:', error);
-      // Continue to show packages if check fails
-    } finally {
-      setCheckingRegistrations(false);
-    }
-  };
 
   // Listen for payment success event
   useEffect(() => {
@@ -425,10 +402,7 @@ function CompanyDetails() {
                 if (result.success && result.redirect) {
                   console.log('✅ Payment successful! Redirecting to form...');
                   
-                  // Show success message
-                  alert('Payment successful! Invoice sent to your email. Redirecting to registration form...');
-                  
-                  // Navigate immediately
+                  // Navigate immediately without alert
                   navigate('/private-limited-form');
                 }
               } catch (error) {
@@ -476,18 +450,6 @@ function CompanyDetails() {
   // Show Continue button only on FAQ, Next on all other flow steps
   const isLastStep = activeTab === "faq";
 
-  // Show loading while checking registrations
-  if (checkingRegistrations) {
-    return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Show form after successful payment
   if (showForm && selectedPackage) {
     return (
@@ -504,6 +466,19 @@ function CompanyDetails() {
   return (
     <div className="min-h-screen bg-[#f3f5f7]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* My Registrations Button - Top Right */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => navigate('/private-limited-dashboard')}
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            My Registrations
+          </button>
+        </div>
+
         {/* Tabs - show always so users know where they are */}
         <TopTabs
           tabs={visibleTabs}

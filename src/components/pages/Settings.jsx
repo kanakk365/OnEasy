@@ -22,17 +22,20 @@ function Settings() {
     panCard: null,
     signature: null
   });
-  const [orgData, setOrgData] = useState({
-    organisationType: '',
-    legalName: '',
-    tradeName: '',
-    gstin: '',
-    incorporationDate: '',
-    panFile: null,
-    tan: '',
-    cin: '',
-    registeredAddress: ''
-  });
+  const [organizations, setOrganizations] = useState([
+    { 
+      id: 1, 
+      organisationType: '',
+      legalName: '',
+      tradeName: '',
+      gstin: '',
+      incorporationDate: '',
+      panFile: null,
+      tan: '',
+      cin: '',
+      registeredAddress: ''
+    }
+  ]);
   const [websites, setWebsites] = useState([
     { id: 1, type: '', url: '', login: '', password: '', showPassword: false }
   ]);
@@ -69,18 +72,35 @@ function Settings() {
           signature: user.signature || null
         });
         
-        // Populate Organisation Details
-        setOrgData({
-          organisationType: user.organisation_type || '',
-          legalName: user.legal_name || '',
-          tradeName: user.trade_name || '',
-          gstin: user.gstin || '',
-          incorporationDate: user.incorporation_date || '',
-          panFile: user.pan_file || null,
-          tan: user.tan || '',
-          cin: user.cin || '',
-          registeredAddress: user.registered_address || ''
-        });
+        // Populate Organisation Details - now supports multiple organizations
+        if (user.organisations && user.organisations.length > 0) {
+          setOrganizations(user.organisations.map((org, idx) => ({
+            id: org.id || idx + 1,
+            organisationType: org.organisation_type || '',
+            legalName: org.legal_name || '',
+            tradeName: org.trade_name || '',
+            gstin: org.gstin || '',
+            incorporationDate: org.incorporation_date || '',
+            panFile: org.pan_file || null,
+            tan: org.tan || '',
+            cin: org.cin || '',
+            registeredAddress: org.registered_address || ''
+          })));
+        } else if (user.organisation_type || user.legal_name) {
+          // Backward compatibility - single organization from old schema
+          setOrganizations([{
+            id: 1,
+            organisationType: user.organisation_type || '',
+            legalName: user.legal_name || '',
+            tradeName: user.trade_name || '',
+            gstin: user.gstin || '',
+            incorporationDate: user.incorporation_date || '',
+            panFile: user.pan_file || null,
+            tan: user.tan || '',
+            cin: user.cin || '',
+            registeredAddress: user.registered_address || ''
+          }]);
+        }
         
         // Populate Websites
         if (userWebsites && userWebsites.length > 0) {
@@ -156,17 +176,17 @@ function Settings() {
       setSaving(true);
       
       const payload = {
-        organisationDetails: {
-          organisationType: orgData.organisationType,
-          legalName: orgData.legalName,
-          tradeName: orgData.tradeName,
-          gstin: orgData.gstin,
-          incorporationDate: orgData.incorporationDate,
-          panFile: orgData.panFile,
-          tan: orgData.tan,
-          cin: orgData.cin,
-          registeredAddress: orgData.registeredAddress
-        }
+        organisations: organizations.map(org => ({
+          organisationType: org.organisationType,
+          legalName: org.legalName,
+          tradeName: org.tradeName,
+          gstin: org.gstin,
+          incorporationDate: org.incorporationDate,
+          panFile: org.panFile,
+          tan: org.tan,
+          cin: org.cin,
+          registeredAddress: org.registeredAddress
+        }))
       };
       
       const response = await updateUsersPageData(payload);
@@ -273,6 +293,33 @@ function Settings() {
     if (file) {
       setFormData(prev => ({ ...prev, [field]: file }));
     }
+  };
+
+  const addOrganization = () => {
+    setOrganizations([...organizations, { 
+      id: Date.now(), 
+      organisationType: '',
+      legalName: '',
+      tradeName: '',
+      gstin: '',
+      incorporationDate: '',
+      panFile: null,
+      tan: '',
+      cin: '',
+      registeredAddress: ''
+    }]);
+  };
+
+  const removeOrganization = (id) => {
+    if (organizations.length > 1) {
+      setOrganizations(organizations.filter(o => o.id !== id));
+    }
+  };
+
+  const updateOrganization = (id, field, value) => {
+    setOrganizations(organizations.map(org => 
+      org.id === id ? { ...org, [field]: value } : org
+    ));
   };
 
   const addWebsite = () => {
@@ -522,134 +569,169 @@ function Settings() {
   const OrganisationDetailsContent = () => (
     <div className="px-6 pb-6 pt-6">
       <div className="space-y-6">
-        {/* Row 1: Organisation Type, Legal Name, Trade Name */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-sm text-gray-600 mb-2">Organisation Type</label>
-            <input
-              type="text"
-              value={orgData.organisationType}
-              onChange={(e) => setOrgData(prev => ({ ...prev, organisationType: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter organisation type"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm text-gray-600 mb-2">Legal Name</label>
-            <input
-              type="text"
-              value={orgData.legalName}
-              onChange={(e) => setOrgData(prev => ({ ...prev, legalName: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter legal name"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm text-gray-600 mb-2">Trade Name</label>
-            <input
-              type="text"
-              value={orgData.tradeName}
-              onChange={(e) => setOrgData(prev => ({ ...prev, tradeName: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter trade name"
-            />
-          </div>
+        {/* Add Organization Button - Top Right */}
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={addOrganization}
+            className="w-12 h-12 bg-[#01334C] text-white rounded-full flex items-center justify-center hover:bg-[#00486D] transition-colors"
+            title="Add Organization"
+          >
+            <AiOutlinePlus className="w-6 h-6" />
+          </button>
         </div>
 
-        {/* Row 2: GSTIN, Incorporation Date, PAN File */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-sm text-gray-600 mb-2">GSTIN</label>
-            <input
-              type="text"
-              value={orgData.gstin}
-              onChange={(e) => setOrgData(prev => ({ ...prev, gstin: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter GSTIN"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm text-gray-600 mb-2">Incorporation Date</label>
-            <div className="relative">
-              <input
-                type="date"
-                value={orgData.incorporationDate}
-                onChange={(e) => setOrgData(prev => ({ ...prev, incorporationDate: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="dd-mm-yyyy"
-              />
-              <BsCalendar3 className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm text-gray-600 mb-2">PAN File</label>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                readOnly
-                value={orgData.panFile ? 'File uploaded' : 'No file chosen'}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
-              />
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  onChange={async (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      const base64 = await fileToBase64(file);
-                      setOrgData(prev => ({ ...prev, panFile: base64 }));
-                    }
-                  }}
-                  className="hidden"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                />
-                <span className="px-4 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block">
-                  edit
-                </span>
-              </label>
-            </div>
-          </div>
-        </div>
+        {/* Organization Entries */}
+        {organizations.map((org, orgIndex) => (
+          <div key={org.id} className="border-2 border-gray-200 rounded-lg p-6 relative">
+            {/* Delete Button - Show if more than 1 organization */}
+            {organizations.length > 1 && (
+              <button
+                type="button"
+                onClick={() => removeOrganization(org.id)}
+                className="absolute top-4 right-4 w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"
+                title="Remove Organization"
+              >
+                ×
+              </button>
+            )}
 
-        {/* Row 3: TAN, CIN, Registered Address */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-sm text-gray-600 mb-2">TAN</label>
-            <input
-              type="text"
-              value={orgData.tan}
-              onChange={(e) => setOrgData(prev => ({ ...prev, tan: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter TAN"
-            />
+            <h4 className="text-sm font-semibold text-gray-700 mb-4">
+              Organization {orgIndex + 1}
+            </h4>
+
+            <div className="space-y-4">
+              {/* Row 1: Organisation Type, Legal Name, Trade Name */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Organisation Type</label>
+                  <input
+                    type="text"
+                    value={org.organisationType}
+                    onChange={(e) => updateOrganization(org.id, 'organisationType', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter organisation type"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Legal Name</label>
+                  <input
+                    type="text"
+                    value={org.legalName}
+                    onChange={(e) => updateOrganization(org.id, 'legalName', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter legal name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Trade Name</label>
+                  <input
+                    type="text"
+                    value={org.tradeName}
+                    onChange={(e) => updateOrganization(org.id, 'tradeName', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter trade name"
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: GSTIN, Incorporation Date, PAN File */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">GSTIN</label>
+                  <input
+                    type="text"
+                    value={org.gstin}
+                    onChange={(e) => updateOrganization(org.id, 'gstin', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter GSTIN"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Incorporation Date</label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      value={org.incorporationDate}
+                      onChange={(e) => updateOrganization(org.id, 'incorporationDate', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="dd-mm-yyyy"
+                    />
+                    <BsCalendar3 className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">PAN File</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={org.panFile ? 'File uploaded' : 'No file chosen'}
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                    />
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const base64 = await fileToBase64(file);
+                            updateOrganization(org.id, 'panFile', base64);
+                          }
+                        }}
+                        className="hidden"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                      />
+                      <span className="px-4 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block">
+                        edit
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 3: TAN, CIN, Registered Address */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">TAN</label>
+                  <input
+                    type="text"
+                    value={org.tan}
+                    onChange={(e) => updateOrganization(org.id, 'tan', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter TAN"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">CIN</label>
+                  <input
+                    type="text"
+                    value={org.cin}
+                    onChange={(e) => updateOrganization(org.id, 'cin', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter CIN"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Registered Address</label>
+                  <textarea
+                    rows={3}
+                    value={org.registeredAddress}
+                    onChange={(e) => updateOrganization(org.id, 'registeredAddress', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+                    placeholder="Enter registered address"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-          
-          <div>
-            <label className="block text-sm text-gray-600 mb-2">CIN</label>
-            <input
-              type="text"
-              value={orgData.cin}
-              onChange={(e) => setOrgData(prev => ({ ...prev, cin: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter CIN"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm text-gray-600 mb-2">Registered Address</label>
-            <textarea
-              rows={3}
-              value={orgData.registeredAddress}
-              onChange={(e) => setOrgData(prev => ({ ...prev, registeredAddress: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
-              placeholder="Enter registered address"
-            />
-          </div>
-        </div>
+        ))}
         
         {/* Save Button */}
         <div className="flex justify-end pt-4">

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import StepIndicator from './StepIndicator';
 import { NameApplicationContent, StartupInformationContent, OfficeAddressContent, DirectorDetailsContent, AuthorizationLetterContent } from './steps/PrivateLimitedSteps';
 import { submitPrivateLimitedRegistration } from '../../utils/privateLimitedApi';
+import { requestTeamFill } from '../../utils/teamFillApi';
 
 function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
   const navigate = useNavigate();
@@ -17,28 +18,128 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
     numberOfShareholders: 1
   });
   
-  // Load package details from localStorage if not provided as prop
+  // Load package details and existing registration data if editing
   useEffect(() => {
-    if (!packageDetails) {
-      const storedPackage = localStorage.getItem('selectedPackage');
-      const storedPayment = localStorage.getItem('paymentDetails');
-      
-      if (storedPackage && storedPayment) {
-        try {
-          setPackageDetails(JSON.parse(storedPackage));
-          console.log('✅ Package and payment verified - form access granted');
-        } catch (e) {
-          console.error('Error parsing package data:', e);
-          alert('Invalid payment data. Please complete payment first.');
+    const loadFormData = async () => {
+      if (!packageDetails) {
+        const storedPackage = localStorage.getItem('selectedPackage');
+        const storedPayment = localStorage.getItem('paymentDetails');
+        
+        if (storedPackage && storedPayment) {
+          try {
+            setPackageDetails(JSON.parse(storedPackage));
+            console.log('✅ Package and payment verified - form access granted');
+          } catch (e) {
+            console.error('Error parsing package data:', e);
+            alert('Invalid payment data. Please complete payment first.');
+            navigate('/company-categories');
+            return;
+          }
+        } else {
+          // No package or payment data - redirect back
+          console.warn('⚠️ No payment found - redirecting to packages');
+          alert('Please complete payment before accessing the registration form.');
           navigate('/company-categories');
+          return;
         }
-      } else {
-        // No package or payment data - redirect back
-        console.warn('⚠️ No payment found - redirecting to packages');
-        alert('Please complete payment before accessing the registration form.');
-        navigate('/company-categories');
       }
-    }
+
+      // Check if we're editing an existing registration
+      const editingTicketId = localStorage.getItem('editingTicketId');
+      if (editingTicketId) {
+        console.log('📝 Loading existing registration for editing:', editingTicketId);
+        try {
+          const { getRegistrationByTicketId } = await import('../../utils/privateLimitedApi');
+          const result = await getRegistrationByTicketId(editingTicketId);
+          
+          if (result.success && result.data) {
+            const reg = result.data.details;
+            const dirs = result.data.directors || [];
+            
+            // Pre-fill form data
+            setFormData({
+              step1: {
+                nameOption1: reg.business_name || '',
+                nameOption2: reg.business_name_option2 || '',
+                nameReason: reg.name_reason || '',
+                companyType: reg.business_type || '',
+                natureOfBusiness: reg.nature_of_business || ''
+              },
+              step2: {
+                numberOfDirectors: reg.directors_partners_count || 2,
+                numberOfShareholders: reg.shareholders_count || 1,
+                authorizedCapital: reg.authorized_capital || '',
+                paidUpCapital: reg.paid_up_capital || '',
+                companyEmail: reg.business_email || '',
+                contactNumber: reg.business_contact_number || '',
+                addressLine1: reg.address_line1 || '',
+                addressLine2: reg.address_line2 || '',
+                city: reg.city || '',
+                state: reg.state || '',
+                country: reg.country || 'India',
+                pincode: reg.pincode || '',
+                nocDate: reg.noc_date || '',
+                landlordName: reg.landlord_name || '',
+                registeredPremisesAddress: reg.registered_premises_address || '',
+                utilityBill: reg.utility_bill || null
+              },
+              step3: {},
+              directors: dirs.map(d => ({
+                name: d.director_name || '',
+                relation: d.relation_with_company || '',
+                designation: d.designation || '',
+                numberOfShares: d.number_of_shares || '',
+                faceValue: d.face_value_per_share || '',
+                totalEquity: d.total_equity || '',
+                sharePercentage: d.share_percentage || '',
+                educationalQualification: d.educational_qualification || '',
+                dateOfBirth: d.date_of_birth || '',
+                gender: d.gender || '',
+                placeOfBirthDistrict: d.place_of_birth_district || '',
+                placeOfBirthState: d.place_of_birth_state || '',
+                occupationType: d.occupation_type || '',
+                panNumber: d.pan_number || '',
+                email: d.director_email || '',
+                contactNumber: d.director_contact || '',
+                permanentAddressLine1: d.permanent_address_line1 || '',
+                permanentAddressLine2: d.permanent_address_line2 || '',
+                permanentCity: d.permanent_city || '',
+                permanentState: d.permanent_state || '',
+                permanentCountry: d.permanent_country || 'India',
+                permanentPincode: d.permanent_pincode || '',
+                presentAddressLine1: d.present_address_line1 || '',
+                presentAddressLine2: d.present_address_line2 || '',
+                presentCity: d.present_city || '',
+                presentState: d.present_state || '',
+                presentCountry: d.present_country || 'India',
+                presentPincode: d.present_pincode || '',
+                durationYears: d.duration_of_stay_years || '',
+                durationMonths: d.duration_of_stay_months || '',
+                isAuthorizedSignatory: d.is_authorized_signatory ? 'Yes' : 'No',
+                specimenSignature: d.specimen_signature || null,
+                isDirectorInOtherCompany: d.is_director_in_other_company ? 'Yes' : 'No',
+                otherCompanyName: d.other_company_name || '',
+                otherCompanyPosition: d.other_company_position || '',
+                isShareholderInOtherCompany: d.is_shareholder_in_other_company ? 'Yes' : 'No',
+                otherShareholderCompanyName: d.other_shareholder_company_name || '',
+                otherCompanyShares: d.other_company_shares || '',
+                otherCompanyShareValue: d.other_company_share_value || '',
+                aadhaarCard: d.aadhaar_doc_path || null,
+                passportPhoto: d.photo_path || null,
+                panCard: d.pan_doc_path || null,
+                bankStatementOrUtilityBill: d.bank_statement_or_utility_bill || null
+              }))
+            });
+            
+            console.log('✅ Existing registration data loaded for editing');
+          }
+        } catch (error) {
+          console.error('❌ Error loading existing registration:', error);
+        }
+      }
+    };
+
+    loadFormData();
   }, [packageDetails, navigate]);
 
   const steps = [
@@ -110,6 +211,8 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
           // Clear stored data after successful submission
           localStorage.removeItem('selectedPackage');
           localStorage.removeItem('paymentDetails');
+          localStorage.removeItem('draftTicketId');
+          localStorage.removeItem('editingTicketId');
           
           // Navigate to Private Limited dashboard instead of client dashboard
           navigate('/private-limited-dashboard');
@@ -184,10 +287,19 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
             </button>
             <button
               type="button"
-              onClick={oneasyTeamFill ? () => navigate('/private-limited-dashboard') : goNext}
+              onClick={oneasyTeamFill ? async () => {
+                // Save team fill request to database
+                setIsSubmitting(true);
+                const result = await requestTeamFill();
+                if (result.success) {
+                  console.log('✅ Team fill request saved');
+                }
+                setIsSubmitting(false);
+                navigate('/private-limited-dashboard');
+              } : goNext}
               disabled={isSubmitting}
               className={`px-6 py-1.5 rounded-md text-white font-medium ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-              style={{ background: oneasyTeamFill ? 'linear-gradient(to right, #27ae60, #2ecc71)' : 'linear-gradient(to right, #01334C, #00486D)' }}
+              style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
             >
               {oneasyTeamFill ? 'Go to Dashboard' : (isSubmitting ? 'Submitting...' : (step === 3 ? 'Submit' : 'Next'))}
             </button>

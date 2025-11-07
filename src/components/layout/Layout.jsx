@@ -13,24 +13,40 @@ const Layout = () => {
     location.pathname === "/" ||
     location.pathname === "/verify-otp" ||
     location.pathname === "/referral";
+  const isAdminRoute = location.pathname.startsWith("/admin");
+  const isSuperAdminRoute = location.pathname.startsWith("/superadmin");
+
+  if (isAuthPage) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <main className="min-h-screen">
+          <Routers />
+        </main>
+      </div>
+    );
+  }
+
+  if (isAdminRoute || isSuperAdminRoute) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Routers />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {!isAuthPage && <Sidebar />}
+      <Sidebar />
       <div
-        className={
-          !isAuthPage
-            ? `transition-all duration-300 ${
-                isCollapsed ? "lg:ml-[70px]" : "lg:ml-60"
-              }`
-            : ""
-        }
+        className={`transition-all duration-300 ${
+          isCollapsed ? "lg:ml-[70px]" : "lg:ml-60"
+        }`}
       >
-        {!isAuthPage && <Header />}
+        <Header />
         <main className="min-h-[calc(100vh-4rem)]">
           <Routers />
         </main>
-        {!isAuthPage && <Footer />}
+        <Footer />
       </div>
     </div>
   );

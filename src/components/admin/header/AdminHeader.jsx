@@ -3,14 +3,15 @@ import { IoMdNotificationsOutline } from 'react-icons/io';
 import { IoCallOutline, IoMailOutline, IoSearchOutline, IoLogOutOutline } from 'react-icons/io5';
 import { BiSupport } from 'react-icons/bi';
 import { MdKeyboardArrowDown } from 'react-icons/md';
-import useLogoutModalStore from '../../stores/logoutModalStore';
-import { AUTH_CONFIG } from '../../config/auth';
+import useLogoutModalStore from '../../../stores/logoutModalStore';
+import LogoutModal from '../../common/LogoutModal';
+import { AUTH_CONFIG } from '../../../config/auth';
 
-function Header() {
+function AdminHeader() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [userData, setUserData] = React.useState(null);
-  const { setShowLogoutModal } = useLogoutModalStore();
+  const { showLogoutModal, setShowLogoutModal, closeLogoutModal, handleLogout } = useLogoutModalStore();
   const profileRef = React.useRef();
 
   // Load user data from localStorage
@@ -77,7 +78,7 @@ function Header() {
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
               <img 
-                src="https://ui-avatars.com/api/?name=Sanya+Singh&background=0D8ABC&color=fff" 
+                src="https://ui-avatars.com/api/?name=Support+Team&background=0D8ABC&color=fff" 
                 alt="POC" 
                 className="w-5 h-5 rounded-full"
               />
@@ -87,13 +88,13 @@ function Header() {
 
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50">
-                <a href="tel:+1234567890" className="flex items-center space-x-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200">
+                <a href="tel:+919100152222" className="flex items-center space-x-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200">
                   <IoCallOutline className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-700">Call Sanya Singh</span>
+                  <span className="text-sm text-gray-700">Call Support</span>
                 </a>
-                <a href="mailto:sanya@oneasy.com" className="flex items-center space-x-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200">
+                <a href="mailto:support@oneasy.in" className="flex items-center space-x-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200">
                   <IoMailOutline className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-700">Mail Sanya Singh</span>
+                  <span className="text-sm text-gray-700">Email Support</span>
                 </a>
               </div>
             )}
@@ -149,8 +150,12 @@ function Header() {
           </div>
         </div>
       </div>
+
+      {/* Logout Modal */}
+      <LogoutModal isOpen={showLogoutModal} onClose={closeLogoutModal} onConfirm={handleLogout} />
     </header>
   );
 }
 
-export default Header;
+export default AdminHeader;
+

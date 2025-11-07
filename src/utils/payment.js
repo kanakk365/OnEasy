@@ -87,13 +87,20 @@ export const initPayment = async (packageData) => {
                   timestamp: new Date().toISOString()
                 }));
                 
-                console.log('✅ Payment verified! Redirecting to form...');
+                // Store draft ticket ID if returned from backend
+                if (verifyResponse.data?.ticketId) {
+                  localStorage.setItem('draftTicketId', verifyResponse.data.ticketId);
+                  console.log('📋 Draft ticket ID stored:', verifyResponse.data.ticketId);
+                }
+                
+                console.log('✅ Payment verified! Draft created. Redirecting to form...');
                 
                 // Resolve promise with success
                 resolve({
                   success: true,
                   orderId: response.razorpay_order_id,
                   paymentId: response.razorpay_payment_id,
+                  ticketId: verifyResponse.data?.ticketId,
                   redirect: true
                 });
               } else {

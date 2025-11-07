@@ -77,15 +77,25 @@ function OTPVerification() {
       }
 
       console.log('✅ OTP verification successful')
+      console.log('👤 User data:', result.user)
+      console.log('🔑 User role:', result.user?.role)
+      console.log('🔑 User role_id:', result.user?.role_id)
       
       // Navigate to appropriate dashboard based on user role
-      const userRole = result.user?.role_id
+      const userRole = result.user?.role || result.user?.role_id
+      console.log('🎯 Detected role for redirect:', userRole)
       
-      if (userRole === '1' || userRole === '2') {
-        navigate('/admin')
+      if (userRole === 'superadmin') {
+        console.log('➡️ Redirecting to superadmin panel...')
+        navigate('/superadmin/clients')
+      } else if (userRole === 'admin' || userRole === '1' || userRole === '2') {
+        console.log('➡️ Redirecting to admin panel...')
+        navigate('/admin/clients')
       } else if (userRole === '3') {
+        console.log('➡️ Redirecting to partner dashboard...')
         navigate('/partner')
       } else {
+        console.log('➡️ Redirecting to client dashboard...')
         navigate('/client')
       }
       
