@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { RiDashboardLine, RiRobot2Line, RiFileEditLine, RiSettings4Line } from "react-icons/ri";
+import { RiDashboardLine, RiRobot2Line, RiFileEditLine, RiUser3Line } from "react-icons/ri";
 import {
   MdOutlineSubscriptions,
   MdOutlineArticle,
@@ -81,7 +81,7 @@ function Sidebar() {
       path: "/subscriptions",
     },
     { icon: <BsBuilding />, text: "Organization", path: "/organization" },
-    { icon: <RiSettings4Line />, text: "Users", path: "/settings" },
+    { icon: <RiUser3Line />, text: "Profile", path: "/settings" },
   ];
 
   return (
