@@ -18,9 +18,11 @@ import PrivateLimitedDetails from "../pages/PrivateLimitedDetails";
 import AdminLayout from "../admin/layout/AdminLayout";
 import AdminClients from "../admin/pages/AdminClients";
 import AdminProfile from "../admin/pages/AdminProfile";
+import AdminFillForm from "../admin/pages/AdminFillForm";
 import SuperAdminLayout from "../superadmin/layout/SuperAdminLayout";
 import SuperAdminClients from "../superadmin/pages/SuperAdminClients";
 import SuperAdminProfile from "../superadmin/pages/SuperAdminProfile";
+import SuperAdminFillForm from "../superadmin/pages/SuperAdminFillForm";
 
 function Routers() {
   return (
@@ -46,6 +48,7 @@ function Routers() {
         <Route path="clients" element={<AdminClients />} />
         <Route path="profile" element={<AdminProfile />} />
         <Route path="client-details/:ticketId" element={<PrivateLimitedDetails />} />
+        <Route path="fill-form/:ticketId" element={<AdminFillForm />} />
       </Route>
       
       {/* SuperAdmin Routes */}
@@ -53,6 +56,7 @@ function Routers() {
         <Route path="clients" element={<SuperAdminClients />} />
         <Route path="profile" element={<SuperAdminProfile />} />
         <Route path="client-details/:ticketId" element={<PrivateLimitedDetails />} />
+        <Route path="fill-form/:ticketId" element={<SuperAdminFillForm />} />
       </Route>
     </Routes>
   );

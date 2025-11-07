@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../../utils/api';
-import PrivateLimitedForm from '../../forms/PrivateLimitedForm';
 
 function SuperAdminClients() {
   const navigate = useNavigate();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, registered, team-fill
-  const [showFormForClient, setShowFormForClient] = useState(null); // { clientId, ticketId, clientName }
 
   useEffect(() => {
     fetchClients();
@@ -239,11 +237,15 @@ function SuperAdminClients() {
                     )}
                     {client.team_fill_requested && !client.registration_submitted && (
                       <button
-                        onClick={() => setShowFormForClient({ 
-                          clientId: client.user_id, 
-                          ticketId: client.ticket_id,
-                          clientName: client.name || client.phone 
-                        })}
+                        onClick={() => {
+                          // Store client info and navigate to fill form page
+                          localStorage.setItem('superadminFillingForClient', JSON.stringify({
+                            clientId: client.user_id,
+                            ticketId: client.ticket_id,
+                            clientName: client.name || client.phone
+                          }));
+                          navigate(`/superadmin/fill-form/${client.ticket_id}`);
+                        }}
                         className="px-4 py-2 text-sm bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"
                       >
                         Fill Form
@@ -255,164 +257,6 @@ function SuperAdminClients() {
             ))}
         </div>
       )}
-
-      {/* Form Modal Overlay - Full Screen */}
-      {showFormForClient && (
-        <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
-          <SuperAdminFormWrapper 
-            clientId={showFormForClient.clientId}
-            ticketId={showFormForClient.ticketId}
-            clientName={showFormForClient.clientName}
-            onClose={() => {
-              setShowFormForClient(null);
-              fetchClients(); // Refresh clients list
-            }}
-          />
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Wrapper component to handle superadmin form logic with sidebar layout
-function SuperAdminFormWrapper({ clientId, ticketId, clientName, onClose }) {
-  const [formData, setFormData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [currentStep, setCurrentStep] = useState(1);
-
-  useEffect(() => {
-    loadClientFormData();
-  }, [ticketId]);
-
-  const loadClientFormData = async () => {
-    try {
-      setLoading(true);
-      const response = await apiClient.get(`/private-limited/registration/${ticketId}`);
-      
-      if (response.success) {
-        setFormData(response.data);
-      }
-    } catch (error) {
-      console.error('Error loading form data:', error);
-      alert('Failed to load form data. Please try again.');
-      onClose();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading form data...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const steps = [
-    { number: 1, title: "Name Application", description: "Choose your company name" },
-    { number: 2, title: "Basic Company Details", description: "Business information" },
-    { number: 3, title: "Directors & Shareholders", description: "Director details" }
-  ];
-
-  return (
-    <div className="flex h-screen bg-[#f3f5f7]">
-      {/* Left Sidebar */}
-      <div className="w-80 bg-white shadow-lg flex flex-col">
-        {/* Sidebar Header */}
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-[#01334C]">Private Limited Registration</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-              title="Close Form"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
-            <p className="text-sm font-semibold text-blue-900">Filling for Client</p>
-            <p className="text-xs text-blue-700 mt-1">{clientName}</p>
-            <p className="text-xs text-blue-600 mt-0.5">Ticket: {ticketId}</p>
-          </div>
-        </div>
-
-        {/* Steps Navigation */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
-            Registration Steps
-          </h3>
-          <div className="space-y-4">
-            {steps.map((step, index) => (
-              <div
-                key={step.number}
-                className={`relative ${index !== steps.length - 1 ? 'pb-4' : ''}`}
-              >
-                {index !== steps.length - 1 && (
-                  <div className="absolute left-4 top-10 bottom-0 w-0.5 bg-gray-200"></div>
-                )}
-                <div className="flex items-start gap-3">
-                  <div
-                    className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm ${
-                      currentStep === step.number
-                        ? 'bg-[#01334C] text-white'
-                        : currentStep > step.number
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-200 text-gray-500'
-                    }`}
-                  >
-                    {currentStep > step.number ? (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : (
-                      step.number
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className={`text-sm font-medium ${
-                        currentStep === step.number ? 'text-[#01334C]' : 'text-gray-600'
-                      }`}
-                    >
-                      {step.title}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-0.5">{step.description}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Sidebar Footer */}
-        <div className="p-6 border-t border-gray-200 bg-gray-50">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>All fields are required</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Form Area */}
-      <div className="flex-1 overflow-y-auto">
-        <PrivateLimitedForm 
-          isAdminFilling={true}
-          clientId={clientId}
-          ticketId={ticketId}
-          initialData={formData}
-          onClose={onClose}
-          onStepChange={setCurrentStep}
-        />
-      </div>
     </div>
   );
 }
