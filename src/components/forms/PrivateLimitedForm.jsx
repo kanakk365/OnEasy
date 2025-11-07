@@ -177,19 +177,19 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
             <button
               type="button"
               onClick={goBack}
-              disabled={isSubmitting}
-              className={`px-6 py-1.5 rounded-md border border-[#00486D] text-[#00486D] ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              disabled={isSubmitting || oneasyTeamFill}
+              className={`px-6 py-1.5 rounded-md border border-[#00486D] text-[#00486D] ${(isSubmitting || oneasyTeamFill) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
               Back
             </button>
             <button
               type="button"
-              onClick={goNext}
+              onClick={oneasyTeamFill ? () => navigate('/private-limited-dashboard') : goNext}
               disabled={isSubmitting}
               className={`px-6 py-1.5 rounded-md text-white font-medium ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-              style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
+              style={{ background: oneasyTeamFill ? 'linear-gradient(to right, #27ae60, #2ecc71)' : 'linear-gradient(to right, #01334C, #00486D)' }}
             >
-              {isSubmitting ? 'Submitting...' : (step === 3 ? 'Submit' : 'Next')}
+              {oneasyTeamFill ? 'Go to Dashboard' : (isSubmitting ? 'Submitting...' : (step === 3 ? 'Submit' : 'Next'))}
             </button>
           </div>
           </div>
