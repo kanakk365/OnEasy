@@ -199,7 +199,16 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
       {/* Floating Button - Oneasy Team Fill */}
       <button
         type="button"
-        onClick={() => setOneasyTeamFill(!oneasyTeamFill)}
+        onClick={() => {
+          const newState = !oneasyTeamFill;
+          setOneasyTeamFill(newState);
+          // Store team fill state in localStorage
+          if (newState) {
+            localStorage.setItem('oneasyTeamFill', 'true');
+          } else {
+            localStorage.removeItem('oneasyTeamFill');
+          }
+        }}
         className={`fixed bottom-8 right-8 px-6 py-4 rounded-full shadow-2xl font-medium text-white transition-all duration-300 hover:scale-105 z-40 ${
           oneasyTeamFill 
             ? 'bg-green-600 hover:bg-green-700' 

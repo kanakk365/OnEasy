@@ -6,9 +6,13 @@ function PrivateLimitedDashboard() {
   const navigate = useNavigate();
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [oneasyTeamFill, setOneasyTeamFill] = useState(false);
 
   useEffect(() => {
     fetchRegistrations();
+    // Check if user clicked "OnEasy Team Fill" button
+    const teamFillStatus = localStorage.getItem('oneasyTeamFill');
+    setOneasyTeamFill(teamFillStatus === 'true');
   }, []);
 
   const fetchRegistrations = async () => {
@@ -85,34 +89,83 @@ function PrivateLimitedDashboard() {
         {/* Registrations List */}
         {registrations.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <svg
-                className="w-12 h-12 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No Registrations Yet
-            </h3>
-            <p className="text-gray-600 mb-6">
-              You haven't submitted any Private Limited company registration applications.
-            </p>
-            <button
-              onClick={() => navigate('/company-categories')}
-              className="px-6 py-2 text-white rounded-md"
-              style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
-            >
-              Start New Registration
-            </button>
+            {oneasyTeamFill ? (
+              <>
+                {/* OnEasy Team Fill Mode - Waiting Message */}
+                <div className="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                  <svg
+                    className="w-12 h-12 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  Form Submitted to OnEasy Team
+                </h3>
+                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                  Please wait while our OnEasy team member completes your registration form. 
+                  You will be notified once the form is submitted and processed.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <button
+                    onClick={() => navigate('/client')}
+                    className="px-6 py-2 border border-[#00486D] text-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
+                  >
+                    Back to Dashboard
+                  </button>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem('oneasyTeamFill');
+                      setOneasyTeamFill(false);
+                    }}
+                    className="px-6 py-2 text-white rounded-md"
+                    style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
+                  >
+                    Start New Registration
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Normal Mode - No Registrations */}
+                <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <svg
+                    className="w-12 h-12 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  No Registrations Yet
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  You haven't submitted any Private Limited company registration applications.
+                </p>
+                <button
+                  onClick={() => navigate('/company-categories')}
+                  className="px-6 py-2 text-white rounded-md"
+                  style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
+                >
+                  Start New Registration
+                </button>
+              </>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
