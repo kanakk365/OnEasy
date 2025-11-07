@@ -21,16 +21,21 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
   useEffect(() => {
     if (!packageDetails) {
       const storedPackage = localStorage.getItem('selectedPackage');
-      if (storedPackage) {
+      const storedPayment = localStorage.getItem('paymentDetails');
+      
+      if (storedPackage && storedPayment) {
         try {
           setPackageDetails(JSON.parse(storedPackage));
+          console.log('✅ Package and payment verified - form access granted');
         } catch (e) {
           console.error('Error parsing package data:', e);
-          // If no package data, redirect back
+          alert('Invalid payment data. Please complete payment first.');
           navigate('/company-categories');
         }
       } else {
-        // No package data, redirect back
+        // No package or payment data - redirect back
+        console.warn('⚠️ No payment found - redirecting to packages');
+        alert('Please complete payment before accessing the registration form.');
         navigate('/company-categories');
       }
     }
