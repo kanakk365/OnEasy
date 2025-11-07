@@ -14,6 +14,7 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [oneasyTeamFill, setOneasyTeamFill] = useState(false);
   const [isAdminOrSuperadmin, setIsAdminOrSuperadmin] = useState(false);
+  const [isFillingOnBehalf, setIsFillingOnBehalf] = useState(false);
   const [formData, setFormData] = useState({
     numberOfDirectors: 1,
     numberOfShareholders: 1
@@ -34,6 +35,18 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
   // Load package details and existing registration data if editing
   useEffect(() => {
     const loadFormData = async () => {
+      // Check if admin is filling on behalf of client (from URL params)
+      const urlParams = new URLSearchParams(window.location.search);
+      const clientId = urlParams.get('clientId');
+      const ticketId = urlParams.get('ticketId');
+      
+      if (clientId && ticketId && isAdminOrSuperadmin) {
+        console.log('🔧 Admin filling form on behalf of client:', clientId, 'Ticket:', ticketId);
+        setIsFillingOnBehalf(true);
+        localStorage.setItem('fillingOnBehalfTicketId', ticketId);
+        localStorage.setItem('fillingOnBehalfClientId', clientId);
+      }
+
       if (!packageDetails) {
         const storedPackage = localStorage.getItem('selectedPackage');
         const storedPayment = localStorage.getItem('paymentDetails');
@@ -48,8 +61,8 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
             navigate('/company-categories');
             return;
           }
-        } else {
-          // No package or payment data - redirect back
+        } else if (!isFillingOnBehalf) {
+          // No package or payment data - redirect back (unless admin filling on behalf)
           console.warn('⚠️ No payment found - redirecting to packages');
           alert('Please complete payment before accessing the registration form.');
           navigate('/company-categories');
@@ -58,7 +71,7 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
       }
 
       // Check if we're editing an existing registration
-      const editingTicketId = localStorage.getItem('editingTicketId');
+      const editingTicketId = localStorage.getItem('editingTicketId') || localStorage.getItem('fillingOnBehalfTicketId');
       if (editingTicketId) {
         console.log('📝 Loading existing registration for editing:', editingTicketId);
         try {
@@ -153,7 +166,7 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
     };
 
     loadFormData();
-  }, [packageDetails, navigate]);
+  }, [packageDetails, navigate, isAdminOrSuperadmin]);
 
   const steps = [
     "Name Application",
@@ -226,9 +239,21 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
           localStorage.removeItem('paymentDetails');
           localStorage.removeItem('draftTicketId');
           localStorage.removeItem('editingTicketId');
+          localStorage.removeItem('fillingOnBehalfTicketId');
+          localStorage.removeItem('fillingOnBehalfClientId');
           
-          // Navigate to Private Limited dashboard instead of client dashboard
-          navigate('/private-limited-dashboard');
+          // Navigate to appropriate dashboard based on user role
+          if (isAdminOrSuperadmin && isFillingOnBehalf) {
+            const userData = JSON.parse(localStorage.getItem('user') || '{}');
+            const userRole = userData.role || userData.role_id;
+            if (userRole === 'superadmin' || userRole === 2) {
+              navigate('/superadmin/clients');
+            } else {
+              navigate('/admin/clients');
+            }
+          } else {
+            navigate('/private-limited-dashboard');
+          }
         }, 3000);
       } else {
         console.error('❌ Registration submission failed:', result.message);
@@ -244,7 +269,8 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
 
   const renderStepContent = () => {
     // Admin/Superadmin should be able to fill the form, regular users should see it disabled
-    const isDisabled = oneasyTeamFill && !isAdminOrSuperadmin;
+    // When admin is filling on behalf, fields should always be enabled
+    const isDisabled = (oneasyTeamFill && !isAdminOrSuperadmin) && !isFillingOnBehalf;
     
     switch (step) {
       case 1:
@@ -276,8 +302,21 @@ function PrivateLimitedForm({ packageDetails: propPackageDetails, onClose }) {
           {/* Stepper */}
           <StepIndicator steps={steps} currentStep={step} />
 
-          {/* OnEasy Team Fill Banner */}
-          {oneasyTeamFill && (
+          {/* Admin Filling on Behalf Banner */}
+          {isFillingOnBehalf && isAdminOrSuperadmin && (
+            <div className="bg-blue-50 border-2 border-blue-500 rounded-lg p-4 mb-6 flex items-center gap-3">
+              <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="font-semibold text-blue-900">Admin Mode: Filling Form on Behalf of Client</p>
+                <p className="text-sm text-blue-700">You are completing this registration form on behalf of the client. All fields are enabled for you to fill.</p>
+              </div>
+            </div>
+          )}
+
+          {/* OnEasy Team Fill Banner (for regular users) */}
+          {oneasyTeamFill && !isAdminOrSuperadmin && (
             <div className="bg-green-50 border-2 border-green-500 rounded-lg p-4 mb-6 flex items-center gap-3">
               <svg className="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
