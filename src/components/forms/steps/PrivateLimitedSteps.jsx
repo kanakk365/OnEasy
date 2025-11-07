@@ -316,8 +316,8 @@ export function StartupInformationContent({ formData, setFormData }) {
         </div>
       </div>
 
-      {/* Approved Name and Letter (Admin fields) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Approved Name and Letter (Admin fields) - COMMENTED FOR NOW */}
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <Field label="Approved Name of the Company">
             <input
@@ -346,7 +346,7 @@ export function StartupInformationContent({ formData, setFormData }) {
             To be uploaded by admin - Oneasy
           </p>
         </div>
-      </div>
+      </div> */}
 
       {/* NOC From Landlord */}
       <div>

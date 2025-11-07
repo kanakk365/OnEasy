@@ -81,7 +81,7 @@ function Sidebar() {
       path: "/subscriptions",
     },
     { icon: <BsBuilding />, text: "Organization", path: "/organization" },
-    { icon: <RiSettings4Line />, text: "Settings", path: "/settings" },
+    { icon: <RiSettings4Line />, text: "Users", path: "/settings" },
   ];
 
   return (

@@ -11,6 +11,7 @@ import CompanyCategories from "../pages/CompanyCategories";
 import CompanyDetails from "../pages/CompanyDetails";
 import BusinessDetailsForm from "../pages/BusinessDetailsForm";
 import Settings from "../pages/Settings";
+import Organization from "../pages/Organization";
 import PrivateLimitedForm from "../forms/PrivateLimitedForm";
 import PrivateLimitedDashboard from "../pages/PrivateLimitedDashboard";
 import PrivateLimitedDetails from "../pages/PrivateLimitedDetails";
@@ -32,6 +33,7 @@ function Routers() {
       <Route path="/private-limited-dashboard" element={<PrivateLimitedDashboard />} />
       <Route path="/private-limited/view/:ticketId" element={<PrivateLimitedDetails />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/organization" element={<Organization />} />
     </Routes>
   );
 }
