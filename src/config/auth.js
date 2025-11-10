@@ -1,10 +1,10 @@
 // Authentication configuration
 export const AUTH_CONFIG = {
   // Google OAuth Configuration
-  GOOGLE_CLIENT_ID: import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID',
+  GOOGLE_CLIENT_ID: process.env.REACT_APP_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID',
   
   // API endpoints (replace with your actual backend URLs)
-  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api/v1',
+  API_BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001/api/v1',
   
   // Login endpoints
   ENDPOINTS: {
@@ -13,7 +13,6 @@ export const AUTH_CONFIG = {
     GOOGLE_LOGIN: '/auth/google-login',
     REFRESH_TOKEN: '/auth/refresh-token',
     GET_ME: '/auth/me',
-    UPDATE_PROFILE: '/auth/profile',
     LOGOUT: '/auth/logout'
   },
   

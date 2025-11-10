@@ -376,3 +376,64 @@ function Sidebar() {
 }
 
 export default Sidebar;
+
+                  )
+                    ? "bg-slate-800 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <span className="text-lg">{item.icon}</span>
+                <span className="font-medium">{item.text}</span>
+              </Link>
+            ))}
+          </nav>
+
+          {/* Mobile Profile Section */}
+          <div className="mt-auto p-4 border-t border-gray-200">
+            <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg bg-gray-50">
+              <div className="flex items-center space-x-3 flex-1">
+                {userData?.profile_image ? (
+                  <img
+                    src={userData.profile_image}
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-[#01334C] text-white rounded-full flex items-center justify-center text-sm font-medium">
+                    {userData?.name ? userData.name.charAt(0).toUpperCase() : 'A'}
+                  </div>
+                )}
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">
+                    {userData?.name || 'User'}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {userData?.email || userData?.phone || ''}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setShowLogoutModal(true);
+                }}
+                className="p-2 hover:bg-gray-200 rounded-lg transition-colors duration-200"
+              >
+                <IoLogOutOutline className="w-4 h-4 text-gray-600" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onClose={closeLogoutModal}
+        onConfirm={handleLogout}
+      />
+    </>
+  );
+}
+
+export default Sidebar;

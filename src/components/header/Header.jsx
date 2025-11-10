@@ -154,3 +154,45 @@ function Header() {
 }
 
 export default Header;
+
+                className="w-8 h-8 rounded-full overflow-hidden hover:ring-2 hover:ring-[#00486D] transition-all duration-200"
+              >
+                {userData?.profile_image ? (
+                  <img
+                    src={userData.profile_image}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#01334C] text-white flex items-center justify-center">
+                    <span className="text-sm">
+                      {userData?.name ? userData.name.charAt(0).toUpperCase() : 'A'}
+                    </span>
+                  </div>
+                )}
+              </button>
+              {isProfileOpen && (
+                <div 
+                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50"
+                >
+                  <button 
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      setShowLogoutModal(true);
+                    }} 
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2"
+                  >
+                    <IoLogOutOutline className="w-4 h-4" />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+export default Header;

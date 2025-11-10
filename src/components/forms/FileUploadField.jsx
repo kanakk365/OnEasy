@@ -66,3 +66,14 @@ function FileUploadField({ label, buttonLabel, required = false, accept, onFileS
 
 export default FileUploadField;
 
+
+            : 'bg-gradient-to-b from-[#00486D] to-[#015A88] cursor-pointer hover:from-[#015A88] hover:to-[#00486D]'
+        }`}
+      >
+        +
+      </button>
+    </div>
+  );
+}
+
+export default FileUploadField;
