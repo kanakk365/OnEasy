@@ -257,8 +257,16 @@ function PrivateLimitedForm({
       return;
     }
 
+    // Check if we already submitted successfully (use a ref or localStorage flag)
+    const submissionKey = `submitting_${ticketId || 'new'}`;
+    if (localStorage.getItem(submissionKey) === 'true') {
+      console.log('⚠️ Already submitted this registration, preventing duplicate');
+      return;
+    }
+
     try {
       setIsSubmitting(true);
+      localStorage.setItem(submissionKey, 'true');
       console.log('📝 Submitting Private Limited registration...');
       console.log('Form Data:', formData);
       console.log('🔍 Submitting for clientId:', clientId, '| isAdminFilling:', isAdminFilling);
@@ -277,6 +285,9 @@ function PrivateLimitedForm({
         
         // Wait 3 seconds then redirect to dashboard or close modal
         setTimeout(() => {
+          // Clear submission flag
+          localStorage.removeItem(submissionKey);
+          
           // Clear stored data after successful submission
           if (!isAdminFilling) {
             localStorage.removeItem('selectedPackage');
@@ -309,11 +320,13 @@ function PrivateLimitedForm({
       } else {
         console.error('❌ Registration submission failed:', result.message);
         alert(result.message || 'Failed to submit registration. Please try again.');
+        localStorage.removeItem(submissionKey); // Clear flag on error
         setIsSubmitting(false); // Re-enable on error
       }
     } catch (error) {
       console.error('❌ Form submission error:', error);
       alert('Failed to submit form. Please try again.');
+      localStorage.removeItem(submissionKey); // Clear flag on error
       setIsSubmitting(false); // Re-enable on error
     }
   };
