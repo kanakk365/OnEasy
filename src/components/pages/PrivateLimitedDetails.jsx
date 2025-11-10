@@ -521,9 +521,35 @@ function PrivateLimitedDetails() {
               </div>
               <div>
                 <span className="font-medium text-gray-700">Name Approval Letter:</span>
-                <p className={registration.name_approval_letter ? "text-blue-600" : "text-gray-500"}>
-                  {registration.name_approval_letter ? '✓ Uploaded (PDF)' : 'N/A'}
-                </p>
+                {registration.name_approval_letter ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <a
+                      href={registration.name_approval_letter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Download PDF
+                    </a>
+                    <a
+                      href={registration.name_approval_letter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      View
+                    </a>
+                  </div>
+                ) : (
+                  <p className="text-gray-500">N/A</p>
+                )}
               </div>
             </div>
           </div>
@@ -549,9 +575,35 @@ function PrivateLimitedDetails() {
             <h3 className="text-md font-semibold text-gray-800 mb-3">Utility Bill</h3>
             <div className="text-sm">
               <span className="font-medium text-gray-700">Utility Bill (Electricity/Similar):</span>
-              <p className={registration.utility_bill ? "text-blue-600" : "text-gray-500"}>
-                {registration.utility_bill ? '✓ Uploaded' : 'N/A'}
-              </p>
+              {registration.utility_bill ? (
+                <div className="flex items-center gap-2 mt-2">
+                  <a
+                    href={registration.utility_bill}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Download
+                  </a>
+                  <a
+                    href={registration.utility_bill}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    View
+                  </a>
+                </div>
+              ) : (
+                <p className="text-gray-500 mt-1">N/A</p>
+              )}
             </div>
           </div>
         </div>
@@ -749,37 +801,91 @@ function PrivateLimitedDetails() {
 
                   {/* Documents */}
                   <div>
-                    <h4 className="text-md font-semibold text-gray-700 mb-2">Documents Submitted</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                    <h4 className="text-md font-semibold text-gray-700 mb-3">Documents Submitted</h4>
+                    <div className="grid grid-cols-1 gap-4 text-sm">
+                      {/* Aadhaar Card */}
                       <div>
-                        <span className="font-medium text-gray-700">Aadhaar Card:</span>
-                        <p className={director.aadhaar_doc_path ? "text-blue-600" : "text-gray-500"}>
-                          {director.aadhaar_doc_path ? '✓ Uploaded' : 'N/A'}
-                        </p>
+                        <span className="font-medium text-gray-700 block mb-1">Aadhaar Card:</span>
+                        {director.aadhaar_doc_path ? (
+                          <div className="flex items-center gap-2">
+                            <a href={director.aadhaar_doc_path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                              Download
+                            </a>
+                            <a href={director.aadhaar_doc_path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                              View
+                            </a>
+                          </div>
+                        ) : (<p className="text-gray-500">N/A</p>)}
                       </div>
+
+                      {/* Passport Photo */}
                       <div>
-                        <span className="font-medium text-gray-700">Passport Photo:</span>
-                        <p className={director.photo_path ? "text-blue-600" : "text-gray-500"}>
-                          {director.photo_path ? '✓ Uploaded' : 'N/A'}
-                        </p>
+                        <span className="font-medium text-gray-700 block mb-1">Passport Photo:</span>
+                        {director.photo_path ? (
+                          <div className="flex items-center gap-2">
+                            <a href={director.photo_path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                              Download
+                            </a>
+                            <a href={director.photo_path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                              View
+                            </a>
+                          </div>
+                        ) : (<p className="text-gray-500">N/A</p>)}
                       </div>
+
+                      {/* PAN Card */}
                       <div>
-                        <span className="font-medium text-gray-700">PAN Card:</span>
-                        <p className={director.pan_doc_path ? "text-blue-600" : "text-gray-500"}>
-                          {director.pan_doc_path ? '✓ Uploaded' : 'N/A'}
-                        </p>
+                        <span className="font-medium text-gray-700 block mb-1">PAN Card:</span>
+                        {director.pan_doc_path ? (
+                          <div className="flex items-center gap-2">
+                            <a href={director.pan_doc_path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                              Download
+                            </a>
+                            <a href={director.pan_doc_path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                              View
+                            </a>
+                          </div>
+                        ) : (<p className="text-gray-500">N/A</p>)}
                       </div>
+
+                      {/* Bank Statement */}
                       <div>
-                        <span className="font-medium text-gray-700">Bank Statement/Utility Bill:</span>
-                        <p className={director.bank_statement_or_utility_bill ? "text-blue-600" : "text-gray-500"}>
-                          {director.bank_statement_or_utility_bill ? '✓ Uploaded' : 'N/A'}
-                        </p>
+                        <span className="font-medium text-gray-700 block mb-1">Bank Statement/Utility Bill:</span>
+                        {director.bank_statement_or_utility_bill ? (
+                          <div className="flex items-center gap-2">
+                            <a href={director.bank_statement_or_utility_bill} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                              Download
+                            </a>
+                            <a href={director.bank_statement_or_utility_bill} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                              View
+                            </a>
+                          </div>
+                        ) : (<p className="text-gray-500">N/A</p>)}
                       </div>
+
+                      {/* Specimen Signature */}
                       <div>
-                        <span className="font-medium text-gray-700">Specimen Signature:</span>
-                        <p className={director.specimen_signature ? "text-blue-600" : "text-gray-500"}>
-                          {director.specimen_signature ? '✓ Uploaded' : 'N/A'}
-                        </p>
+                        <span className="font-medium text-gray-700 block mb-1">Specimen Signature:</span>
+                        {director.specimen_signature ? (
+                          <div className="flex items-center gap-2">
+                            <a href={director.specimen_signature} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                              Download
+                            </a>
+                            <a href={director.specimen_signature} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                              View
+                            </a>
+                          </div>
+                        ) : (<p className="text-gray-500">N/A</p>)}
                       </div>
                     </div>
                   </div>
