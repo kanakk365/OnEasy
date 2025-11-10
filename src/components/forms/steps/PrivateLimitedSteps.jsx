@@ -905,6 +905,10 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
                 accept=".pdf,.jpg,.jpeg,.png"
                 buttonLabel="Upload Signature"
                 disabled={disabled}
+                onFileSelect={async (file) => {
+                  const base64 = await fileToBase64(file);
+                  updateDirector(index, 'specimenSignature', base64);
+                }}
               />
             </div>
           )}
@@ -995,6 +999,10 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
               accept=".pdf,.jpg,.jpeg,.png"
               buttonLabel="Upload Aadhaar Card"
               disabled={disabled}
+              onFileSelect={async (file) => {
+                const base64 = await fileToBase64(file);
+                updateDirector(index, 'aadhaarCard', base64);
+              }}
             />
 
             <FileUploadField
@@ -1002,6 +1010,10 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
               accept=".jpg,.jpeg,.png"
               buttonLabel="Upload Photo"
               disabled={disabled}
+              onFileSelect={async (file) => {
+                const base64 = await fileToBase64(file);
+                updateDirector(index, 'passportPhoto', base64);
+              }}
             />
 
             <FileUploadField
@@ -1009,6 +1021,10 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
               accept=".pdf,.jpg,.jpeg,.png"
               buttonLabel="Upload PAN Card"
               disabled={disabled}
+              onFileSelect={async (file) => {
+                const base64 = await fileToBase64(file);
+                updateDirector(index, 'panCard', base64);
+              }}
             />
 
             <div>
@@ -1017,6 +1033,10 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
                 accept=".pdf,.jpg,.jpeg,.png"
                 buttonLabel="Upload Document"
                 disabled={disabled}
+                onFileSelect={async (file) => {
+                  const base64 = await fileToBase64(file);
+                  updateDirector(index, 'bankStatementOrUtilityBill', base64);
+                }}
               />
               <p className="text-xs text-gray-500 mt-1">
                 Note: Should be within the last month and should have your present residential address
