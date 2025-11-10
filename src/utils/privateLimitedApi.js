@@ -5,11 +5,14 @@ import apiClient from './api';
  * @param {object} formData - Complete form data from all steps
  * @returns {Promise} API response
  */
-export const submitPrivateLimitedRegistration = async (formData, clientId = null) => {
+export const submitPrivateLimitedRegistration = async (formData, clientId = null, ticketId = null) => {
   try {
     // Get payment details from localStorage
     const paymentDetails = JSON.parse(localStorage.getItem('paymentDetails') || '{}');
     const packageDetails = JSON.parse(localStorage.getItem('selectedPackage') || '{}');
+    
+    // Get editing ticket ID if editing existing registration
+    const editingTicketId = ticketId || localStorage.getItem('editingTicketId');
     
     // Prepare complete payload
     const payload = {
@@ -19,12 +22,16 @@ export const submitPrivateLimitedRegistration = async (formData, clientId = null
       directors: formData.directors || [],
       paymentDetails,
       packageDetails,
-      clientId // Pass clientId if admin is filling on behalf
+      clientId, // Pass clientId if admin is filling on behalf
+      ticketId: editingTicketId // Pass ticketId if updating existing registration
     };
     
     console.log('🚀 Submitting Private Limited registration...');
     if (clientId) {
       console.log('👤 Filling on behalf of client:', clientId);
+    }
+    if (editingTicketId) {
+      console.log('📝 Updating existing registration:', editingTicketId);
     }
     
     const response = await apiClient.post('/private-limited/register', payload);
@@ -137,3 +144,6 @@ export const prepareFormDataWithFiles = async (rawFormData) => {
   await convertFilesToBase64(formData);
   return formData;
 };
+
+
+

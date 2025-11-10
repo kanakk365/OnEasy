@@ -269,10 +269,10 @@ function PrivateLimitedForm({
       localStorage.setItem(submissionKey, 'true');
       console.log('📝 Submitting Private Limited registration...');
       console.log('Form Data:', formData);
-      console.log('🔍 Submitting for clientId:', clientId, '| isAdminFilling:', isAdminFilling);
+      console.log('🔍 Submitting for clientId:', clientId, '| isAdminFilling:', isAdminFilling, '| ticketId:', ticketId);
       
-      // Call API to submit registration (pass clientId if admin filling)
-      const result = await submitPrivateLimitedRegistration(formData, isAdminFilling ? clientId : null);
+      // Call API to submit registration (pass clientId if admin filling, pass ticketId if editing)
+      const result = await submitPrivateLimitedRegistration(formData, isAdminFilling ? clientId : null, ticketId);
       
       if (result.success) {
         console.log('✅ Registration submitted successfully:', result.data);
@@ -542,5 +542,6 @@ function PrivateLimitedForm({
 }
 
 export default PrivateLimitedForm;
+
 
 
