@@ -166,7 +166,7 @@ export function StartupInformationContent({ formData, setFormData, disabled = fa
           <CustomDropdown
             options={['1', '2', '3']}
             placeholder="Select number of directors"
-            value={formData.numberOfDirectors.toString()}
+            value={formData.numberOfDirectors ? formData.numberOfDirectors.toString() : '1'}
             onChange={(value) => setFormData({ ...formData, numberOfDirectors: parseInt(value) })}
             disabled={disabled}
           />
@@ -179,7 +179,7 @@ export function StartupInformationContent({ formData, setFormData, disabled = fa
           <CustomDropdown
             options={['1', '2', '3', '4', '5', '6']}
             placeholder="Select number of shareholders"
-            value={formData.numberOfShareholders.toString()}
+            value={formData.numberOfShareholders ? formData.numberOfShareholders.toString() : '1'}
             onChange={(value) => setFormData({ ...formData, numberOfShareholders: parseInt(value) })}
             disabled={disabled}
           />

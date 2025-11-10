@@ -12,13 +12,35 @@ function AdminClients() {
     fetchClients();
   }, []);
 
+  // Refresh when returning from fill form page
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log('👁️ Page focused, refreshing clients...');
+      fetchClients();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
   const fetchClients = async () => {
     try {
       // Fetch all registrations
       const response = await apiClient.get('/admin/clients');
       
       if (response.success) {
+        console.log('📊 Clients data:', response.data);
         setClients(response.data || []);
+        
+        // Log Harsha's status for debugging
+        const harsha = response.data?.find(c => c.phone === '+917569460743');
+        if (harsha) {
+          console.log('👤 Harsha status:', {
+            team_fill_requested: harsha.team_fill_requested,
+            registration_submitted: harsha.registration_submitted,
+            ticket_id: harsha.ticket_id
+          });
+        }
       }
     } catch (error) {
       console.error('Error fetching clients:', error);
