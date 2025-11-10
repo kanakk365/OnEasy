@@ -1,16 +1,16 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import SupersuperadminSidebar from '../sidebar/SupersuperadminSidebar';
-import SupersuperadminHeader from '../header/SupersuperadminHeader';
+import SuperAdminSidebar from '../sidebar/SuperAdminSidebar';
+import SuperAdminHeader from '../header/SuperAdminHeader';
 import useSidebarStore from '../../../stores/sidebarStore';
 
-function SupersuperadminLayout() {
+function SuperAdminLayout() {
   const { isCollapsed } = useSidebarStore();
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <SupersuperadminSidebar />
+      <SuperAdminSidebar />
 
       {/* Main Content Area - Matches user layout structure */}
       <div
@@ -19,7 +19,7 @@ function SupersuperadminLayout() {
         }`}
       >
         {/* Header */}
-        <SupersuperadminHeader />
+        <SuperAdminHeader />
 
         {/* Page Content */}
         <main className="min-h-[calc(100vh-4rem)]">
@@ -30,6 +30,6 @@ function SupersuperadminLayout() {
   );
 }
 
-export default SupersuperadminLayout;
+export default SuperAdminLayout;
 
 
