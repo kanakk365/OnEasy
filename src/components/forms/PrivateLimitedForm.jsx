@@ -267,6 +267,9 @@ function PrivateLimitedForm({
       
       if (result.success) {
         console.log('✅ Registration submitted successfully:', result.data);
+        console.log('🎫 Ticket ID created:', result.data.ticket_id);
+        console.log('📝 Registration submitted flag:', result.data.registration?.registration_submitted);
+        console.log('📊 Full response:', JSON.stringify(result.data, null, 2));
         
         // Show success modal
         setShowSuccessModal(true);
@@ -283,12 +286,12 @@ function PrivateLimitedForm({
             localStorage.removeItem('fillingOnBehalfClientId');
           }
           
-          // If admin filling from modal, close modal
-          if (isAdminFilling && onClose) {
-            onClose();
-          } else {
-            // Navigate to appropriate dashboard based on user role
-            if (isAdminOrSuperadmin && isFillingOnBehalf) {
+          // If admin filling, use onClose callback or navigate to admin panel
+          if (isAdminFilling) {
+            if (onClose) {
+              onClose(); // Calls handleClose which navigates to /admin/clients
+            } else {
+              // Fallback if onClose not provided
               const userData = JSON.parse(localStorage.getItem('user') || '{}');
               const userRole = userData.role || userData.role_id;
               if (userRole === 'superadmin' || userRole === 2) {
@@ -296,9 +299,10 @@ function PrivateLimitedForm({
               } else {
                 navigate('/admin/clients');
               }
-            } else {
-              navigate('/private-limited-dashboard');
             }
+          } else {
+            // Regular user navigation
+            navigate('/private-limited-dashboard');
           }
         }, 3000);
       } else {
