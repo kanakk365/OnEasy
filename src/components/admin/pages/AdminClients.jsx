@@ -252,15 +252,7 @@ function AdminClients() {
                     )}
                     {client.team_fill_requested && !client.registration_submitted && (
                       <button
-                        onClick={() => {
-                          // Store client info and navigate to fill form page
-                          localStorage.setItem('adminFillingForClient', JSON.stringify({
-                            clientId: client.user_id,
-                            ticketId: client.ticket_id,
-                            clientName: client.name || client.phone
-                          }));
-                          navigate(`/admin/fill-form/${client.ticket_id}`);
-                        }}
+                        onClick={() => navigate(`/admin/fill-form/${client.ticket_id}`)}
                         className="px-4 py-2 text-sm bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"
                       >
                         Fill Form

@@ -17,18 +17,26 @@ function SuperAdminFillForm() {
   const loadData = async () => {
     try {
       setLoading(true);
-      
-      // Get client info from localStorage
-      const storedClientInfo = localStorage.getItem('superadminFillingForClient');
-      if (storedClientInfo) {
-        setClientInfo(JSON.parse(storedClientInfo));
-      }
 
-      // Load form data
+      // Load form data from database
       const response = await apiClient.get(`/private-limited/registration/${ticketId}`);
       
       if (response.success) {
         setFormData(response.data);
+        
+        // Extract client info from the registration data
+        const registration = response.data?.details;
+        if (registration) {
+          setClientInfo({
+            clientId: registration.user_id,
+            ticketId: registration.ticket_id,
+            clientName: registration.business_name || 'Client'
+          });
+          console.log('✅ Client info fetched from database:', {
+            clientId: registration.user_id,
+            ticketId: registration.ticket_id
+          });
+        }
       }
     } catch (error) {
       console.error('Error loading form data:', error);
@@ -40,7 +48,6 @@ function SuperAdminFillForm() {
   };
 
   const handleClose = () => {
-    localStorage.removeItem('superadminFillingForClient');
     navigate('/superadmin/clients');
   };
 
