@@ -124,7 +124,7 @@ export function NameApplicationContent({ formData, setFormData, disabled = false
 }
 
 // Step 2: Basic Company Details
-export function StartupInformationContent({ formData, setFormData, disabled = false }) {
+export function StartupInformationContent({ formData, setFormData, disabled = false, isAdmin = false }) {
   const step2 = formData.step2 || {};
 
   const updateStep2 = (field, value) => {
@@ -333,37 +333,48 @@ export function StartupInformationContent({ formData, setFormData, disabled = fa
         </div>
       </div>
 
-      {/* Approved Name and Letter (Admin fields) - COMMENTED FOR NOW */}
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <Field label="Approved Name of the Company">
-            <input
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
-              placeholder="Name to be entered by admin - Oneasy"
-              value={step2.approvedCompanyName || ''}
-              onChange={(e) => updateStep2('approvedCompanyName', e.target.value)}
-            />
-          </Field>
-          <p className="text-xs text-blue-500 mt-1">
-            Admin Entry Required
-          </p>
-        </div>
+      {/* Approved Name and Letter (Admin Only Fields) */}
+      {isAdmin && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+          <div className="col-span-2">
+            <p className="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Admin Only Fields
+            </p>
+          </div>
+          <div>
+            <Field label="Approved Name of the Company">
+              <input
+                className="w-full px-4 py-3 rounded-lg bg-white border border-blue-300 outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                placeholder="Enter approved company name"
+                value={step2.approvedCompanyName || ''}
+                onChange={(e) => updateStep2('approvedCompanyName', e.target.value)}
+                disabled={disabled}
+              />
+            </Field>
+            <p className="text-xs text-blue-600 mt-1">
+              ℹ️ Final approved name from government
+            </p>
+          </div>
 
-        <div>
-          <FileUploadField
-            label="Name Approval Letter"
-            accept=".pdf"
-            buttonLabel="Upload Name Approval Letter (PDF)"
-            onFileSelect={async (file) => {
-              const base64 = await fileToBase64(file);
-              updateStep2('nameApprovalLetter', base64);
-            }}
-          />
-          <p className="text-xs text-blue-500 mt-1">
-            To be uploaded by admin - Oneasy
-          </p>
+          <div>
+            <FileUploadField
+              label="Name Approval Letter"
+              accept=".pdf"
+              buttonLabel="Upload Name Approval Letter (PDF)"
+              onFileSelect={async (file) => {
+                const base64 = await fileToBase64(file);
+                updateStep2('nameApprovalLetter', base64);
+              }}
+            />
+            <p className="text-xs text-blue-600 mt-1">
+              ℹ️ Upload official approval letter from government
+            </p>
+          </div>
         </div>
-      </div> */}
+      )}
 
       {/* NOC From Landlord */}
       <div>

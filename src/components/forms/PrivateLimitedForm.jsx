@@ -327,7 +327,7 @@ function PrivateLimitedForm({
       case 1:
         return <NameApplicationContent formData={formData} setFormData={setFormData} disabled={isDisabled} />;
       case 2:
-        return <StartupInformationContent formData={formData} setFormData={setFormData} disabled={isDisabled} />;
+        return <StartupInformationContent formData={formData} setFormData={setFormData} disabled={isDisabled} isAdmin={isAdminOrSuperadmin} />;
       case 3:
         return <OfficeAddressContent formData={formData} setFormData={setFormData} disabled={isDisabled} />;
       default:
