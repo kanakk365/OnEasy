@@ -46,6 +46,8 @@ function PrivateLimitedForm({
   // Load package details and existing registration data if editing
   useEffect(() => {
     const loadFormData = async () => {
+      console.log('🔍 Form props:', { isAdminFilling, ticketId, clientId, hasInitialData: !!initialData });
+      
       // If admin is filling from modal (passed as props)
       if (isAdminFilling && ticketId) {
         console.log('🔧 Admin filling form from modal for ticket:', ticketId);
