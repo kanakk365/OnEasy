@@ -21,7 +21,11 @@ function AdminFillForm() {
       // Get client info from localStorage
       const storedClientInfo = localStorage.getItem('adminFillingForClient');
       if (storedClientInfo) {
-        setClientInfo(JSON.parse(storedClientInfo));
+        const parsed = JSON.parse(storedClientInfo);
+        console.log('📋 Client info from localStorage:', parsed);
+        setClientInfo(parsed);
+      } else {
+        console.warn('⚠️ No client info found in localStorage');
       }
 
       // Load form data
