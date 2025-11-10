@@ -154,23 +154,26 @@ function PrivateLimitedDetails() {
             {/* Edit button - for both admin and user */}
             <button
               onClick={() => {
-                // Store the ticket ID and redirect to form for editing
-                localStorage.setItem('editingTicketId', ticketId);
-                localStorage.setItem('selectedPackage', JSON.stringify({
-                  name: registration.package_name,
-                  price: registration.package_price,
-                  priceValue: registration.package_price
-                }));
-                localStorage.setItem('paymentDetails', JSON.stringify({
-                  orderId: registration.razorpay_order_id,
-                  paymentId: registration.razorpay_payment_id,
-                  timestamp: registration.created_at
-                }));
-                
-                // Navigate to appropriate form page
-                if (isAdminView) {
-                  navigate('/private-limited-form');
+                // Navigate to appropriate form page based on user role
+                if (isSuperAdminView) {
+                  // SuperAdmin: Navigate to fill-form page within superadmin layout
+                  navigate(`/superadmin/fill-form/${ticketId}`);
+                } else if (isAdminView) {
+                  // Admin: Navigate to fill-form page within admin layout
+                  navigate(`/admin/fill-form/${ticketId}`);
                 } else {
+                  // Regular user: Navigate to regular form page
+                  localStorage.setItem('editingTicketId', ticketId);
+                  localStorage.setItem('selectedPackage', JSON.stringify({
+                    name: registration.package_name,
+                    price: registration.package_price,
+                    priceValue: registration.package_price
+                  }));
+                  localStorage.setItem('paymentDetails', JSON.stringify({
+                    orderId: registration.razorpay_order_id,
+                    paymentId: registration.razorpay_payment_id,
+                    timestamp: registration.created_at
+                  }));
                   navigate('/private-limited-form');
                 }
               }}
@@ -792,5 +795,6 @@ function PrivateLimitedDetails() {
 }
 
 export default PrivateLimitedDetails;
+
 
 
