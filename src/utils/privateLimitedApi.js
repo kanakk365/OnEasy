@@ -145,5 +145,36 @@ export const prepareFormDataWithFiles = async (rawFormData) => {
   return formData;
 };
 
+/**
+ * Get signed URL for S3 file
+ * @param {string} s3Url - S3 file URL
+ * @returns {Promise<string>} Signed URL
+ */
+export const getSignedUrl = async (s3Url) => {
+  try {
+    if (!s3Url) {
+      return null;
+    }
+
+    // If it's not an S3 URL, return as is (might be base64)
+    if (!s3Url.includes('.s3.') || !s3Url.includes('.amazonaws.com')) {
+      return s3Url;
+    }
+
+    console.log('🔐 Requesting signed URL for:', s3Url);
+    
+    const response = await apiClient.post('/private-limited/get-signed-url', { s3Url });
+    
+    console.log('✅ Signed URL received');
+    
+    return response.signedUrl;
+  } catch (error) {
+    console.error('❌ Error getting signed URL:', error);
+    return s3Url; // Return original URL as fallback
+  }
+};
+
+
+
 
 

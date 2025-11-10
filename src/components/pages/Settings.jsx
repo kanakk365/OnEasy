@@ -40,9 +40,14 @@ function Settings() {
     { id: 1, type: '', url: '', login: '', password: '', showPassword: false }
   ]);
   const [tasks, setTasks] = useState([
-    { id: 1, title: '', description: '', type: '' }
+    { id: 1, title: '', description: '', type: '', date: '' }
   ]);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
+  const [isAddingNewTask, setIsAddingNewTask] = useState(false);
   const [notes, setNotes] = useState('');
+  const [adminNotes, setAdminNotes] = useState('');
+  const [userNotes, setUserNotes] = useState('');
+  const [userNotesAttachments, setUserNotesAttachments] = useState([]);
   
   // Load data on mount
   useEffect(() => {
@@ -120,12 +125,16 @@ function Settings() {
             id: t.id || Date.now(),
             title: t.task_title || '',
             description: t.task_description || '',
-            type: t.task_type || ''
+            type: t.task_type || '',
+            date: t.task_date || ''
           })));
         }
         
         // Populate Notes
         setNotes(user.notes || '');
+        setAdminNotes(user.admin_notes || '');
+        setUserNotes(user.user_notes || '');
+        setUserNotesAttachments(user.user_notes_attachments || []);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -240,7 +249,8 @@ function Settings() {
         tasks: tasks.map(t => ({
           title: t.title,
           description: t.description,
-          type: t.type
+          type: t.type,
+          date: t.date
         }))
       };
       
@@ -264,7 +274,10 @@ function Settings() {
       setSaving(true);
       
       const payload = {
-        notes
+        notes,
+        adminNotes,
+        userNotes,
+        userNotesAttachments
       };
       
       const response = await updateUsersPageData(payload);
@@ -356,12 +369,24 @@ function Settings() {
   };
 
   const addTask = () => {
-    setTasks([...tasks, { 
+    const newTask = { 
       id: Date.now(), 
       title: '', 
       description: '', 
-      type: '' 
-    }]);
+      type: '',
+      date: ''
+    };
+    setTasks([...tasks, newTask]);
+    setSelectedTaskId(newTask.id);
+    setIsAddingNewTask(true);
+  };
+
+  const removeTask = (id) => {
+    setTasks(tasks.filter(task => task.id !== id));
+    if (selectedTaskId === id) {
+      setSelectedTaskId(null);
+      setIsAddingNewTask(false);
+    }
   };
 
   const updateTask = (id, field, value) => {
@@ -371,107 +396,377 @@ function Settings() {
   };
 
   // Render functions with direct state access to maintain input focus
-  const renderNotesContent = () => (
-    <div className="px-6 pb-6 pt-6">
-      <div className="space-y-6">
-        {/* Notes Textarea */}
-        <div>
-          <label className="block text-sm text-gray-600 mb-2">Notes</label>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            rows={10}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
-            placeholder="Enter your notes here..."
-          />
-        </div>
-        
-        {/* Save Button */}
-        <div className="flex justify-end pt-4">
-          <button 
-            onClick={handleSaveNotes}
-            disabled={saving}
-            className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {saving ? 'Saving...' : 'Save Changes'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+  const renderNotesContent = () => {
+    // Check if user is admin
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    const userRole = userData.role || userData.role_id;
+    const isAdmin = userRole === 'admin' || userRole === 'superadmin' || userRole === 1 || userRole === 2;
 
-  const TasksContent = () => (
-    <div className="px-6 pb-6 pt-6">
-      <div className="space-y-6">
-        {/* Add Button in top-right */}
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={addTask}
-            className="w-12 h-12 bg-[#01334C] text-white rounded-full flex items-center justify-center hover:bg-[#00486D] transition-colors"
-          >
-            <AiOutlinePlus className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Task Rows */}
-        <div className="space-y-4">
-          {tasks.map((task) => (
-            <div key={task.id} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Task Title */}
+    return (
+      <div className="px-6 pb-6 pt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Admin Notes Section */}
+          <div className="border-r border-gray-200 pr-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              Admin Notes
+              {!isAdmin && (
+                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Read Only</span>
+              )}
+            </h3>
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Task Title</label>
-                <input
-                  type="text"
-                  value={task.title}
-                  onChange={(e) => updateTask(task.id, 'title', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter task title"
-                />
-              </div>
-
-              {/* Task Description */}
-              <div>
-                <label className="block text-sm text-gray-600 mb-2">Task Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Notes (Admin Only)</label>
                 <textarea
-                  value={task.description}
-                  onChange={(e) => updateTask(task.id, 'description', e.target.value)}
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
-                  placeholder="Enter task description"
+                  value={adminNotes}
+                  onChange={(e) => isAdmin && setAdminNotes(e.target.value)}
+                  rows={12}
+                  disabled={!isAdmin}
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y ${
+                    !isAdmin ? 'bg-gray-50 cursor-not-allowed' : ''
+                  }`}
+                  placeholder={isAdmin ? "Enter admin notes here (not visible to user)..." : "Admin notes (read-only)"}
                 />
+                <p className="text-xs text-gray-500 mt-2">
+                  🔒 These notes are only visible to admin and will not be shared with the user.
+                </p>
               </div>
 
-              {/* Task Type */}
+              {/* Admin Attachments */}
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Task Type</label>
-                <select
-                  value={task.type}
-                  onChange={(e) => updateTask(task.id, 'type', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
-                >
-                  <option value="">Type of task</option>
-                  <option value="recurring">Recurring</option>
-                  <option value="non-recurring">Non-Recurring</option>
-                </select>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Admin Attachments</label>
+                {isAdmin ? (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors cursor-pointer">
+                    <input
+                      type="file"
+                      multiple
+                      onChange={(e) => {
+                        // Handle admin file upload
+                        console.log('Admin files:', e.target.files);
+                      }}
+                      className="hidden"
+                      id="admin-notes-attachments"
+                    />
+                    <label htmlFor="admin-notes-attachments" className="cursor-pointer">
+                      <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <p className="mt-2 text-sm text-gray-600">
+                        <span className="font-medium text-blue-600">Click to upload</span> or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-500">PDF, DOC, DOCX, PNG, JPG up to 10MB</p>
+                    </label>
+                  </div>
+                ) : (
+                  <div className="border-2 border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <svg className="mx-auto h-12 w-12 text-gray-300" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <p className="mt-2 text-sm text-gray-500">No attachments available</p>
+                    <p className="text-xs text-gray-400">Admin only section</p>
+                  </div>
+                )}
               </div>
             </div>
-          ))}
-        </div>
-        
-        {/* Save Button */}
-        <div className="flex justify-end pt-4">
-          <button 
-            onClick={handleSaveTasks}
-            disabled={saving}
-            className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {saving ? 'Saving...' : 'Save Changes'}
-          </button>
+          </div>
+
+        {/* User Notes Section */}
+        <div className="pl-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">User Notes</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Notes (Visible to User)</label>
+              <textarea
+                value={userNotes}
+                onChange={(e) => setUserNotes(e.target.value)}
+                rows={12}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+                placeholder="Enter notes here..."
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                👁️ These notes are visible to the user.
+              </p>
+            </div>
+
+            {/* User Attachments */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">User Attachments</label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors cursor-pointer">
+                <input
+                  type="file"
+                  multiple
+                  onChange={(e) => {
+                    // Handle user file upload
+                    const files = Array.from(e.target.files);
+                    console.log('User files:', files);
+                    // Convert to base64 or upload to S3
+                    files.forEach(file => {
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        setUserNotesAttachments(prev => [...prev, {
+                          name: file.name,
+                          size: file.size,
+                          type: file.type,
+                          data: reader.result
+                        }]);
+                      };
+                      reader.readAsDataURL(file);
+                    });
+                  }}
+                  className="hidden"
+                  id="user-notes-attachments"
+                />
+                <label htmlFor="user-notes-attachments" className="cursor-pointer">
+                  <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <p className="mt-2 text-sm text-gray-600">
+                    <span className="font-medium text-blue-600">Click to upload</span> or drag and drop
+                  </p>
+                  <p className="text-xs text-gray-500">PDF, DOC, DOCX, PNG, JPG up to 10MB</p>
+                </label>
+              </div>
+
+              {/* Show uploaded files */}
+              {userNotesAttachments.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {userNotesAttachments.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                      <div className="flex items-center gap-2 flex-1">
+                        <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span className="text-sm text-gray-700 truncate">{file.name}</span>
+                        {file.size && (
+                          <span className="text-xs text-gray-500">({(file.size / 1024).toFixed(2)} KB)</span>
+                        )}
+                        {file.url && (
+                          <a
+                            href={file.url}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 text-xs ml-2"
+                          >
+                            Download
+                          </a>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => setUserNotesAttachments(prev => prev.filter((_, i) => i !== index))}
+                        className="text-red-500 hover:text-red-700 flex-shrink-0"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
+      
+      {/* Save Button */}
+      <div className="flex justify-end pt-6 mt-6 border-t border-gray-200">
+        <button 
+          onClick={handleSaveNotes}
+          disabled={saving}
+          className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {saving ? 'Saving...' : 'Save Changes'}
+        </button>
+      </div>
     </div>
-  );
+    );
+  };
+
+  const TasksContent = () => {
+    const savedTasks = tasks.filter(t => t.title && t.title.trim() !== '');
+    const hasNoTasks = savedTasks.length === 0 && !selectedTaskId;
+
+    return (
+      <div className="px-6 pb-6 pt-6">
+        <div className="space-y-4">
+          {/* Add Button aligned with table */}
+          <div className="flex justify-between items-center">
+            <div></div>
+            <button
+              type="button"
+              onClick={addTask}
+              className="w-12 h-12 bg-[#01334C] text-white rounded-full flex items-center justify-center hover:bg-[#00486D] transition-colors"
+            >
+              <AiOutlinePlus className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Show message if no tasks */}
+          {hasNoTasks && (
+            <div className="text-center py-8 text-gray-500">
+              <p>No tasks yet. Click the + button to add a new task.</p>
+            </div>
+          )}
+
+          {/* Tasks Table View */}
+          {savedTasks.length > 0 && !selectedTaskId && (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
+                <thead>
+                  <tr className="bg-gray-50 border-b-2 border-gray-200">
+                    <th className="text-left px-4 py-3 text-sm font-semibold text-gray-700">Header</th>
+                    <th className="text-left px-4 py-3 text-sm font-semibold text-gray-700">Date</th>
+                    <th className="text-left px-4 py-3 text-sm font-semibold text-gray-700">Type</th>
+                    <th className="text-left px-4 py-3 text-sm font-semibold text-gray-700">Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {savedTasks.map((task) => (
+                    <tr 
+                      key={task.id}
+                      onClick={() => setSelectedTaskId(task.id)}
+                      className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer transition-colors"
+                    >
+                      <td className="px-4 py-3 text-sm text-gray-900 font-medium">{task.title || 'Untitled'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        {task.date ? new Date(task.date).toLocaleDateString('en-IN', { 
+                          day: '2-digit', 
+                          month: 'short', 
+                          year: 'numeric' 
+                        }) : 'No date'}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        {task.type && (
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            task.type === 'urgent' ? 'bg-red-100 text-red-700' :
+                            task.type === 'recurring' ? 'bg-blue-100 text-blue-700' :
+                            task.type === 'non-recurring' ? 'bg-green-100 text-green-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {task.type.charAt(0).toUpperCase() + task.type.slice(1)}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600 max-w-md truncate">
+                        {task.description || 'No description'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Expanded Task Card (Edit Mode) */}
+          {selectedTaskId && (
+            <div className="border-2 border-blue-500 rounded-xl p-6 bg-white shadow-lg">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {isAddingNewTask ? 'New Task' : 'Edit Task'}
+                </h3>
+                <button
+                  onClick={() => {
+                    setSelectedTaskId(null);
+                    setIsAddingNewTask(false);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column */}
+                <div className="space-y-4">
+                  {/* Task Header (Title) */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Task Header</label>
+                    <input
+                      type="text"
+                      value={tasks.find(t => t.id === selectedTaskId)?.title || ''}
+                      onChange={(e) => updateTask(selectedTaskId, 'title', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter task header/title"
+                    />
+                  </div>
+
+                  {/* Task Date */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Date</label>
+                    <input
+                      type="date"
+                      value={tasks.find(t => t.id === selectedTaskId)?.date || ''}
+                      onChange={(e) => updateTask(selectedTaskId, 'date', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-4">
+                  {/* Task Description */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                    <textarea
+                      value={tasks.find(t => t.id === selectedTaskId)?.description || ''}
+                      onChange={(e) => updateTask(selectedTaskId, 'description', e.target.value)}
+                      rows={4}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+                      placeholder="Enter task description"
+                    />
+                  </div>
+
+                  {/* Task Type */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Type of Task</label>
+                    <select
+                      value={tasks.find(t => t.id === selectedTaskId)?.type || ''}
+                      onChange={(e) => updateTask(selectedTaskId, 'type', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+                    >
+                      <option value="">Select type</option>
+                      <option value="recurring">Recurring</option>
+                      <option value="non-recurring">Non-Recurring</option>
+                      <option value="urgent">Urgent</option>
+                      <option value="normal">Normal</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Delete Button */}
+              <div className="flex justify-end mt-4">
+                <button
+                  type="button"
+                  onClick={() => removeTask(selectedTaskId)}
+                  className="px-4 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  Delete Task
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* Save Button */}
+          <div className="flex justify-end">
+            <button 
+              onClick={async () => {
+                await handleSaveTasks();
+                setSelectedTaskId(null);
+                setIsAddingNewTask(false);
+              }}
+              disabled={saving}
+              className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const WebsiteDetailsContent = () => (
     <div className="px-6 pb-6 pt-6">
@@ -1005,5 +1300,8 @@ function Settings() {
 }
 
 export default Settings;
+
+
+
 
 

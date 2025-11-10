@@ -1,25 +1,46 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AUTH_CONFIG } from '../../config/auth';
 
-function RoleBasedRedirect() {
+function RoleBasedRedirect({ children }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || '{}');
-    const role = user.role || user.role_id;
+    const storedUser = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER);
+    if (!storedUser) return;
 
-    if (role === 'admin' || role === 5) {
-      navigate('/admin/clients');
-    } else if (role === 'superadmin') {
-      navigate('/superadmin/clients');
-    } else {
-      navigate('/client');
+    try {
+      const user = JSON.parse(storedUser);
+      const userRole = user.role || user.role_id;
+
+      // If admin is on client routes, redirect to admin panel
+      if ((userRole === 'admin' || userRole === '1' || userRole === '2')) {
+        const clientRoutes = ['/client', '/registrations', '/settings', '/organization', '/company-categories'];
+        if (clientRoutes.includes(location.pathname)) {
+          console.log('🔐 Admin detected on client route, redirecting to admin panel...');
+          navigate('/admin/clients', { replace: true });
+          return;
+        }
+      }
+
+      // If regular user is on admin routes, redirect to client dashboard
+      if (userRole !== 'admin' && userRole !== '1' && userRole !== '2') {
+        const adminRoutes = ['/admin'];
+        if (location.pathname.startsWith('/admin') && !location.pathname.includes('/admin/clients') && !location.pathname.includes('/admin/profile')) {
+          console.log('🔐 Non-admin detected on admin route, redirecting to client dashboard...');
+          navigate('/client', { replace: true });
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Error checking user role:', error);
     }
-  }, [navigate]);
+  }, [location.pathname, navigate]);
 
-  return null;
+  return <>{children}</>;
 }
 
 export default RoleBasedRedirect;
+
 

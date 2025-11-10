@@ -14,7 +14,7 @@ const fileToBase64 = (file) => {
 };
 
 // Step 1: Name Application (Business Details)
-export function NameApplicationContent({ formData, setFormData, disabled = false }) {
+export function NameApplicationContent({ formData, setFormData, disabled = false, nameApplicationStatus = 'pending' }) {
   const step1 = formData.step1 || {};
   const suffix = ' Private Limited';
 
@@ -47,6 +47,69 @@ export function NameApplicationContent({ formData, setFormData, disabled = false
 
   return (
     <div className="grid grid-cols-1 gap-6 mt-6">
+      {/* Name Application Status Banner */}
+      {nameApplicationStatus && nameApplicationStatus !== 'pending' && (
+        <div className={`border-2 rounded-lg p-4 ${
+          nameApplicationStatus === 'approved' 
+            ? 'bg-green-50 border-green-300' 
+            : 'bg-yellow-50 border-yellow-300'
+        }`}>
+          <div className="flex items-center gap-3">
+            <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+              nameApplicationStatus === 'approved' 
+                ? 'bg-green-500' 
+                : 'bg-yellow-500'
+            }`}>
+              {nameApplicationStatus === 'approved' ? (
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              )}
+            </div>
+            <div className="flex-1">
+              <h3 className={`text-sm font-semibold mb-1 ${
+                nameApplicationStatus === 'approved' ? 'text-green-800' : 'text-yellow-800'
+              }`}>
+                {nameApplicationStatus === 'approved' 
+                  ? '✅ Your Company Name Has Been Approved!' 
+                  : '⚠️ Name Resubmission Required'}
+              </h3>
+              <p className={`text-xs ${
+                nameApplicationStatus === 'approved' ? 'text-green-700' : 'text-yellow-700'
+              }`}>
+                {nameApplicationStatus === 'approved' 
+                  ? 'Your proposed company name has been approved by the admin.'
+                  : 'Admin has requested changes. Please check your details page for feedback.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {nameApplicationStatus === 'pending' && step1.nameOption1 && (
+        <div className="border-2 rounded-lg p-4 bg-blue-50 border-blue-300">
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-blue-800 mb-1">
+                ⏳ Name Application Pending Review
+              </h3>
+              <p className="text-xs text-blue-700">
+                Your company name is currently under review by our admin team.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Name of the Company Section */}
       <div>
         <h3 className="text-sm font-medium text-gray-700 mb-4">
@@ -904,11 +967,11 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
                 label="Specimen Signature for Authorisation"
                 accept=".pdf,.jpg,.jpeg,.png"
                 buttonLabel="Upload Signature"
-                disabled={disabled}
                 onFileSelect={async (file) => {
                   const base64 = await fileToBase64(file);
                   updateDirector(index, 'specimenSignature', base64);
                 }}
+                disabled={disabled}
               />
             </div>
           )}
@@ -998,33 +1061,33 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
               label="Aadhaar Card"
               accept=".pdf,.jpg,.jpeg,.png"
               buttonLabel="Upload Aadhaar Card"
-              disabled={disabled}
               onFileSelect={async (file) => {
                 const base64 = await fileToBase64(file);
                 updateDirector(index, 'aadhaarCard', base64);
               }}
+              disabled={disabled}
             />
 
             <FileUploadField
               label="Passport Size Photo"
               accept=".jpg,.jpeg,.png"
               buttonLabel="Upload Photo"
-              disabled={disabled}
               onFileSelect={async (file) => {
                 const base64 = await fileToBase64(file);
                 updateDirector(index, 'passportPhoto', base64);
               }}
+              disabled={disabled}
             />
 
             <FileUploadField
               label="PAN Card"
               accept=".pdf,.jpg,.jpeg,.png"
               buttonLabel="Upload PAN Card"
-              disabled={disabled}
               onFileSelect={async (file) => {
                 const base64 = await fileToBase64(file);
                 updateDirector(index, 'panCard', base64);
               }}
+              disabled={disabled}
             />
 
             <div>
@@ -1032,11 +1095,11 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
                 label="Most Recent Bank Statement or Utility Bill"
                 accept=".pdf,.jpg,.jpeg,.png"
                 buttonLabel="Upload Document"
-                disabled={disabled}
                 onFileSelect={async (file) => {
                   const base64 = await fileToBase64(file);
                   updateDirector(index, 'bankStatementOrUtilityBill', base64);
                 }}
+                disabled={disabled}
               />
               <p className="text-xs text-gray-500 mt-1">
                 Note: Should be within the last month and should have your present residential address
@@ -1072,5 +1135,8 @@ export function AuthorizationLetterContent({ formData, setFormData }) {
     </div>
   );
 }
+
+
+
 
 

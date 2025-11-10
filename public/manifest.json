@@ -1,4 +1,3 @@
-
 {
   "name": "OnEasy - Business Services Platform",
   "short_name": "OnEasy",
@@ -12,15 +11,9 @@
   "icons": [
     {
       "src": "./logo.png",
-      "sizes": "192x192",
+      "sizes": "any",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./logo.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ],
   "categories": ["business", "productivity", "utilities"],

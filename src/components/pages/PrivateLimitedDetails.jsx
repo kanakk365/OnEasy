@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getRegistrationByTicketId } from '../../utils/privateLimitedApi';
+import { getRegistrationByTicketId, getSignedUrl } from '../../utils/privateLimitedApi';
 import apiClient from '../../utils/api';
 
 function PrivateLimitedDetails() {
@@ -19,6 +19,7 @@ function PrivateLimitedDetails() {
     nameReason: '',
     statusMessage: ''
   });
+  const [signedUrls, setSignedUrls] = useState({});
 
   // Check if this is an admin/superadmin view
   const isSuperAdminView = location.pathname.startsWith('/superadmin/client-details');
@@ -49,12 +50,57 @@ function PrivateLimitedDetails() {
           nameReason: result.data.details.name_reason || '',
           statusMessage: result.data.details.status_message || ''
         });
+
+        // Fetch signed URLs for all S3 documents
+        await fetchSignedUrls(result.data.details, result.data.directors || []);
       }
     } catch (error) {
       console.error('Error fetching registration details:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchSignedUrls = async (registrationData, directorsData) => {
+    const urlsToFetch = {};
+    
+    // Registration-level documents
+    if (registrationData.name_approval_letter) {
+      urlsToFetch['name_approval_letter'] = registrationData.name_approval_letter;
+    }
+    if (registrationData.utility_bill) {
+      urlsToFetch['utility_bill'] = registrationData.utility_bill;
+    }
+
+    // Director documents
+    directorsData.forEach((director, index) => {
+      if (director.aadhaar_doc_path) {
+        urlsToFetch[`director_${index}_aadhaar`] = director.aadhaar_doc_path;
+      }
+      if (director.photo_path) {
+        urlsToFetch[`director_${index}_photo`] = director.photo_path;
+      }
+      if (director.pan_doc_path) {
+        urlsToFetch[`director_${index}_pan`] = director.pan_doc_path;
+      }
+      if (director.bank_statement_or_utility_bill) {
+        urlsToFetch[`director_${index}_bank`] = director.bank_statement_or_utility_bill;
+      }
+      if (director.specimen_signature) {
+        urlsToFetch[`director_${index}_signature`] = director.specimen_signature;
+      }
+    });
+
+    // Fetch all signed URLs in parallel
+    const signedUrlPromises = Object.entries(urlsToFetch).map(async ([key, url]) => {
+      const signedUrl = await getSignedUrl(url);
+      return [key, signedUrl];
+    });
+
+    const signedUrlResults = await Promise.all(signedUrlPromises);
+    const signedUrlsMap = Object.fromEntries(signedUrlResults);
+    
+    setSignedUrls(signedUrlsMap);
   };
 
   const handleStatusUpdate = async () => {
@@ -410,6 +456,74 @@ function PrivateLimitedDetails() {
         {/* Step 1: Name Application */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Step 1: Name Application</h2>
+          
+          {/* Name Application Status Banner */}
+          <div className={`mb-4 border-2 rounded-lg p-4 ${
+            registration.name_application_status === 'approved' 
+              ? 'bg-green-50 border-green-300' 
+              : registration.name_application_status === 'resubmission'
+              ? 'bg-yellow-50 border-yellow-300'
+              : 'bg-blue-50 border-blue-300'
+          }`}>
+            <div className="flex items-center gap-3">
+              <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                registration.name_application_status === 'approved' 
+                  ? 'bg-green-500' 
+                  : registration.name_application_status === 'resubmission'
+                  ? 'bg-yellow-500'
+                  : 'bg-blue-500'
+              }`}>
+                {registration.name_application_status === 'approved' ? (
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : registration.name_application_status === 'resubmission' ? (
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+              </div>
+              <div className="flex-1">
+                <h3 className={`text-sm font-semibold mb-1 ${
+                  registration.name_application_status === 'approved' 
+                    ? 'text-green-800' 
+                    : registration.name_application_status === 'resubmission'
+                    ? 'text-yellow-800'
+                    : 'text-blue-800'
+                }`}>
+                  {registration.name_application_status === 'approved' 
+                    ? '✅ Company Name Approved' 
+                    : registration.name_application_status === 'resubmission'
+                    ? '⚠️ Name Resubmission Required'
+                    : '⏳ Name Application Pending Review'}
+                </h3>
+                <p className={`text-xs ${
+                  registration.name_application_status === 'approved' 
+                    ? 'text-green-700' 
+                    : registration.name_application_status === 'resubmission'
+                    ? 'text-yellow-700'
+                    : 'text-blue-700'
+                }`}>
+                  {registration.name_application_status === 'approved' 
+                    ? 'Your proposed company name has been approved and is ready to proceed.' 
+                    : registration.name_application_status === 'resubmission'
+                    ? 'Admin has requested changes to your company name. Please check the message below.'
+                    : 'Your company name application is currently under review by our admin team.'}
+                </p>
+                {registration.status_message && (
+                  <div className="mt-2 bg-white p-3 rounded border border-gray-200">
+                    <p className="text-xs font-medium text-gray-700 mb-1">Admin Message:</p>
+                    <p className="text-xs text-gray-600">{registration.status_message}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
               <span className="font-medium text-gray-700">Business Name (Option 1):</span>
@@ -578,7 +692,8 @@ function PrivateLimitedDetails() {
               {registration.utility_bill ? (
                 <div className="flex items-center gap-2 mt-2">
                   <a
-                    href={registration.utility_bill}
+                    href={signedUrls.utility_bill || registration.utility_bill}
+                    download
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
@@ -589,7 +704,7 @@ function PrivateLimitedDetails() {
                     Download
                   </a>
                   <a
-                    href={registration.utility_bill}
+                    href={signedUrls.utility_bill || registration.utility_bill}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700 transition-colors"
@@ -808,11 +923,11 @@ function PrivateLimitedDetails() {
                         <span className="font-medium text-gray-700 block mb-1">Aadhaar Card:</span>
                         {director.aadhaar_doc_path ? (
                           <div className="flex items-center gap-2">
-                            <a href={director.aadhaar_doc_path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
+                            <a href={signedUrls[`director_${idx}_aadhaar`] || director.aadhaar_doc_path} download target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                               Download
                             </a>
-                            <a href={director.aadhaar_doc_path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700">
+                            <a href={signedUrls[`director_${idx}_aadhaar`] || director.aadhaar_doc_path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                               View
                             </a>
@@ -825,11 +940,11 @@ function PrivateLimitedDetails() {
                         <span className="font-medium text-gray-700 block mb-1">Passport Photo:</span>
                         {director.photo_path ? (
                           <div className="flex items-center gap-2">
-                            <a href={director.photo_path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
+                            <a href={signedUrls[`director_${idx}_photo`] || director.photo_path} download target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                               Download
                             </a>
-                            <a href={director.photo_path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700">
+                            <a href={signedUrls[`director_${idx}_photo`] || director.photo_path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                               View
                             </a>
@@ -842,11 +957,11 @@ function PrivateLimitedDetails() {
                         <span className="font-medium text-gray-700 block mb-1">PAN Card:</span>
                         {director.pan_doc_path ? (
                           <div className="flex items-center gap-2">
-                            <a href={director.pan_doc_path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
+                            <a href={signedUrls[`director_${idx}_pan`] || director.pan_doc_path} download target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                               Download
                             </a>
-                            <a href={director.pan_doc_path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700">
+                            <a href={signedUrls[`director_${idx}_pan`] || director.pan_doc_path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                               View
                             </a>
@@ -859,11 +974,11 @@ function PrivateLimitedDetails() {
                         <span className="font-medium text-gray-700 block mb-1">Bank Statement/Utility Bill:</span>
                         {director.bank_statement_or_utility_bill ? (
                           <div className="flex items-center gap-2">
-                            <a href={director.bank_statement_or_utility_bill} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
+                            <a href={signedUrls[`director_${idx}_bank`] || director.bank_statement_or_utility_bill} download target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                               Download
                             </a>
-                            <a href={director.bank_statement_or_utility_bill} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700">
+                            <a href={signedUrls[`director_${idx}_bank`] || director.bank_statement_or_utility_bill} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                               View
                             </a>
@@ -876,11 +991,11 @@ function PrivateLimitedDetails() {
                         <span className="font-medium text-gray-700 block mb-1">Specimen Signature:</span>
                         {director.specimen_signature ? (
                           <div className="flex items-center gap-2">
-                            <a href={director.specimen_signature} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
+                            <a href={signedUrls[`director_${idx}_signature`] || director.specimen_signature} download target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                               Download
                             </a>
-                            <a href={director.specimen_signature} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700">
+                            <a href={signedUrls[`director_${idx}_signature`] || director.specimen_signature} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                               View
                             </a>
@@ -901,6 +1016,12 @@ function PrivateLimitedDetails() {
 }
 
 export default PrivateLimitedDetails;
+
+
+
+
+
+
 
 
 

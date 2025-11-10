@@ -23,6 +23,7 @@ function PrivateLimitedForm({
   const [oneasyTeamFill, setOneasyTeamFill] = useState(false);
   const [isAdminOrSuperadmin, setIsAdminOrSuperadmin] = useState(false);
   const [isFillingOnBehalf, setIsFillingOnBehalf] = useState(isAdminFilling);
+  const [nameApplicationStatus, setNameApplicationStatus] = useState('pending');
   const [formData, setFormData] = useState({
     numberOfDirectors: 1,
     numberOfShareholders: 1
@@ -118,6 +119,9 @@ function PrivateLimitedForm({
       if (registrationData && registrationData.details) {
         const reg = registrationData.details;
         const dirs = registrationData.directors || [];
+        
+        // Set the name application status
+        setNameApplicationStatus(reg.name_application_status || 'pending');
             
             // Pre-fill form data
             setFormData({
@@ -338,7 +342,7 @@ function PrivateLimitedForm({
     
     switch (step) {
       case 1:
-        return <NameApplicationContent formData={formData} setFormData={setFormData} disabled={isDisabled} />;
+        return <NameApplicationContent formData={formData} setFormData={setFormData} disabled={isDisabled} nameApplicationStatus={nameApplicationStatus} />;
       case 2:
         return <StartupInformationContent formData={formData} setFormData={setFormData} disabled={isDisabled} isAdmin={isAdminOrSuperadmin} />;
       case 3:
@@ -542,6 +546,10 @@ function PrivateLimitedForm({
 }
 
 export default PrivateLimitedForm;
+
+
+
+
 
 
 
