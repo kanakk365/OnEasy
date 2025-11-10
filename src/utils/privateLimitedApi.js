@@ -5,7 +5,7 @@ import apiClient from './api';
  * @param {object} formData - Complete form data from all steps
  * @returns {Promise} API response
  */
-export const submitPrivateLimitedRegistration = async (formData) => {
+export const submitPrivateLimitedRegistration = async (formData, clientId = null) => {
   try {
     // Get payment details from localStorage
     const paymentDetails = JSON.parse(localStorage.getItem('paymentDetails') || '{}');
@@ -18,10 +18,14 @@ export const submitPrivateLimitedRegistration = async (formData) => {
       step3: formData.step3,
       directors: formData.directors || [],
       paymentDetails,
-      packageDetails
+      packageDetails,
+      clientId // Pass clientId if admin is filling on behalf
     };
     
     console.log('🚀 Submitting Private Limited registration...');
+    if (clientId) {
+      console.log('👤 Filling on behalf of client:', clientId);
+    }
     
     const response = await apiClient.post('/private-limited/register', payload);
     

@@ -261,9 +261,10 @@ function PrivateLimitedForm({
       setIsSubmitting(true);
       console.log('📝 Submitting Private Limited registration...');
       console.log('Form Data:', formData);
+      console.log('🔍 Submitting for clientId:', clientId, '| isAdminFilling:', isAdminFilling);
       
-      // Call API to submit registration
-      const result = await submitPrivateLimitedRegistration(formData);
+      // Call API to submit registration (pass clientId if admin filling)
+      const result = await submitPrivateLimitedRegistration(formData, isAdminFilling ? clientId : null);
       
       if (result.success) {
         console.log('✅ Registration submitted successfully:', result.data);
