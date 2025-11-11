@@ -1,7 +1,8 @@
 import React from "react";
 
-function FAQSection() {
-  const faqs = [
+function FAQSection({ faqs }) {
+  // Default FAQs for Private Limited if not provided
+  const defaultFaqs = [
     {
       question:
         "What is the minimum number of directors required to register a Private Limited Company?",
@@ -58,6 +59,8 @@ function FAQSection() {
         "Yes, shares in a Private Limited Company can only be transferred with the approval of the Board of Directors as per the company's Articles of Association.",
     },
   ];
+  
+  const faqsList = faqs || defaultFaqs;
 
   return (
     <div className=" bg-white p-8 rounded-lg shadow-sm">
@@ -65,7 +68,7 @@ function FAQSection() {
         FAQs
       </h2>
       <div className="space-y-6">
-        {faqs.map((faq, index) => (
+        {faqsList.map((faq, index) => (
           <div key={index} className="space-y-2">
             <div className="flex items-start">
               <span className=" font-bold text-gray-900 mr-2">{index + 1}.</span>

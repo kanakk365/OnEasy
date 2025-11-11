@@ -155,121 +155,51 @@ function AdminClients() {
           </div>
         </div>
 
-      {/* Clients List */}
+      {/* Clients Table/List */}
       {filteredClients.length === 0 ? (
         <div className="bg-white rounded-xl p-12 text-center transition-all duration-300 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
-            <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <svg
-                className="w-12 h-12 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No Clients Found
-            </h3>
-            <p className="text-gray-600">
-              No clients match the selected filter criteria.
-            </p>
+          <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
           </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Clients Found</h3>
+          <p className="text-gray-600">No clients match the selected filter criteria.</p>
+        </div>
       ) : (
-        <div className="space-y-4 md:space-y-6">
-          {filteredClients.map((client) => (
-            <div
-              key={client.user_id}
-              className="bg-white rounded-xl p-5 md:p-6 transition-all duration-300 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012] hover:[box-shadow:0px_6px_16px_0px_#00000018]"
-            >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      {/* Avatar */}
-                      <div className="w-12 h-12 rounded-full bg-[#01334C] text-white flex items-center justify-center font-semibold text-lg">
+        <div className="bg-white rounded-xl overflow-hidden border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
+          {/* Table View */}
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b-2 border-gray-200">
+              <tr>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Client Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Email</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Phone Number</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredClients.map((client) => (
+                <tr
+                  key={client.user_id}
+                  onClick={() => navigate(`/admin/client-overview/${client.user_id}`)}
+                  className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer transition-colors"
+                >
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#01334C] text-white flex items-center justify-center font-semibold text-sm">
                         {client.name ? client.name.charAt(0).toUpperCase() : 'C'}
                       </div>
-                      
-                      <div>
-                        <h3 className="text-lg font-semibold text-[#28303F]">
-                          {client.name || 'Unknown'}
-                        </h3>
-                        <p className="text-sm text-gray-600">{client.phone}</p>
-                      </div>
-
-                      {getStatusBadge(client)}
+                      <span className="font-medium text-gray-900">{client.name || 'Unknown'}</span>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                      {client.email && (
-                        <div>
-                          <span className="font-medium text-gray-700">Email:</span>{' '}
-                          {client.email}
-                        </div>
-                      )}
-                      {client.ticket_id && (
-                        <div>
-                          <span className="font-medium text-gray-700">Ticket ID:</span>{' '}
-                          {client.ticket_id}
-                        </div>
-                      )}
-                      {client.company_name && (
-                        <div>
-                          <span className="font-medium text-gray-700">Company:</span>{' '}
-                          {client.company_name}
-                        </div>
-                      )}
-                    </div>
-
-                    {client.package_name && (
-                      <div className="mt-3 text-sm">
-                        <span className="font-medium text-gray-700">Package:</span>{' '}
-                        {client.package_name} - <span className="text-green-600 font-semibold">₹{client.package_price?.toLocaleString('en-IN')}</span>
-                      </div>
-                    )}
-
-                    {client.payment_date && (
-                      <div className="mt-2 text-xs text-gray-500">
-                        Payment Date: {formatDate(client.payment_date)}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex flex-col gap-2 ml-4">
-                    {client.ticket_id && (
-                      <button
-                        onClick={() => navigate(`/admin/client-details/${client.ticket_id}`)}
-                        className="px-4 py-2 text-sm bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors"
-                      >
-                        View Details
-                      </button>
-                    )}
-                    {client.team_fill_requested && !client.registration_submitted && (
-                      <button
-                        onClick={() => navigate(`/admin/fill-form/${client.ticket_id}`)}
-                        className="px-4 py-2 text-sm bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"
-                      >
-                        Fill Form
-                      </button>
-                    )}
-                    {client.team_fill_requested && client.registration_submitted && (
-                      <div className="px-4 py-2 text-sm bg-green-100 text-green-800 rounded-md font-medium flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        Form Filled
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{client.email || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{client.phone || 'N/A'}</td>
+                  <td className="px-6 py-4">{getStatusBadge(client)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
@@ -277,6 +207,10 @@ function AdminClients() {
 }
 
 export default AdminClients;
+
+
+
+
 
 
 

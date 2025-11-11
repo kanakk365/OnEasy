@@ -1,7 +1,8 @@
 import React from "react";
 
-function DocumentsSection({ illustration }) {
-  const documents = [
+function DocumentsSection({ illustration, documents }) {
+  // Default documents for Private Limited if not provided
+  const defaultDocuments = [
     "PAN Card of all Directors",
     "Aadhaar Card of all Directors",
     "Passport (only for Foreign Nationals)",
@@ -10,6 +11,8 @@ function DocumentsSection({ illustration }) {
     "Rental Agreement and NOC (Company)",
     "Latest utility bill of the Company (Electricity Bill)",
   ];
+  
+  const documentsList = documents || defaultDocuments;
 
   return (
     <div className="mt-8 bg-white p-8 rounded-lg">
@@ -18,7 +21,7 @@ function DocumentsSection({ illustration }) {
       </h2>
       <div className="flex flex-col md:flex-row justify-between items-start md:space-x-8">
         <div className="flex-1 space-y-6 mb-8 md:mb-0">
-          {documents.map((doc, index) => (
+          {documentsList.map((doc, index) => (
             <div key={index} className="flex items-center gap-3">
               <div
                 className="w-6 h-6 rounded-full text-white text-xs font-semibold flex items-center justify-center"

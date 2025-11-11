@@ -13,15 +13,9 @@ function AdminProfile() {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
-  const [clients, setClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [adminNotes, setAdminNotes] = useState('');
-  const [userNotes, setUserNotes] = useState('');
-  const [savingNotes, setSavingNotes] = useState(false);
 
   useEffect(() => {
     loadUserData();
-    loadClients();
   }, []);
 
   const loadUserData = () => {
@@ -62,55 +56,6 @@ function AdminProfile() {
         }));
       };
       reader.readAsDataURL(file);
-    }
-  };
-
-  const loadClients = async () => {
-    try {
-      const response = await apiClient.get('/admin/clients');
-      if (response.success) {
-        setClients(response.data || []);
-      }
-    } catch (error) {
-      console.error('Error loading clients:', error);
-    }
-  };
-
-  const handleClientSelect = async (clientId) => {
-    try {
-      setSelectedClient(clientId);
-      // Load notes for selected client
-      const response = await apiClient.get(`/admin/client-notes/${clientId}`);
-      if (response.success) {
-        setAdminNotes(response.data.admin_notes || '');
-        setUserNotes(response.data.user_notes || '');
-      }
-    } catch (error) {
-      console.error('Error loading client notes:', error);
-      setAdminNotes('');
-      setUserNotes('');
-    }
-  };
-
-  const handleSaveNotes = async () => {
-    if (!selectedClient) return;
-    
-    try {
-      setSavingNotes(true);
-      const response = await apiClient.post('/admin/update-client-notes', {
-        userId: selectedClient,
-        adminNotes,
-        userNotes
-      });
-
-      if (response.success) {
-        alert('Notes saved successfully!');
-      }
-    } catch (error) {
-      console.error('Error saving notes:', error);
-      alert('Failed to save notes. Please try again.');
-    } finally {
-      setSavingNotes(false);
     }
   };
 
@@ -301,88 +246,6 @@ function AdminProfile() {
               </button>
             </div>
           </div>
-        </div>
-
-        {/* Notes Section for Clients */}
-        <div className="bg-white rounded-lg shadow-sm p-8 mt-6">
-          <h2 className="text-2xl font-bold text-[#28303F] mb-6">Client Notes</h2>
-          
-          {/* User Dropdown */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select User
-            </label>
-            <select
-              value={selectedClient || ''}
-              onChange={(e) => handleClientSelect(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
-            >
-              <option value="">-- Select a user --</option>
-              {clients.map((client) => (
-                <option key={client.user_id} value={client.user_id}>
-                  {client.name || 'Unknown'} - {client.company_name || 'No Company'} ({client.phone})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Notes Form - Only show when user is selected */}
-          {selectedClient && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Admin Notes - Left Column */}
-                <div className="border-r border-gray-200 pr-6">
-                  <h3 className="text-md font-semibold text-gray-800 mb-3">Admin Notes (Private)</h3>
-                  <textarea
-                    value={adminNotes}
-                    onChange={(e) => setAdminNotes(e.target.value)}
-                    rows={10}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y text-sm"
-                    placeholder="Enter private admin notes (not visible to user)..."
-                  />
-                  <p className="text-xs text-gray-500 mt-2">
-                    🔒 These notes are only visible to admin/superadmin.
-                  </p>
-                </div>
-
-                {/* User Notes - Right Column */}
-                <div className="pl-6">
-                  <h3 className="text-md font-semibold text-gray-800 mb-3">User Notes (Visible to User)</h3>
-                  <textarea
-                    value={userNotes}
-                    onChange={(e) => setUserNotes(e.target.value)}
-                    rows={10}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y text-sm"
-                    placeholder="Enter notes for user (visible to this user)..."
-                  />
-                  <p className="text-xs text-gray-500 mt-2">
-                    👁️ These notes will be visible to the user in their profile.
-                  </p>
-                </div>
-              </div>
-
-              {/* Save Notes Button */}
-              <div className="flex justify-end pt-4 border-t border-gray-200">
-                <button
-                  onClick={handleSaveNotes}
-                  disabled={savingNotes}
-                  className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {savingNotes ? 'Saving...' : 'Save Notes'}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!selectedClient && (
-            <div className="text-center py-12 text-gray-500">
-              <svg className="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <p>Select a user from the dropdown above to add or edit notes.</p>
-            </div>
-          )}
         </div>
       </div>
     </div>

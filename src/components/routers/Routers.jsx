@@ -15,49 +15,119 @@ import Organization from "../pages/Organization";
 import PrivateLimitedForm from "../forms/PrivateLimitedForm";
 import PrivateLimitedDashboard from "../pages/PrivateLimitedDashboard";
 import PrivateLimitedDetails from "../pages/PrivateLimitedDetails";
+import ProprietorshipDetails from "../pages/ProprietorshipDetails";
 import AdminLayout from "../admin/layout/AdminLayout";
 import AdminClients from "../admin/pages/AdminClients";
+import AdminClientOverview from "../admin/pages/AdminClientOverview";
 import AdminProfile from "../admin/pages/AdminProfile";
 import AdminFillForm from "../admin/pages/AdminFillForm";
 import SuperAdminLayout from "../superadmin/layout/SuperAdminLayout";
 import SuperAdminClients from "../superadmin/pages/SuperAdminClients";
 import SuperAdminProfile from "../superadmin/pages/SuperAdminProfile";
 import SuperAdminFillForm from "../superadmin/pages/SuperAdminFillForm";
+import ProtectedRoute from "../common/ProtectedRoute";
 
 function Routers() {
   return (
     <Routes>
+      {/* Public Routes */}
       <Route path="/" element={<Login />} />
       <Route path="/verify-otp" element={<OTPVerification />} />
       <Route path="/referral" element={<ReferralCode />} />
-      <Route path="/client" element={<Client />} />
-      <Route path="/admin" element={<Admin />} />
-      <Route path="/partner" element={<Partner />} />
-      <Route path="/registrations" element={<Registrations />} />
-      <Route path="/company-categories" element={<CompanyCategories />} />
-      <Route path="/company/:type" element={<CompanyDetails />} />
-      <Route path="/company-form" element={<BusinessDetailsForm />} />
-      <Route path="/private-limited-form" element={<PrivateLimitedForm />} />
-      <Route path="/private-limited-dashboard" element={<PrivateLimitedDashboard />} />
-      <Route path="/private-limited/view/:ticketId" element={<PrivateLimitedDetails />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/organization" element={<Organization />} />
       
-      {/* Admin Routes */}
-      <Route path="/admin" element={<AdminLayout />}>
+      {/* User Routes - Protected */}
+      <Route path="/client" element={
+        <ProtectedRoute allowedRoles={['user', 5]}>
+          <Client />
+        </ProtectedRoute>
+      } />
+      <Route path="/partner" element={
+        <ProtectedRoute allowedRoles={['user', 5]}>
+          <Partner />
+        </ProtectedRoute>
+      } />
+      <Route path="/registrations" element={
+        <ProtectedRoute>
+          <Registrations />
+        </ProtectedRoute>
+      } />
+      <Route path="/company-categories" element={
+        <ProtectedRoute>
+          <CompanyCategories />
+        </ProtectedRoute>
+      } />
+      <Route path="/company/proprietorship" element={
+        <ProtectedRoute>
+          <ProprietorshipDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/company/:type" element={
+        <ProtectedRoute>
+          <CompanyDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/company-form" element={
+        <ProtectedRoute>
+          <BusinessDetailsForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/private-limited-form" element={
+        <ProtectedRoute>
+          <PrivateLimitedForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/private-limited-dashboard" element={
+        <ProtectedRoute>
+          <PrivateLimitedDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/private-limited/view/:ticketId" element={
+        <ProtectedRoute>
+          <PrivateLimitedDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <Settings />
+        </ProtectedRoute>
+      } />
+      <Route path="/organization" element={
+        <ProtectedRoute>
+          <Organization />
+        </ProtectedRoute>
+      } />
+      
+      {/* Admin Routes - Protected */}
+      <Route path="/admin" element={
+        <ProtectedRoute allowedRoles={['admin', 'superadmin', 1, 2]}>
+          <AdminLayout />
+        </ProtectedRoute>
+      }>
         <Route path="clients" element={<AdminClients />} />
+        <Route path="client-overview/:userId" element={<AdminClientOverview />} />
         <Route path="profile" element={<AdminProfile />} />
         <Route path="client-details/:ticketId" element={<PrivateLimitedDetails />} />
         <Route path="fill-form/:ticketId" element={<AdminFillForm />} />
       </Route>
       
-      {/* SuperAdmin Routes */}
-      <Route path="/superadmin" element={<SuperAdminLayout />}>
+      {/* SuperAdmin Routes - Protected */}
+      <Route path="/superadmin" element={
+        <ProtectedRoute allowedRoles={['superadmin', 2]}>
+          <SuperAdminLayout />
+        </ProtectedRoute>
+      }>
         <Route path="clients" element={<SuperAdminClients />} />
         <Route path="profile" element={<SuperAdminProfile />} />
         <Route path="client-details/:ticketId" element={<PrivateLimitedDetails />} />
         <Route path="fill-form/:ticketId" element={<SuperAdminFillForm />} />
       </Route>
+
+      {/* Legacy Admin Route (redirects to /admin/clients) */}
+      <Route path="/admin-old" element={
+        <ProtectedRoute allowedRoles={['admin', 'superadmin', 1, 2]}>
+          <Admin />
+        </ProtectedRoute>
+      } />
     </Routes>
   );
 }
