@@ -7,18 +7,47 @@ function AdminClientOverview() {
   const navigate = useNavigate();
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('profile'); // profile, services, compliance, subscriptions
+  const [activeTab, setActiveTab] = useState('services'); // profile, services, compliance, subscriptions
   const [expandedSection, setExpandedSection] = useState(null);
   const [clientProfile, setClientProfile] = useState(null);
-  const [adminNotes, setAdminNotes] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
   const [expandedOrgId, setExpandedOrgId] = useState(null);
   const [documentUrls, setDocumentUrls] = useState({});
+  const [showNotepad, setShowNotepad] = useState(false);
+  const [clientPersona, setClientPersona] = useState('');
+  const [adminNotesList, setAdminNotesList] = useState([]);
+  const [userNotesList, setUserNotesList] = useState([]);
+  const [expandedAdminNoteId, setExpandedAdminNoteId] = useState(null);
+  const [expandedUserNoteId, setExpandedUserNoteId] = useState(null);
+  const [isAddingNote, setIsAddingNote] = useState(false);
+  const [editingNoteIndex, setEditingNoteIndex] = useState(null);
+  const [currentNote, setCurrentNote] = useState({ date: '', description: '', attachments: [] });
+  const [isServiceCardExpanded, setIsServiceCardExpanded] = useState(false);
+  const [serviceStatus, setServiceStatus] = useState('registered');
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
 
   useEffect(() => {
     fetchClientDetails();
     fetchClientProfile();
+    fetchClientPersona();
   }, [userId]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isStatusDropdownOpen) {
+        setIsStatusDropdownOpen(false);
+      }
+    };
+
+    if (isStatusDropdownOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isStatusDropdownOpen]);
 
   const fetchClientDetails = async () => {
     try {
@@ -28,6 +57,8 @@ function AdminClientOverview() {
         const clientData = response.data.find(c => c.user_id === userId);
         if (clientData) {
           setClient(clientData);
+          // Load service status
+          setServiceStatus(clientData.service_status || 'registered');
         } else {
           console.error('Client not found');
           navigate('/admin/clients');
@@ -47,13 +78,58 @@ function AdminClientOverview() {
       
       if (response.success && response.data) {
         setClientProfile(response.data);
-        setAdminNotes(response.data.user?.admin_notes || '');
+        const adminNotesRaw = response.data.user?.admin_notes || '';
+        
+        // Parse admin notes (array of notes)
+        try {
+          const notesList = JSON.parse(adminNotesRaw);
+          if (Array.isArray(notesList)) {
+            setAdminNotesList(notesList);
+          } else if (notesList.note !== undefined) {
+            setAdminNotesList([notesList]);
+          } else if (adminNotesRaw) {
+            setAdminNotesList([{ date: '', description: adminNotesRaw, attachments: [] }]);
+          }
+        } catch {
+          if (adminNotesRaw) {
+            setAdminNotesList([{ date: '', description: adminNotesRaw, attachments: [] }]);
+          }
+        }
+        
+        // Parse user notes (array of notes)
+        const userNotesRaw = response.data.user?.user_notes || '';
+        try {
+          const notesList = JSON.parse(userNotesRaw);
+          if (Array.isArray(notesList)) {
+            setUserNotesList(notesList);
+          } else if (notesList.note !== undefined) {
+            setUserNotesList([notesList]);
+          } else if (userNotesRaw) {
+            setUserNotesList([{ date: '', description: userNotesRaw, attachments: [] }]);
+          }
+        } catch {
+          if (userNotesRaw) {
+            setUserNotesList([{ date: '', description: userNotesRaw, attachments: [] }]);
+          }
+        }
         
         // Fetch signed URLs for documents if they're S3 URLs
         await fetchDocumentSignedUrls(response.data.user);
       }
     } catch (error) {
       console.error('Error fetching client profile:', error);
+    }
+  };
+
+  const fetchClientPersona = async () => {
+    try {
+      const response = await apiClient.get(`/admin/client-persona/${userId}`);
+      
+      if (response.success && response.data) {
+        setClientPersona(response.data.client_persona || '');
+      }
+    } catch (error) {
+      console.error('Error fetching client persona:', error);
     }
   };
 
@@ -88,23 +164,149 @@ function AdminClientOverview() {
     setDocumentUrls(urls);
   };
 
-  const handleSaveAdminNotes = async () => {
+  const handleNoteFileUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCurrentNote(prev => ({
+          ...prev,
+          attachments: [...prev.attachments, {
+            name: file.name,
+            data: reader.result,
+            type: file.type,
+            size: file.size
+          }]
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeNoteAttachment = (index) => {
+    setCurrentNote(prev => ({
+      ...prev,
+      attachments: prev.attachments.filter((_, idx) => idx !== index)
+    }));
+  };
+
+  const handleEditNote = (note, index) => {
+    setCurrentNote({
+      date: note.date,
+      description: note.description,
+      attachments: note.attachments || []
+    });
+    setEditingNoteIndex(index);
+    setIsAddingNote(true);
+  };
+
+  const handleDeleteNote = async (index) => {
+    if (!confirm('Are you sure you want to delete this note?')) return;
+    
     try {
       setSavingNotes(true);
+      const updatedNotesList = adminNotesList.filter((_, idx) => idx !== index);
+
       const response = await apiClient.post('/admin/update-client-notes', {
         userId,
-        adminNotes,
-        userNotes: clientProfile?.user?.user_notes || ''
+        adminNotes: JSON.stringify(updatedNotesList),
+        userNotes: JSON.stringify(userNotesList)
       });
 
       if (response.success) {
-        alert('Admin notes saved successfully!');
+        setAdminNotesList(updatedNotesList);
+        alert('Note deleted successfully!');
       }
     } catch (error) {
-      console.error('Error saving admin notes:', error);
-      alert('Failed to save admin notes');
+      console.error('Error deleting note:', error);
+      alert('Failed to delete note');
     } finally {
       setSavingNotes(false);
+    }
+  };
+
+  const handleSaveAdminNote = async () => {
+    try {
+      setSavingNotes(true);
+      
+      let updatedNotesList;
+      
+      if (editingNoteIndex !== null) {
+        // Update existing note
+        updatedNotesList = adminNotesList.map((note, idx) => 
+          idx === editingNoteIndex 
+            ? { ...note, date: currentNote.date, description: currentNote.description, attachments: currentNote.attachments, updatedAt: new Date().toISOString() }
+            : note
+        );
+      } else {
+        // Add new note
+        updatedNotesList = [...adminNotesList, {
+          id: Date.now(),
+          date: currentNote.date,
+          description: currentNote.description,
+          attachments: currentNote.attachments,
+          createdAt: new Date().toISOString()
+        }];
+      }
+
+      const response = await apiClient.post('/admin/update-client-notes', {
+        userId,
+        adminNotes: JSON.stringify(updatedNotesList),
+        userNotes: JSON.stringify(userNotesList)
+      });
+
+      if (response.success) {
+        setAdminNotesList(updatedNotesList);
+        setCurrentNote({ date: '', description: '', attachments: [] });
+        setIsAddingNote(false);
+        setEditingNoteIndex(null);
+        alert(editingNoteIndex !== null ? 'Note updated successfully!' : 'Note saved successfully!');
+      }
+    } catch (error) {
+      console.error('Error saving admin note:', error);
+      alert('Failed to save note');
+    } finally {
+      setSavingNotes(false);
+    }
+  };
+
+  const handleSaveClientPersona = async () => {
+    try {
+      setSavingNotes(true);
+      
+      const response = await apiClient.post('/admin/update-client-persona', {
+        userId,
+        persona: clientPersona
+      });
+
+      if (response.success) {
+        alert('Client persona saved successfully!');
+        setShowNotepad(false);
+      }
+    } catch (error) {
+      console.error('Error saving client persona:', error);
+      alert('Failed to save client persona');
+    } finally {
+      setSavingNotes(false);
+    }
+  };
+
+  const handleUpdateServiceStatus = async (newStatus) => {
+    try {
+      const response = await apiClient.post('/admin/update-service-status', {
+        userId,
+        status: newStatus
+      });
+
+      if (response.success) {
+        setServiceStatus(newStatus);
+        console.log('✅ Service status updated:', newStatus);
+      }
+    } catch (error) {
+      console.error('Error updating service status:', error);
+      alert('Failed to update status');
     }
   };
 
@@ -512,7 +714,11 @@ function AdminClientOverview() {
           {/* Notes */}
           <div className="bg-white rounded-xl border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012] overflow-hidden">
             <button
-              onClick={() => setExpandedSection(expandedSection === 'notes' ? null : 'notes')}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                setExpandedSection(expandedSection === 'notes' ? null : 'notes');
+              }}
               className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
             >
               <h3 className="text-lg font-semibold text-gray-900">Notes</h3>
@@ -520,38 +726,283 @@ function AdminClientOverview() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
+
             {expandedSection === 'notes' && (
-              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Admin Notes - Editable */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Admin Notes (Editable)</label>
-                    <textarea
-                      value={adminNotes}
-                      onChange={(e) => setAdminNotes(e.target.value)}
-                      className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
-                      placeholder="Add admin notes here..."
-                    />
+              <div className="p-6 border-t border-gray-200 bg-gray-50">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Admin Notes - Left Side */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-semibold text-gray-900">Admin Notes (Editable)</h4>
                     <button
-                      onClick={handleSaveAdminNotes}
-                      disabled={savingNotes}
-                      className="mt-2 px-4 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors disabled:opacity-50"
+                      onClick={() => setIsAddingNote(true)}
+                      className="flex items-center gap-1 px-2 py-1 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs"
                     >
-                      {savingNotes ? 'Saving...' : 'Save Admin Notes'}
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add
                     </button>
                   </div>
-
-                  {/* User Notes - Read Only */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">User Notes (Read Only)</label>
-                    <textarea
-                      value={clientProfile.user?.user_notes || ''}
-                      readOnly
-                      className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
-                      placeholder="No user notes"
+              {/* Add/Edit Note Form */}
+              {isAddingNote && (
+                <div className="mb-4 p-4 border border-gray-300 rounded-lg bg-gray-50">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-3">{editingNoteIndex !== null ? 'Edit Note' : 'New Note'}</h4>
+                  
+                  {/* Date */}
+                  <div className="mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
+                    <input
+                      type="date"
+                      value={currentNote.date}
+                      onChange={(e) => setCurrentNote({ ...currentNote, date: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                     />
                   </div>
+
+                  {/* Description */}
+                  <div className="mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                    <textarea
+                      value={currentNote.description}
+                      onChange={(e) => setCurrentNote({ ...currentNote, description: e.target.value })}
+                      placeholder="Enter note description..."
+                      className="w-full h-24 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    />
+                  </div>
+
+                  {/* Attachments */}
+                  <div className="mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Attachments</label>
+                    <label className="flex items-center justify-center gap-2 px-3 py-2 border-2 border-dashed border-gray-300 rounded-md hover:border-[#00486D] cursor-pointer">
+                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                      </svg>
+                      <span className="text-xs">Upload</span>
+                      <input type="file" multiple onChange={handleNoteFileUpload} className="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
+                    </label>
+                    {currentNote.attachments.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {currentNote.attachments.map((file, idx) => (
+                          <div key={idx} className="flex items-center justify-between bg-white px-2 py-1 rounded border text-xs">
+                            <span className="truncate">{file.name}</span>
+                            <button onClick={() => removeNoteAttachment(idx)} className="text-red-500 ml-2">✕</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    <button onClick={handleSaveAdminNote} disabled={savingNotes} className="flex-1 px-3 py-2 bg-[#00486D] text-white rounded-md text-sm">
+                      {savingNotes ? 'Saving...' : (editingNoteIndex !== null ? 'Update' : 'Save')}
+                    </button>
+                    <button onClick={() => { setIsAddingNote(false); setEditingNoteIndex(null); setCurrentNote({ date: '', description: '', attachments: [] }); }} className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm">
+                      Cancel
+                    </button>
+                  </div>
                 </div>
+              )}
+
+              {/* Notes Table */}
+              {adminNotesList.length > 0 ? (
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">Date</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">Description</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">Attachments</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {adminNotesList.map((note, idx) => (
+                      <React.Fragment key={note.id || idx}>
+                        <tr 
+                          onClick={() => setExpandedAdminNoteId(expandedAdminNoteId === idx ? null : idx)}
+                          className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
+                        >
+                          <td className="px-2 py-2 text-gray-600 text-xs">{note.date || 'N/A'}</td>
+                          <td className="px-2 py-2 text-gray-600 truncate text-xs">{note.description || 'N/A'}</td>
+                          <td className="px-2 py-2 text-gray-600 text-xs">{note.attachments?.length || 0}</td>
+                        </tr>
+                        {expandedAdminNoteId === idx && (
+                          <tr className="bg-gray-50">
+                            <td colSpan="3" className="px-3 py-3">
+                              <div className="flex justify-between">
+                                <div className="space-y-2 text-xs flex-1">
+                                  <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{note.date || 'N/A'}</span></div>
+                                  <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1">{note.description}</p></div>
+                                  {note.attachments && note.attachments.length > 0 && (
+                                    <div>
+                                      <span className="font-medium text-gray-700">Attachments:</span>
+                                      <div className="mt-1 space-y-1">
+                                        {note.attachments.map((file, fileIdx) => (
+                                          <div key={fileIdx} className="flex items-center gap-1">
+                                            {(file.url || file.data) ? (
+                                              <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                  e.preventDefault();
+                                                  e.stopPropagation();
+                                                  const fileUrl = file.url || file.data;
+                                                  console.log('📎 Opening file:', file.name);
+                                                  console.log('📎 File type:', file.type);
+                                                  console.log('📎 Has URL:', !!file.url);
+                                                  console.log('📎 Has Data:', !!file.data);
+                                                  
+                                                  if (fileUrl) {
+                                                    // For base64 data, create a downloadable link
+                                                    if (fileUrl.startsWith('data:')) {
+                                                      console.log('📎 Opening base64 file...');
+                                                      const link = document.createElement('a');
+                                                      link.href = fileUrl;
+                                                      link.download = file.name;
+                                                      link.target = '_blank';
+                                                      document.body.appendChild(link);
+                                                      link.click();
+                                                      document.body.removeChild(link);
+                                                    } else {
+                                                      console.log('📎 Opening S3 URL...');
+                                                      window.open(fileUrl, '_blank', 'noopener,noreferrer');
+                                                    }
+                                                  } else {
+                                                    console.error('❌ No file URL or data found');
+                                                  }
+                                                }}
+                                                className="text-blue-600 hover:underline text-left bg-transparent border-none p-0 cursor-pointer flex items-center gap-1"
+                                              >
+                                                📎 <span className="underline">{file.name}</span>
+                                              </button>
+                                            ) : (
+                                              <span className="text-gray-600">📎 {file.name}</span>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex flex-col gap-2 ml-3">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleEditNote(note, idx);
+                                    }}
+                                    className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs whitespace-nowrap"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteNote(idx);
+                                    }}
+                                    className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-xs whitespace-nowrap"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="text-gray-600 text-center py-4 text-xs">No admin notes</p>
+              )}
+                </div>
+
+                {/* User Notes - Right Side (Read Only) */}
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900 mb-3">User Notes (Read Only)</h4>
+                  
+                  {userNotesList.length > 0 ? (
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Date</th>
+                          <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Description</th>
+                          <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Files</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {userNotesList.map((note, idx) => (
+                          <React.Fragment key={note.id || idx}>
+                            <tr 
+                              onClick={() => setExpandedUserNoteId(expandedUserNoteId === idx ? null : idx)}
+                              className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
+                            >
+                              <td className="px-2 py-2 text-gray-600 text-xs">{note.date || 'N/A'}</td>
+                              <td className="px-2 py-2 text-gray-600 truncate text-xs">{note.description || 'N/A'}</td>
+                              <td className="px-2 py-2 text-gray-600 text-xs">{note.attachments?.length || 0}</td>
+                            </tr>
+                            {expandedUserNoteId === idx && (
+                              <tr className="bg-gray-50">
+                                <td colSpan="3" className="px-3 py-3">
+                                  <div className="space-y-2 text-xs">
+                                    <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{note.date || 'N/A'}</span></div>
+                                    <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1">{note.description}</p></div>
+                                    {note.attachments && note.attachments.length > 0 && (
+                                      <div>
+                                        <span className="font-medium text-gray-700">Attachments:</span>
+                                        <div className="mt-1 space-y-1">
+                                          {note.attachments.map((file, fileIdx) => (
+                                            <div key={fileIdx} className="flex items-center gap-1">
+                                              {(file.url || file.data) ? (
+                                                <button
+                                                  type="button"
+                                                  onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    const fileUrl = file.url || file.data;
+                                                    console.log('📎 Opening user file:', file.name);
+                                                    console.log('📎 File type:', file.type);
+                                                    
+                                                    if (fileUrl) {
+                                                      if (fileUrl.startsWith('data:')) {
+                                                        console.log('📎 Downloading base64 file...');
+                                                        const link = document.createElement('a');
+                                                        link.href = fileUrl;
+                                                        link.download = file.name;
+                                                        link.target = '_blank';
+                                                        document.body.appendChild(link);
+                                                        link.click();
+                                                        document.body.removeChild(link);
+                                                      } else {
+                                                        console.log('📎 Opening S3 URL...');
+                                                        window.open(fileUrl, '_blank', 'noopener,noreferrer');
+                                                      }
+                                                    }
+                                                  }}
+                                                  className="text-blue-600 hover:underline text-left bg-transparent border-none p-0 cursor-pointer flex items-center gap-1"
+                                                >
+                                                  📎 <span className="underline">{file.name}</span>
+                                                </button>
+                                              ) : (
+                                                <span className="text-gray-600">📎 {file.name}</span>
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p className="text-gray-600 text-center py-4 text-xs">No user notes</p>
+                  )}
+                </div>
+              </div>
               </div>
             )}
           </div>
@@ -562,10 +1013,13 @@ function AdminClientOverview() {
       {/* Services Tab */}
       {activeTab === 'services' && (
         <>
-          {/* Client Card - Same as Profile */}
-          <div className="bg-white rounded-xl overflow-hidden border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
-            {/* Top Section - Light Blue Background */}
-            <div className="bg-blue-50 p-6 flex items-center justify-between border-b border-gray-200">
+          {/* Client Card - Expandable */}
+          <div className="bg-white rounded-xl border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
+            {/* Top Section - Light Blue Background - Clickable */}
+            <div 
+              onClick={() => setIsServiceCardExpanded(!isServiceCardExpanded)}
+              className="bg-blue-50 p-6 flex items-center justify-between border-b border-gray-200 cursor-pointer hover:bg-blue-100 transition-colors rounded-t-xl"
+            >
               <div className="flex items-center gap-4 flex-1">
                 {/* Avatar */}
                 <div className="w-12 h-12 rounded-full bg-[#01334C] text-white flex items-center justify-center font-semibold text-lg">
@@ -587,13 +1041,66 @@ function AdminClientOverview() {
                   {client.phone || 'N/A'}
                 </div>
 
-                {/* Status Badge */}
-                {getStatusBadge(client)}
+                {/* Status Badge with Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsStatusDropdownOpen(!isStatusDropdownOpen);
+                    }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
+                      serviceStatus === 'registered' 
+                        ? 'bg-green-100 text-green-800' 
+                        : serviceStatus === 'in-progress'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}
+                  >
+                    <span>{serviceStatus === 'registered' ? 'Registered' : serviceStatus === 'in-progress' ? 'In Progress' : 'Pending'}</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {isStatusDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUpdateServiceStatus('in-progress');
+                          setIsStatusDropdownOpen(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm hover:bg-blue-50 flex items-center gap-2 text-blue-800 rounded-t-lg"
+                      >
+                        <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                        In Progress
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUpdateServiceStatus('registered');
+                          setIsStatusDropdownOpen(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-green-800 rounded-b-lg"
+                      >
+                        <span className="w-2 h-2 rounded-full bg-green-600"></span>
+                        Registered
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* Chevron Icon */}
+              <svg className={`w-5 h-5 text-gray-600 transition-transform ml-4 ${isServiceCardExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </div>
 
-            {/* Bottom Section - White Background */}
-            <div className="p-6">
+            {/* Bottom Section - White Background - Expandable */}
+            {isServiceCardExpanded && (
+              <div className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   {/* Ticket ID */}
@@ -659,7 +1166,8 @@ function AdminClientOverview() {
                   )}
                 </div>
               </div>
-            </div>
+              </div>
+            )}
           </div>
         </>
       )}
@@ -678,6 +1186,98 @@ function AdminClientOverview() {
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Subscriptions</h2>
           <p className="text-gray-600">Subscription details will be displayed here.</p>
         </div>
+      )}
+
+      {/* Floating Notepad Button - Admin Only */}
+      {activeTab === 'profile' && (
+        <>
+          <button
+            onClick={() => setShowNotepad(!showNotepad)}
+            className="fixed bottom-6 right-6 w-14 h-14 bg-[#00486D] text-white rounded-full shadow-lg hover:bg-[#01334C] transition-all duration-300 flex items-center justify-center z-[9998] hover:scale-110"
+            title="Quick Notes"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+
+          {/* Notepad Modal */}
+          {showNotepad && (
+            <div className="fixed bottom-24 right-6 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-[9999] overflow-hidden max-h-[calc(100vh-150px)] flex flex-col">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-[#00486D] to-[#01334C] px-4 py-3 flex items-center justify-between flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  <h3 className="text-white font-semibold">Client Persona</h3>
+                </div>
+                <button
+                  onClick={() => setShowNotepad(false)}
+                  className="text-white hover:text-gray-200 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Content - Scrollable */}
+              <div className="p-4 overflow-y-auto flex-1">
+                {/* Simple Textarea for Client Persona */}
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Client Personality & Preferences
+                    <span className="ml-2 text-xs text-gray-500">(Private - Not visible to client)</span>
+                  </label>
+                  <textarea
+                    value={clientPersona}
+                    onChange={(e) => setClientPersona(e.target.value)}
+                    placeholder="Describe client's personality, preferences, communication style, etc..."
+                    className="w-full h-64 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00486D] focus:border-transparent resize-none text-sm"
+                  />
+                </div>
+
+                {/* Character Count */}
+                <div className="text-xs text-gray-500">
+                  <span>{clientPersona.length} characters</span>
+                </div>
+              </div>
+
+              {/* Footer - Fixed at bottom */}
+              <div className="p-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveClientPersona}
+                    disabled={savingNotes}
+                    className="flex-1 px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm"
+                  >
+                    {savingNotes ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Saving...
+                      </span>
+                    ) : (
+                      'Save Persona'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      fetchClientPersona();
+                      setShowNotepad(false);
+                    }}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium text-sm"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

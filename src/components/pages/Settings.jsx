@@ -45,9 +45,12 @@ function Settings() {
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [isAddingNewTask, setIsAddingNewTask] = useState(false);
   const [notes, setNotes] = useState('');
-  const [adminNotes, setAdminNotes] = useState('');
-  const [userNotes, setUserNotes] = useState('');
-  const [userNotesAttachments, setUserNotesAttachments] = useState([]);
+  const [adminNotesList, setAdminNotesList] = useState([]);
+  const [userNotesList, setUserNotesList] = useState([]);
+  const [expandedAdminNoteId, setExpandedAdminNoteId] = useState(null);
+  const [expandedUserNoteId, setExpandedUserNoteId] = useState(null);
+  const [isAddingUserNote, setIsAddingUserNote] = useState(false);
+  const [currentUserNote, setCurrentUserNote] = useState({ date: '', description: '', attachments: [] });
   
   // Load data on mount
   useEffect(() => {
@@ -132,9 +135,40 @@ function Settings() {
         
         // Populate Notes
         setNotes(user.notes || '');
-        setAdminNotes(user.admin_notes || '');
-        setUserNotes(user.user_notes || '');
-        setUserNotesAttachments(user.user_notes_attachments || []);
+        
+        // Parse admin notes (array of notes)
+        const adminNotesRaw = user.admin_notes || '';
+        try {
+          const notesList = JSON.parse(adminNotesRaw);
+          if (Array.isArray(notesList)) {
+            setAdminNotesList(notesList);
+          } else if (notesList.note !== undefined) {
+            setAdminNotesList([notesList]);
+          } else if (adminNotesRaw) {
+            setAdminNotesList([{ date: '', description: adminNotesRaw, attachments: [] }]);
+          }
+        } catch {
+          if (adminNotesRaw) {
+            setAdminNotesList([{ date: '', description: adminNotesRaw, attachments: [] }]);
+          }
+        }
+        
+        // Parse user notes (array of notes)
+        const userNotesRaw = user.user_notes || '';
+        try {
+          const notesList = JSON.parse(userNotesRaw);
+          if (Array.isArray(notesList)) {
+            setUserNotesList(notesList);
+          } else if (notesList.note !== undefined) {
+            setUserNotesList([notesList]);
+          } else if (userNotesRaw) {
+            setUserNotesList([{ date: '', description: userNotesRaw, attachments: [] }]);
+          }
+        } catch {
+          if (userNotesRaw) {
+            setUserNotesList([{ date: '', description: userNotesRaw, attachments: [] }]);
+          }
+        }
       }
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -268,6 +302,68 @@ function Settings() {
     }
   };
 
+  const handleUserNoteFileUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCurrentUserNote(prev => ({
+          ...prev,
+          attachments: [...prev.attachments, {
+            name: file.name,
+            data: reader.result,
+            type: file.type,
+            size: file.size
+          }]
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeUserNoteAttachment = (index) => {
+    setCurrentUserNote(prev => ({
+      ...prev,
+      attachments: prev.attachments.filter((_, idx) => idx !== index)
+    }));
+  };
+
+  const handleSaveUserNote = async () => {
+    try {
+      setSaving(true);
+      
+      // Add new note to list
+      const updatedNotesList = [...userNotesList, {
+        id: Date.now(),
+        date: currentUserNote.date,
+        description: currentUserNote.description,
+        attachments: currentUserNote.attachments,
+        createdAt: new Date().toISOString()
+      }];
+
+      const payload = {
+        userNotes: JSON.stringify(updatedNotesList)
+      };
+      
+      const response = await updateUsersPageData(payload);
+      
+      if (response.success) {
+        setUserNotesList(updatedNotesList);
+        setCurrentUserNote({ date: '', description: '', attachments: [] });
+        setIsAddingUserNote(false);
+        alert('Note saved successfully!');
+        await loadUserData();
+      }
+    } catch (error) {
+      console.error('Error saving user note:', error);
+      alert('Failed to save note');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleSaveNotes = async () => {
     try {
       console.log('💾 Saving Notes...');
@@ -275,9 +371,8 @@ function Settings() {
       
       const payload = {
         notes,
-        adminNotes,
-        userNotes,
-        userNotesAttachments
+        adminNotes: JSON.stringify(adminNotesList),
+        userNotes: JSON.stringify(userNotesList)
       };
       
       const response = await updateUsersPageData(payload);
@@ -397,186 +492,235 @@ function Settings() {
 
   // Render functions with direct state access to maintain input focus
   const renderNotesContent = () => {
-    // Check if user is admin
-    const userData = JSON.parse(localStorage.getItem('user') || '{}');
-    const userRole = userData.role || userData.role_id;
-    const isAdmin = userRole === 'admin' || userRole === 'superadmin' || userRole === 1 || userRole === 2;
-
     return (
       <div className="px-6 pb-6 pt-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Admin Notes Section */}
+          {/* Admin Notes Section - Read Only for Users */}
           <div className="border-r border-gray-200 pr-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
               Admin Notes
-              {!isAdmin && (
-                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Read Only</span>
-              )}
+              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Read Only</span>
             </h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Notes (Admin Only)</label>
-                <textarea
-                  value={adminNotes}
-                  onChange={(e) => isAdmin && setAdminNotes(e.target.value)}
-                  rows={12}
-                  disabled={!isAdmin}
-                  className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y ${
-                    !isAdmin ? 'bg-gray-50 cursor-not-allowed' : ''
-                  }`}
-                  placeholder={isAdmin ? "Enter admin notes here (not visible to user)..." : "Admin notes (read-only)"}
+            
+            {/* Admin Notes Table - Read Only */}
+            {adminNotesList.length > 0 ? (
+              <table className="w-full text-sm">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Date</th>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Description</th>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Files</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {adminNotesList.map((note, idx) => (
+                    <React.Fragment key={note.id || idx}>
+                      <tr 
+                        onClick={() => setExpandedAdminNoteId(expandedAdminNoteId === idx ? null : idx)}
+                        className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
+                      >
+                        <td className="px-2 py-2 text-gray-600 text-xs">{note.date || 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 truncate text-xs">{note.description || 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs">{note.attachments?.length || 0}</td>
+                      </tr>
+                      {expandedAdminNoteId === idx && (
+                        <tr className="bg-gray-50">
+                          <td colSpan="3" className="px-3 py-3">
+                            <div className="space-y-2 text-xs">
+                              <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{note.date || 'N/A'}</span></div>
+                              <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1">{note.description}</p></div>
+                              {note.attachments && note.attachments.length > 0 && (
+                                <div>
+                                  <span className="font-medium text-gray-700">Attachments:</span>
+                                  <div className="mt-1 space-y-1">
+                                    {note.attachments.map((file, fileIdx) => (
+                                      <div key={fileIdx}>
+                                        {(file.url || file.data) ? (
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              const fileUrl = file.url || file.data;
+                                              if (fileUrl.startsWith('data:')) {
+                                                const link = document.createElement('a');
+                                                link.href = fileUrl;
+                                                link.download = file.name;
+                                                link.target = '_blank';
+                                                link.click();
+                                              } else {
+                                                window.open(fileUrl, '_blank');
+                                              }
+                                            }}
+                                            className="text-blue-600 hover:underline"
+                                          >
+                                            📎 {file.name}
+                                          </button>
+                                        ) : (
+                                          <span className="text-gray-600">📎 {file.name}</span>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="text-gray-600 text-center py-4 text-xs">No admin notes</p>
+            )}
+          </div>
+
+        {/* User Notes Section - Editable */}
+        <div className="pl-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-900">My Notes</h3>
+            <button
+              onClick={() => setIsAddingUserNote(true)}
+              className="flex items-center gap-1 px-2 py-1 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-xs"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add
+            </button>
+          </div>
+
+          {/* Add Note Form */}
+          {isAddingUserNote && (
+            <div className="mb-4 p-4 border border-gray-300 rounded-lg bg-gray-50">
+              <h4 className="text-sm font-semibold text-gray-900 mb-3">New Note</h4>
+              
+              <div className="mb-3">
+                <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
+                <input
+                  type="date"
+                  value={currentUserNote.date}
+                  onChange={(e) => setCurrentUserNote({ ...currentUserNote, date: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                 />
-                <p className="text-xs text-gray-500 mt-2">
-                  🔒 These notes are only visible to admin and will not be shared with the user.
-                </p>
               </div>
 
-              {/* Admin Attachments */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Admin Attachments</label>
-                {isAdmin ? (
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors cursor-pointer">
-                    <input
-                      type="file"
-                      multiple
-                      onChange={(e) => {
-                        // Handle admin file upload
-                        console.log('Admin files:', e.target.files);
-                      }}
-                      className="hidden"
-                      id="admin-notes-attachments"
-                    />
-                    <label htmlFor="admin-notes-attachments" className="cursor-pointer">
-                      <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      <p className="mt-2 text-sm text-gray-600">
-                        <span className="font-medium text-blue-600">Click to upload</span> or drag and drop
-                      </p>
-                      <p className="text-xs text-gray-500">PDF, DOC, DOCX, PNG, JPG up to 10MB</p>
-                    </label>
-                  </div>
-                ) : (
-                  <div className="border-2 border-gray-200 rounded-lg p-4 bg-gray-50">
-                    <svg className="mx-auto h-12 w-12 text-gray-300" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <p className="mt-2 text-sm text-gray-500">No attachments available</p>
-                    <p className="text-xs text-gray-400">Admin only section</p>
+              <div className="mb-3">
+                <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  value={currentUserNote.description}
+                  onChange={(e) => setCurrentUserNote({ ...currentUserNote, description: e.target.value })}
+                  placeholder="Enter note description..."
+                  className="w-full h-24 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                />
+              </div>
+
+              <div className="mb-3">
+                <label className="block text-xs font-medium text-gray-700 mb-1">Attachments</label>
+                <label className="flex items-center justify-center gap-2 px-3 py-2 border-2 border-dashed border-gray-300 rounded-md hover:border-[#00486D] cursor-pointer">
+                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                  </svg>
+                  <span className="text-xs">Upload</span>
+                  <input type="file" multiple onChange={handleUserNoteFileUpload} className="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
+                </label>
+                {currentUserNote.attachments.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {currentUserNote.attachments.map((file, idx) => (
+                      <div key={idx} className="flex items-center justify-between bg-white px-2 py-1 rounded border text-xs">
+                        <span className="truncate">{file.name}</span>
+                        <button onClick={() => removeUserNoteAttachment(idx)} className="text-red-500 ml-2">✕</button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
-            </div>
-          </div>
 
-        {/* User Notes Section */}
-        <div className="pl-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">User Notes</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Notes (Visible to User)</label>
-              <textarea
-                value={userNotes}
-                onChange={(e) => setUserNotes(e.target.value)}
-                rows={12}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
-                placeholder="Enter notes here..."
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                👁️ These notes are visible to the user.
-              </p>
-            </div>
-
-            {/* User Attachments */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">User Attachments</label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors cursor-pointer">
-                <input
-                  type="file"
-                  multiple
-                  onChange={(e) => {
-                    // Handle user file upload
-                    const files = Array.from(e.target.files);
-                    console.log('User files:', files);
-                    // Convert to base64 or upload to S3
-                    files.forEach(file => {
-                      const reader = new FileReader();
-                      reader.onload = () => {
-                        setUserNotesAttachments(prev => [...prev, {
-                          name: file.name,
-                          size: file.size,
-                          type: file.type,
-                          data: reader.result
-                        }]);
-                      };
-                      reader.readAsDataURL(file);
-                    });
-                  }}
-                  className="hidden"
-                  id="user-notes-attachments"
-                />
-                <label htmlFor="user-notes-attachments" className="cursor-pointer">
-                  <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  <p className="mt-2 text-sm text-gray-600">
-                    <span className="font-medium text-blue-600">Click to upload</span> or drag and drop
-                  </p>
-                  <p className="text-xs text-gray-500">PDF, DOC, DOCX, PNG, JPG up to 10MB</p>
-                </label>
+              <div className="flex gap-2">
+                <button onClick={handleSaveUserNote} disabled={saving} className="flex-1 px-3 py-2 bg-[#01334C] text-white rounded-md text-sm">
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
+                <button onClick={() => { setIsAddingUserNote(false); setCurrentUserNote({ date: '', description: '', attachments: [] }); }} className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm">
+                  Cancel
+                </button>
               </div>
-
-              {/* Show uploaded files */}
-              {userNotesAttachments.length > 0 && (
-                <div className="mt-3 space-y-2">
-                  {userNotesAttachments.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                      <div className="flex items-center gap-2 flex-1">
-                        <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <span className="text-sm text-gray-700 truncate">{file.name}</span>
-                        {file.size && (
-                          <span className="text-xs text-gray-500">({(file.size / 1024).toFixed(2)} KB)</span>
-                        )}
-                        {file.url && (
-                          <a
-                            href={file.url}
-                            download
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 text-xs ml-2"
-                          >
-                            Download
-                          </a>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => setUserNotesAttachments(prev => prev.filter((_, i) => i !== index))}
-                        className="text-red-500 hover:text-red-700 flex-shrink-0"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
-          </div>
+          )}
+
+          {/* User Notes Table */}
+          {userNotesList.length > 0 ? (
+            <table className="w-full text-sm">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Date</th>
+                  <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Description</th>
+                  <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Files</th>
+                </tr>
+              </thead>
+              <tbody>
+                {userNotesList.map((note, idx) => (
+                  <React.Fragment key={note.id || idx}>
+                    <tr 
+                      onClick={() => setExpandedUserNoteId(expandedUserNoteId === idx ? null : idx)}
+                      className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
+                    >
+                      <td className="px-2 py-2 text-gray-600 text-xs">{note.date || 'N/A'}</td>
+                      <td className="px-2 py-2 text-gray-600 truncate text-xs">{note.description || 'N/A'}</td>
+                      <td className="px-2 py-2 text-gray-600 text-xs">{note.attachments?.length || 0}</td>
+                    </tr>
+                    {expandedUserNoteId === idx && (
+                      <tr className="bg-gray-50">
+                        <td colSpan="3" className="px-3 py-3">
+                          <div className="space-y-2 text-xs">
+                            <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{note.date || 'N/A'}</span></div>
+                            <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1">{note.description}</p></div>
+                            {note.attachments && note.attachments.length > 0 && (
+                              <div>
+                                <span className="font-medium text-gray-700">Attachments:</span>
+                                <div className="mt-1 space-y-1">
+                                  {note.attachments.map((file, fileIdx) => (
+                                    <div key={fileIdx}>
+                                      {(file.url || file.data) ? (
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            const fileUrl = file.url || file.data;
+                                            if (fileUrl.startsWith('data:')) {
+                                              const link = document.createElement('a');
+                                              link.href = fileUrl;
+                                              link.download = file.name;
+                                              link.target = '_blank';
+                                              link.click();
+                                            } else {
+                                              window.open(fileUrl, '_blank');
+                                            }
+                                          }}
+                                          className="text-blue-600 hover:underline"
+                                        >
+                                          📎 {file.name}
+                                        </button>
+                                      ) : (
+                                        <span className="text-gray-600">📎 {file.name}</span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="text-gray-600 text-center py-4 text-xs">No notes added yet</p>
+          )}
         </div>
-      </div>
-      
-      {/* Save Button */}
-      <div className="flex justify-end pt-6 mt-6 border-t border-gray-200">
-        <button 
-          onClick={handleSaveNotes}
-          disabled={saving}
-          className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {saving ? 'Saving...' : 'Save Changes'}
-        </button>
       </div>
     </div>
     );
@@ -1300,6 +1444,12 @@ function Settings() {
 }
 
 export default Settings;
+
+
+
+
+
+
 
 
 

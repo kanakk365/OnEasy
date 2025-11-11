@@ -52,7 +52,7 @@ function AdminSidebar() {
   }, [loadUserData]);
 
   const menuItems = [
-    { icon: <HiOutlineUsers />, text: "Clients", path: "/admin/clients" },
+    { icon: <HiOutlineUsers />, text: "Clients", path: "/admin/clients", subPaths: ['/admin/client-overview', '/admin/client-details', '/admin/fill-form'] },
     { icon: <RiUser3Line />, text: "Profile", path: "/admin/profile" },
   ];
 
@@ -125,7 +125,9 @@ function AdminSidebar() {
               className={`flex items-center ${
                 isCollapsed ? "justify-center px-2" : "space-x-3 px-3"
               } py-2 rounded-lg transition-all duration-200 ${
-                location.pathname === item.path
+                location.pathname === item.path || 
+                location.pathname.startsWith(item.path + '/') ||
+                (item.subPaths && item.subPaths.some(subPath => location.pathname.startsWith(subPath)))
                   ? "bg-[#01334C] text-white"
                   : "text-gray-700 hover:bg-gray-50"
               } group relative`}
@@ -138,7 +140,9 @@ function AdminSidebar() {
               >
                 {React.cloneElement(item.icon, {
                   className: `text-base ${
-                    location.pathname === item.path
+                    location.pathname === item.path || 
+                    location.pathname.startsWith(item.path + '/') ||
+                    (item.subPaths && item.subPaths.some(subPath => location.pathname.startsWith(subPath)))
                       ? "text-white"
                       : "text-gray-400"
                   }`,
@@ -262,7 +266,7 @@ function AdminSidebar() {
         {/* Mobile Menu Items */}
         <nav className="flex-1 py-6 overflow-y-auto">
           {menuItems.map((item, index) => {
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
             return (
               <Link
                 key={index}
@@ -303,6 +307,14 @@ function AdminSidebar() {
 }
 
 export default AdminSidebar;
+
+
+
+
+
+
+
+
 
 
 
