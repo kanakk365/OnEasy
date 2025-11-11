@@ -25,6 +25,7 @@ function AdminClientOverview() {
   const [isServiceCardExpanded, setIsServiceCardExpanded] = useState(false);
   const [serviceStatus, setServiceStatus] = useState('registered');
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+  const [visiblePasswords, setVisiblePasswords] = useState({});
 
   useEffect(() => {
     fetchClientDetails();
@@ -665,6 +666,85 @@ function AdminClientOverview() {
                   </div>
                 ) : (
                   <p className="text-gray-600">No organisation details available</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Website Details */}
+          <div className="bg-white rounded-xl border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012] overflow-hidden">
+            <button
+              onClick={() => setExpandedSection(expandedSection === 'website' ? null : 'website')}
+              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="text-lg font-semibold text-gray-900">Website Details</h3>
+              <svg className={`w-5 h-5 transition-transform ${expandedSection === 'website' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {expandedSection === 'website' && (
+              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                {clientProfile.websites && clientProfile.websites.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm border-collapse">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Website Type</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Website URL</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Login</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Password</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {clientProfile.websites.map((website, idx) => (
+                          <tr key={idx} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 text-gray-900 border border-gray-300">{website.website_type || 'N/A'}</td>
+                            <td className="px-4 py-3 border border-gray-300">
+                              {website.website_url ? (
+                                <a href={website.website_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                  {website.website_url}
+                                </a>
+                              ) : (
+                                <span className="text-gray-600">N/A</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-gray-600 border border-gray-300">{website.login || 'N/A'}</td>
+                            <td className="px-4 py-3 border border-gray-300">
+                              <div className="flex items-center gap-2">
+                                <span className="text-gray-600">
+                                  {website.password ? (
+                                    visiblePasswords[idx] ? website.password : '••••••••'
+                                  ) : (
+                                    'N/A'
+                                  )}
+                                </span>
+                                {website.password && (
+                                  <button
+                                    onClick={() => setVisiblePasswords(prev => ({ ...prev, [idx]: !prev[idx] }))}
+                                    className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                                    title={visiblePasswords[idx] ? 'Hide password' : 'Show password'}
+                                  >
+                                    {visiblePasswords[idx] ? (
+                                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                      </svg>
+                                    ) : (
+                                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                      </svg>
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-gray-600">No website details available</p>
                 )}
               </div>
             )}
