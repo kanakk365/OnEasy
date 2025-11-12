@@ -97,19 +97,15 @@ function ProprietorshipForm() {
       case 1:
         return (
           <BasicBusinessDetailsContent
-            formData={formData.step1 || {}}
-            onChange={(data) => updateFormData({ step1: data })}
-            onNext={handleNext}
+            formData={formData}
+            setFormData={setFormData}
           />
         );
       case 2:
         return (
           <BasicProprietorDetailsContent
-            formData={formData.step2 || {}}
-            onChange={(data) => updateFormData({ step2: data })}
-            onBack={handleBack}
-            onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
+            formData={formData}
+            setFormData={setFormData}
           />
         );
       default:
@@ -160,6 +156,39 @@ function ProprietorshipForm() {
         {/* Step Content */}
         <div className="bg-white rounded-lg shadow-sm p-8">
           {renderStepContent()}
+          
+          {/* Navigation Buttons */}
+          <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+            {step > 1 ? (
+              <button
+                onClick={handleBack}
+                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              >
+                ← Back
+              </button>
+            ) : (
+              <div></div>
+            )}
+            
+            {step < 2 ? (
+              <button
+                onClick={handleNext}
+                className="px-8 py-3 text-white rounded-lg font-medium transition-colors"
+                style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="px-8 py-3 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Registration'}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Success Modal */}
