@@ -150,8 +150,8 @@ function ProprietorshipForm() {
         <div className="mb-8">
           <StepIndicator
             steps={[
-              { number: 1, title: 'Basic Business Details' },
-              { number: 2, title: 'Basic Proprietor Details' }
+              'Basic Business Details',
+              'Basic Proprietor Details'
             ]}
             currentStep={step}
           />
