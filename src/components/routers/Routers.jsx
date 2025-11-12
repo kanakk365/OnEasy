@@ -7,6 +7,7 @@ import Client from "../pages/Client";
 import Admin from "../pages/Admin";
 import Partner from "../pages/Partner";
 import Registrations from "../pages/Registrations";
+import RegistrationCategories from "../pages/RegistrationCategories";
 import CompanyCategories from "../pages/CompanyCategories";
 import CompanyDetails from "../pages/CompanyDetails";
 import BusinessDetailsForm from "../pages/BusinessDetailsForm";
@@ -53,6 +54,11 @@ function Routers() {
       <Route path="/registrations" element={
         <ProtectedRoute>
           <Registrations />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration-categories" element={
+        <ProtectedRoute>
+          <RegistrationCategories />
         </ProtectedRoute>
       } />
       <Route path="/company-categories" element={

@@ -102,6 +102,8 @@ function Registrations() {
               onClick={() => {
                 if (service.title === "Start up Services") {
                   navigate("/company-categories");
+                } else if (service.title === "Registration Services") {
+                  navigate("/registration-categories");
                 }
               }}
             >
