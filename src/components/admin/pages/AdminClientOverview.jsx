@@ -10,6 +10,7 @@ function AdminClientOverview() {
   const [activeTab, setActiveTab] = useState('services'); // profile, services, compliance, subscriptions
   const [expandedSection, setExpandedSection] = useState(null);
   const [clientProfile, setClientProfile] = useState(null);
+  const [allRegistrations, setAllRegistrations] = useState([]);
   const [savingNotes, setSavingNotes] = useState(false);
   const [expandedOrgId, setExpandedOrgId] = useState(null);
   const [documentUrls, setDocumentUrls] = useState({});
@@ -31,6 +32,7 @@ function AdminClientOverview() {
     fetchClientDetails();
     fetchClientProfile();
     fetchClientPersona();
+    fetchAllRegistrations();
   }, [userId]);
 
   // Close dropdown when clicking outside
@@ -131,6 +133,29 @@ function AdminClientOverview() {
       }
     } catch (error) {
       console.error('Error fetching client persona:', error);
+    }
+  };
+
+  const fetchAllRegistrations = async () => {
+    try {
+      // Fetch both private limited and proprietorship registrations
+      const [privateLimitedResponse, proprietorshipResponse] = await Promise.all([
+        apiClient.get(`/private-limited/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
+        apiClient.get(`/proprietorship/user-registrations/${userId}`).catch(() => ({ success: false, data: [] }))
+      ]);
+
+      const privateLimited = privateLimitedResponse.success ? privateLimitedResponse.data : [];
+      const proprietorship = proprietorshipResponse.success ? proprietorshipResponse.data : [];
+
+      // Combine and sort by created_at
+      const combined = [...privateLimited, ...proprietorship].sort((a, b) => 
+        new Date(b.created_at) - new Date(a.created_at)
+      );
+
+      setAllRegistrations(combined);
+      console.log('📊 Fetched all registrations:', combined.length, 'total');
+    } catch (error) {
+      console.error('Error fetching all registrations:', error);
     }
   };
 
@@ -1092,33 +1117,47 @@ function AdminClientOverview() {
 
       {/* Services Tab */}
       {activeTab === 'services' && (
-        <>
-          {/* Client Card - Expandable */}
-          <div className="bg-white rounded-xl border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
-            {/* Top Section - Light Blue Background - Clickable */}
-            <div 
-              onClick={() => setIsServiceCardExpanded(!isServiceCardExpanded)}
-              className="bg-blue-50 p-6 flex items-center justify-between border-b border-gray-200 cursor-pointer hover:bg-blue-100 transition-colors rounded-t-xl"
-            >
+        <div className="space-y-4">
+          {allRegistrations.length === 0 ? (
+            <div className="bg-white rounded-xl p-12 text-center border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
+              <p className="text-gray-600">No registrations found for this client.</p>
+            </div>
+          ) : (
+            allRegistrations.map((registration, index) => (
+              <div key={registration.ticket_id} className="bg-white rounded-xl border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
+                {/* Top Section - Light Blue Background - Clickable */}
+                <div 
+                  onClick={() => setIsServiceCardExpanded(isServiceCardExpanded === index ? null : index)}
+                  className="bg-blue-50 p-6 flex items-center justify-between border-b border-gray-200 cursor-pointer hover:bg-blue-100 transition-colors rounded-t-xl"
+                >
               <div className="flex items-center gap-4 flex-1">
                 {/* Avatar */}
                 <div className="w-12 h-12 rounded-full bg-[#01334C] text-white flex items-center justify-center font-semibold text-lg">
-                  {client.name ? client.name.charAt(0).toUpperCase() : 'C'}
+                  {registration.business_name ? registration.business_name.charAt(0).toUpperCase() : registration.ticket_id.startsWith('PVT_') ? 'P' : 'Pr'}
                 </div>
                 
                 {/* Name */}
                 <div className="flex-1">
-                  <h2 className="text-xl font-semibold text-gray-900">{client.name || 'Unknown'}</h2>
+                  <h2 className="text-xl font-semibold text-gray-900">{registration.business_name || 'Pending'}</h2>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {registration.ticket_id.startsWith('PVT_') ? 'Private Limited' : 'Proprietorship'}
+                  </p>
                 </div>
 
-                {/* Email */}
+                {/* Package */}
                 <div className="text-sm text-gray-600">
-                  {client.email || 'N/A'}
+                  {registration.package_name || 'N/A'}
                 </div>
 
-                {/* Phone */}
-                <div className="text-sm text-gray-600">
-                  {client.phone || 'N/A'}
+                {/* Status */}
+                <div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    registration.status === 'completed' ? 'bg-green-100 text-green-800' :
+                    registration.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-blue-100 text-blue-800'
+                  }`}>
+                    {registration.status || 'Pending'}
+                  </span>
                 </div>
 
                 {/* Status Badge with Dropdown */}
@@ -1184,72 +1223,50 @@ function AdminClientOverview() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   {/* Ticket ID */}
-                  {client.ticket_id && (
-                    <div className="mb-4">
-                      <span className="text-sm font-medium text-gray-700">Ticket ID:</span>
-                      <p className="text-gray-900 mt-1">{client.ticket_id}</p>
-                    </div>
-                  )}
+                  <div className="mb-4">
+                    <span className="text-sm font-medium text-gray-700">Ticket ID:</span>
+                    <p className="text-gray-900 mt-1">{registration.ticket_id}</p>
+                  </div>
 
                   {/* Package */}
-                  {client.package_name && (
-                    <div className="mb-4">
-                      <span className="text-sm font-medium text-gray-700">Package:</span>
-                      <p className="text-gray-900 mt-1">
-                        {client.package_name} - <span className="text-green-600 font-semibold">₹{client.package_price?.toLocaleString('en-IN')}</span>
-                      </p>
-                    </div>
-                  )}
+                  <div className="mb-4">
+                    <span className="text-sm font-medium text-gray-700">Package:</span>
+                    <p className="text-gray-900 mt-1">
+                      {registration.package_name} - <span className="text-green-600 font-semibold">₹{registration.package_price?.toLocaleString('en-IN')}</span>
+                    </p>
+                  </div>
 
                   {/* Payment Date */}
-                  {client.payment_date && (
-                    <div>
-                      <span className="text-sm font-medium text-gray-700">Payment Date:</span>
-                      <p className="text-gray-900 mt-1">{formatDate(client.payment_date)}</p>
-                    </div>
-                  )}
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">Payment Date:</span>
+                    <p className="text-gray-900 mt-1">{formatDate(registration.created_at)}</p>
+                  </div>
 
-                  {/* Company Name */}
-                  {client.company_name && (
+                  {/* Business Name */}
+                  {registration.business_name && (
                     <div className="mt-4">
-                      <span className="text-sm font-medium text-gray-700">Company:</span>
-                      <p className="text-gray-900 mt-1">{client.company_name}</p>
+                      <span className="text-sm font-medium text-gray-700">Business Name:</span>
+                      <p className="text-gray-900 mt-1">{registration.business_name}</p>
                     </div>
                   )}
                 </div>
 
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-2 ml-6">
-                  {client.ticket_id && (
-                    <button
-                      onClick={() => navigate(`/admin/client-details/${client.ticket_id}`)}
-                      className="px-4 py-2 text-sm bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors whitespace-nowrap"
-                    >
-                      View Details
-                    </button>
-                  )}
-                  {client.team_fill_requested && !client.registration_submitted && (
-                    <button
-                      onClick={() => navigate(`/admin/fill-form/${client.ticket_id}`)}
-                      className="px-4 py-2 text-sm bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors whitespace-nowrap"
-                    >
-                      Fill Form
-                    </button>
-                  )}
-                  {client.team_fill_requested && client.registration_submitted && (
-                    <div className="px-4 py-2 text-sm bg-green-100 text-green-800 rounded-md font-medium flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      Form Filled
-                    </div>
-                  )}
+                  <button
+                    onClick={() => navigate(`/admin/client-details/${registration.ticket_id}`)}
+                    className="px-4 py-2 text-sm bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors whitespace-nowrap"
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
               </div>
             )}
           </div>
-        </>
+            ))
+          )}
+        </div>
       )}
 
       {/* Compliance Tab */}
