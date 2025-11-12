@@ -11,6 +11,9 @@ export const submitPrivateLimitedRegistration = async (formData, clientId = null
     const paymentDetails = JSON.parse(localStorage.getItem('paymentDetails') || '{}');
     const packageDetails = JSON.parse(localStorage.getItem('selectedPackage') || '{}');
     
+    console.log('💳 Payment details from localStorage:', paymentDetails);
+    console.log('📦 Package details from localStorage:', packageDetails);
+    
     // Get editing ticket ID if editing existing registration
     const editingTicketId = ticketId || localStorage.getItem('editingTicketId');
     
@@ -27,6 +30,8 @@ export const submitPrivateLimitedRegistration = async (formData, clientId = null
     };
     
     console.log('🚀 Submitting Private Limited registration...');
+    console.log('📋 Payment ID:', paymentDetails.paymentId);
+    console.log('📋 Order ID:', paymentDetails.orderId);
     if (clientId) {
       console.log('👤 Filling on behalf of client:', clientId);
     }
@@ -173,6 +178,10 @@ export const getSignedUrl = async (s3Url) => {
     return s3Url; // Return original URL as fallback
   }
 };
+
+
+
+
 
 
 
