@@ -138,14 +138,25 @@ function AdminClientOverview() {
 
   const fetchAllRegistrations = async () => {
     try {
+      console.log('🔍 Fetching registrations for userId:', userId);
+      
       // Fetch both private limited and proprietorship registrations
       const [privateLimitedResponse, proprietorshipResponse] = await Promise.all([
-        apiClient.get(`/private-limited/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
-        apiClient.get(`/proprietorship/user-registrations/${userId}`).catch(() => ({ success: false, data: [] }))
+        apiClient.get(`/private-limited/user-registrations/${userId}`).catch((err) => {
+          console.error('Private Limited fetch error:', err);
+          return { success: false, data: [] };
+        }),
+        apiClient.get(`/proprietorship/user-registrations/${userId}`).catch((err) => {
+          console.error('Proprietorship fetch error:', err);
+          return { success: false, data: [] };
+        })
       ]);
 
-      const privateLimited = privateLimitedResponse.success ? privateLimitedResponse.data : [];
-      const proprietorship = proprietorshipResponse.success ? proprietorshipResponse.data : [];
+      const privateLimited = privateLimitedResponse.success ? (privateLimitedResponse.data || []) : [];
+      const proprietorship = proprietorshipResponse.success ? (proprietorshipResponse.data || []) : [];
+
+      console.log('📊 Private Limited registrations:', privateLimited.length, privateLimited);
+      console.log('📊 Proprietorship registrations:', proprietorship.length, proprietorship);
 
       // Combine and sort by created_at
       const combined = [...privateLimited, ...proprietorship].sort((a, b) => 
@@ -153,7 +164,7 @@ function AdminClientOverview() {
       );
 
       setAllRegistrations(combined);
-      console.log('📊 Fetched all registrations:', combined.length, 'total');
+      console.log('📊 Total combined registrations for user', userId, ':', combined.length);
     } catch (error) {
       console.error('Error fetching all registrations:', error);
     }
