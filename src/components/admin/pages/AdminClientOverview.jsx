@@ -140,20 +140,23 @@ function AdminClientOverview() {
     try {
       console.log('🔍 Fetching all registrations for user ID:', userId);
       
-      // Fetch both private limited and proprietorship registrations
-      const [privateLimitedResponse, proprietorshipResponse] = await Promise.all([
+      // Fetch private limited, proprietorship, and startup india registrations
+      const [privateLimitedResponse, proprietorshipResponse, startupIndiaResponse] = await Promise.all([
         apiClient.get(`/private-limited/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
-        apiClient.get(`/proprietorship/user-registrations/${userId}`).catch(() => ({ success: false, data: [] }))
+        apiClient.get(`/proprietorship/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
+        apiClient.get(`/startup-india/user-registrations/${userId}`).catch(() => ({ success: false, data: [] }))
       ]);
 
       const privateLimited = privateLimitedResponse.success ? privateLimitedResponse.data : [];
       const proprietorship = proprietorshipResponse.success ? proprietorshipResponse.data : [];
+      const startupIndia = startupIndiaResponse.success ? startupIndiaResponse.data : [];
 
       console.log('📊 Private Limited:', privateLimited.length, 'registrations');
       console.log('📊 Proprietorship:', proprietorship.length, 'registrations');
+      console.log('📊 Startup India:', startupIndia.length, 'registrations');
 
       // Combine and sort by created_at
-      const combined = [...privateLimited, ...proprietorship].sort((a, b) => 
+      const combined = [...privateLimited, ...proprietorship, ...startupIndia].sort((a, b) => 
         new Date(b.created_at) - new Date(a.created_at)
       );
 
