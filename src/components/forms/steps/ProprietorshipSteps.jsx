@@ -97,7 +97,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
     <div className="grid grid-cols-1 gap-6 mt-6">
       {/* Business Name and Nature - Two Column */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Field label="Name of the Business" required>
+        <Field label="Name of the Business">
           <input
             className="w-full px-4 py-3 rounded-lg bg-white outline-none"
             placeholder="Enter business name"
@@ -106,7 +106,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
           />
         </Field>
 
-        <Field label="Business Email" required>
+        <Field label="Business Email">
           <input
             type="email"
             className="w-full px-4 py-3 rounded-lg bg-white outline-none"
@@ -118,7 +118,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
       </div>
 
       {/* Nature of Business - Full Width */}
-      <Field label="Nature of the Business" required>
+      <Field label="Nature of the Business">
         <textarea
           rows={4}
           className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none"
@@ -130,7 +130,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
 
       {/* Contact Number */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Field label="Business Contact Number" required>
+        <Field label="Business Contact Number">
           <div className="flex gap-2">
             <input
               type="text"
@@ -178,7 +178,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Field label="Address Line 1" required>
+          <Field label="Address Line 1">
             <input
               className="w-full px-4 py-3 rounded-lg bg-white outline-none"
               placeholder="Building, Street"
@@ -196,7 +196,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
             />
           </Field>
 
-          <Field label="City" required>
+          <Field label="City">
             <input
               className="w-full px-4 py-3 rounded-lg bg-white outline-none"
               placeholder="Enter city"
@@ -205,7 +205,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
             />
           </Field>
 
-          <Field label="State" required>
+          <Field label="State">
             <CustomDropdown
               options={INDIAN_STATES}
               value={step1.state || ''}
@@ -222,7 +222,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
             />
           </Field>
 
-          <Field label="Pin Code" required>
+          <Field label="Pin Code">
             <input
               type="text"
               className="w-full px-4 py-3 rounded-lg bg-white outline-none"
@@ -239,7 +239,6 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FileUploadField
           label="Utility Bill (Electricity Bill or Similar)"
-          required
           accept=".pdf,.jpg,.jpeg,.png"
           placeholder="Upload Doc in PDF"
           onChange={(file) => handleFileUpload('utilityBill', file)}
@@ -248,7 +247,6 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
 
         <FileUploadField
           label="Rental Agreement/Affidavit"
-          required
           accept=".pdf"
           placeholder="Upload Doc in PDF"
           onChange={(file) => handleFileUpload('rentalAgreement', file)}
@@ -340,7 +338,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Field label="Date of Incorporation/Registration" required>
+          <Field label="Date of Incorporation/Registration">
             <input
               type="date"
               className="w-full px-4 py-3 rounded-lg bg-white outline-none"
@@ -359,7 +357,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
           </Field>
 
           {step1.businessCommenced && (
-            <Field label="Date of Commencement of Business" required>
+            <Field label="Date of Commencement of Business">
               <input
                 type="date"
                 className="w-full px-4 py-3 rounded-lg bg-white outline-none"
@@ -413,7 +411,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
     <div className="grid grid-cols-1 gap-6 mt-6">
       {/* Proprietor Basic Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Field label="Name of Proprietor" required>
+        <Field label="Name of Proprietor">
           <input
             className="w-full px-4 py-3 rounded-lg bg-white outline-none"
             placeholder="Enter name as per PAN card"
@@ -422,7 +420,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
           />
         </Field>
 
-        <Field label="Date of Birth" required>
+        <Field label="Date of Birth">
           <input
             type="date"
             className="w-full px-4 py-3 rounded-lg bg-white outline-none"
@@ -431,7 +429,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
           />
         </Field>
 
-        <Field label="Occupation Type" required>
+        <Field label="Occupation Type">
           <CustomDropdown
             options={OCCUPATION_TYPES}
             value={step2.occupationType || ''}
@@ -440,7 +438,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
           />
         </Field>
 
-        <Field label="Email ID of the Proprietor" required>
+        <Field label="Email ID of the Proprietor">
           <input
             type="email"
             className="w-full px-4 py-3 rounded-lg bg-white outline-none"
@@ -453,7 +451,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
 
       {/* Contact Number */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Field label="Contact Number" required>
+        <Field label="Contact Number">
           <div className="flex gap-2">
             <input
               type="text"
@@ -480,7 +478,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Field label="Address Line 1" required>
+          <Field label="Address Line 1">
             <input
               className="w-full px-4 py-3 rounded-lg bg-white outline-none"
               placeholder="Building, Street"
@@ -498,7 +496,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
             />
           </Field>
 
-          <Field label="City" required>
+          <Field label="City">
             <input
               className="w-full px-4 py-3 rounded-lg bg-white outline-none"
               placeholder="Enter city"
@@ -507,7 +505,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
             />
           </Field>
 
-          <Field label="State" required>
+          <Field label="State">
             <CustomDropdown
               options={INDIAN_STATES}
               value={step2.permanentState || ''}
@@ -524,7 +522,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
             />
           </Field>
 
-          <Field label="Pin Code" required>
+          <Field label="Pin Code">
             <input
               type="text"
               className="w-full px-4 py-3 rounded-lg bg-white outline-none"
@@ -541,7 +539,6 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FileUploadField
           label="Aadhaar Card"
-          required
           accept=".pdf,.jpg,.jpeg,.png"
           placeholder="Upload Doc in PDF"
           onChange={(file) => handleFileUpload('aadhaarCard', file)}
@@ -550,7 +547,6 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
 
         <FileUploadField
           label="Passport Size Photo"
-          required
           accept=".jpg,.jpeg,.png"
           placeholder="Upload Photo in JPG, JPEG"
           onChange={(file) => handleFileUpload('passportPhoto', file)}
@@ -559,7 +555,6 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
 
         <FileUploadField
           label="PAN Card Photo"
-          required
           accept=".pdf,.jpg,.jpeg,.png"
           placeholder="Upload Doc in PDF"
           onChange={(file) => handleFileUpload('panCard', file)}
@@ -568,7 +563,6 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
 
         <FileUploadField
           label="Most Recent Bank Statement"
-          required
           accept=".pdf"
           placeholder="Upload Doc in PDF"
           onChange={(file) => handleFileUpload('bankStatement', file)}
