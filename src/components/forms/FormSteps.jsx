@@ -41,7 +41,6 @@ function DirectorForm({ directorNumber }) {
         <FileUploadField
           label="Upload Aadhaar Card"
           buttonLabel="Upload Doc in PDF"
-          required
           accept="application/pdf"
         />
       </div>
@@ -49,7 +48,6 @@ function DirectorForm({ directorNumber }) {
         <FileUploadField
           label="PAN Upload"
           buttonLabel="Upload Doc in PDF"
-          required
           accept="application/pdf"
         />
         <Field label="Are you an Authorised Representative" required>
@@ -66,14 +64,14 @@ function DirectorForm({ directorNumber }) {
 export function Step1Content() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Field label="Business Name" required>
+      <Field label="Business Name">
         <input
           className="w-full px-4 py-3 rounded-lg bg-white outline-none"
           placeholder="Enter your Business Name"
         />
       </Field>
 
-      <Field label="Type of Business" required>
+      <Field label="Type of Business">
         <CustomDropdown
           options={["Private Limited", "Public Limited", "LLP", "Partnership", "Sole Proprietorship"]}
           placeholder="Select your Business Type"
@@ -81,7 +79,7 @@ export function Step1Content() {
       </Field>
 
       <div className="md:col-span-2">
-        <Field label="Nature of Business" required>
+        <Field label="Nature of Business">
           <textarea
             rows="5"
             className="w-full px-4 py-3 rounded-lg bg-white outline-none"
@@ -90,14 +88,14 @@ export function Step1Content() {
         </Field>
       </div>
 
-      <Field label="Business Email" required>
+      <Field label="Business Email">
         <input
           className="w-full px-4 py-3 rounded-lg bg-white outline-none"
           placeholder="Enter your Business Email"
         />
       </Field>
 
-      <Field label="Business Contact Number" required>
+      <Field label="Business Contact Number">
         <div className="flex gap-2">
           <input
             disabled
@@ -111,28 +109,28 @@ export function Step1Content() {
         </div>
       </Field>
 
-      <Field label="Number of Directors/Partners" required>
+      <Field label="Number of Directors/Partners">
         <input
           className="w-full px-4 py-3 rounded-lg bg-white outline-none"
           placeholder="Enter Number of Directors/Partners"
         />
       </Field>
 
-      <Field label="Mobile App link" required>
+      <Field label="Mobile App link">
         <input
           className="w-full px-4 py-3 rounded-lg bg-white outline-none"
           placeholder="Enter Mobile App link"
         />
       </Field>
 
-      <Field label="Website link" required>
+      <Field label="Website link">
         <input
           className="w-full px-4 py-3 rounded-lg bg-white outline-none"
           placeholder="Enter Website link"
         />
       </Field>
 
-      <Field label="Number of Employees" required>
+      <Field label="Number of Employees">
         <input
           className="w-full px-4 py-3 rounded-lg bg-white outline-none"
           placeholder="Enter Number of Employees"
@@ -142,7 +140,6 @@ export function Step1Content() {
       <FileUploadField
         label="Upload Logo"
         buttonLabel="Upload Logo in Jpg, Jpeg"
-        required
         accept="image/jpeg,image/jpg"
       />
 
@@ -155,27 +152,23 @@ export function Step1Content() {
       <FileUploadField
         label="Certificate of Incorporation / Partnership Deed"
         buttonLabel="Upload Doc in PDF"
-        required
         accept="application/pdf"
       />
 
       <FileUploadField
         label="PAN(Entity)"
         buttonLabel="Upload Doc in PDF"
-        required
         accept="application/pdf"
       />
 
       <FileUploadField
         label="TAN(Entity)"
         buttonLabel="Upload Doc in PDF"
-        required
         accept="application/pdf"
       />
 
       <Field
         label="Any recognition or awards received by the startup"
-        required
       >
         <CustomDropdown
           options={["Yes", "No"]}
@@ -189,7 +182,7 @@ export function Step1Content() {
 export function Step2Content() {
   return (
     <div className="grid grid-cols-1 gap-6">
-      <Field label="What problem your startup is solving" required>
+      <Field label="What problem your startup is solving">
         <textarea
           rows="5"
           className="w-full px-4 py-3 rounded-lg bg-white outline-none"
@@ -199,7 +192,6 @@ export function Step2Content() {
 
       <Field
         label="How does the startup propose to solve the problem"
-        required
       >
         <textarea
           rows="5"
@@ -208,7 +200,7 @@ export function Step2Content() {
         />
       </Field>
 
-      <Field label="What is the uniqueness of the solution" required>
+      <Field label="What is the uniqueness of the solution">
         <textarea
           rows="5"
           className="w-full px-4 py-3 rounded-lg bg-white outline-none"
@@ -216,7 +208,7 @@ export function Step2Content() {
         />
       </Field>
 
-      <Field label="How your startup earns revenue" required>
+      <Field label="How your startup earns revenue">
         <textarea
           rows="5"
           className="w-full px-4 py-3 rounded-lg bg-white outline-none"
@@ -226,7 +218,6 @@ export function Step2Content() {
 
       <Field
         label="Brief note supporting the options chosen for innovation, improvement and scalability"
-        required
       >
         <textarea
           rows="5"
