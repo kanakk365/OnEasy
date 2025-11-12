@@ -46,11 +46,7 @@ const INDIAN_STATES = [
   'Delhi',
   'Puducherry',
   'Chandigarh',
-  'Ladakh',
-  'Andaman and Nicobar Islands',
-  'Dadra and Nagar Haveli and Daman and Diu',
-  'Jammu and Kashmir',
-  'Lakshadweep'
+  'Ladakh'
 ];
 
 const BUSINESS_TYPES = [
