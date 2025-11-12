@@ -115,79 +115,51 @@ function ProprietorshipForm() {
 
   return (
     <div className="min-h-screen bg-[#f3f5f7] py-8">
-      <div className="max-w-5xl mx-auto px-6">
+      <div className="max-w-6xl mx-auto px-6 py-10">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h1 className="text-2xl font-bold text-[#28303F] mb-2">
-            Proprietorship Registration Form
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-xl font-semibold text-[#28303F]">
+            Add your Details
           </h1>
-          <p className="text-gray-600">
-            Complete the following steps to register your proprietorship
-          </p>
           {packageDetails && (
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Selected Package</p>
-                  <p className="text-lg font-semibold text-[#00486D]">{packageDetails.name}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-700">Amount Paid</p>
-                  <p className="text-lg font-semibold text-green-600">
-                    ₹{Number(packageDetails.priceValue || packageDetails.price).toLocaleString('en-IN')}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <p className="text-sm text-gray-600">
+              Package: <span className="font-medium">{packageDetails.name}</span> - <span className="font-semibold text-[#00486D]">₹{Number(packageDetails.priceValue || packageDetails.price).toLocaleString('en-IN')}</span>
+            </p>
           )}
         </div>
 
         {/* Step Indicator */}
-        <div className="mb-8">
-          <StepIndicator
-            steps={[
-              'Basic Business Details',
-              'Basic Proprietor Details'
-            ]}
-            currentStep={step}
-          />
-        </div>
+        <StepIndicator
+          steps={[
+            'Basic Business Details',
+            'Basic Proprietor Details'
+          ]}
+          currentStep={step}
+        />
 
         {/* Step Content */}
-        <div className="bg-white rounded-lg shadow-sm p-8">
+        <div className="rounded-lg p-6">
           {renderStepContent()}
           
           {/* Navigation Buttons */}
-          <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
-            {step > 1 ? (
-              <button
-                onClick={handleBack}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-              >
-                ← Back
-              </button>
-            ) : (
-              <div></div>
-            )}
-            
-            {step < 2 ? (
-              <button
-                onClick={handleNext}
-                className="px-8 py-3 text-white rounded-lg font-medium transition-colors"
-                style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
-              >
-                Next
-              </button>
-            ) : (
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="px-8 py-3 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Registration'}
-              </button>
-            )}
+          <div className="flex justify-between mt-8">
+            <button
+              type="button"
+              onClick={handleBack}
+              disabled={isSubmitting}
+              className={`px-6 py-1.5 rounded-md border border-[#00486D] text-[#00486D] ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={step < 2 ? handleNext : handleSubmit}
+              disabled={isSubmitting}
+              className={`px-6 py-1.5 rounded-md text-white font-medium ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
+            >
+              {isSubmitting ? 'Submitting...' : (step === 2 ? 'Submit' : 'Next')}
+            </button>
           </div>
         </div>
 
