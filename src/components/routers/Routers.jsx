@@ -10,7 +10,7 @@ import Registrations from "../pages/Registrations";
 import RegistrationCategories from "../pages/RegistrationCategories";
 import CompanyCategories from "../pages/CompanyCategories";
 import CompanyDetails from "../pages/CompanyDetails";
-import BusinessDetailsForm from "../pages/BusinessDetailsForm";
+import StartupIndiaForm from "../pages/StartupIndiaForm";
 import Settings from "../pages/Settings";
 import Organization from "../pages/Organization";
 import PrivateLimitedForm from "../forms/PrivateLimitedForm";
@@ -76,9 +76,9 @@ function Routers() {
           <CompanyDetails />
         </ProtectedRoute>
       } />
-      <Route path="/company-form" element={
+      <Route path="/startup-india-form" element={
         <ProtectedRoute>
-          <BusinessDetailsForm />
+          <StartupIndiaForm />
         </ProtectedRoute>
       } />
       <Route path="/private-limited-form" element={

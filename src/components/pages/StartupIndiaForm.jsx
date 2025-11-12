@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import StepIndicator from "../forms/StepIndicator";
 import { Step1Content, Step2Content, Step3Content, Step4Content, Step5Content } from "../forms/FormSteps";
 
-function BusinessDetailsForm() {
+function StartupIndiaForm() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
 
@@ -83,4 +83,4 @@ function BusinessDetailsForm() {
   );
 }
 
-export default BusinessDetailsForm;
+export default StartupIndiaForm;

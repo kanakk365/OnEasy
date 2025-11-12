@@ -28,6 +28,7 @@ function RegistrationCategories() {
       title: "Start - Up India Certificate",
       description: "Get certified under Start-Up India initiative",
       icon: <FaCertificate />,
+      path: "/startup-india-form",
     },
     {
       id: 2,
@@ -143,6 +144,7 @@ function RegistrationCategories() {
           {filteredRegistrations.map((registration) => (
             <div
               key={registration.id}
+              onClick={() => registration.path && navigate(registration.path)}
               className="relative cursor-pointer rounded-xl p-8 transition-all duration-200 flex flex-col items-center text-center group bg-[#FAFBFF] border border-[#EFEFEF] shadow-[0_4px_16px_0_#9797970D] hover:bg-[#01466a] hover:text-white"
             >
               <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4 bg-[#00486d] group-hover:bg-[#25607f]">
