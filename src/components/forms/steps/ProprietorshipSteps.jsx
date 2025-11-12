@@ -216,7 +216,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
 
           <Field label="Country">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-gray-100 outline-none"
+              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
               value="India"
               disabled
             />
@@ -518,7 +518,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
 
           <Field label="Country">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-gray-100 outline-none"
+              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
               value="India"
               disabled
             />
