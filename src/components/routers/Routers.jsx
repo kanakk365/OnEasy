@@ -16,6 +16,9 @@ import PrivateLimitedForm from "../forms/PrivateLimitedForm";
 import PrivateLimitedDashboard from "../pages/PrivateLimitedDashboard";
 import PrivateLimitedDetails from "../pages/PrivateLimitedDetails";
 import ProprietorshipDetails from "../pages/ProprietorshipDetails";
+import ProprietorshipForm from "../forms/ProprietorshipForm";
+import ProprietorshipDashboard from "../pages/ProprietorshipDashboard";
+import ProprietorshipViewDetails from "../pages/ProprietorshipViewDetails";
 import AdminLayout from "../admin/layout/AdminLayout";
 import AdminClients from "../admin/pages/AdminClients";
 import AdminClientOverview from "../admin/pages/AdminClientOverview";
@@ -84,6 +87,21 @@ function Routers() {
       <Route path="/private-limited/view/:ticketId" element={
         <ProtectedRoute>
           <PrivateLimitedDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/proprietorship-form" element={
+        <ProtectedRoute>
+          <ProprietorshipForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/proprietorship-dashboard" element={
+        <ProtectedRoute>
+          <ProprietorshipDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/proprietorship/view/:ticketId" element={
+        <ProtectedRoute>
+          <ProprietorshipViewDetails />
         </ProtectedRoute>
       } />
       <Route path="/settings" element={
