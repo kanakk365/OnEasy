@@ -24,6 +24,7 @@ import AdminClients from "../admin/pages/AdminClients";
 import AdminClientOverview from "../admin/pages/AdminClientOverview";
 import AdminProfile from "../admin/pages/AdminProfile";
 import AdminFillForm from "../admin/pages/AdminFillForm";
+import RegistrationDetailsRouter from "../admin/pages/RegistrationDetailsRouter";
 import SuperAdminLayout from "../superadmin/layout/SuperAdminLayout";
 import SuperAdminClients from "../superadmin/pages/SuperAdminClients";
 import SuperAdminProfile from "../superadmin/pages/SuperAdminProfile";
@@ -124,7 +125,7 @@ function Routers() {
         <Route path="clients" element={<AdminClients />} />
         <Route path="client-overview/:userId" element={<AdminClientOverview />} />
         <Route path="profile" element={<AdminProfile />} />
-        <Route path="client-details/:ticketId" element={<PrivateLimitedDetails />} />
+        <Route path="client-details/:ticketId" element={<RegistrationDetailsRouter />} />
         <Route path="fill-form/:ticketId" element={<AdminFillForm />} />
       </Route>
       
@@ -136,7 +137,7 @@ function Routers() {
       }>
         <Route path="clients" element={<SuperAdminClients />} />
         <Route path="profile" element={<SuperAdminProfile />} />
-        <Route path="client-details/:ticketId" element={<PrivateLimitedDetails />} />
+        <Route path="client-details/:ticketId" element={<RegistrationDetailsRouter />} />
         <Route path="fill-form/:ticketId" element={<SuperAdminFillForm />} />
       </Route>
 
