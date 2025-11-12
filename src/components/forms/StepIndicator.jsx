@@ -65,7 +65,6 @@ function StepIndicator({ steps, currentStep }) {
 
 export default StepIndicator;
 
-
 function StepCircle({ status }) {
   if (status === "completed") {
     return (
@@ -111,4 +110,3 @@ function Connector({ completed }) {
 }
 
 export { StepCircle, Connector };
-
