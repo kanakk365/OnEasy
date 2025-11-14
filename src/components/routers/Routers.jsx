@@ -2,7 +2,6 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Login from "../pages/Login";
 import OTPVerification from "../pages/OTPVerification";
-import CompleteProfile from "../pages/CompleteProfile";
 import ReferralCode from "../pages/ReferralCode";
 import Client from "../pages/Client";
 import Admin from "../pages/Admin";
@@ -39,7 +38,6 @@ function Routers() {
       {/* Public Routes */}
       <Route path="/" element={<Login />} />
       <Route path="/verify-otp" element={<OTPVerification />} />
-      <Route path="/complete-profile" element={<CompleteProfile />} />
       <Route path="/referral" element={<ReferralCode />} />
       
       {/* User Routes - Protected */}

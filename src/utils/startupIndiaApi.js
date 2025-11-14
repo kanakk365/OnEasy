@@ -85,27 +85,3 @@ export const getSignedUrl = async (fileUrl) => {
     throw error;
   }
 };
-
-  try {
-    const response = await apiClient.put(`${API_BASE}/${ticketId}`, updateData);
-    return response.data;
-  } catch (error) {
-    console.error('Error updating Startup India registration:', error);
-    throw error;
-  }
-};
-
-/**
- * Get signed URL for viewing/downloading a document
- */
-export const getSignedUrl = async (fileUrl) => {
-  try {
-    const response = await apiClient.get(`${API_BASE}/signed-url`, {
-      params: { fileUrl }
-    });
-    return response.data.signedUrl;
-  } catch (error) {
-    console.error('Error getting signed URL:', error);
-    throw error;
-  }
-};

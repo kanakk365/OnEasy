@@ -132,5 +132,3 @@ function Registrations() {
 }
 
 export default Registrations;
-
-export default Registrations;

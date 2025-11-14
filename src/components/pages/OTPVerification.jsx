@@ -80,19 +80,6 @@ function OTPVerification() {
       console.log('👤 User data:', result.user)
       console.log('🔑 User role:', result.user?.role)
       console.log('🔑 User role_id:', result.user?.role_id)
-      console.log('📋 Profile incomplete:', result.profileIncomplete)
-      
-      // Check if profile is incomplete
-      if (result.profileIncomplete) {
-        console.log('⚠️  Profile incomplete - redirecting to complete profile page')
-        navigate('/complete-profile', {
-          state: {
-            userId: result.user?.id,
-            phone: result.user?.phone
-          }
-        })
-        return
-      }
       
       // Navigate to appropriate dashboard based on user role
       const userRole = result.user?.role || result.user?.role_id
