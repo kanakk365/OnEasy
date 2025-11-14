@@ -542,3 +542,5 @@ function ProprietorshipViewDetails() {
 
 export default ProprietorshipViewDetails;
 
+
+

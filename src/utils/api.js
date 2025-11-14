@@ -102,6 +102,26 @@ class APIClient {
   }
 
   // Authentication methods
+  async emailLogin(email, password) {
+    const response = await this.post(
+      AUTH_CONFIG.ENDPOINTS.EMAIL_LOGIN,
+      { email, password },
+      { includeAuth: false }
+    );
+
+    // Store token and user data
+    if (response.success && response.token) {
+      localStorage.setItem(AUTH_CONFIG.STORAGE_KEYS.TOKEN, response.token);
+      localStorage.setItem(AUTH_CONFIG.STORAGE_KEYS.USER, JSON.stringify(response.user));
+      
+      if (response.refreshToken) {
+        localStorage.setItem(AUTH_CONFIG.STORAGE_KEYS.REFRESH_TOKEN, response.refreshToken);
+      }
+    }
+
+    return response;
+  }
+
   async phoneLogin(phone) {
     return this.post(AUTH_CONFIG.ENDPOINTS.PHONE_LOGIN, { phone }, { includeAuth: false });
   }

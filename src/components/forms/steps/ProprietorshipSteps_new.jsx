@@ -563,3 +563,5 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
   );
 }
 
+
+
