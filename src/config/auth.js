@@ -8,6 +8,7 @@ export const AUTH_CONFIG = {
   
   // Login endpoints
   ENDPOINTS: {
+    SIGNUP: '/auth/signup',
     EMAIL_LOGIN: '/auth/email-login',
     PHONE_LOGIN: '/auth/phone-login',
     VERIFY_OTP: '/auth/verify-otp',
