@@ -581,3 +581,21 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
   );
 }
 
+
+          placeholder="Upload Doc in PDF"
+          onChange={(file) => handleFileUpload('bankStatement', file)}
+          value={step2.bankStatement}
+        />
+
+        <FileUploadField
+          label="Name board of the premises (Optional)"
+          accept=".jpg,.jpeg,.png"
+          placeholder="Upload Photo in JPG, JPEG"
+          onChange={(file) => handleFileUpload('nameBoard', file)}
+          value={step2.nameBoard}
+        />
+      </div>
+    </div>
+  );
+}
+
