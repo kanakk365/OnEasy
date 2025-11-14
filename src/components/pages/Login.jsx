@@ -68,15 +68,25 @@ function Login() {
       const data = await apiClient.emailLogin(email, password);
 
       console.log("✅ Email login successful");
+      console.log("📊 User data received:", data.user);
+      console.log("🔐 User role:", data.user?.role);
+      console.log("🔐 User role_id:", data.user?.role_id);
 
       // Navigate to appropriate dashboard based on role
       const userRole = data.user?.role_id;
+      const userRoleString = data.user?.role;
       
-      if (userRole === '1' || userRole === '2') {
+      console.log("🚀 Navigating based on role_id:", userRole);
+      
+      // Check by role_id or role string
+      if (userRole === '1' || userRole === '2' || userRole === 1 || userRole === 2 || userRoleString === 'admin' || userRoleString === 'superadmin') {
+        console.log("➡️  Redirecting to /admin");
         navigate("/admin");
-      } else if (userRole === '3') {
+      } else if (userRole === '3' || userRole === 3 || userRoleString === 'partner') {
+        console.log("➡️  Redirecting to /partner");
         navigate("/partner");
       } else {
+        console.log("➡️  Redirecting to /client");
         navigate("/client");
       }
     } catch (err) {
