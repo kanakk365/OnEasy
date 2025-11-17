@@ -63,6 +63,29 @@ class APIClient {
       return await this.handleResponse(response);
     } catch (error) {
       console.error('API Request Error:', error);
+      
+      // Check if it's a network error (Failed to fetch) for email-related endpoints
+      const emailEndpoints = [
+        '/auth/signup',
+        '/auth/email-login',
+        AUTH_CONFIG.ENDPOINTS.EMAIL_LOGIN,
+        AUTH_CONFIG.ENDPOINTS.SIGNUP,
+      ];
+      
+      const isEmailEndpoint = emailEndpoints.some(emailEndpoint => 
+        endpoint.includes(emailEndpoint) || endpoint === emailEndpoint
+      );
+      
+      // Check if error is a network error (Failed to fetch)
+      const isNetworkError = error.message === 'Failed to fetch' || 
+                            error.message?.includes('Failed to fetch') ||
+                            error.name === 'TypeError' ||
+                            error.message?.includes('network');
+      
+      if (isEmailEndpoint && isNetworkError) {
+        throw new Error('Invalid email id');
+      }
+      
       throw error;
     }
   }
@@ -215,6 +238,20 @@ class APIClient {
     return response;
   }
 
+  async changePassword(currentPassword, newPassword) {
+    return this.put('/auth/change-password', {
+      currentPassword,
+      newPassword
+    });
+  }
+
+  async setEmailPassword(email, password) {
+    return this.put('/auth/set-email-password', {
+      email,
+      password
+    });
+  }
+
   // Company methods
   async getCompanies(params = {}) {
     const queryString = new URLSearchParams(params).toString();
@@ -259,6 +296,11 @@ class APIClient {
 
   async addRegistrationNote(id, content) {
     return this.post(`/registrations/${id}/notes`, { content });
+  }
+
+  // Admin methods
+  async createUser(userData) {
+    return this.post('/admin/users/create', userData);
   }
 
   // Referral methods

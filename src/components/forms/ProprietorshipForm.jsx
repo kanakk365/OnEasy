@@ -4,9 +4,17 @@ import StepIndicator from './StepIndicator';
 import { BasicBusinessDetailsContent, BasicProprietorDetailsContent } from './steps/ProprietorshipSteps';
 import { submitProprietorshipRegistration } from '../../utils/proprietorshipApi';
 
-function ProprietorshipForm() {
+function ProprietorshipForm({ 
+  packageDetails: propPackageDetails,
+  onClose,
+  isAdminFilling = false,
+  clientId = null,
+  ticketId = null,
+  initialData = null,
+  onFormSubmit = null
+}) {
   const navigate = useNavigate();
-  const [packageDetails, setPackageDetails] = useState(null);
+  const [packageDetails, setPackageDetails] = useState(propPackageDetails);
   const [step, setStep] = useState(1);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,7 +59,19 @@ function ProprietorshipForm() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    
     try {
+      // If onFormSubmit callback is provided (new registration flow), use it instead
+      if (onFormSubmit && isAdminFilling && !ticketId) {
+        console.log('📝 New registration flow - calling onFormSubmit callback');
+        await onFormSubmit({
+          step1: formData.step1 || {},
+          step2: formData.step2 || {}
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const paymentDetails = JSON.parse(localStorage.getItem('paymentDetails') || '{}');
       
       const submissionData = {

@@ -12,7 +12,8 @@ function PrivateLimitedForm({
   clientId = null,
   ticketId = null,
   initialData = null,
-  onStepChange = null
+  onStepChange = null,
+  onFormSubmit = null // New callback for new registration flow
 }) {
   const navigate = useNavigate();
   const [packageDetails, setPackageDetails] = useState(propPackageDetails);
@@ -270,6 +271,29 @@ function PrivateLimitedForm({
 
     try {
       setIsSubmitting(true);
+      
+      // If onFormSubmit callback is provided (new registration flow), use it instead
+      if (onFormSubmit && isAdminFilling && !ticketId) {
+        console.log('📝 New registration flow - calling onFormSubmit callback');
+        console.log('📋 Form data being sent:', {
+          hasStep1: !!formData.step1,
+          hasStep2: !!formData.step2,
+          hasStep3: !!formData.step3,
+          directorsCount: formData.directors?.length || 0,
+          formDataKeys: Object.keys(formData)
+        });
+        localStorage.setItem(submissionKey, 'true');
+        await onFormSubmit({
+          step1: formData.step1 || {},
+          step2: formData.step2 || {},
+          step3: formData.step3 || {},
+          directors: formData.directors || []
+        });
+        localStorage.removeItem(submissionKey);
+        setIsSubmitting(false);
+        return;
+      }
+      
       localStorage.setItem(submissionKey, 'true');
       console.log('📝 Submitting Private Limited registration...');
       console.log('Form Data:', formData);

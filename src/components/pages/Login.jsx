@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import apiClient from "../../utils/api";
 import logo from "../../assets/logo.png";
 import bgImage from "../../assets/bg.png";
+import ChangePasswordModal from "../common/ChangePasswordModal";
 
 function Login() {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ function Login() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [userDataAfterLogin, setUserDataAfterLogin] = useState(null);
 
   // Handle signup
   const handleSignup = async (e) => {
@@ -52,6 +55,35 @@ function Login() {
     }
   };
 
+  // Navigate to appropriate dashboard
+  const navigateToDashboard = (user) => {
+    const userRole = user?.role_id;
+    const userRoleString = user?.role;
+    
+    console.log("🚀 Navigating based on role_id:", userRole);
+    
+    // Check by role_id or role string
+    if (userRole === '1' || userRole === '2' || userRole === 1 || userRole === 2 || userRoleString === 'admin' || userRoleString === 'superadmin') {
+      console.log("➡️  Redirecting to /admin");
+      navigate("/admin");
+    } else if (userRole === '3' || userRole === 3 || userRoleString === 'partner') {
+      console.log("➡️  Redirecting to /partner");
+      navigate("/partner");
+    } else {
+      console.log("➡️  Redirecting to /client");
+      navigate("/client");
+    }
+  };
+
+  // Handle password change success
+  const handlePasswordChangeSuccess = () => {
+    // After password change, navigate to dashboard
+    if (userDataAfterLogin) {
+      const updatedUser = { ...userDataAfterLogin, must_change_password: false };
+      navigateToDashboard(updatedUser);
+    }
+  };
+
   // Handle email/password login
   const handleEmailLogin = async (e) => {
     e.preventDefault();
@@ -71,24 +103,19 @@ function Login() {
       console.log("📊 User data received:", data.user);
       console.log("🔐 User role:", data.user?.role);
       console.log("🔐 User role_id:", data.user?.role_id);
+      console.log("🔐 Must change password:", data.user?.must_change_password);
+
+      // Check if user must change password
+      if (data.user?.must_change_password) {
+        // Store user data and show password change modal
+        setUserDataAfterLogin(data.user);
+        setShowChangePasswordModal(true);
+        setIsLoading(false);
+        return; // Don't navigate yet
+      }
 
       // Navigate to appropriate dashboard based on role
-      const userRole = data.user?.role_id;
-      const userRoleString = data.user?.role;
-      
-      console.log("🚀 Navigating based on role_id:", userRole);
-      
-      // Check by role_id or role string
-      if (userRole === '1' || userRole === '2' || userRole === 1 || userRole === 2 || userRoleString === 'admin' || userRoleString === 'superadmin') {
-        console.log("➡️  Redirecting to /admin");
-        navigate("/admin");
-      } else if (userRole === '3' || userRole === 3 || userRoleString === 'partner') {
-        console.log("➡️  Redirecting to /partner");
-        navigate("/partner");
-      } else {
-        console.log("➡️  Redirecting to /client");
-        navigate("/client");
-      }
+      navigateToDashboard(data.user);
     } catch (err) {
       setError(err.message || "Login failed");
     } finally {
@@ -612,6 +639,21 @@ function Login() {
           </div>
         </div>
       </div>
+
+      {/* Change Password Modal */}
+      {showChangePasswordModal && (
+        <ChangePasswordModal
+          isOpen={showChangePasswordModal}
+          onClose={() => {
+            // Don't allow closing if password change is required
+            if (!userDataAfterLogin?.must_change_password) {
+              setShowChangePasswordModal(false);
+            }
+          }}
+          onSuccess={handlePasswordChangeSuccess}
+          required={userDataAfterLogin?.must_change_password || false}
+        />
+      )}
     </div>
   );
 }

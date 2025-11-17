@@ -25,6 +25,9 @@ import AdminClients from "../admin/pages/AdminClients";
 import AdminClientOverview from "../admin/pages/AdminClientOverview";
 import AdminProfile from "../admin/pages/AdminProfile";
 import AdminFillForm from "../admin/pages/AdminFillForm";
+import AdminAddUser from "../admin/pages/AdminAddUser";
+import AdminNewRegistration from "../admin/pages/AdminNewRegistration";
+import AdminFillFormNew from "../admin/pages/AdminFillFormNew";
 import RegistrationDetailsRouter from "../admin/pages/RegistrationDetailsRouter";
 import SuperAdminLayout from "../superadmin/layout/SuperAdminLayout";
 import SuperAdminClients from "../superadmin/pages/SuperAdminClients";
@@ -130,6 +133,9 @@ function Routers() {
       }>
         <Route path="clients" element={<AdminClients />} />
         <Route path="client-overview/:userId" element={<AdminClientOverview />} />
+        <Route path="add-user" element={<AdminAddUser />} />
+        <Route path="new-registration" element={<AdminNewRegistration />} />
+        <Route path="fill-form-new" element={<AdminFillFormNew />} />
         <Route path="profile" element={<AdminProfile />} />
         <Route path="client-details/:ticketId" element={<RegistrationDetailsRouter />} />
         <Route path="fill-form/:ticketId" element={<AdminFillForm />} />

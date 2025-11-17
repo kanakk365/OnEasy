@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import apiClient from '../../utils/api'
 import logo from '../../assets/logo.png'
 import bgImage from '../../assets/bg.png'
+import SetEmailPasswordModal from '../common/SetEmailPasswordModal'
 
 function OTPVerification() {
   const navigate = useNavigate()
@@ -12,6 +13,8 @@ function OTPVerification() {
   const [error, setError] = useState('')
   const [canResend, setCanResend] = useState(false)
   const [resendTimer, setResendTimer] = useState(30)
+  const [showEmailPasswordModal, setShowEmailPasswordModal] = useState(false)
+  const [userDataAfterOTP, setUserDataAfterOTP] = useState(null)
   const inputRefs = useRef([])
 
   // Get phone number from location state
@@ -81,23 +84,26 @@ function OTPVerification() {
       console.log('🔑 User role:', result.user?.role)
       console.log('🔑 User role_id:', result.user?.role_id)
       
+      // Check if user has email (password is not returned in response for security)
+      // If user doesn't have email, they likely don't have password either
+      const hasEmail = result.user?.email && result.user.email.trim() !== ''
+      
+      console.log('📧 User has email:', hasEmail)
+      
+      // If user doesn't have email, show modal to set email and password
+      if (!hasEmail) {
+        console.log('⚠️ User missing email, showing setup modal')
+        setUserDataAfterOTP(result.user)
+        setShowEmailPasswordModal(true)
+        setIsLoading(false)
+        return // Don't navigate yet
+      }
+      
       // Navigate to appropriate dashboard based on user role
       const userRole = result.user?.role || result.user?.role_id
       console.log('🎯 Detected role for redirect:', userRole)
       
-      if (userRole === 'superadmin') {
-        console.log('➡️ Redirecting to superadmin panel...')
-        navigate('/superadmin/clients')
-      } else if (userRole === 'admin' || userRole === '1' || userRole === '2') {
-        console.log('➡️ Redirecting to admin panel...')
-        navigate('/admin/clients')
-      } else if (userRole === '3') {
-        console.log('➡️ Redirecting to partner dashboard...')
-        navigate('/partner')
-      } else {
-        console.log('➡️ Redirecting to client dashboard...')
-        navigate('/client')
-      }
+      navigateToDashboard(userRole)
       
     } catch (err) {
       setError(err.message || 'OTP verification failed')
@@ -143,6 +149,33 @@ function OTPVerification() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Navigate to dashboard based on role
+  const navigateToDashboard = (userRole) => {
+    if (userRole === 'superadmin') {
+      console.log('➡️ Redirecting to superadmin panel...')
+      navigate('/superadmin/clients')
+    } else if (userRole === 'admin' || userRole === '1' || userRole === '2') {
+      console.log('➡️ Redirecting to admin panel...')
+      navigate('/admin/clients')
+    } else if (userRole === '3') {
+      console.log('➡️ Redirecting to partner dashboard...')
+      navigate('/partner')
+    } else {
+      console.log('➡️ Redirecting to client dashboard...')
+      navigate('/client')
+    }
+  }
+
+  // Handle email/password setup success
+  const handleEmailPasswordSuccess = (updatedUser) => {
+    console.log('✅ Email and password set successfully')
+    setShowEmailPasswordModal(false)
+    
+    // Navigate to dashboard
+    const userRole = updatedUser?.role || updatedUser?.role_id || userDataAfterOTP?.role || userDataAfterOTP?.role_id
+    navigateToDashboard(userRole)
   }
 
   // Start resend timer on component mount
@@ -259,6 +292,21 @@ function OTPVerification() {
           </div>
         </div>
       </div>
+
+      {/* Email/Password Setup Modal */}
+      {showEmailPasswordModal && (
+        <SetEmailPasswordModal
+          isOpen={showEmailPasswordModal}
+          onClose={() => {
+            // Don't allow closing if required
+            if (!userDataAfterOTP) {
+              setShowEmailPasswordModal(false)
+            }
+          }}
+          onSuccess={handleEmailPasswordSuccess}
+          required={true}
+        />
+      )}
     </div>
   )
 }
