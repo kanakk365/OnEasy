@@ -15,14 +15,23 @@ function ProprietorshipViewDetails() {
 
   const fetchRegistrationDetails = async () => {
     try {
+      setLoading(true);
       const result = await getProprietorshipByTicketId(ticketId);
-      if (result.success) {
-        setRegistration(result.data);
+      console.log('📋 Proprietorship registration fetch result:', result);
+      
+      if (result.success && result.data) {
+        // Handle if result.data is nested (has details property)
+        const registrationData = result.data.details || result.data;
+        setRegistration(registrationData);
         // Fetch signed URLs for documents
-        await fetchSignedUrls(result.data);
+        await fetchSignedUrls(registrationData);
+      } else {
+        console.error('❌ Registration not found or invalid response:', result);
+        setRegistration(null);
       }
     } catch (error) {
-      console.error('Error fetching registration details:', error);
+      console.error('❌ Error fetching registration details:', error);
+      setRegistration(null);
     } finally {
       setLoading(false);
     }
@@ -78,13 +87,23 @@ function ProprietorshipViewDetails() {
     });
   };
 
+  const formatValue = (value) => {
+    if (value === null || value === undefined || value === '') return 'N/A';
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    return String(value);
+  };
+
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'completed':
       case 'approved':
+      case 'submitted':
         return 'bg-green-100 text-green-800';
       case 'pending':
+      case 'draft':
         return 'bg-yellow-100 text-yellow-800';
+      case 'incomplete':
+        return 'bg-orange-100 text-orange-800';
       case 'processing':
         return 'bg-blue-100 text-blue-800';
       case 'rejected':
@@ -188,19 +207,19 @@ function ProprietorshipViewDetails() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="font-medium text-gray-700">Business Name:</span>
-                <p className="text-gray-600">{registration.business_name || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.business_name)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Business Email:</span>
-                <p className="text-gray-600">{registration.business_email || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.business_email)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Contact Number:</span>
-                <p className="text-gray-600">{registration.contact_number || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.contact_number)}</p>
               </div>
               <div className="md:col-span-2">
                 <span className="font-medium text-gray-700">Nature of Business:</span>
-                <p className="text-gray-600">{registration.nature_of_business || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.nature_of_business)}</p>
               </div>
             </div>
           </div>
@@ -211,27 +230,27 @@ function ProprietorshipViewDetails() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
               <div>
                 <span className="font-medium text-gray-700">Address Line 1:</span>
-                <p className="text-gray-600">{registration.address_line1 || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.address_line1)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Address Line 2:</span>
-                <p className="text-gray-600">{registration.address_line2 || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.address_line2)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">City:</span>
-                <p className="text-gray-600">{registration.city || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.city)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">State:</span>
-                <p className="text-gray-600">{registration.state || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.state)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Country:</span>
-                <p className="text-gray-600">{registration.country || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.country)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Pin Code:</span>
-                <p className="text-gray-600">{registration.pincode || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.pincode)}</p>
               </div>
             </div>
           </div>
@@ -335,16 +354,22 @@ function ProprietorshipViewDetails() {
                 <p className="text-gray-600">{registration.special_abled ? 'Yes' : 'No'}</p>
               </div>
               <div>
-                <span className="font-medium text-gray-700">GSTIN Number:</span>
-                <p className="text-gray-600">{registration.gstin_number || 'N/A'}</p>
+                <span className="font-medium text-gray-700">Has GSTIN:</span>
+                <p className="text-gray-600">{formatValue(registration.has_gstin)}</p>
               </div>
+              {registration.has_gstin && (
+                <div>
+                  <span className="font-medium text-gray-700">GSTIN Number:</span>
+                  <p className="text-gray-600">{formatValue(registration.gstin_number)}</p>
+                </div>
+              )}
               <div>
                 <span className="font-medium text-gray-700">Date of Incorporation:</span>
                 <p className="text-gray-600">{formatDate(registration.date_of_incorporation)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Business Commenced:</span>
-                <p className="text-gray-600">{registration.business_commenced ? 'Yes' : 'No'}</p>
+                <p className="text-gray-600">{formatValue(registration.business_commenced)}</p>
               </div>
               {registration.business_commenced && (
                 <div>
@@ -354,10 +379,47 @@ function ProprietorshipViewDetails() {
               )}
               <div>
                 <span className="font-medium text-gray-700">Filed ITR:</span>
-                <p className="text-gray-600">{registration.filed_itr ? 'Yes' : 'No'}</p>
+                <p className="text-gray-600">{formatValue(registration.filed_itr)}</p>
               </div>
             </div>
           </div>
+
+          {/* Additional Unit Details */}
+          {(registration.additional_unit_name || registration.additional_unit_address_line1) && (
+            <div className="mb-6">
+              <h3 className="text-md font-semibold text-gray-800 mb-3">Additional Unit Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium text-gray-700">Unit Name:</span>
+                  <p className="text-gray-600">{formatValue(registration.additional_unit_name)}</p>
+                </div>
+                <div className="md:col-span-2">
+                  <span className="font-medium text-gray-700">Address Line 1:</span>
+                  <p className="text-gray-600">{formatValue(registration.additional_unit_address_line1)}</p>
+                </div>
+                <div className="md:col-span-2">
+                  <span className="font-medium text-gray-700">Address Line 2:</span>
+                  <p className="text-gray-600">{formatValue(registration.additional_unit_address_line2)}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">City:</span>
+                  <p className="text-gray-600">{formatValue(registration.additional_unit_city)}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">State:</span>
+                  <p className="text-gray-600">{formatValue(registration.additional_unit_state)}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Country:</span>
+                  <p className="text-gray-600">{formatValue(registration.additional_unit_country)}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Pin Code:</span>
+                  <p className="text-gray-600">{formatValue(registration.additional_unit_pincode)}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Bank Details */}
           {(registration.bank_name || registration.bank_account_number || registration.ifsc_code) && (
@@ -391,7 +453,7 @@ function ProprietorshipViewDetails() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="font-medium text-gray-700">Name:</span>
-                <p className="text-gray-600">{registration.proprietor_name || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.proprietor_name)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Date of Birth:</span>
@@ -399,15 +461,15 @@ function ProprietorshipViewDetails() {
               </div>
               <div>
                 <span className="font-medium text-gray-700">Occupation Type:</span>
-                <p className="text-gray-600">{registration.occupation_type || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.occupation_type)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Email:</span>
-                <p className="text-gray-600">{registration.proprietor_email || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.proprietor_email)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Contact Number:</span>
-                <p className="text-gray-600">{registration.proprietor_contact || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.proprietor_contact)}</p>
               </div>
             </div>
           </div>
@@ -418,27 +480,27 @@ function ProprietorshipViewDetails() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
               <div>
                 <span className="font-medium text-gray-700">Address Line 1:</span>
-                <p className="text-gray-600">{registration.permanent_address_line1 || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.permanent_address_line1)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Address Line 2:</span>
-                <p className="text-gray-600">{registration.permanent_address_line2 || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.permanent_address_line2)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">City:</span>
-                <p className="text-gray-600">{registration.permanent_city || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.permanent_city)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">State:</span>
-                <p className="text-gray-600">{registration.permanent_state || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.permanent_state)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Country:</span>
-                <p className="text-gray-600">{registration.permanent_country || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.permanent_country)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Pin Code:</span>
-                <p className="text-gray-600">{registration.permanent_pincode || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.permanent_pincode)}</p>
               </div>
             </div>
           </div>

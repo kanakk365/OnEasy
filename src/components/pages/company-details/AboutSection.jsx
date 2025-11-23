@@ -9,35 +9,37 @@ function AboutSection({
 }) {
   return (
     <div className="mt-8">
-      <div
-        className="rounded-lg p-8 mb-6 relative overflow-hidden"
-        style={{
-          background: "linear-gradient(90deg, #00486D 0%, #01334C 100%)",
-        }}
-      >
-        <div className="relative z-10 max-w-[60%]">
-          <h2 className="text-[18px] font-semibold tracking-[0.03em] text-white mb-4">
-            About Private Limited Company
-          </h2>
-          <p className="text-white text-[14px] font-medium leading-7 tracking-[0.03em] opacity-95">
-            A Private Limited Company is one of the most popular and trusted
-            business structures in India, known for providing limited liability
-            protection to its shareholders. It requires a minimum of two
-            shareholders and two directors and allows easy ownership
-            transferability while offering credibility in the business world.
-            This structure is ideal for small to medium-sized businesses aiming
-            for long-term growth.
-          </p>
+      {building && (
+        <div
+          className="rounded-lg p-8 mb-6 relative overflow-hidden"
+          style={{
+            background: "linear-gradient(90deg, #00486D 0%, #01334C 100%)",
+          }}
+        >
+          <div className="relative z-10 max-w-[60%]">
+            <h2 className="text-[18px] font-semibold tracking-[0.03em] text-white mb-4">
+              About Private Limited Company
+            </h2>
+            <p className="text-white text-[14px] font-medium leading-7 tracking-[0.03em] opacity-95">
+              A Private Limited Company is one of the most popular and trusted
+              business structures in India, known for providing limited liability
+              protection to its shareholders. It requires a minimum of two
+              shareholders and two directors and allows easy ownership
+              transferability while offering credibility in the business world.
+              This structure is ideal for small to medium-sized businesses aiming
+              for long-term growth.
+            </p>
+          </div>
+          <div className="absolute -right-4 -bottom-4 w-[45%] h-[110%]">
+            <img
+              src={building}
+              alt="Building Illustration"
+              className="w-full h-full object-cover"
+              style={{ opacity: 0.88 }}
+            />
+          </div>
         </div>
-        <div className="absolute -right-4 -bottom-4 w-[45%] h-[110%]">
-          <img
-            src={building}
-            alt="Building Illustration"
-            className="w-full h-full object-cover"
-            style={{ opacity: 0.88 }}
-          />
-        </div>
-      </div>
+      )}
 
       <div className="space-y-4">
         {aboutSections.map((section) => {

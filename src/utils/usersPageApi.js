@@ -36,6 +36,25 @@ export const updateUsersPageData = async (data) => {
   }
 };
 
+/**
+ * Update user data by userId (Admin only)
+ */
+export const updateUserDataByUserId = async (userId, data) => {
+  try {
+    console.log(`💾 Admin updating user data for user ${userId}...`);
+    console.log('📤 Sending payload:', data);
+    
+    const response = await apiClient.post(`/users-page/update-user/${userId}`, data);
+    
+    console.log('✅ User data updated:', response);
+    return response;
+  } catch (error) {
+    console.error('❌ Error updating user data:', error);
+    console.error('Error details:', error.response || error.message || error);
+    throw error;
+  }
+};
+
 
 
 

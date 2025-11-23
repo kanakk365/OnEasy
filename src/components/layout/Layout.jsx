@@ -11,8 +11,10 @@ const Layout = () => {
   const { isCollapsed } = useSidebarStore();
   const isAuthPage =
     location.pathname === "/" ||
+    location.pathname === "/login" ||
     location.pathname === "/verify-otp" ||
-    location.pathname === "/referral";
+    location.pathname === "/referral" ||
+    location.pathname === "/payment-success";
   const isAdminRoute = location.pathname.startsWith("/admin");
   const isSuperAdminRoute = location.pathname.startsWith("/superadmin");
 

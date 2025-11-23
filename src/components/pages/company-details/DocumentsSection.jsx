@@ -37,9 +37,11 @@ function DocumentsSection({ illustration, documents }) {
             </div>
           ))}
         </div>
-        <div className="flex-1 flex justify-center items-center">
-          <img src={illustration} alt="Documents Illustration" className="max-w-full h-auto" />
-        </div>
+        {illustration && (
+          <div className="flex-1 flex justify-center items-center">
+            <img src={illustration} alt="Documents Illustration" className="max-w-full h-auto" />
+          </div>
+        )}
       </div>
     </div>
   );

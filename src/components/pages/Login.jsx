@@ -1,12 +1,14 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import apiClient from "../../utils/api";
+import { AUTH_CONFIG } from "../../config/auth";
 import logo from "../../assets/logo.png";
 import bgImage from "../../assets/bg.png";
 import ChangePasswordModal from "../common/ChangePasswordModal";
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSignupMode, setIsSignupMode] = useState(false); // Toggle between login and signup
   const [loginMethod, setLoginMethod] = useState("phone"); // 'phone' or 'email'
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -19,6 +21,16 @@ function Login() {
   const [error, setError] = useState("");
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [userDataAfterLogin, setUserDataAfterLogin] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  // Check for payment success message from location state
+  useEffect(() => {
+    if (location.state?.paymentSuccess && location.state?.message) {
+      setSuccessMessage(location.state.message);
+      // Clear the state to prevent showing message on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Handle signup
   const handleSignup = async (e) => {
@@ -31,6 +43,9 @@ function Login() {
       if (!name.trim()) {
         throw new Error("Please enter your name");
       }
+      if (!phoneNumber.trim()) {
+        throw new Error("Please enter your phone number");
+      }
       if (!email.trim() || !password.trim()) {
         throw new Error("Please enter your email and password");
       }
@@ -41,10 +56,27 @@ function Login() {
         throw new Error("Passwords do not match");
       }
 
+      // Format phone number (remove country code if included)
+      const phone = phoneNumber.replace(/^\+91/, '').replace(/\s+/g, '');
+      if (phone.length !== 10) {
+        throw new Error("Please enter a valid 10-digit phone number");
+      }
+
       // Call backend API for signup
-      const data = await apiClient.signup({ name, email, password });
+      const data = await apiClient.signup({ name, email, password, phone });
 
       console.log("✅ Signup successful");
+      console.log("📱 User phone number:", data.user?.phone);
+
+      // Ensure phone number is stored in localStorage
+      if (data.user && data.user.phone) {
+        const storedUser = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER);
+        if (storedUser) {
+          const user = JSON.parse(storedUser);
+          user.phone = data.user.phone;
+          localStorage.setItem(AUTH_CONFIG.STORAGE_KEYS.USER, JSON.stringify(user));
+        }
+      }
 
       // Navigate to client dashboard (new users are always clients)
       navigate("/client");
@@ -76,11 +108,26 @@ function Login() {
   };
 
   // Handle password change success
-  const handlePasswordChangeSuccess = () => {
-    // After password change, navigate to dashboard
-    if (userDataAfterLogin) {
-      const updatedUser = { ...userDataAfterLogin, must_change_password: false };
-      navigateToDashboard(updatedUser);
+  const handlePasswordChangeSuccess = async () => {
+    // After password change, refresh user data from backend
+    try {
+      const userData = await apiClient.getMe()
+      if (userData && userData.user) {
+        console.log('🔄 Refreshed user data after password change:', userData.user)
+        console.log('🔒 Updated must_change_password:', userData.user.must_change_password)
+        navigateToDashboard(userData.user)
+      } else if (userDataAfterLogin) {
+        // Fallback to existing user data
+        const updatedUser = { ...userDataAfterLogin, must_change_password: false };
+        navigateToDashboard(updatedUser);
+      }
+    } catch (err) {
+      console.error('Error refreshing user data:', err)
+      // Fallback to existing user data
+      if (userDataAfterLogin) {
+        const updatedUser = { ...userDataAfterLogin, must_change_password: false };
+        navigateToDashboard(updatedUser);
+      }
     }
   };
 
@@ -249,6 +296,13 @@ function Login() {
               </p>
             </div>
 
+            {/* Success Message */}
+            {successMessage && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-sm text-green-800">{successMessage}</p>
+              </div>
+            )}
+
             {/* Login Method Tabs (only show in login mode) */}
             {!isSignupMode && (
               <div className="flex mb-6 border-b border-gray-200">
@@ -304,6 +358,36 @@ function Login() {
                     className="w-full h-12 px-4 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent placeholder-gray-400 text-sm"
                     disabled={isLoading}
                   />
+                </div>
+
+                {/* Phone Input */}
+                <div>
+                  <label
+                    htmlFor="signup-phone"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Phone Number
+                  </label>
+                  <div className="flex">
+                    <select
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      className="h-12 px-3 border border-gray-300 rounded-l-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#01334C] text-sm"
+                      disabled={isLoading}
+                    >
+                      <option value="+91">+91</option>
+                    </select>
+                    <input
+                      type="tel"
+                      id="signup-phone"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                      placeholder="Enter your phone number"
+                      maxLength="10"
+                      className="flex-1 h-12 px-4 border border-gray-300 rounded-r-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent placeholder-gray-400 text-sm"
+                      disabled={isLoading}
+                    />
+                  </div>
                 </div>
 
                 {/* Email Input */}

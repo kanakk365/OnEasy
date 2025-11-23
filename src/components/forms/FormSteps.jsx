@@ -1,8 +1,18 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import { Download, Check, TriangleAlert, CloudUpload } from "lucide-react";
 import Field from "./Field";
 import CustomDropdown from "./CustomDropdown";
 import FileUploadField from "./FileUploadField";
+
+// Helper to convert file to base64
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+};
 
 function DirectorForm({ directorNumber }) {
   return (
@@ -61,13 +71,27 @@ function DirectorForm({ directorNumber }) {
   );
 }
 
-export function Step1Content() {
+export function Step1Content({ formData, setFormData }) {
+  const step1 = formData?.step1 || {};
+  
+  const updateStep1 = (field, value) => {
+    setFormData({
+      ...formData,
+      step1: {
+        ...step1,
+        [field]: value
+      }
+    });
+  };
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Field label="Business Name">
         <input
           className="w-full px-4 py-3 rounded-lg bg-white outline-none"
           placeholder="Enter your Business Name"
+          value={step1.businessName || ''}
+          onChange={(e) => updateStep1('businessName', e.target.value)}
         />
       </Field>
 
@@ -324,7 +348,172 @@ export function Step4Content() {
   );
 }
 
-export function Step5Content() {
+export function Step5Content({ formData, setFormData }) {
+  const fileInputRef = useRef(null);
+  const [fileName, setFileName] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+  const step5 = formData?.step5 || {};
+
+  // Update step5 data
+  const updateStep5 = (field, value) => {
+    setFormData({
+      ...formData,
+      step5: {
+        ...step5,
+        [field]: value
+      }
+    });
+  };
+
+  // Handle file selection
+  const handleFileSelect = async (file) => {
+    if (!file) return;
+
+    // Validate file type
+    if (file.type !== 'application/pdf') {
+      alert('Please upload a PDF file only.');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size must be less than 10MB.');
+      return;
+    }
+
+    try {
+      const base64 = await fileToBase64(file);
+      setFileName(file.name);
+      updateStep5('authorizationLetter', base64);
+    } catch (error) {
+      console.error('Error converting file:', error);
+      alert('Failed to upload file. Please try again.');
+    }
+  };
+
+  // Handle file input change
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  // Handle browse button click
+  const handleBrowseClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Handle PDF download
+  const handleDownloadPDF = () => {
+    // Create a sample PDF content (minimal PDF structure)
+    const pdfContent = `%PDF-1.4
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/MediaBox [0 0 612 792]
+/Contents 4 0 R
+/Resources <<
+/Font <<
+/F1 <<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+>>
+>>
+>>
+endobj
+4 0 obj
+<<
+/Length 200
+>>
+stream
+BT
+/F1 12 Tf
+100 700 Td
+(Authorization Letter) Tj
+0 -20 Td
+(This letter confirms authorization for official) Tj
+0 -20 Td
+(communication and actions on behalf of the startup.) Tj
+0 -40 Td
+(Authorized Representative Name: ________________) Tj
+0 -20 Td
+(Designation: ________________) Tj
+0 -40 Td
+(Signature: ________________) Tj
+0 -20 Td
+(Date: ________________) Tj
+ET
+endstream
+endobj
+xref
+0 5
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000316 00000 n 
+trailer
+<<
+/Size 5
+/Root 1 0 R
+>>
+startxref
+516
+%%EOF`;
+
+    // Create a blob from the PDF content
+    const blob = new Blob([pdfContent], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create a temporary link and trigger download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'Authorization_Letter_Startup_India.pdf';
+    document.body.appendChild(link);
+    link.click();
+    
+    // Clean up
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Handle drag and drop
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       {/* Header + Download */}
@@ -344,6 +533,7 @@ export function Step5Content() {
           type="button"
           className="px-4 py-2 rounded-md text-white text-sm self-end flex items-center gap-2"
           style={{ background: 'linear-gradient(90deg, #01334C 0%, #00486D 100%)' }}
+          onClick={handleDownloadPDF}
         >
           <Download size={16} />
           Download PDF
@@ -401,19 +591,51 @@ export function Step5Content() {
         </div>
       </div>
 
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/pdf"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       {/* Dropzone */}
-      <div className="border-2 border-dashed flex flex-col items-center justify-center border-[#AFC3D2] rounded-xl p-8 text-center text-[#5A5A5A] bg-white">
+      <div
+        className={`border-2 border-dashed flex flex-col items-center justify-center rounded-xl p-8 text-center text-[#5A5A5A] bg-white cursor-pointer transition-colors ${
+          isDragging 
+            ? 'border-[#00486D] bg-[#F0F7FA]' 
+            : 'border-[#AFC3D2]'
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={handleBrowseClick}
+      >
         <CloudUpload
           size={24}
-          className="text-[#00486D] "
+          className="text-[#00486D]"
         />
-        <div className="text-sm">Drag & Drop your ID here</div>
-        <button
-          type="button"
-          className="mt-1 text-[#00486D] underline text-sm"
-        >
-          Browse Files
-        </button>
+        <div className="text-sm mt-2">
+          {fileName ? (
+            <span className="text-[#00486D] font-medium">✓ {fileName}</span>
+          ) : (
+            <>
+              Drag & Drop your PDF here
+              <br />
+              <button
+                type="button"
+                className="mt-1 text-[#00486D] underline text-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleBrowseClick();
+                }}
+              >
+                Browse Files
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="flex justify-center">
@@ -421,8 +643,15 @@ export function Step5Content() {
           type="button"
           className="px-6 py-3 rounded-md text-white text-sm"
           style={{ background: 'linear-gradient(90deg, #01334C 0%, #00486D 100%)' }}
+          onClick={() => {
+            if (fileName) {
+              alert('Authorization letter uploaded successfully!');
+            } else {
+              handleBrowseClick();
+            }
+          }}
         >
-          Upload Signed Authorization Letter
+          {fileName ? '✓ Upload Signed Authorization Letter' : 'Upload Signed Authorization Letter'}
         </button>
       </div>
     </div>

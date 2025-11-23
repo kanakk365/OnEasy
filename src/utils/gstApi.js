@@ -1,72 +1,72 @@
 import apiClient from './api';
 
-const API_BASE = '/startup-india';
+const API_BASE = '/gst';
 
 /**
- * Submit a new Startup India registration
+ * Submit a new GST registration
  */
-export const submitStartupIndiaRegistration = async (formData) => {
+export const submitGSTRegistration = async (formData) => {
   try {
-    console.log('📤 Submitting Startup India registration...');
+    console.log('📤 Submitting GST registration...');
     
     const response = await apiClient.post(`${API_BASE}/submit`, formData);
     
-    console.log('✅ Startup India registration submitted successfully:', response.data);
+    console.log('✅ GST registration submitted successfully:', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ Error submitting Startup India registration:', error);
+    console.error('❌ Error submitting GST registration:', error);
     throw error;
   }
 };
 
 /**
- * Get all Startup India registrations for the current user
+ * Get all GST registrations for the current user
  */
-export const getMyRegistrations = async () => {
+export const getMyGSTRegistrations = async () => {
   try {
     const response = await apiClient.get(`${API_BASE}/my-registrations`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching Startup India registrations:', error);
+    console.error('Error fetching GST registrations:', error);
     throw error;
   }
 };
 
 /**
- * Get Startup India registrations for a specific user (Admin only)
+ * Get GST registrations for a specific user (Admin only)
  */
-export const getUserStartupIndiaRegistrations = async (userId) => {
+export const getUserGSTRegistrations = async (userId) => {
   try {
     const response = await apiClient.get(`${API_BASE}/user-registrations/${userId}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching user Startup India registrations:', error);
+    console.error('Error fetching user GST registrations:', error);
     throw error;
   }
 };
 
 /**
- * Get a single Startup India registration by ticket ID
+ * Get a single GST registration by ticket ID
  */
-export const getStartupIndiaByTicketId = async (ticketId) => {
+export const getGSTByTicketId = async (ticketId) => {
   try {
     const response = await apiClient.get(`${API_BASE}/${ticketId}`);
     return response; // Return full response object, not just response.data
   } catch (error) {
-    console.error('Error fetching Startup India registration:', error);
+    console.error('Error fetching GST registration:', error);
     throw error;
   }
 };
 
 /**
- * Update a Startup India registration
+ * Update a GST registration
  */
-export const updateStartupIndiaRegistration = async (ticketId, updateData) => {
+export const updateGSTRegistration = async (ticketId, updateData) => {
   try {
     const response = await apiClient.put(`${API_BASE}/${ticketId}`, updateData);
     return response.data;
   } catch (error) {
-    console.error('Error updating Startup India registration:', error);
+    console.error('Error updating GST registration:', error);
     throw error;
   }
 };
@@ -79,9 +79,11 @@ export const getSignedUrl = async (fileUrl) => {
     const response = await apiClient.get(`${API_BASE}/signed-url`, {
       params: { fileUrl }
     });
-    return response.data.signedUrl;
+    return response.data;
   } catch (error) {
     console.error('Error getting signed URL:', error);
     throw error;
   }
 };
+
+

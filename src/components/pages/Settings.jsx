@@ -39,11 +39,18 @@ function Settings() {
   const [websites, setWebsites] = useState([
     { id: 1, type: '', url: '', login: '', password: '', showPassword: false }
   ]);
-  const [tasks, setTasks] = useState([
-    { id: 1, title: '', description: '', type: '', date: '' }
-  ]);
-  const [selectedTaskId, setSelectedTaskId] = useState(null);
-  const [isAddingNewTask, setIsAddingNewTask] = useState(false);
+  const [selectedOrgId, setSelectedOrgId] = useState(null);
+  const [isAddingNewOrg, setIsAddingNewOrg] = useState(false);
+  const [expandedOrgId, setExpandedOrgId] = useState(null);
+  const [adminTasksList, setAdminTasksList] = useState([]);
+  const [userTasksList, setUserTasksList] = useState([]);
+  const [expandedAdminTaskId, setExpandedAdminTaskId] = useState(null);
+  const [expandedUserTaskId, setExpandedUserTaskId] = useState(null);
+  const [isAddingUserTask, setIsAddingUserTask] = useState(false);
+  const [isAddingAdminTask, setIsAddingAdminTask] = useState(false);
+  const [currentUserTask, setCurrentUserTask] = useState({ date: '', title: '', description: '', type: '' });
+  const [currentAdminTask, setCurrentAdminTask] = useState({ date: '', title: '', description: '', type: '' });
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
   const [notes, setNotes] = useState('');
   const [adminNotesList, setAdminNotesList] = useState([]);
   const [userNotesList, setUserNotesList] = useState([]);
@@ -54,6 +61,11 @@ function Settings() {
   
   // Load data on mount
   useEffect(() => {
+    // Check if user is admin
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    const userRole = userData.role || '';
+    setIsUserAdmin(userRole === 'admin' || userRole === 'superadmin');
+    
     loadUserData();
   }, []);
   
@@ -63,7 +75,7 @@ function Settings() {
       const response = await getUsersPageData();
       
       if (response.success && response.data) {
-        const { user, websites: userWebsites, tasks: userTasks } = response.data;
+        const { user, websites: userWebsites } = response.data;
         
         // Populate Client Profile data
         setFormData({
@@ -122,15 +134,34 @@ function Settings() {
           })));
         }
         
-        // Populate Tasks
-        if (userTasks && userTasks.length > 0) {
-          setTasks(userTasks.map(t => ({
-            id: t.id || Date.now(),
-            title: t.task_title || '',
-            description: t.task_description || '',
-            type: t.task_type || '',
-            date: t.task_date || ''
-          })));
+        // Parse admin tasks (array of tasks)
+        const adminTasksRaw = user.admin_tasks || '';
+        try {
+          const tasksList = JSON.parse(adminTasksRaw);
+          if (Array.isArray(tasksList)) {
+            setAdminTasksList(tasksList);
+          } else if (adminTasksRaw) {
+            setAdminTasksList([{ date: '', title: adminTasksRaw, description: '', type: '' }]);
+          }
+        } catch {
+          if (adminTasksRaw) {
+            setAdminTasksList([{ date: '', title: adminTasksRaw, description: '', type: '' }]);
+          }
+        }
+        
+        // Parse user tasks (array of tasks)
+        const userTasksRaw = user.user_tasks || '';
+        try {
+          const tasksList = JSON.parse(userTasksRaw);
+          if (Array.isArray(tasksList)) {
+            setUserTasksList(tasksList);
+          } else if (userTasksRaw) {
+            setUserTasksList([{ date: '', title: userTasksRaw, description: '', type: '' }]);
+          }
+        } catch {
+          if (userTasksRaw) {
+            setUserTasksList([{ date: '', title: userTasksRaw, description: '', type: '' }]);
+          }
         }
         
         // Populate Notes
@@ -236,6 +267,8 @@ function Settings() {
       
       if (response.success) {
         alert('✅ Organisation Details saved successfully!');
+        setSelectedOrgId(null);
+        setIsAddingNewOrg(false);
         await loadUserData();
       }
     } catch (error) {
@@ -274,33 +307,6 @@ function Settings() {
     }
   };
 
-  const handleSaveTasks = async () => {
-    try {
-      console.log('💾 Saving Tasks...');
-      setSaving(true);
-      
-      const payload = {
-        tasks: tasks.map(t => ({
-          title: t.title,
-          description: t.description,
-          type: t.type,
-          date: t.date
-        }))
-      };
-      
-      const response = await updateUsersPageData(payload);
-      
-      if (response.success) {
-        alert('✅ Tasks saved successfully!');
-        await loadUserData();
-      }
-    } catch (error) {
-      console.error('❌ Error saving Tasks:', error);
-      alert(`❌ Failed to save: ${error.message}`);
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const handleUserNoteFileUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -364,7 +370,9 @@ function Settings() {
     }
   };
 
-  const handleSaveNotes = async () => {
+  // Note: handleSaveNotes is kept for potential future use if bulk save is needed
+  // Currently notes are saved immediately when added via handleSaveUserNote
+  const _handleSaveNotes = async () => {
     try {
       console.log('💾 Saving Notes...');
       setSaving(true);
@@ -404,7 +412,7 @@ function Settings() {
   };
 
   const addOrganization = () => {
-    setOrganizations([...organizations, { 
+    const newOrg = { 
       id: Date.now(), 
       organisationType: '',
       legalName: '',
@@ -415,7 +423,10 @@ function Settings() {
       tan: '',
       cin: '',
       registeredAddress: ''
-    }]);
+    };
+    setOrganizations([...organizations, newOrg]);
+    setSelectedOrgId(newOrg.id);
+    setIsAddingNewOrg(true);
   };
 
   const removeOrganization = (id) => {
@@ -441,6 +452,22 @@ function Settings() {
     }]);
   };
 
+  const removeWebsite = (id) => {
+    if (websites.length > 1) {
+      setWebsites(websites.filter(w => w.id !== id));
+    } else {
+      // If only one website, reset it to empty instead of removing
+      setWebsites([{ 
+        id: Date.now(), 
+        type: '', 
+        url: '', 
+        login: '', 
+        password: '', 
+        showPassword: false 
+      }]);
+    }
+  };
+
   const updateWebsite = (id, field, value) => {
     setWebsites(websites.map(website => 
       website.id === id ? { ...website, [field]: value } : website
@@ -463,31 +490,104 @@ function Settings() {
     });
   };
 
-  const addTask = () => {
-    const newTask = { 
-      id: Date.now(), 
-      title: '', 
-      description: '', 
-      type: '',
-      date: ''
-    };
-    setTasks([...tasks, newTask]);
-    setSelectedTaskId(newTask.id);
-    setIsAddingNewTask(true);
-  };
+  const addUserTask = async () => {
+    if (!currentUserTask.title || !currentUserTask.title.trim()) {
+      alert('Please enter a task title');
+      return;
+    }
 
-  const removeTask = (id) => {
-    setTasks(tasks.filter(task => task.id !== id));
-    if (selectedTaskId === id) {
-      setSelectedTaskId(null);
-      setIsAddingNewTask(false);
+    try {
+      setSaving(true);
+      const updatedTasksList = [...userTasksList, {
+        id: Date.now(),
+        date: currentUserTask.date,
+        title: currentUserTask.title,
+        description: currentUserTask.description,
+        type: currentUserTask.type,
+        createdAt: new Date().toISOString()
+      }];
+
+      const payload = {
+        userTasks: JSON.stringify(updatedTasksList)
+      };
+      
+      const response = await updateUsersPageData(payload);
+      
+      if (response.success) {
+        setUserTasksList(updatedTasksList);
+        setCurrentUserTask({ date: '', title: '', description: '', type: '' });
+        setIsAddingUserTask(false);
+        alert('Task saved successfully!');
+        await loadUserData();
+      }
+    } catch (error) {
+      console.error('Error saving task:', error);
+      alert('Failed to save task. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const updateTask = (id, field, value) => {
-    setTasks(tasks.map(task => 
-      task.id === id ? { ...task, [field]: value } : task
-    ));
+  const addAdminTask = async () => {
+    if (!currentAdminTask.title || !currentAdminTask.title.trim()) {
+      alert('Please enter a task title');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const updatedTasksList = [...adminTasksList, {
+        id: Date.now(),
+        date: currentAdminTask.date,
+        title: currentAdminTask.title,
+        description: currentAdminTask.description,
+        type: currentAdminTask.type,
+        createdAt: new Date().toISOString()
+      }];
+
+      const payload = {
+        adminTasks: JSON.stringify(updatedTasksList)
+      };
+      
+      const response = await updateUsersPageData(payload);
+      
+      if (response.success) {
+        setAdminTasksList(updatedTasksList);
+        setCurrentAdminTask({ date: '', title: '', description: '', type: '' });
+        setIsAddingAdminTask(false);
+        alert('Task saved successfully!');
+        await loadUserData();
+      }
+    } catch (error) {
+      console.error('Error saving task:', error);
+      alert('Failed to save task. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveTasks = async () => {
+    try {
+      console.log('💾 Saving Tasks...');
+      setSaving(true);
+      
+      const payload = {
+        adminTasks: JSON.stringify(adminTasksList),
+        userTasks: JSON.stringify(userTasksList)
+      };
+      
+      const response = await updateUsersPageData(payload);
+      
+      if (response.success) {
+        alert('✅ Tasks saved successfully!');
+        await loadUserData();
+      }
+    } catch (error) {
+      console.error('❌ Error saving Tasks:', error);
+      alert(`❌ Failed to save: ${error.message}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   // Render functions with direct state access to maintain input focus
@@ -727,148 +827,239 @@ function Settings() {
   };
 
   const TasksContent = () => {
-    const savedTasks = tasks.filter(t => t.title && t.title.trim() !== '');
-    const hasNoTasks = savedTasks.length === 0 && !selectedTaskId;
-
     return (
       <div className="px-6 pb-6 pt-6">
-        <div className="space-y-4">
-          {/* Add Button aligned with table */}
-          <div className="flex justify-between items-center">
-            <div></div>
-            <button
-              type="button"
-              onClick={addTask}
-              className="w-12 h-12 bg-[#01334C] text-white rounded-full flex items-center justify-center hover:bg-[#00486D] transition-colors"
-            >
-              <AiOutlinePlus className="w-6 h-6" />
-            </button>
-          </div>
-
-          {/* Show message if no tasks */}
-          {hasNoTasks && (
-            <div className="text-center py-8 text-gray-500">
-              <p>No tasks yet. Click the + button to add a new task.</p>
-            </div>
-          )}
-
-          {/* Tasks Table View */}
-          {savedTasks.length > 0 && !selectedTaskId && (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
-                <thead>
-                  <tr className="bg-gray-50 border-b-2 border-gray-200">
-                    <th className="text-left px-4 py-3 text-sm font-semibold text-gray-700">Header</th>
-                    <th className="text-left px-4 py-3 text-sm font-semibold text-gray-700">Date</th>
-                    <th className="text-left px-4 py-3 text-sm font-semibold text-gray-700">Type</th>
-                    <th className="text-left px-4 py-3 text-sm font-semibold text-gray-700">Description</th>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Admin Tasks Section - Read Only for Users */}
+          <div className="border-r border-gray-200 pr-6">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              Admin Tasks
+              {!isUserAdmin && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Read Only</span>}
+            </h3>
+            
+            {/* Admin Tasks Table */}
+            {adminTasksList.length > 0 ? (
+              <table className="w-full text-sm">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Date</th>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Title</th>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Type</th>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Description</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {savedTasks.map((task) => (
-                    <tr 
-                      key={task.id}
-                      onClick={() => setSelectedTaskId(task.id)}
-                      className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer transition-colors"
-                    >
-                      <td className="px-4 py-3 text-sm text-gray-900 font-medium">{task.title || 'Untitled'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {task.date ? new Date(task.date).toLocaleDateString('en-IN', { 
-                          day: '2-digit', 
-                          month: 'short', 
-                          year: 'numeric' 
-                        }) : 'No date'}
-                      </td>
-                      <td className="px-4 py-3 text-sm">
-                        {task.type && (
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            task.type === 'urgent' ? 'bg-red-100 text-red-700' :
-                            task.type === 'recurring' ? 'bg-blue-100 text-blue-700' :
-                            task.type === 'non-recurring' ? 'bg-green-100 text-green-700' :
-                            'bg-gray-100 text-gray-700'
-                          }`}>
-                            {task.type.charAt(0).toUpperCase() + task.type.slice(1)}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600 max-w-md truncate">
-                        {task.description || 'No description'}
-                      </td>
-                    </tr>
+                  {adminTasksList.map((task, idx) => (
+                    <React.Fragment key={task.id || idx}>
+                      <tr 
+                        onClick={() => setExpandedAdminTaskId(expandedAdminTaskId === idx ? null : idx)}
+                        className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
+                      >
+                        <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.title || 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs">
+                          {task.type ? (
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              task.type === 'urgent' ? 'bg-red-100 text-red-700' :
+                              task.type === 'recurring' ? 'bg-blue-100 text-blue-700' :
+                              task.type === 'non-recurring' ? 'bg-green-100 text-green-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {task.type.charAt(0).toUpperCase() + task.type.slice(1)}
+                            </span>
+                          ) : 'N/A'}
+                        </td>
+                        <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.description || 'N/A'}</td>
+                      </tr>
+                      {expandedAdminTaskId === idx && (
+                        <tr className="bg-gray-50">
+                          <td colSpan="4" className="px-3 py-3">
+                            <div className="space-y-2 text-xs">
+                              <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</span></div>
+                              <div><span className="font-medium text-gray-700">Title:</span> <span className="text-gray-600">{task.title || 'N/A'}</span></div>
+                              <div><span className="font-medium text-gray-700">Type:</span> <span className="text-gray-600">{task.type ? task.type.charAt(0).toUpperCase() + task.type.slice(1) : 'N/A'}</span></div>
+                              <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1 whitespace-pre-wrap">{task.description || 'No description'}</p></div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>
-            </div>
-          )}
+            ) : (
+              <p className="text-gray-600 text-center py-4 text-xs">No admin tasks added yet</p>
+            )}
 
-          {/* Expanded Task Card (Edit Mode) */}
-          {selectedTaskId && (
-            <div className="border-2 border-blue-500 rounded-xl p-6 bg-white shadow-lg">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {isAddingNewTask ? 'New Task' : 'Edit Task'}
-                </h3>
-                <button
-                  onClick={() => {
-                    setSelectedTaskId(null);
-                    setIsAddingNewTask(false);
-                  }}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left Column */}
-                <div className="space-y-4">
-                  {/* Task Header (Title) */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Task Header</label>
-                    <input
-                      type="text"
-                      value={tasks.find(t => t.id === selectedTaskId)?.title || ''}
-                      onChange={(e) => updateTask(selectedTaskId, 'title', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter task header/title"
-                    />
+            {/* Add Admin Task Form - Only for Admins */}
+            {isUserAdmin && (
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                {isAddingAdminTask ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
+                      <input
+                        type="date"
+                        value={currentAdminTask.date}
+                        onChange={(e) => setCurrentAdminTask({ ...currentAdminTask, date: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Title</label>
+                      <input
+                        type="text"
+                        value={currentAdminTask.title}
+                        onChange={(e) => setCurrentAdminTask({ ...currentAdminTask, title: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded text-xs"
+                        placeholder="Enter task title"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
+                      <select
+                        value={currentAdminTask.type}
+                        onChange={(e) => setCurrentAdminTask({ ...currentAdminTask, type: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded text-xs"
+                      >
+                        <option value="">Select type</option>
+                        <option value="recurring">Recurring</option>
+                        <option value="non-recurring">Non-Recurring</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="normal">Normal</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                      <textarea
+                        value={currentAdminTask.description}
+                        onChange={(e) => setCurrentAdminTask({ ...currentAdminTask, description: e.target.value })}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded text-xs"
+                        placeholder="Enter task description"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={addAdminTask}
+                        disabled={saving}
+                        className="flex-1 px-3 py-2 bg-[#01334C] text-white rounded text-xs hover:bg-[#00486D] disabled:opacity-50"
+                      >
+                        {saving ? 'Saving...' : 'Save'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsAddingAdminTask(false);
+                          setCurrentAdminTask({ date: '', title: '', description: '', type: '' });
+                        }}
+                        className="px-3 py-2 border border-gray-300 rounded text-xs hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
+                ) : (
+                  <button
+                    onClick={() => setIsAddingAdminTask(true)}
+                    className="w-full px-3 py-2 bg-[#01334C] text-white rounded text-xs hover:bg-[#00486D] flex items-center justify-center gap-2"
+                  >
+                    <AiOutlinePlus className="w-4 h-4" />
+                    Add Admin Task
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
 
-                  {/* Task Date */}
+          {/* User Tasks Section - Editable */}
+          <div className="pl-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-900">My Tasks</h3>
+            </div>
+            
+            {/* User Tasks Table */}
+            {userTasksList.length > 0 ? (
+              <table className="w-full text-sm">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Date</th>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Title</th>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Type</th>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {userTasksList.map((task, idx) => (
+                    <React.Fragment key={task.id || idx}>
+                      <tr 
+                        onClick={() => setExpandedUserTaskId(expandedUserTaskId === idx ? null : idx)}
+                        className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
+                      >
+                        <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.title || 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs">
+                          {task.type ? (
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              task.type === 'urgent' ? 'bg-red-100 text-red-700' :
+                              task.type === 'recurring' ? 'bg-blue-100 text-blue-700' :
+                              task.type === 'non-recurring' ? 'bg-green-100 text-green-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {task.type.charAt(0).toUpperCase() + task.type.slice(1)}
+                            </span>
+                          ) : 'N/A'}
+                        </td>
+                        <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.description || 'N/A'}</td>
+                      </tr>
+                      {expandedUserTaskId === idx && (
+                        <tr className="bg-gray-50">
+                          <td colSpan="4" className="px-3 py-3">
+                            <div className="space-y-2 text-xs">
+                              <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</span></div>
+                              <div><span className="font-medium text-gray-700">Title:</span> <span className="text-gray-600">{task.title || 'N/A'}</span></div>
+                              <div><span className="font-medium text-gray-700">Type:</span> <span className="text-gray-600">{task.type ? task.type.charAt(0).toUpperCase() + task.type.slice(1) : 'N/A'}</span></div>
+                              <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1 whitespace-pre-wrap">{task.description || 'No description'}</p></div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="text-gray-600 text-center py-4 text-xs">No tasks added yet</p>
+            )}
+
+            {/* Add User Task Form */}
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              {isAddingUserTask ? (
+                <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Date</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
                     <input
                       type="date"
-                      value={tasks.find(t => t.id === selectedTaskId)?.date || ''}
-                      onChange={(e) => updateTask(selectedTaskId, 'date', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={currentUserTask.date}
+                      onChange={(e) => setCurrentUserTask({ ...currentUserTask, date: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded text-xs"
                     />
                   </div>
-                </div>
-
-                {/* Right Column */}
-                <div className="space-y-4">
-                  {/* Task Description */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                    <textarea
-                      value={tasks.find(t => t.id === selectedTaskId)?.description || ''}
-                      onChange={(e) => updateTask(selectedTaskId, 'description', e.target.value)}
-                      rows={4}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
-                      placeholder="Enter task description"
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Title</label>
+                    <input
+                      type="text"
+                      value={currentUserTask.title}
+                      onChange={(e) => setCurrentUserTask({ ...currentUserTask, title: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded text-xs"
+                      placeholder="Enter task title"
                     />
                   </div>
-
-                  {/* Task Type */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Type of Task</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
                     <select
-                      value={tasks.find(t => t.id === selectedTaskId)?.type || ''}
-                      onChange={(e) => updateTask(selectedTaskId, 'type', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+                      value={currentUserTask.type}
+                      onChange={(e) => setCurrentUserTask({ ...currentUserTask, type: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded text-xs"
                     >
                       <option value="">Select type</option>
                       <option value="recurring">Recurring</option>
@@ -877,30 +1068,252 @@ function Settings() {
                       <option value="normal">Normal</option>
                     </select>
                   </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                    <textarea
+                      value={currentUserTask.description}
+                      onChange={(e) => setCurrentUserTask({ ...currentUserTask, description: e.target.value })}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded text-xs"
+                      placeholder="Enter task description"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={addUserTask}
+                      disabled={saving}
+                      className="flex-1 px-3 py-2 bg-[#01334C] text-white rounded text-xs hover:bg-[#00486D] disabled:opacity-50"
+                    >
+                      {saving ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsAddingUserTask(false);
+                        setCurrentUserTask({ date: '', title: '', description: '', type: '' });
+                      }}
+                      className="px-3 py-2 border border-gray-300 rounded text-xs hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-              </div>
-
-              {/* Delete Button */}
-              <div className="flex justify-end mt-4">
+              ) : (
                 <button
-                  type="button"
-                  onClick={() => removeTask(selectedTaskId)}
-                  className="px-4 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                  onClick={() => setIsAddingUserTask(true)}
+                  className="w-full px-3 py-2 bg-[#01334C] text-white rounded text-xs hover:bg-[#00486D] flex items-center justify-center gap-2"
                 >
-                  Delete Task
+                  <AiOutlinePlus className="w-4 h-4" />
+                  Add Task
                 </button>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        {/* Save Button */}
+        <div className="flex justify-end mt-6">
+          <button 
+            onClick={handleSaveTasks}
+            disabled={saving}
+            className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const WebsiteDetailsContent = () => {
+    // Filter out empty websites for table display
+    const savedWebsites = websites.filter(w => w.url && w.url.trim() !== '');
+    const hasNoWebsites = savedWebsites.length === 0 && websites.every(w => !w.url || w.url.trim() === '');
+
+    return (
+      <div className="px-6 pb-6 pt-6">
+        <div className="space-y-4">
+          {/* Show message if no websites */}
+          {hasNoWebsites && (
+            <div className="text-center py-8 text-gray-500">
+              <p>No websites yet. Click the + button to add a new website.</p>
+            </div>
+          )}
+
+          {/* Table and Add Button side by side */}
+          {savedWebsites.length > 0 && (
+            <div className="flex items-start gap-4 mb-4">
+              {/* Websites Table View */}
+              <div className="flex-1 overflow-x-auto">
+              <table className="w-full border-collapse bg-white">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Website Type</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Website URL</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Login</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Password</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {savedWebsites.map((website) => (
+                    <tr key={website.id} className="bg-white border-b border-gray-200">
+                      <td className="px-4 py-3 text-gray-900 border border-gray-300">{website.type || 'N/A'}</td>
+                      <td className="px-4 py-3 border border-gray-300">
+                        {website.url ? (
+                          <a href={website.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                            {website.url}
+                          </a>
+                        ) : (
+                          <span className="text-gray-600">N/A</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-gray-900 border border-gray-300">{website.login || 'N/A'}</td>
+                      <td className="px-4 py-3 border border-gray-300">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-900">
+                            {website.password ? (
+                              website.showPassword ? website.password : '••••••••'
+                            ) : (
+                              'N/A'
+                            )}
+                          </span>
+                          {website.password && (
+                            <button
+                              type="button"
+                              onClick={() => togglePasswordVisibility(website.id)}
+                              className="text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer"
+                              title={website.showPassword ? 'Hide password' : 'Show password'}
+                            >
+                              {website.showPassword ? (
+                                <FiEyeOff className="w-4 h-4" />
+                              ) : (
+                                <FiEye className="w-4 h-4" />
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
               </div>
+              
+              {/* Add Button beside table */}
+              <button
+                type="button"
+                onClick={addWebsite}
+                className="w-12 h-12 bg-[#01334C] text-white rounded-full flex items-center justify-center hover:bg-[#00486D] transition-colors flex-shrink-0"
+                title="Add Website"
+              >
+                <AiOutlinePlus className="w-6 h-6" />
+              </button>
+            </div>
+          )}
+
+          {/* Add Button when no table (empty state) */}
+          {hasNoWebsites && (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={addWebsite}
+                className="w-12 h-12 bg-[#01334C] text-white rounded-full flex items-center justify-center hover:bg-[#00486D] transition-colors"
+                title="Add Website"
+              >
+                <AiOutlinePlus className="w-6 h-6" />
+              </button>
+            </div>
+          )}
+
+          {/* Website Entry Forms - Only show when adding new or when no saved websites */}
+          {(hasNoWebsites || websites.some(w => !w.url || w.url.trim() === '')) && (
+            <div className="space-y-4">
+              {websites.map((website) => {
+                // Only show form if website is empty (new entry)
+                if (website.url && website.url.trim() !== '') return null;
+                
+                return (
+                  <div key={website.id} className="flex items-end gap-4">
+                    {/* Website Type */}
+                    <div className="flex-1">
+                      <label className="block text-sm text-gray-600 mb-2">Website Type</label>
+                      <input
+                        type="text"
+                        value={website.type}
+                        onChange={(e) => updateWebsite(website.id, 'type', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter website type"
+                      />
+                    </div>
+
+                    {/* Website URL */}
+                    <div className="flex-1">
+                      <label className="block text-sm text-gray-600 mb-2">Website URL</label>
+                      <input
+                        type="url"
+                        value={website.url}
+                        onChange={(e) => updateWebsite(website.id, 'url', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter website URL"
+                      />
+                    </div>
+
+                    {/* Login */}
+                    <div className="flex-1">
+                      <label className="block text-sm text-gray-600 mb-2">Login</label>
+                      <input
+                        type="text"
+                        value={website.login}
+                        onChange={(e) => updateWebsite(website.id, 'login', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter login"
+                      />
+                    </div>
+
+                    {/* Password */}
+                    <div className="flex-1">
+                      <label className="block text-sm text-gray-600 mb-2">Password</label>
+                      <div className="relative">
+                        <input
+                          type={website.showPassword ? 'text' : 'password'}
+                          value={website.password}
+                          onChange={(e) => updateWebsite(website.id, 'password', e.target.value)}
+                          className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg bg-[#E8EFF5] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Enter password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => togglePasswordVisibility(website.id)}
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {website.showPassword ? (
+                            <FiEye className="w-5 h-5" />
+                          ) : (
+                            <FiEyeOff className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Remove Button - Show if more than 1 website */}
+                    {websites.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeWebsite(website.id)}
+                        className="text-red-600 hover:text-red-800 text-sm"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
           
           {/* Save Button */}
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-4">
             <button 
-              onClick={async () => {
-                await handleSaveTasks();
-                setSelectedTaskId(null);
-                setIsAddingNewTask(false);
-              }}
+              onClick={handleSaveWebsites}
               disabled={saving}
               className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -912,279 +1325,361 @@ function Settings() {
     );
   };
 
-  const WebsiteDetailsContent = () => (
-    <div className="px-6 pb-6 pt-6">
-      <div className="space-y-4">
-        {websites.map((website, index) => (
-          <div key={website.id} className="flex items-end gap-4">
-            {/* Website Type */}
-            <div className="flex-1">
-              <label className="block text-sm text-gray-600 mb-2">Website Type</label>
-              <input
-                type="text"
-                value={website.type}
-                onChange={(e) => updateWebsite(website.id, 'type', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter website type"
-              />
-            </div>
+  const OrganisationDetailsContent = () => {
+    // Filter out empty organizations for table display
+    const savedOrganizations = organizations.filter(org => org.legalName && org.legalName.trim() !== '');
+    const hasNoOrganizations = savedOrganizations.length === 0 && !selectedOrgId;
 
-            {/* Website URL */}
-            <div className="flex-1">
-              <label className="block text-sm text-gray-600 mb-2">Website URL</label>
-              <input
-                type="url"
-                value={website.url}
-                onChange={(e) => updateWebsite(website.id, 'url', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter website URL"
-              />
+    return (
+      <div className="px-6 pb-6 pt-6">
+        <div className="space-y-4">
+          {/* Show message if no organizations */}
+          {hasNoOrganizations && (
+            <div className="text-center py-8 text-gray-500">
+              <p>No organizations yet. Click the + button to add a new organization.</p>
             </div>
+          )}
 
-            {/* Login */}
-            <div className="flex-1">
-              <label className="block text-sm text-gray-600 mb-2">Login</label>
-              <input
-                type="text"
-                value={website.login}
-                onChange={(e) => updateWebsite(website.id, 'login', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter login"
-              />
-            </div>
+          {/* Table and Add Button side by side */}
+          {savedOrganizations.length > 0 && !selectedOrgId && (
+            <div className="flex items-start gap-4">
+              {/* Organizations Table View */}
+              <div className="flex-1 overflow-x-auto">
+              <table className="w-full text-sm table-fixed border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
+                <colgroup>
+                  <col className="w-12" />
+                  <col className="w-28" />
+                  <col className="w-auto" />
+                  <col className="w-auto" />
+                  <col className="w-32" />
+                  <col className="w-28" />
+                  <col className="w-28" />
+                </colgroup>
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">ID</th>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">Type</th>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">Legal Name</th>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">Trade Name</th>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">GSTIN</th>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">TAN</th>
+                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">CIN</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {savedOrganizations.map((org, idx) => (
+                    <React.Fragment key={org.id}>
+                      <tr 
+                        onClick={() => {
+                          setExpandedOrgId(expandedOrgId === idx ? null : idx);
+                          setSelectedOrgId(org.id);
+                        }}
+                        className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer transition-colors"
+                      >
+                        <td className="px-2 py-2 text-gray-700 font-medium text-xs border border-gray-300">{idx + 1}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.organisationType}>{org.organisationType || 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.legalName}>{org.legalName || 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.tradeName}>{org.tradeName || 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.gstin}>{org.gstin || 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.tan}>{org.tan || 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.cin}>{org.cin || 'N/A'}</td>
+                      </tr>
+                      {expandedOrgId === idx && (
+                        <tr className="bg-white">
+                          <td colSpan="7" className="p-6 border border-gray-300">
+                            <div className="bg-white rounded-lg border border-gray-200 p-6">
+                              <h4 className="text-lg font-semibold text-gray-900 mb-4">{org.legalName || 'Organization Details'}</h4>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {/* Column 1 */}
+                                <div className="space-y-4">
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Organisation Type</label>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.organisationType || 'N/A'}</div>
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">GSTIN</label>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.gstin || 'N/A'}</div>
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">TAN</label>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.tan || 'N/A'}</div>
+                                  </div>
+                                </div>
 
-            {/* Password */}
-            <div className="flex-1">
-              <label className="block text-sm text-gray-600 mb-2">Password</label>
-              <div className="relative">
-                <input
-                  type={website.showPassword ? 'text' : 'password'}
-                  value={website.password}
-                  onChange={(e) => updateWebsite(website.id, 'password', e.target.value)}
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg bg-[#E8EFF5] focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter password"
-                />
-                <button
-                  type="button"
-                  onClick={() => togglePasswordVisibility(website.id)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                >
-                  {website.showPassword ? (
-                    <FiEye className="w-5 h-5" />
-                  ) : (
-                    <FiEyeOff className="w-5 h-5" />
-                  )}
-                </button>
+                                {/* Column 2 */}
+                                <div className="space-y-4">
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Legal Name</label>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.legalName || 'N/A'}</div>
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Incorporation Date</label>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900 flex items-center gap-2">
+                                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                      </svg>
+                                      {org.incorporationDate ? new Date(org.incorporationDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">CIN</label>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.cin || 'N/A'}</div>
+                                  </div>
+                                </div>
+
+                                {/* Column 3 */}
+                                <div className="space-y-4">
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Trade Name</label>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.tradeName || 'N/A'}</div>
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">PAN File</label>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                      {org.panFile ? (
+                                        <a href={org.panFile} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View File</a>
+                                      ) : (
+                                        'Not uploaded'
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Registered Address</label>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.registeredAddress || 'N/A'}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
               </div>
-            </div>
-
-            {/* Add Button - Only show on first row */}
-            {index === 0 && (
+              
+              {/* Add Button beside table */}
               <button
                 type="button"
-                onClick={addWebsite}
+                onClick={addOrganization}
                 className="w-12 h-12 bg-[#01334C] text-white rounded-full flex items-center justify-center hover:bg-[#00486D] transition-colors flex-shrink-0"
+                title="Add Organization"
               >
                 <AiOutlinePlus className="w-6 h-6" />
               </button>
-            )}
-          </div>
-        ))}
-        
-        {/* Save Button */}
-        <div className="flex justify-end pt-4">
-          <button 
-            onClick={handleSaveWebsites}
-            disabled={saving}
-            className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {saving ? 'Saving...' : 'Save Changes'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+            </div>
+          )}
 
-  const OrganisationDetailsContent = () => (
-    <div className="px-6 pb-6 pt-6">
-      <div className="space-y-6">
-        {/* Add Organization Button - Top Right */}
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={addOrganization}
-            className="w-12 h-12 bg-[#01334C] text-white rounded-full flex items-center justify-center hover:bg-[#00486D] transition-colors"
-            title="Add Organization"
-          >
-            <AiOutlinePlus className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Organization Entries */}
-        {organizations.map((org, orgIndex) => (
-          <div key={org.id} className="border-2 border-gray-200 rounded-lg p-6 relative">
-            {/* Delete Button - Show if more than 1 organization */}
-            {organizations.length > 1 && (
+          {/* Add Button when no table (empty state) */}
+          {hasNoOrganizations && (
+            <div className="flex justify-end">
               <button
                 type="button"
-                onClick={() => removeOrganization(org.id)}
-                className="absolute top-4 right-4 w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"
-                title="Remove Organization"
+                onClick={addOrganization}
+                className="w-12 h-12 bg-[#01334C] text-white rounded-full flex items-center justify-center hover:bg-[#00486D] transition-colors"
+                title="Add Organization"
               >
-                ×
+                <AiOutlinePlus className="w-6 h-6" />
               </button>
-            )}
-
-            <h4 className="text-sm font-semibold text-gray-700 mb-4">
-              Organization {orgIndex + 1}
-            </h4>
-
-            <div className="space-y-4">
-              {/* Row 1: Organisation Type, Legal Name, Trade Name */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm text-gray-600 mb-2">Organisation Type</label>
-                  <input
-                    type="text"
-                    value={org.organisationType}
-                    onChange={(e) => updateOrganization(org.id, 'organisationType', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter organisation type"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm text-gray-600 mb-2">Legal Name</label>
-                  <input
-                    type="text"
-                    value={org.legalName}
-                    onChange={(e) => updateOrganization(org.id, 'legalName', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter legal name"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm text-gray-600 mb-2">Trade Name</label>
-                  <input
-                    type="text"
-                    value={org.tradeName}
-                    onChange={(e) => updateOrganization(org.id, 'tradeName', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter trade name"
-                  />
-                </div>
-              </div>
-
-              {/* Row 2: GSTIN, Incorporation Date, PAN File */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm text-gray-600 mb-2">GSTIN</label>
-                  <input
-                    type="text"
-                    value={org.gstin}
-                    onChange={(e) => updateOrganization(org.id, 'gstin', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter GSTIN"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm text-gray-600 mb-2">Incorporation Date</label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      value={org.incorporationDate}
-                      onChange={(e) => updateOrganization(org.id, 'incorporationDate', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="dd-mm-yyyy"
-                    />
-                    <BsCalendar3 className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm text-gray-600 mb-2">PAN File</label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      readOnly
-                      value={org.panFile ? 'File uploaded' : 'No file chosen'}
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
-                    />
-                    <label className="cursor-pointer">
-                      <input
-                        type="file"
-                        onChange={async (e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            const base64 = await fileToBase64(file);
-                            updateOrganization(org.id, 'panFile', base64);
-                          }
-                        }}
-                        className="hidden"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                      />
-                      <span className="px-4 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block">
-                        edit
-                      </span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 3: TAN, CIN, Registered Address */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm text-gray-600 mb-2">TAN</label>
-                  <input
-                    type="text"
-                    value={org.tan}
-                    onChange={(e) => updateOrganization(org.id, 'tan', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter TAN"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm text-gray-600 mb-2">CIN</label>
-                  <input
-                    type="text"
-                    value={org.cin}
-                    onChange={(e) => updateOrganization(org.id, 'cin', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter CIN"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm text-gray-600 mb-2">Registered Address</label>
-                  <textarea
-                    rows={3}
-                    value={org.registeredAddress}
-                    onChange={(e) => updateOrganization(org.id, 'registeredAddress', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
-                    placeholder="Enter registered address"
-                  />
-                </div>
-              </div>
             </div>
+          )}
+
+          {/* Expanded Organization Card (Edit Mode) */}
+          {selectedOrgId && (
+            <div className="border-2 border-blue-500 rounded-xl p-6 bg-white shadow-lg">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {isAddingNewOrg ? 'New Organization' : 'Edit Organization'}
+                </h3>
+                <button
+                  onClick={() => {
+                    setSelectedOrgId(null);
+                    setIsAddingNewOrg(false);
+                    setExpandedOrgId(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {organizations.map((org) => {
+                if (org.id !== selectedOrgId) return null;
+                
+                return (
+                  <div key={org.id} className="space-y-4">
+                    {/* Row 1: Organisation Type, Legal Name, Trade Name */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Organisation Type</label>
+                        <input
+                          type="text"
+                          value={org.organisationType}
+                          onChange={(e) => updateOrganization(org.id, 'organisationType', e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Enter organisation type"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Legal Name</label>
+                        <input
+                          type="text"
+                          value={org.legalName}
+                          onChange={(e) => updateOrganization(org.id, 'legalName', e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Enter legal name"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Trade Name</label>
+                        <input
+                          type="text"
+                          value={org.tradeName}
+                          onChange={(e) => updateOrganization(org.id, 'tradeName', e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Enter trade name"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Row 2: GSTIN, Incorporation Date, PAN File */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">GSTIN</label>
+                        <input
+                          type="text"
+                          value={org.gstin}
+                          onChange={(e) => updateOrganization(org.id, 'gstin', e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Enter GSTIN"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Incorporation Date</label>
+                        <div className="relative">
+                          <input
+                            type="date"
+                            value={org.incorporationDate}
+                            onChange={(e) => updateOrganization(org.id, 'incorporationDate', e.target.value)}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="dd-mm-yyyy"
+                          />
+                          <BsCalendar3 className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">PAN File</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            readOnly
+                            value={org.panFile ? 'File uploaded' : 'No file chosen'}
+                            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                          />
+                          <label className="cursor-pointer">
+                            <input
+                              type="file"
+                              onChange={async (e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                  const base64 = await fileToBase64(file);
+                                  updateOrganization(org.id, 'panFile', base64);
+                                }
+                              }}
+                              className="hidden"
+                              accept=".pdf,.jpg,.jpeg,.png"
+                            />
+                            <span className="px-4 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block">
+                              edit
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Row 3: TAN, CIN, Registered Address */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">TAN</label>
+                        <input
+                          type="text"
+                          value={org.tan}
+                          onChange={(e) => updateOrganization(org.id, 'tan', e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Enter TAN"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">CIN</label>
+                        <input
+                          type="text"
+                          value={org.cin}
+                          onChange={(e) => updateOrganization(org.id, 'cin', e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Enter CIN"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Registered Address</label>
+                        <textarea
+                          rows={3}
+                          value={org.registeredAddress}
+                          onChange={(e) => updateOrganization(org.id, 'registeredAddress', e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+                          placeholder="Enter registered address"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Delete Button */}
+                    {!isAddingNewOrg && (
+                      <div className="flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            removeOrganization(org.id);
+                            setSelectedOrgId(null);
+                            setIsAddingNewOrg(false);
+                            setExpandedOrgId(null);
+                          }}
+                          className="px-4 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          Delete Organization
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          
+          {/* Save Button */}
+          <div className="flex justify-end">
+            <button 
+              onClick={async () => {
+                await handleSaveOrganisation();
+              }}
+              disabled={saving}
+              className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
           </div>
-        ))}
-        
-        {/* Save Button */}
-        <div className="flex justify-end pt-4">
-          <button 
-            onClick={handleSaveOrganisation}
-            disabled={saving}
-            className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {saving ? 'Saving...' : 'Save Changes'}
-          </button>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const ClientProfileContent = () => (
     <div className="px-6 pb-6 pt-6">

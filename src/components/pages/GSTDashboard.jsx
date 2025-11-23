@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMyProprietorshipRegistrations } from '../../utils/proprietorshipApi';
+import { getMyGSTRegistrations } from '../../utils/gstApi';
 
-function ProprietorshipDashboard() {
+function GSTDashboard() {
   const navigate = useNavigate();
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,17 +13,15 @@ function ProprietorshipDashboard() {
 
   const fetchRegistrations = async () => {
     try {
-      const result = await getMyProprietorshipRegistrations();
-      console.log('📊 Proprietorship registrations response:', result);
+      const result = await getMyGSTRegistrations();
+      console.log('📊 GST registrations response:', result);
       
       // Handle different response structures
       if (result.success) {
         setRegistrations(result.data || []);
       } else if (Array.isArray(result)) {
-        // If result is directly an array
         setRegistrations(result);
       } else if (result.data) {
-        // If data is nested
         setRegistrations(Array.isArray(result.data) ? result.data : []);
       } else {
         setRegistrations([]);
@@ -87,10 +85,10 @@ function ProprietorshipDashboard() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-2xl font-bold text-[#28303F]">
-              Proprietorship Registrations
+              GST Registrations
             </h1>
             <p className="text-gray-600 mt-1">
-              View and manage your proprietorship registration applications
+              View and manage your GST registration applications
             </p>
           </div>
           <button
@@ -114,7 +112,7 @@ function ProprietorshipDashboard() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth="2"
+                  strokeWidth={2}
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
@@ -123,12 +121,11 @@ function ProprietorshipDashboard() {
               No Registrations Yet
             </h3>
             <p className="text-gray-600 mb-6">
-              You haven't submitted any proprietorship registration applications.
+              You haven't submitted any GST registrations yet.
             </p>
             <button
-              onClick={() => navigate('/company-categories')}
-              className="px-6 py-2 text-white rounded-md"
-              style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
+              onClick={() => navigate('/gst-details')}
+              className="px-6 py-3 bg-[#00486D] text-white rounded-md hover:bg-[#003855] transition-colors"
             >
               Start New Registration
             </button>
@@ -149,7 +146,7 @@ function ProprietorshipDashboard() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-lg font-semibold text-[#28303F]">
-                          {registration.business_name || 'Proprietorship Registration'}
+                          {registration.business_name || 'GST Registration'}
                         </h3>
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(registration.status)}`}
@@ -180,7 +177,6 @@ function ProprietorshipDashboard() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          // Always allow editing by navigating to form with ticketId
                           localStorage.setItem('editingTicketId', ticketId);
                           if (registration.package_name) {
                             localStorage.setItem('selectedPackage', JSON.stringify({
@@ -189,14 +185,14 @@ function ProprietorshipDashboard() {
                               priceValue: registration.package_price
                             }));
                           }
-                          if (registration.razorpay_order_id || registration.razorpay_payment_id) {
+                          if (registration.order_id || registration.payment_id) {
                             localStorage.setItem('paymentDetails', JSON.stringify({
-                              orderId: registration.razorpay_order_id,
-                              paymentId: registration.razorpay_payment_id,
+                              orderId: registration.order_id,
+                              paymentId: registration.payment_id,
                               timestamp: registration.created_at
                             }));
                           }
-                          navigate(`/proprietorship-form?ticketId=${ticketId}`);
+                          navigate(`/gst-form?ticketId=${ticketId}`);
                         }}
                         className="px-4 py-2 text-sm bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors flex items-center gap-2"
                       >
@@ -208,7 +204,7 @@ function ProprietorshipDashboard() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/proprietorship/view/${ticketId}`);
+                          navigate(`/gst/view/${ticketId}`);
                         }}
                         className="px-4 py-2 text-sm border border-[#00486D] text-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
                       >
@@ -221,38 +217,11 @@ function ProprietorshipDashboard() {
             })}
           </div>
         )}
-
-        {/* Info Box */}
-        {registrations.length > 0 && (
-          <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <svg
-                className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <div className="text-sm text-blue-800">
-                <p className="font-medium mb-1">Application Status Information</p>
-                <p>
-                  Your applications are being processed. You will be notified via email and phone once there are updates. 
-                  For any queries, please contact our support team.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
-export default ProprietorshipDashboard;
-
+export default GSTDashboard;
 
 

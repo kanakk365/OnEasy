@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import apiClient from '../../../utils/api';
 import PrivateLimitedForm from '../../forms/PrivateLimitedForm';
 import ProprietorshipForm from '../../forms/ProprietorshipForm';
+import StartupIndiaForm from '../../pages/StartupIndiaForm';
 
 function AdminFillFormNew() {
   const location = useLocation();
@@ -139,6 +140,20 @@ function AdminFillFormNew() {
           />
         )}
       </>
+    );
+  } else if (registrationType === 'startup-india' || registrationType === 'startup india') {
+    // Store package and payment details in localStorage for Startup India form
+    React.useEffect(() => {
+      localStorage.setItem('selectedPackage', JSON.stringify(packageDetails));
+      localStorage.setItem('paymentDetails', JSON.stringify({
+        paymentId: null,
+        orderId: null,
+        payment_status: 'unpaid'
+      }));
+    }, [packageDetails]);
+    
+    return (
+      <StartupIndiaForm />
     );
   }
 

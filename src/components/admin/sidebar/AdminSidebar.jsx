@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { RiUser3Line, RiUserAddLine } from "react-icons/ri";
+import { RiUser3Line, RiUserAddLine, RiTicketLine } from "react-icons/ri";
 import { HiOutlineUsers } from "react-icons/hi";
 import {
   MdMenu,
@@ -52,9 +52,10 @@ function AdminSidebar() {
   }, [loadUserData]);
 
   const menuItems = [
-    { icon: <HiOutlineUsers />, text: "Clients", path: "/admin/clients", subPaths: ['/admin/client-overview', '/admin/client-details', '/admin/fill-form'] },
+    { icon: <HiOutlineUsers />, text: "Clients", path: "/admin/clients", subPaths: ['/admin/client-overview', '/admin/client-details', '/admin/fill-form', '/admin/gst-form', '/admin/startup-india-form', '/admin/proprietorship-form', '/admin/private-limited-form'] },
     { icon: <RiUserAddLine />, text: "Add User", path: "/admin/add-user" },
     { icon: <RiUserAddLine />, text: "New Registration", path: "/admin/new-registration" },
+    { icon: <RiTicketLine />, text: "Coupon Code Generator", path: "/admin/coupon-generator" },
     { icon: <RiUser3Line />, text: "Profile", path: "/admin/profile" },
   ];
 

@@ -55,12 +55,19 @@ function ChangePasswordModal({ isOpen, onClose, onSuccess, required = false }) {
       );
 
       if (response.success) {
-        // Update user in localStorage
+        // Update user in localStorage with updated data from backend
         const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-        const updatedUser = { ...storedUser, ...response.data, must_change_password: false };
+        const updatedUser = { 
+          ...storedUser, 
+          ...response.data, 
+          must_change_password: false // Backend sets this to false, ensure frontend reflects it
+        };
         localStorage.setItem('user', JSON.stringify(updatedUser));
 
-        // Call onSuccess callback
+        console.log('✅ Password changed, updated user in localStorage:', updatedUser);
+        console.log('🔒 must_change_password flag:', updatedUser.must_change_password);
+
+        // Call onSuccess callback (will refresh user data from backend)
         if (onSuccess) {
           onSuccess();
         }

@@ -4,6 +4,7 @@ import apiClient from '../../utils/api'
 import logo from '../../assets/logo.png'
 import bgImage from '../../assets/bg.png'
 import SetEmailPasswordModal from '../common/SetEmailPasswordModal'
+import ChangePasswordModal from '../common/ChangePasswordModal'
 
 function OTPVerification() {
   const navigate = useNavigate()
@@ -14,6 +15,7 @@ function OTPVerification() {
   const [canResend, setCanResend] = useState(false)
   const [resendTimer, setResendTimer] = useState(30)
   const [showEmailPasswordModal, setShowEmailPasswordModal] = useState(false)
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false)
   const [userDataAfterOTP, setUserDataAfterOTP] = useState(null)
   const inputRefs = useRef([])
 
@@ -83,21 +85,41 @@ function OTPVerification() {
       console.log('👤 User data:', result.user)
       console.log('🔑 User role:', result.user?.role)
       console.log('🔑 User role_id:', result.user?.role_id)
+      console.log('📧 User email:', result.user?.email)
+      console.log('🔒 Must change password:', result.user?.must_change_password)
       
-      // Check if user has email (password is not returned in response for security)
-      // If user doesn't have email, they likely don't have password either
-      const hasEmail = result.user?.email && result.user.email.trim() !== ''
+      // Check if user has email
+      const hasEmail = result.user?.email && 
+                       result.user.email.trim() !== '' && 
+                       result.user.email !== null && 
+                       result.user.email !== undefined
+      
+      // Check if user must change password (admin-created users)
+      const mustChangePassword = result.user?.must_change_password === true
       
       console.log('📧 User has email:', hasEmail)
+      console.log('🔒 Must change password:', mustChangePassword)
       
-      // If user doesn't have email, show modal to set email and password
+      // Priority 1: If admin created user with email/password, they must change password on first login
+      if (mustChangePassword && hasEmail) {
+        console.log('⚠️ Admin-created user must change password, showing change password modal')
+        setUserDataAfterOTP(result.user)
+        setShowChangePasswordModal(true)
+        setIsLoading(false)
+        return // Don't navigate yet
+      }
+      
+      // Priority 2: If user doesn't have email (new phone-only user), they must set email and password
       if (!hasEmail) {
-        console.log('⚠️ User missing email, showing setup modal')
+        console.log('⚠️ User missing email, showing email/password setup modal')
         setUserDataAfterOTP(result.user)
         setShowEmailPasswordModal(true)
         setIsLoading(false)
         return // Don't navigate yet
       }
+      
+      // User has email and doesn't need to change password - proceed to dashboard
+      console.log('✅ User has email and password set, proceeding to dashboard')
       
       // Navigate to appropriate dashboard based on user role
       const userRole = result.user?.role || result.user?.role_id
@@ -175,6 +197,30 @@ function OTPVerification() {
     
     // Navigate to dashboard
     const userRole = updatedUser?.role || updatedUser?.role_id || userDataAfterOTP?.role || userDataAfterOTP?.role_id
+    navigateToDashboard(userRole)
+  }
+
+  // Handle password change success
+  const handlePasswordChangeSuccess = async () => {
+    console.log('✅ Password changed successfully')
+    setShowChangePasswordModal(false)
+    
+    // Refresh user data from backend to get updated must_change_password flag
+    try {
+      const userData = await apiClient.getMe()
+      if (userData && userData.user) {
+        console.log('🔄 Refreshed user data:', userData.user)
+        console.log('🔒 Updated must_change_password:', userData.user.must_change_password)
+        
+        // Update userDataAfterOTP with fresh data
+        setUserDataAfterOTP(userData.user)
+      }
+    } catch (err) {
+      console.error('Error refreshing user data:', err)
+    }
+    
+    // Navigate to dashboard
+    const userRole = userDataAfterOTP?.role || userDataAfterOTP?.role_id
     navigateToDashboard(userRole)
   }
 
@@ -293,7 +339,7 @@ function OTPVerification() {
         </div>
       </div>
 
-      {/* Email/Password Setup Modal */}
+      {/* Email/Password Setup Modal - For new users without email */}
       {showEmailPasswordModal && (
         <SetEmailPasswordModal
           isOpen={showEmailPasswordModal}
@@ -304,6 +350,21 @@ function OTPVerification() {
             }
           }}
           onSuccess={handleEmailPasswordSuccess}
+          required={true}
+        />
+      )}
+
+      {/* Change Password Modal - For admin-created users */}
+      {showChangePasswordModal && (
+        <ChangePasswordModal
+          isOpen={showChangePasswordModal}
+          onClose={() => {
+            // Don't allow closing if required
+            if (!userDataAfterOTP) {
+              setShowChangePasswordModal(false)
+            }
+          }}
+          onSuccess={handlePasswordChangeSuccess}
           required={true}
         />
       )}

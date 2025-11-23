@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../../utils/api';
-import { FaBuilding, FaStore, FaFileInvoiceDollar } from 'react-icons/fa';
+import { FaBuilding, FaStore, FaFileInvoiceDollar, FaRocket } from 'react-icons/fa';
+import PaymentLinkGeneration from './PaymentLinkGeneration';
 
 function AdminNewRegistration() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // 1: Select User, 2: Select Type, 3: Select Plan, 4: Fill Form
+  const [step, setStep] = useState(1); // 1: Select User, 2: Select Type, 3: Select Plan, 4: Payment Link, 5: Fill Form
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedType, setSelectedType] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
+  const [paymentLinkData, setPaymentLinkData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -27,6 +29,12 @@ function AdminNewRegistration() {
       description: 'Register a proprietorship business'
     },
     {
+      id: 'startup-india',
+      name: 'Startup India',
+      icon: <FaRocket className="w-8 h-8" />,
+      description: 'Register for Startup India Certificate'
+    },
+    {
       id: 'gst',
       name: 'GST Registration',
       icon: <FaFileInvoiceDollar className="w-8 h-8" />,
@@ -34,21 +42,27 @@ function AdminNewRegistration() {
     }
   ];
 
-  // Package plans (example - adjust based on your actual packages)
+  // Package plans - matching actual packages from the system
   const packagePlans = {
     'private-limited': [
-      { id: 'basic', name: 'Basic Plan', price: 5999, description: 'Essential features for startup' },
-      { id: 'standard', name: 'Standard Plan', price: 8999, description: 'Popular choice for growing businesses' },
-      { id: 'premium', name: 'Premium Plan', price: 12999, description: 'Complete solution with priority support' }
+      { id: 'starter', name: 'Starter', price: 12999, description: 'For solo entrepreneurs' },
+      { id: 'growth', name: 'Growth', price: 16999, description: 'As your business scales' },
+      { id: 'pro', name: 'Pro', price: 24999, description: 'Complete solution with priority support' }
     ],
     'proprietorship': [
-      { id: 'basic', name: 'Basic Plan', price: 2999, description: 'Essential proprietorship registration' },
-      { id: 'standard', name: 'Standard Plan', price: 4999, description: 'Includes additional documents' },
-      { id: 'premium', name: 'Premium Plan', price: 7999, description: 'Complete proprietorship package' }
+      { id: 'starter1', name: 'Starter', price: 999, description: 'Basic proprietorship registration' },
+      { id: 'starter2', name: 'Starter Enhanced', price: 1499, description: 'Enhanced proprietorship package' },
+      { id: 'growth', name: 'Growth', price: 3499, description: 'Complete proprietorship solution' }
+    ],
+    'startup-india': [
+      { id: 'starter', name: 'Starter', price: 2999, description: 'Basic Startup India registration' },
+      { id: 'growth', name: 'Growth', price: 5999, description: 'Enhanced Startup India package' },
+      { id: 'pro', name: 'Pro', price: 14999, description: 'Complete Startup India solution' }
     ],
     'gst': [
-      { id: 'basic', name: 'GST Registration', price: 1499, description: 'Standard GST registration' },
-      { id: 'premium', name: 'GST + FSSAI', price: 2999, description: 'GST with FSSAI registration' }
+      { id: 'starter', name: 'Starter', price: 2599, description: 'Basic GST registration package' },
+      { id: 'growth', name: 'Growth', price: 5599, description: 'Enhanced GST package' },
+      { id: 'pro', name: 'Pro', price: 12999, description: 'Complete GST solution' }
     ]
   };
 
@@ -99,15 +113,24 @@ function AdminNewRegistration() {
 
   const handlePlanSelect = (plan) => {
     setSelectedPlan(plan);
-    setStep(4);
-    // Navigate to fill form with user, type, and plan info
+    setStep(4); // Go to payment link generation step
+  };
+
+  const handlePaymentLinkGenerated = (data) => {
+    setPaymentLinkData(data);
+  };
+
+  const handleContinueToForm = () => {
+    // Navigate to fill form with user, type, plan, and payment link info
     navigate(`/admin/fill-form-new`, {
       state: {
         userId: selectedUser.id,
         userName: selectedUser.name,
         userEmail: selectedUser.email,
         registrationType: selectedType.id,
-        packagePlan: plan
+        packagePlan: selectedPlan,
+        paymentLinkGenerated: true,
+        paymentLinkData: paymentLinkData
       }
     });
   };
@@ -122,6 +145,7 @@ function AdminNewRegistration() {
     } else if (step === 4) {
       setStep(3);
       setSelectedPlan(null);
+      setPaymentLinkData(null);
     }
   };
 
@@ -281,6 +305,18 @@ function AdminNewRegistration() {
           ))}
         </div>
       </div>
+    );
+  }
+
+  if (step === 4) {
+    return (
+      <PaymentLinkGeneration
+        user={selectedUser}
+        registrationType={selectedType}
+        packagePlan={selectedPlan}
+        onBack={handleBack}
+        onPaymentLinkGenerated={handlePaymentLinkGenerated}
+      />
     );
   }
 

@@ -423,7 +423,7 @@ function PrivateLimitedForm({
           <div className="rounded-lg p-6">
             {renderStepContent()}
 
-          <div className="flex justify-between mt-8">
+          <div className="flex justify-between mt-8 mb-24">
             <button
               type="button"
               onClick={goBack}
@@ -437,7 +437,7 @@ function PrivateLimitedForm({
               onClick={(oneasyTeamFill && !isAdminOrSuperadmin) ? async () => {
                 // Regular user: Save team fill request and go to dashboard
                 setIsSubmitting(true);
-                const result = await requestTeamFill();
+                const result = await requestTeamFill('private-limited', ticketId || null);
                 if (result.success) {
                   console.log('✅ Team fill request saved');
                 }
@@ -468,7 +468,7 @@ function PrivateLimitedForm({
               localStorage.setItem('oneasyTeamFill', 'true');
               
               // Save to team fill requests table
-              const result = await requestTeamFill();
+              const result = await requestTeamFill('private-limited', ticketId || null);
               if (result.success) {
                 console.log('✅ Team fill request saved');
               }

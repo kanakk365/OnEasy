@@ -38,14 +38,24 @@ export const initPayment = async (packageData) => {
         return;
       }
 
-      // Create order on backend
+      // Create order on backend with coupon info
       console.log('Creating payment order for:', packageData.name);
-      apiClient.post('/payment/create-order', {
+      const orderPayload = {
         amount: packageData.priceValue,
         currency: 'INR',
         receipt: `receipt_${Date.now()}`,
         packageName: packageData.name
-      }).then(orderResponse => {
+      };
+
+      // Add coupon info if available
+      if (packageData.couponCode) {
+        orderPayload.couponCode = packageData.couponCode;
+        orderPayload.originalAmount = packageData.originalPriceValue || packageData.priceValue;
+        orderPayload.discountAmount = packageData.discountAmount || 0;
+        orderPayload.discountPercentage = packageData.discountPercentage || 0;
+      }
+
+      apiClient.post('/payment/create-order', orderPayload).then(orderResponse => {
         if (!orderResponse.success) {
           reject(new Error(orderResponse.message || 'Failed to create payment order'));
           return;
@@ -53,13 +63,19 @@ export const initPayment = async (packageData) => {
 
         const { orderId, amount, currency, keyId } = orderResponse.data;
 
+        // Determine service type from package name or localStorage
+        const registrationType = localStorage.getItem('selectedRegistrationType');
+        const serviceDescription = registrationType 
+          ? `${packageData.name} Package - ${localStorage.getItem('selectedRegistrationTitle') || 'Registration Service'}`
+          : `${packageData.name} Package - Private Limited Company`;
+
         // Configure Razorpay options
         const options = {
           key: keyId,
           amount: amount,
           currency: currency,
           name: 'OnEasy',
-          description: `${packageData.name} Package - Private Limited Company`,
+          description: serviceDescription,
           order_id: orderId,
           prefill: {
             name: userData.name || '',
@@ -72,12 +88,19 @@ export const initPayment = async (packageData) => {
           handler: function (response) {
             // Payment successful - verify on backend
             console.log('Payment successful, verifying...');
-            apiClient.post('/payment/verify', {
+            const verifyPayload = {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
               packageDetails: packageData // Send package details for invoice email
-            }).then(verifyResponse => {
+            };
+
+            // Include coupon code if applied
+            if (packageData.couponCode) {
+              verifyPayload.couponCode = packageData.couponCode;
+            }
+
+            apiClient.post('/payment/verify', verifyPayload).then(verifyResponse => {
               if (verifyResponse.success) {
                 // Payment verified successfully - store package data
                 localStorage.setItem('selectedPackage', JSON.stringify(packageData));

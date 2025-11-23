@@ -28,55 +28,63 @@ function RegistrationCategories() {
       title: "Start - Up India Certificate",
       description: "Get certified under Start-Up India initiative",
       icon: <FaCertificate />,
-      path: "/startup-india-form",
+      registrationType: "startup-india",
     },
     {
       id: 2,
       title: "Professional Tax Registration",
       description: "Register for professional tax compliance",
       icon: <FaUserTie />,
+      registrationType: "professional-tax",
     },
     {
       id: 3,
       title: "Labour License Registration",
       description: "Obtain labor license for your business",
       icon: <FaIndustry />,
+      registrationType: "labour-license",
     },
     {
       id: 4,
       title: "Provident Fund Registration",
       description: "Register for PF and employee benefits",
       icon: <FaUsers />,
+      registrationType: "provident-fund",
     },
     {
       id: 5,
       title: "GST Registration",
       description: "Register for Goods and Services Tax",
       icon: <FaFileInvoiceDollar />,
+      registrationType: "gst",
     },
     {
       id: 6,
       title: "Udyam Registration",
       description: "MSME/Udyog Aadhaar registration",
       icon: <FaStore />,
+      registrationType: "udyam",
     },
     {
       id: 7,
       title: "FSSAI / Food license",
       description: "Food safety and standards authority license",
       icon: <FaShoppingCart />,
+      registrationType: "fssai",
     },
     {
       id: 8,
       title: "Trade License",
       description: "Municipal trade license for business operations",
       icon: <FaBuilding />,
+      registrationType: "trade-license",
     },
     {
       id: 9,
       title: "Import Export Code (IEC) Registration",
       description: "IEC for import/export business",
       icon: <FaGlobe />,
+      registrationType: "iec",
     },
     {
       id: 10,
@@ -144,7 +152,25 @@ function RegistrationCategories() {
           {filteredRegistrations.map((registration) => (
             <div
               key={registration.id}
-              onClick={() => registration.path && navigate(registration.path)}
+              onClick={() => {
+                if (registration.path) {
+                  navigate(registration.path);
+                } else if (registration.registrationType === 'startup-india') {
+                  // Navigate to Startup India details page with packages
+                  navigate('/startup-india-details');
+                } else if (registration.registrationType === 'gst') {
+                  // Navigate to GST details page with packages
+                  navigate('/gst-details');
+                } else if (registration.registrationType) {
+                  // Navigate to package selection for other registration services
+                  navigate('/registration-packages', {
+                    state: {
+                      registrationType: registration.registrationType,
+                      registrationTitle: registration.title
+                    }
+                  });
+                }
+              }}
               className="relative cursor-pointer rounded-xl p-8 transition-all duration-200 flex flex-col items-center text-center group bg-[#FAFBFF] border border-[#EFEFEF] shadow-[0_4px_16px_0_#9797970D] hover:bg-[#01466a] hover:text-white"
             >
               <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4 bg-[#00486d] group-hover:bg-[#25607f]">

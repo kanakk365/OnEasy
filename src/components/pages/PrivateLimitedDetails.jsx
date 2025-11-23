@@ -135,13 +135,23 @@ function PrivateLimitedDetails() {
     });
   };
 
+  const formatValue = (value) => {
+    if (value === null || value === undefined || value === '') return 'N/A';
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    return String(value);
+  };
+
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'completed':
       case 'approved':
+      case 'submitted':
         return 'bg-green-100 text-green-800';
       case 'pending':
+      case 'draft':
         return 'bg-yellow-100 text-yellow-800';
+      case 'incomplete':
+        return 'bg-orange-100 text-orange-800';
       case 'processing':
         return 'bg-blue-100 text-blue-800';
       case 'rejected':
@@ -253,7 +263,7 @@ function PrivateLimitedDetails() {
             </div>
             <div>
               <span className="font-medium text-gray-700">Package:</span>
-              <p className="text-gray-600">{registration.package_name || 'N/A'}</p>
+              <p className="text-gray-600">{formatValue(registration.package_name)}</p>
             </div>
             <div>
               <span className="font-medium text-gray-700">Package Price:</span>
@@ -265,7 +275,7 @@ function PrivateLimitedDetails() {
             </div>
             <div>
               <span className="font-medium text-gray-700">Razorpay Payment ID:</span>
-              <p className="text-gray-600 text-xs">{registration.razorpay_payment_id || 'N/A'}</p>
+              <p className="text-gray-600 text-xs">{formatValue(registration.razorpay_payment_id)}</p>
             </div>
           </div>
         </div>
@@ -527,28 +537,24 @@ function PrivateLimitedDetails() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
               <span className="font-medium text-gray-700">Business Name (Option 1):</span>
-              <p className="text-gray-600">{registration.business_name || 'N/A'}</p>
+              <p className="text-gray-600">{formatValue(registration.business_name)}</p>
             </div>
             <div>
               <span className="font-medium text-gray-700">Business Name (Option 2):</span>
-              <p className="text-gray-600">{registration.business_name_option2 || 'N/A'}</p>
+              <p className="text-gray-600">{formatValue(registration.business_name_option2)}</p>
             </div>
-            {registration.name_reason && (
-              <div className="md:col-span-2">
-                <span className="font-medium text-gray-700">Reason for Names:</span>
-                <p className="text-gray-600">{registration.name_reason}</p>
-              </div>
-            )}
+            <div className="md:col-span-2">
+              <span className="font-medium text-gray-700">Reason for Names:</span>
+              <p className="text-gray-600">{formatValue(registration.name_reason)}</p>
+            </div>
             <div>
               <span className="font-medium text-gray-700">Company Type:</span>
-              <p className="text-gray-600">{registration.business_type || 'N/A'}</p>
+              <p className="text-gray-600">{formatValue(registration.business_type)}</p>
             </div>
-            {registration.nature_of_business && (
-              <div className="md:col-span-2">
-                <span className="font-medium text-gray-700">Nature of Business:</span>
-                <p className="text-gray-600">{registration.nature_of_business}</p>
-              </div>
-            )}
+            <div className="md:col-span-2">
+              <span className="font-medium text-gray-700">Nature of Business:</span>
+              <p className="text-gray-600">{formatValue(registration.nature_of_business)}</p>
+            </div>
           </div>
         </div>
 
@@ -585,11 +591,11 @@ function PrivateLimitedDetails() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="font-medium text-gray-700">Company Email:</span>
-                <p className="text-gray-600">{registration.business_email || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.business_email)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Contact Number:</span>
-                <p className="text-gray-600">{registration.business_contact_number || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.business_contact_number)}</p>
               </div>
             </div>
           </div>
@@ -600,27 +606,27 @@ function PrivateLimitedDetails() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
               <div>
                 <span className="font-medium text-gray-700">Address Line 1:</span>
-                <p className="text-gray-600">{registration.address_line1 || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.address_line1)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Address Line 2:</span>
-                <p className="text-gray-600">{registration.address_line2 || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.address_line2)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">City:</span>
-                <p className="text-gray-600">{registration.city || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.city)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">State:</span>
-                <p className="text-gray-600">{registration.state || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.state)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Country:</span>
-                <p className="text-gray-600">{registration.country || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.country)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Pin Code:</span>
-                <p className="text-gray-600">{registration.pincode || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.pincode)}</p>
               </div>
             </div>
           </div>
@@ -631,7 +637,7 @@ function PrivateLimitedDetails() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="font-medium text-gray-700">Approved Company Name:</span>
-                <p className="text-gray-600">{registration.approved_company_name || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.approved_company_name)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Name Approval Letter:</span>
@@ -678,11 +684,11 @@ function PrivateLimitedDetails() {
               </div>
               <div>
                 <span className="font-medium text-gray-700">Landlord Name:</span>
-                <p className="text-gray-600">{registration.landlord_name || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.landlord_name)}</p>
               </div>
               <div className="md:col-span-2">
                 <span className="font-medium text-gray-700">Registered Premises Address:</span>
-                <p className="text-gray-600">{registration.registered_premises_address || 'N/A'}</p>
+                <p className="text-gray-600">{formatValue(registration.registered_premises_address)}</p>
               </div>
             </div>
             
@@ -740,19 +746,19 @@ function PrivateLimitedDetails() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                       <div>
                         <span className="font-medium text-gray-700">Name:</span>
-                        <p className="text-gray-600">{director.director_name || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.director_name)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Relation:</span>
-                        <p className="text-gray-600">{director.relation_with_company || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.relation_with_company)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Designation:</span>
-                        <p className="text-gray-600">{director.designation || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.designation)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Education:</span>
-                        <p className="text-gray-600">{director.educational_qualification || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.educational_qualification)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Date of Birth:</span>
@@ -760,17 +766,17 @@ function PrivateLimitedDetails() {
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Gender:</span>
-                        <p className="text-gray-600">{director.gender || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.gender)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Occupation:</span>
-                        <p className="text-gray-600">{director.occupation_type || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.occupation_type)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Place of Birth:</span>
                         <p className="text-gray-600">
                           {director.place_of_birth_district || director.place_of_birth_state 
-                            ? `${director.place_of_birth_district || 'N/A'}, ${director.place_of_birth_state || 'N/A'}`
+                            ? `${formatValue(director.place_of_birth_district)}, ${formatValue(director.place_of_birth_state)}`
                             : 'N/A'}
                         </p>
                       </div>
@@ -784,11 +790,11 @@ function PrivateLimitedDetails() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                         <div>
                           <span className="font-medium text-gray-700">Number of Shares:</span>
-                          <p className="text-gray-600">{director.number_of_shares || 'N/A'}</p>
+                          <p className="text-gray-600">{formatValue(director.number_of_shares)}</p>
                         </div>
                         <div>
                           <span className="font-medium text-gray-700">Face Value per Share:</span>
-                          <p className="text-gray-600">₹{director.face_value_per_share || 'N/A'}</p>
+                          <p className="text-gray-600">₹{formatValue(director.face_value_per_share)}</p>
                         </div>
                         <div>
                           <span className="font-medium text-gray-700">Total Equity:</span>
@@ -808,15 +814,15 @@ function PrivateLimitedDetails() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                       <div>
                         <span className="font-medium text-gray-700">PAN Number:</span>
-                        <p className="text-gray-600">{director.pan_number || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.pan_number)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Email:</span>
-                        <p className="text-gray-600">{director.director_email || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.director_email)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Contact Number:</span>
-                        <p className="text-gray-600">{director.director_contact || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.director_contact)}</p>
                       </div>
                     </div>
                   </div>
@@ -827,27 +833,27 @@ function PrivateLimitedDetails() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                       <div>
                         <span className="font-medium text-gray-700">Address Line 1:</span>
-                        <p className="text-gray-600">{director.permanent_address_line1 || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.permanent_address_line1)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Address Line 2:</span>
-                        <p className="text-gray-600">{director.permanent_address_line2 || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.permanent_address_line2)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">City:</span>
-                        <p className="text-gray-600">{director.permanent_city || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.permanent_city)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">State:</span>
-                        <p className="text-gray-600">{director.permanent_state || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.permanent_state)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Country:</span>
-                        <p className="text-gray-600">{director.permanent_country || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.permanent_country)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Pin Code:</span>
-                        <p className="text-gray-600">{director.permanent_pincode || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.permanent_pincode)}</p>
                       </div>
                     </div>
                   </div>
@@ -858,27 +864,27 @@ function PrivateLimitedDetails() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                       <div>
                         <span className="font-medium text-gray-700">Address Line 1:</span>
-                        <p className="text-gray-600">{director.present_address_line1 || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.present_address_line1)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Address Line 2:</span>
-                        <p className="text-gray-600">{director.present_address_line2 || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.present_address_line2)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">City:</span>
-                        <p className="text-gray-600">{director.present_city || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.present_city)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">State:</span>
-                        <p className="text-gray-600">{director.present_state || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.present_state)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Country:</span>
-                        <p className="text-gray-600">{director.present_country || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.present_country)}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Pin Code:</span>
-                        <p className="text-gray-600">{director.present_pincode || 'N/A'}</p>
+                        <p className="text-gray-600">{formatValue(director.present_pincode)}</p>
                       </div>
                       <div className="md:col-span-2">
                         <span className="font-medium text-gray-700">Duration of Stay:</span>
@@ -899,7 +905,7 @@ function PrivateLimitedDetails() {
                         <span className="font-medium text-gray-700">Director in Other Company:</span>
                         <p className="text-gray-600">
                           {director.is_director_in_other_company && director.other_company_name
-                            ? `${director.other_company_name} (${director.other_company_position || 'N/A'})`
+                            ? `${director.other_company_name} (${formatValue(director.other_company_position)})`
                             : 'No'}
                         </p>
                       </div>
@@ -907,7 +913,7 @@ function PrivateLimitedDetails() {
                         <span className="font-medium text-gray-700">Shareholder in Other Company:</span>
                         <p className="text-gray-600">
                           {director.is_shareholder_in_other_company && director.other_shareholder_company_name
-                            ? `${director.other_shareholder_company_name} (${director.other_company_shares || 'N/A'} shares)`
+                            ? `${director.other_shareholder_company_name} (${formatValue(director.other_company_shares)} shares)`
                             : 'No'}
                         </p>
                       </div>

@@ -32,9 +32,13 @@ function PrivateLimitedDashboard() {
     switch (status?.toLowerCase()) {
       case 'completed':
       case 'approved':
+      case 'submitted':
         return 'bg-green-100 text-green-800';
       case 'pending':
+      case 'draft':
         return 'bg-yellow-100 text-yellow-800';
+      case 'incomplete':
+        return 'bg-orange-100 text-orange-800';
       case 'processing':
         return 'bg-blue-100 text-blue-800';
       case 'rejected':
@@ -169,9 +173,14 @@ function PrivateLimitedDashboard() {
           </div>
         ) : (
           <div className="space-y-4">
-            {registrations.map((registration) => (
+            {registrations.map((registration) => {
+              const ticketId = registration.ticket_id || registration.id;
+              const isDraft = registration.status?.toLowerCase() === 'draft';
+              const isIncomplete = registration.status?.toLowerCase() === 'incomplete';
+              
+              return (
               <div
-                key={registration.id}
+                key={ticketId}
                 className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start justify-between">
@@ -221,8 +230,39 @@ function PrivateLimitedDashboard() {
 
                   <div className="flex flex-col gap-2 ml-4">
                     <button
-                      onClick={() => navigate(`/private-limited/view/${registration.ticket_id}`)}
-                      className="px-4 py-2 text-sm bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Always allow editing by navigating to form with ticketId
+                        localStorage.setItem('editingTicketId', ticketId);
+                        if (registration.package_name) {
+                          localStorage.setItem('selectedPackage', JSON.stringify({
+                            name: registration.package_name,
+                            price: registration.package_price,
+                            priceValue: registration.package_price
+                          }));
+                        }
+                        if (registration.razorpay_order_id || registration.razorpay_payment_id) {
+                          localStorage.setItem('paymentDetails', JSON.stringify({
+                            orderId: registration.razorpay_order_id,
+                            paymentId: registration.razorpay_payment_id,
+                            timestamp: registration.created_at
+                          }));
+                        }
+                        navigate(`/private-limited-form?ticketId=${ticketId}`);
+                      }}
+                      className="px-4 py-2 text-sm bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      {isDraft || isIncomplete ? 'Continue Filling' : 'Edit Registration'}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/private-limited/view/${ticketId}`);
+                      }}
+                      className="px-4 py-2 text-sm border border-[#00486D] text-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
                     >
                       View Details
                     </button>
@@ -241,7 +281,8 @@ function PrivateLimitedDashboard() {
                   )}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

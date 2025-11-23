@@ -8,11 +8,17 @@ import Admin from "../pages/Admin";
 import Partner from "../pages/Partner";
 import Registrations from "../pages/Registrations";
 import RegistrationCategories from "../pages/RegistrationCategories";
+import RegistrationPackageSelection from "../pages/RegistrationPackageSelection";
+import RegistrationForm from "../forms/RegistrationForm";
 import CompanyCategories from "../pages/CompanyCategories";
 import CompanyDetails from "../pages/CompanyDetails";
 import StartupIndiaForm from "../pages/StartupIndiaForm";
+import StartupIndiaDetails from "../pages/StartupIndiaDetails";
+import StartupIndiaViewDetails from "../pages/StartupIndiaViewDetails";
+import StartupIndiaDashboard from "../pages/StartupIndiaDashboard";
 import Settings from "../pages/Settings";
 import Organization from "../pages/Organization";
+import CouponCodeGenerator from "../pages/CouponCodeGenerator";
 import PrivateLimitedForm from "../forms/PrivateLimitedForm";
 import PrivateLimitedDashboard from "../pages/PrivateLimitedDashboard";
 import PrivateLimitedDetails from "../pages/PrivateLimitedDetails";
@@ -20,6 +26,12 @@ import ProprietorshipDetails from "../pages/ProprietorshipDetails";
 import ProprietorshipForm from "../forms/ProprietorshipForm";
 import ProprietorshipDashboard from "../pages/ProprietorshipDashboard";
 import ProprietorshipViewDetails from "../pages/ProprietorshipViewDetails";
+import GSTDetails from "../pages/GSTDetails";
+import GSTPackageSelection from "../pages/GSTPackageSelection";
+import GSTForm from "../pages/GSTForm";
+import GSTDashboard from "../pages/GSTDashboard";
+import GSTViewDetails from "../pages/GSTViewDetails";
+import PaymentSuccess from "../pages/PaymentSuccess";
 import AdminLayout from "../admin/layout/AdminLayout";
 import AdminClients from "../admin/pages/AdminClients";
 import AdminClientOverview from "../admin/pages/AdminClientOverview";
@@ -40,8 +52,10 @@ function Routers() {
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<Login />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/verify-otp" element={<OTPVerification />} />
       <Route path="/referral" element={<ReferralCode />} />
+      <Route path="/payment-success" element={<PaymentSuccess />} />
       
       {/* User Routes - Protected */}
       <Route path="/client" element={
@@ -64,6 +78,56 @@ function Routers() {
           <RegistrationCategories />
         </ProtectedRoute>
       } />
+      <Route path="/registration-packages" element={
+        <ProtectedRoute>
+          <RegistrationPackageSelection />
+        </ProtectedRoute>
+      } />
+      <Route path="/gst-registration-form" element={
+        <ProtectedRoute>
+          <RegistrationForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/udyam-registration-form" element={
+        <ProtectedRoute>
+          <RegistrationForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/professional-tax-form" element={
+        <ProtectedRoute>
+          <RegistrationForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/labour-license-form" element={
+        <ProtectedRoute>
+          <RegistrationForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/provident-fund-form" element={
+        <ProtectedRoute>
+          <RegistrationForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/fssai-form" element={
+        <ProtectedRoute>
+          <RegistrationForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/trade-license-form" element={
+        <ProtectedRoute>
+          <RegistrationForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/iec-form" element={
+        <ProtectedRoute>
+          <RegistrationForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration-form" element={
+        <ProtectedRoute>
+          <RegistrationForm />
+        </ProtectedRoute>
+      } />
       <Route path="/company-categories" element={
         <ProtectedRoute>
           <CompanyCategories />
@@ -79,9 +143,24 @@ function Routers() {
           <CompanyDetails />
         </ProtectedRoute>
       } />
+      <Route path="/startup-india-details" element={
+        <ProtectedRoute>
+          <StartupIndiaDetails />
+        </ProtectedRoute>
+      } />
       <Route path="/startup-india-form" element={
         <ProtectedRoute>
           <StartupIndiaForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/startup-india/view/:ticketId" element={
+        <ProtectedRoute>
+          <StartupIndiaViewDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/startup-india-dashboard" element={
+        <ProtectedRoute>
+          <StartupIndiaDashboard />
         </ProtectedRoute>
       } />
       <Route path="/private-limited-form" element={
@@ -114,6 +193,31 @@ function Routers() {
           <ProprietorshipViewDetails />
         </ProtectedRoute>
       } />
+      <Route path="/gst-details" element={
+        <ProtectedRoute>
+          <GSTDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/gst-package-selection" element={
+        <ProtectedRoute>
+          <GSTPackageSelection />
+        </ProtectedRoute>
+      } />
+      <Route path="/gst-form" element={
+        <ProtectedRoute>
+          <GSTForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/gst-dashboard" element={
+        <ProtectedRoute>
+          <GSTDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/gst/view/:ticketId" element={
+        <ProtectedRoute>
+          <GSTViewDetails />
+        </ProtectedRoute>
+      } />
       <Route path="/settings" element={
         <ProtectedRoute>
           <Settings />
@@ -136,9 +240,15 @@ function Routers() {
         <Route path="add-user" element={<AdminAddUser />} />
         <Route path="new-registration" element={<AdminNewRegistration />} />
         <Route path="fill-form-new" element={<AdminFillFormNew />} />
+        <Route path="coupon-generator" element={<CouponCodeGenerator />} />
         <Route path="profile" element={<AdminProfile />} />
         <Route path="client-details/:ticketId" element={<RegistrationDetailsRouter />} />
         <Route path="fill-form/:ticketId" element={<AdminFillForm />} />
+        {/* Admin form routes - these use AdminLayout */}
+        <Route path="gst-form" element={<GSTForm />} />
+        <Route path="startup-india-form" element={<StartupIndiaForm />} />
+        <Route path="proprietorship-form" element={<ProprietorshipForm />} />
+        <Route path="private-limited-form" element={<PrivateLimitedForm />} />
       </Route>
       
       {/* SuperAdmin Routes - Protected */}

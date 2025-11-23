@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import apiClient from '../../../utils/api';
+import { updateUserDataByUserId } from '../../../utils/usersPageApi';
+import { AiOutlinePlus } from 'react-icons/ai';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 function AdminClientOverview() {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('services'); // profile, services, compliance, subscriptions
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'services'); // profile, services, compliance, subscriptions
   const [expandedSection, setExpandedSection] = useState(null);
   const [clientProfile, setClientProfile] = useState(null);
   const [allRegistrations, setAllRegistrations] = useState([]);
@@ -15,7 +19,10 @@ function AdminClientOverview() {
   const [expandedOrgId, setExpandedOrgId] = useState(null);
   const [documentUrls, setDocumentUrls] = useState({});
   const [showNotepad, setShowNotepad] = useState(false);
-  const [clientPersona, setClientPersona] = useState('');
+  const [clientPersonaList, setClientPersonaList] = useState([]);
+  const [expandedPersonaId, setExpandedPersonaId] = useState(null);
+  const [isAddingPersona, setIsAddingPersona] = useState(false);
+  const [currentPersona, setCurrentPersona] = useState({ date: '', description: '' });
   const [adminNotesList, setAdminNotesList] = useState([]);
   const [userNotesList, setUserNotesList] = useState([]);
   const [expandedAdminNoteId, setExpandedAdminNoteId] = useState(null);
@@ -23,27 +30,51 @@ function AdminClientOverview() {
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [editingNoteIndex, setEditingNoteIndex] = useState(null);
   const [currentNote, setCurrentNote] = useState({ date: '', description: '', attachments: [] });
-  const [isServiceCardExpanded, setIsServiceCardExpanded] = useState(false);
+  // Tasks state
+  const [adminTasksList, setAdminTasksList] = useState([]);
+  const [userTasksList, setUserTasksList] = useState([]);
+  const [expandedAdminTaskId, setExpandedAdminTaskId] = useState(null);
+  const [expandedUserTaskId, setExpandedUserTaskId] = useState(null);
+  const [isAddingAdminTask, setIsAddingAdminTask] = useState(false);
+  const [isAddingUserTask, setIsAddingUserTask] = useState(false);
+  const [editingAdminTaskIndex, setEditingAdminTaskIndex] = useState(null);
+  const [editingUserTaskIndex, setEditingUserTaskIndex] = useState(null);
+  const [currentAdminTask, setCurrentAdminTask] = useState({ date: '', title: '', description: '', type: '' });
+  const [currentUserTask, setCurrentUserTask] = useState({ date: '', title: '', description: '', type: '' });
+  const [savingTasks, setSavingTasks] = useState(false);
+  const [isServiceCardExpanded, setIsServiceCardExpanded] = useState(null); // Track which card index is expanded
   const [serviceStatus, setServiceStatus] = useState('registered');
-  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(null); // Track which card's dropdown is open (by index)
   const [visiblePasswords, setVisiblePasswords] = useState({});
+  const [isEditingOrganisations, setIsEditingOrganisations] = useState(false);
+  const [isEditingWebsites, setIsEditingWebsites] = useState(false);
+  const [organisations, setOrganisations] = useState([]);
+  const [websites, setWebsites] = useState([]);
+  const [savingOrg, setSavingOrg] = useState(false);
+  const [savingWebsites, setSavingWebsites] = useState(false);
 
   useEffect(() => {
     fetchClientDetails();
     fetchClientProfile();
     fetchClientPersona();
     fetchAllRegistrations();
-  }, [userId]);
+    
+    // Set active tab from URL params
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['profile', 'services', 'compliance', 'subscriptions'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [userId, searchParams]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isStatusDropdownOpen) {
-        setIsStatusDropdownOpen(false);
+      if (isStatusDropdownOpen !== null) {
+        setIsStatusDropdownOpen(null);
       }
     };
 
-    if (isStatusDropdownOpen) {
+    if (isStatusDropdownOpen !== null) {
       document.addEventListener('click', handleClickOutside);
     }
 
@@ -81,6 +112,56 @@ function AdminClientOverview() {
       
       if (response.success && response.data) {
         setClientProfile(response.data);
+        
+        // Initialize organisations and websites for editing
+        if (response.data.user?.organisations && response.data.user.organisations.length > 0) {
+          setOrganisations(response.data.user.organisations.map((org, idx) => ({
+            id: org.id || idx + 1,
+            organisationType: org.organisation_type || '',
+            legalName: org.legal_name || '',
+            tradeName: org.trade_name || '',
+            gstin: org.gstin || '',
+            incorporationDate: org.incorporation_date || '',
+            panFile: org.pan_file || null,
+            tan: org.tan || '',
+            cin: org.cin || '',
+            registeredAddress: org.registered_address || ''
+          })));
+        } else {
+          setOrganisations([{ 
+            id: 1, 
+            organisationType: '',
+            legalName: '',
+            tradeName: '',
+            gstin: '',
+            incorporationDate: '',
+            panFile: null,
+            tan: '',
+            cin: '',
+            registeredAddress: ''
+          }]);
+        }
+        
+        if (response.data.websites && response.data.websites.length > 0) {
+          setWebsites(response.data.websites.map((web, idx) => ({
+            id: web.id || idx + 1,
+            type: web.website_type || '',
+            url: web.website_url || '',
+            login: web.login || '',
+            password: web.password || '',
+            showPassword: false
+          })));
+        } else {
+          setWebsites([{ 
+            id: 1, 
+            type: '', 
+            url: '', 
+            login: '', 
+            password: '', 
+            showPassword: false 
+          }]);
+        }
+        
         const adminNotesRaw = response.data.user?.admin_notes || '';
         
         // Parse admin notes (array of notes)
@@ -116,6 +197,36 @@ function AdminClientOverview() {
           }
         }
         
+        // Parse admin tasks (array of tasks)
+        const adminTasksRaw = response.data.user?.admin_tasks || '';
+        try {
+          const tasksList = JSON.parse(adminTasksRaw);
+          if (Array.isArray(tasksList)) {
+            setAdminTasksList(tasksList);
+          } else if (adminTasksRaw) {
+            setAdminTasksList([{ date: '', title: adminTasksRaw, description: '', type: '' }]);
+          }
+        } catch {
+          if (adminTasksRaw) {
+            setAdminTasksList([{ date: '', title: adminTasksRaw, description: '', type: '' }]);
+          }
+        }
+        
+        // Parse user tasks (array of tasks)
+        const userTasksRaw = response.data.user?.user_tasks || '';
+        try {
+          const tasksList = JSON.parse(userTasksRaw);
+          if (Array.isArray(tasksList)) {
+            setUserTasksList(tasksList);
+          } else if (userTasksRaw) {
+            setUserTasksList([{ date: '', title: userTasksRaw, description: '', type: '' }]);
+          }
+        } catch {
+          if (userTasksRaw) {
+            setUserTasksList([{ date: '', title: userTasksRaw, description: '', type: '' }]);
+          }
+        }
+        
         // Fetch signed URLs for documents if they're S3 URLs
         await fetchDocumentSignedUrls(response.data.user);
       }
@@ -129,7 +240,23 @@ function AdminClientOverview() {
       const response = await apiClient.get(`/admin/client-persona/${userId}`);
       
       if (response.success && response.data) {
-        setClientPersona(response.data.client_persona || '');
+        // Parse personaList from response
+        if (response.data.personaList && Array.isArray(response.data.personaList)) {
+          setClientPersonaList(response.data.personaList);
+        } else if (response.data.client_persona) {
+          try {
+            const parsed = JSON.parse(response.data.client_persona);
+            if (Array.isArray(parsed)) {
+              setClientPersonaList(parsed);
+            } else {
+              setClientPersonaList([{ date: new Date().toISOString().split('T')[0], description: response.data.client_persona }]);
+            }
+          } catch {
+            setClientPersonaList([{ date: new Date().toISOString().split('T')[0], description: response.data.client_persona }]);
+          }
+        } else {
+          setClientPersonaList([]);
+        }
       }
     } catch (error) {
       console.error('Error fetching client persona:', error);
@@ -140,24 +267,36 @@ function AdminClientOverview() {
     try {
       console.log('🔍 Fetching all registrations for user ID:', userId);
       
-      // Fetch private limited, proprietorship, and startup india registrations
-      const [privateLimitedResponse, proprietorshipResponse, startupIndiaResponse] = await Promise.all([
+      // Fetch private limited, proprietorship, startup india, and GST registrations
+      const [privateLimitedResponse, proprietorshipResponse, startupIndiaResponse, gstResponse] = await Promise.all([
         apiClient.get(`/private-limited/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
         apiClient.get(`/proprietorship/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
-        apiClient.get(`/startup-india/user-registrations/${userId}`).catch(() => ({ success: false, data: [] }))
+        apiClient.get(`/startup-india/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
+        apiClient.get(`/gst/user-registrations/${userId}`).catch(() => ({ success: false, data: [] }))
       ]);
 
-      const privateLimited = privateLimitedResponse.success ? privateLimitedResponse.data : [];
-      const proprietorship = proprietorshipResponse.success ? proprietorshipResponse.data : [];
-      const startupIndia = startupIndiaResponse.success ? startupIndiaResponse.data : [];
+      // Handle response structure - check if data is nested
+      const privateLimited = privateLimitedResponse.success 
+        ? (Array.isArray(privateLimitedResponse.data) ? privateLimitedResponse.data : (privateLimitedResponse.data?.data || []))
+        : [];
+      const proprietorship = proprietorshipResponse.success 
+        ? (Array.isArray(proprietorshipResponse.data) ? proprietorshipResponse.data : (proprietorshipResponse.data?.data || []))
+        : [];
+      const startupIndia = startupIndiaResponse.success 
+        ? (Array.isArray(startupIndiaResponse.data) ? startupIndiaResponse.data : (startupIndiaResponse.data?.data || []))
+        : [];
+      const gst = gstResponse.success 
+        ? (Array.isArray(gstResponse.data) ? gstResponse.data : (gstResponse.data?.data || []))
+        : [];
 
       console.log('📊 Private Limited:', privateLimited.length, 'registrations');
       console.log('📊 Proprietorship:', proprietorship.length, 'registrations');
       console.log('📊 Startup India:', startupIndia.length, 'registrations');
+      console.log('📊 GST:', gst.length, 'registrations');
 
       // Combine and sort by created_at
-      const combined = [...privateLimited, ...proprietorship, ...startupIndia].sort((a, b) => 
-        new Date(b.created_at) - new Date(a.created_at)
+      const combined = [...privateLimited, ...proprietorship, ...startupIndia, ...gst].sort((a, b) => 
+        new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0)
       );
 
       setAllRegistrations(combined);
@@ -262,6 +401,108 @@ function AdminClientOverview() {
     }
   };
 
+  // Task handling functions
+  const addAdminTask = async () => {
+    if (!currentAdminTask.title || !currentAdminTask.title.trim()) {
+      alert('Please enter a task title');
+      return;
+    }
+
+    try {
+      setSavingTasks(true);
+      const updatedTasksList = [...adminTasksList, {
+        id: Date.now(),
+        date: currentAdminTask.date,
+        title: currentAdminTask.title,
+        description: currentAdminTask.description,
+        type: currentAdminTask.type,
+        createdAt: new Date().toISOString()
+      }];
+
+      const payload = {
+        adminTasks: JSON.stringify(updatedTasksList),
+        userTasks: JSON.stringify(userTasksList)
+      };
+      
+      const response = await updateUserDataByUserId(userId, payload);
+      
+      if (response.success) {
+        setAdminTasksList(updatedTasksList);
+        setCurrentAdminTask({ date: '', title: '', description: '', type: '' });
+        setIsAddingAdminTask(false);
+        alert('Task saved successfully!');
+        await fetchClientProfile();
+      }
+    } catch (error) {
+      console.error('Error saving task:', error);
+      alert('Failed to save task. Please try again.');
+    } finally {
+      setSavingTasks(false);
+    }
+  };
+
+  const addUserTask = async () => {
+    if (!currentUserTask.title || !currentUserTask.title.trim()) {
+      alert('Please enter a task title');
+      return;
+    }
+
+    try {
+      setSavingTasks(true);
+      const updatedTasksList = [...userTasksList, {
+        id: Date.now(),
+        date: currentUserTask.date,
+        title: currentUserTask.title,
+        description: currentUserTask.description,
+        type: currentUserTask.type,
+        createdAt: new Date().toISOString()
+      }];
+
+      const payload = {
+        adminTasks: JSON.stringify(adminTasksList),
+        userTasks: JSON.stringify(updatedTasksList)
+      };
+      
+      const response = await updateUserDataByUserId(userId, payload);
+      
+      if (response.success) {
+        setUserTasksList(updatedTasksList);
+        setCurrentUserTask({ date: '', title: '', description: '', type: '' });
+        setIsAddingUserTask(false);
+        alert('Task saved successfully!');
+        await fetchClientProfile();
+      }
+    } catch (error) {
+      console.error('Error saving task:', error);
+      alert('Failed to save task. Please try again.');
+    } finally {
+      setSavingTasks(false);
+    }
+  };
+
+  const handleSaveTasks = async () => {
+    try {
+      setSavingTasks(true);
+      
+      const payload = {
+        adminTasks: JSON.stringify(adminTasksList),
+        userTasks: JSON.stringify(userTasksList)
+      };
+      
+      const response = await updateUserDataByUserId(userId, payload);
+      
+      if (response.success) {
+        alert('✅ Tasks saved successfully!');
+        await fetchClientProfile();
+      }
+    } catch (error) {
+      console.error('❌ Error saving Tasks:', error);
+      alert(`❌ Failed to save: ${error.message}`);
+    } finally {
+      setSavingTasks(false);
+    }
+  };
+
   const handleSaveAdminNote = async () => {
     try {
       setSavingNotes(true);
@@ -307,18 +548,138 @@ function AdminClientOverview() {
     }
   };
 
+  // Organization handlers
+  const addOrganization = () => {
+    setOrganisations([...organisations, { 
+      id: Date.now(), 
+      organisationType: '',
+      legalName: '',
+      tradeName: '',
+      gstin: '',
+      incorporationDate: '',
+      panFile: null,
+      tan: '',
+      cin: '',
+      registeredAddress: ''
+    }]);
+  };
+
+  const removeOrganization = (id) => {
+    if (organisations.length > 1) {
+      setOrganisations(organisations.filter(o => o.id !== id));
+    }
+  };
+
+  const updateOrganization = (id, field, value) => {
+    setOrganisations(organisations.map(org => 
+      org.id === id ? { ...org, [field]: value } : org
+    ));
+  };
+
+  const handleSaveOrganisations = async () => {
+    try {
+      setSavingOrg(true);
+      
+      const payload = {
+        organisations: organisations.map(org => ({
+          organisationType: org.organisationType,
+          legalName: org.legalName,
+          tradeName: org.tradeName,
+          gstin: org.gstin,
+          incorporationDate: org.incorporationDate,
+          panFile: org.panFile,
+          tan: org.tan,
+          cin: org.cin,
+          registeredAddress: org.registeredAddress
+        }))
+      };
+      
+      const response = await updateUserDataByUserId(userId, payload);
+      
+      if (response.success) {
+        alert('✅ Organisation Details saved successfully!');
+        setIsEditingOrganisations(false);
+        await fetchClientProfile();
+      }
+    } catch (error) {
+      console.error('❌ Error saving Organisation:', error);
+      alert(`❌ Failed to save: ${error.message}`);
+    } finally {
+      setSavingOrg(false);
+    }
+  };
+
+  // Website handlers
+  const addWebsite = () => {
+    setWebsites([...websites, { 
+      id: Date.now(), 
+      type: '', 
+      url: '', 
+      login: '', 
+      password: '', 
+      showPassword: false 
+    }]);
+  };
+
+  const removeWebsite = (id) => {
+    if (websites.length > 1) {
+      setWebsites(websites.filter(w => w.id !== id));
+    }
+  };
+
+  const updateWebsite = (id, field, value) => {
+    setWebsites(websites.map(website => 
+      website.id === id ? { ...website, [field]: value } : website
+    ));
+  };
+
+  const togglePasswordVisibility = (id) => {
+    setWebsites(websites.map(website => 
+      website.id === id ? { ...website, showPassword: !website.showPassword } : website
+    ));
+  };
+
+  const handleSaveWebsites = async () => {
+    try {
+      setSavingWebsites(true);
+      
+      const payload = {
+        websites: websites.map(w => ({
+          type: w.type,
+          url: w.url,
+          login: w.login,
+          password: w.password
+        }))
+      };
+      
+      const response = await updateUserDataByUserId(userId, payload);
+      
+      if (response.success) {
+        alert('✅ Website Details saved successfully!');
+        setIsEditingWebsites(false);
+        await fetchClientProfile();
+      }
+    } catch (error) {
+      console.error('❌ Error saving Websites:', error);
+      alert(`❌ Failed to save: ${error.message}`);
+    } finally {
+      setSavingWebsites(false);
+    }
+  };
+
   const handleSaveClientPersona = async () => {
     try {
       setSavingNotes(true);
       
       const response = await apiClient.post('/admin/update-client-persona', {
         userId,
-        persona: clientPersona
+        personaList: JSON.stringify(clientPersonaList)
       });
 
       if (response.success) {
         alert('Client persona saved successfully!');
         setShowNotepad(false);
+        await fetchClientPersona();
       }
     } catch (error) {
       console.error('Error saving client persona:', error);
@@ -326,6 +687,30 @@ function AdminClientOverview() {
     } finally {
       setSavingNotes(false);
     }
+  };
+
+  const addPersonaEntry = () => {
+    if (!currentPersona.description || !currentPersona.description.trim()) {
+      alert('Please enter a description');
+      return;
+    }
+
+    const newEntry = {
+      id: Date.now(),
+      date: currentPersona.date || new Date().toISOString().split('T')[0],
+      description: currentPersona.description,
+      createdAt: new Date().toISOString()
+    };
+
+    setClientPersonaList([...clientPersonaList, newEntry]);
+    setCurrentPersona({ date: '', description: '' });
+    setIsAddingPersona(false);
+  };
+
+  const removePersonaEntry = (index) => {
+    if (!confirm('Are you sure you want to delete this entry?')) return;
+    const updatedList = clientPersonaList.filter((_, idx) => idx !== index);
+    setClientPersonaList(updatedList);
   };
 
   const handleUpdateServiceStatus = async (newStatus) => {
@@ -440,13 +825,22 @@ function AdminClientOverview() {
           </button>
           <button
             onClick={() => setActiveTab('services')}
-            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-6 py-2 rounded-lg font-medium transition-colors relative ${
               activeTab === 'services'
                 ? 'bg-[#01334C] text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Services
+            {allRegistrations.length > 0 && (
+              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                activeTab === 'services'
+                  ? 'bg-white/20 text-white'
+                  : 'bg-[#01334C] text-white'
+              }`}>
+                {allRegistrations.length}
+              </span>
+            )}
           </button>
           <button
             onClick={() => setActiveTab('compliance')}
@@ -574,18 +968,155 @@ function AdminClientOverview() {
 
           {/* Organisation Details */}
           <div className="bg-white rounded-xl border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012] overflow-hidden">
-            <button
-              onClick={() => setExpandedSection(expandedSection === 'organisation' ? null : 'organisation')}
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-            >
+            <div className="w-full px-6 py-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Organisation Details</h3>
-              <svg className={`w-5 h-5 transition-transform ${expandedSection === 'organisation' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+              <div className="flex items-center gap-2">
+                {!isEditingOrganisations ? (
+                  <button
+                    onClick={() => setIsEditingOrganisations(true)}
+                    className="px-4 py-2 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm"
+                  >
+                    Add/Edit
+                  </button>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSaveOrganisations}
+                      disabled={savingOrg}
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm disabled:opacity-50"
+                    >
+                      {savingOrg ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsEditingOrganisations(false);
+                        fetchClientProfile(); // Reload to reset changes
+                      }}
+                      className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={() => setExpandedSection(expandedSection === 'organisation' ? null : 'organisation')}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg className={`w-5 h-5 transition-transform ${expandedSection === 'organisation' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
             {expandedSection === 'organisation' && (
               <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                {clientProfile.user?.organisations && clientProfile.user.organisations.length > 0 ? (
+                {isEditingOrganisations ? (
+                  <div className="space-y-4">
+                    {organisations.map((org, idx) => (
+                      <div key={org.id} className="bg-white rounded-lg border border-gray-200 p-6">
+                        <div className="flex justify-between items-center mb-4">
+                          <h4 className="text-lg font-semibold text-gray-900">Organization {idx + 1}</h4>
+                          {organisations.length > 1 && (
+                            <button
+                              onClick={() => removeOrganization(org.id)}
+                              className="text-red-600 hover:text-red-800 text-sm"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Organisation Type</label>
+                            <input
+                              type="text"
+                              value={org.organisationType}
+                              onChange={(e) => updateOrganization(org.id, 'organisationType', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                              placeholder="e.g., Private Limited"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Legal Name</label>
+                            <input
+                              type="text"
+                              value={org.legalName}
+                              onChange={(e) => updateOrganization(org.id, 'legalName', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                              placeholder="Legal name as per registration"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Trade Name</label>
+                            <input
+                              type="text"
+                              value={org.tradeName}
+                              onChange={(e) => updateOrganization(org.id, 'tradeName', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                              placeholder="Trading name"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">GSTIN</label>
+                            <input
+                              type="text"
+                              value={org.gstin}
+                              onChange={(e) => updateOrganization(org.id, 'gstin', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                              placeholder="GSTIN number"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">TAN</label>
+                            <input
+                              type="text"
+                              value={org.tan}
+                              onChange={(e) => updateOrganization(org.id, 'tan', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                              placeholder="TAN number"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">CIN</label>
+                            <input
+                              type="text"
+                              value={org.cin}
+                              onChange={(e) => updateOrganization(org.id, 'cin', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                              placeholder="CIN number"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Incorporation Date</label>
+                            <input
+                              type="date"
+                              value={org.incorporationDate}
+                              onChange={(e) => updateOrganization(org.id, 'incorporationDate', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Registered Address</label>
+                            <textarea
+                              value={org.registeredAddress}
+                              onChange={(e) => updateOrganization(org.id, 'registeredAddress', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                              rows="2"
+                              placeholder="Registered office address"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      onClick={addOrganization}
+                      className="w-full py-2 border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-[#01334C] hover:text-[#01334C] transition-colors flex items-center justify-center gap-2"
+                    >
+                      <AiOutlinePlus className="w-5 h-5" />
+                      Add Another Organization
+                    </button>
+                  </div>
+                ) : clientProfile.user?.organisations && clientProfile.user.organisations.length > 0 ? (
                   <div className="space-y-4">
                     <table className="w-full text-sm table-fixed">
                       <colgroup>
@@ -707,18 +1238,125 @@ function AdminClientOverview() {
 
           {/* Website Details */}
           <div className="bg-white rounded-xl border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012] overflow-hidden">
-            <button
-              onClick={() => setExpandedSection(expandedSection === 'website' ? null : 'website')}
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-            >
+            <div className="w-full px-6 py-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Website Details</h3>
-              <svg className={`w-5 h-5 transition-transform ${expandedSection === 'website' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+              <div className="flex items-center gap-2">
+                {!isEditingWebsites ? (
+                  <button
+                    onClick={() => setIsEditingWebsites(true)}
+                    className="px-4 py-2 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm"
+                  >
+                    Add/Edit
+                  </button>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSaveWebsites}
+                      disabled={savingWebsites}
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm disabled:opacity-50"
+                    >
+                      {savingWebsites ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsEditingWebsites(false);
+                        fetchClientProfile(); // Reload to reset changes
+                      }}
+                      className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={() => setExpandedSection(expandedSection === 'website' ? null : 'website')}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg className={`w-5 h-5 transition-transform ${expandedSection === 'website' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
             {expandedSection === 'website' && (
               <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                {clientProfile.websites && clientProfile.websites.length > 0 ? (
+                {isEditingWebsites ? (
+                  <div className="space-y-4">
+                    {websites.map((website, index) => (
+                      <div key={website.id} className="bg-white rounded-lg border border-gray-200 p-4">
+                        <div className="flex justify-between items-center mb-4">
+                          <h4 className="text-md font-semibold text-gray-900">Website {index + 1}</h4>
+                          {websites.length > 1 && (
+                            <button
+                              onClick={() => removeWebsite(website.id)}
+                              className="text-red-600 hover:text-red-800 text-sm"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Website Type</label>
+                            <input
+                              type="text"
+                              value={website.type}
+                              onChange={(e) => updateWebsite(website.id, 'type', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                              placeholder="e.g., Company Website, Portal"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
+                            <input
+                              type="url"
+                              value={website.url}
+                              onChange={(e) => updateWebsite(website.id, 'url', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                              placeholder="https://example.com"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Login</label>
+                            <input
+                              type="text"
+                              value={website.login}
+                              onChange={(e) => updateWebsite(website.id, 'login', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                              placeholder="Username/Email"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <div className="relative">
+                              <input
+                                type={website.showPassword ? 'text' : 'password'}
+                                value={website.password}
+                                onChange={(e) => updateWebsite(website.id, 'password', e.target.value)}
+                                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md text-sm"
+                                placeholder="Password"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => togglePasswordVisibility(website.id)}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                              >
+                                {website.showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      onClick={addWebsite}
+                      className="w-full py-2 border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-[#01334C] hover:text-[#01334C] transition-colors flex items-center justify-center gap-2"
+                    >
+                      <AiOutlinePlus className="w-5 h-5" />
+                      Add Another Website
+                    </button>
+                  </div>
+                ) : clientProfile.websites && clientProfile.websites.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm border-collapse">
                       <thead>
@@ -796,31 +1434,223 @@ function AdminClientOverview() {
               </svg>
             </button>
             {expandedSection === 'tasks' && (
-              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                {clientProfile.tasks && clientProfile.tasks.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-100">
-                        <tr>
-                          <th className="px-4 py-2 text-left font-medium text-gray-700">Title</th>
-                          <th className="px-4 py-2 text-left font-medium text-gray-700">Date</th>
-                          <th className="px-4 py-2 text-left font-medium text-gray-700">Description</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {clientProfile.tasks.map((task, idx) => (
-                          <tr key={idx} className="border-b border-gray-200">
-                            <td className="px-4 py-2 text-gray-600">{task.title || 'N/A'}</td>
-                            <td className="px-4 py-2 text-gray-600">{task.date || 'N/A'}</td>
-                            <td className="px-4 py-2 text-gray-600">{task.description || 'N/A'}</td>
+              <div className="p-6 border-t border-gray-200 bg-gray-50">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Admin Tasks - Left Side */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-semibold text-gray-900">Admin Tasks (Editable)</h4>
+                      <button
+                        onClick={() => setIsAddingAdminTask(true)}
+                        className="flex items-center gap-1 px-2 py-1 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add
+                      </button>
+                    </div>
+
+                    {/* Add Admin Task Form */}
+                    {isAddingAdminTask && (
+                      <div className="mb-4 p-4 border border-gray-300 rounded-lg bg-white">
+                        <h4 className="text-sm font-semibold text-gray-900 mb-3">New Admin Task</h4>
+                        
+                        <div className="mb-3">
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
+                          <input
+                            type="date"
+                            value={currentAdminTask.date}
+                            onChange={(e) => setCurrentAdminTask({ ...currentAdminTask, date: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          />
+                        </div>
+
+                        <div className="mb-3">
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Title</label>
+                          <input
+                            type="text"
+                            value={currentAdminTask.title}
+                            onChange={(e) => setCurrentAdminTask({ ...currentAdminTask, title: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            placeholder="Enter task title"
+                          />
+                        </div>
+
+                        <div className="mb-3">
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
+                          <select
+                            value={currentAdminTask.type}
+                            onChange={(e) => setCurrentAdminTask({ ...currentAdminTask, type: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          >
+                            <option value="">Select type</option>
+                            <option value="recurring">Recurring</option>
+                            <option value="non-recurring">Non-Recurring</option>
+                            <option value="urgent">Urgent</option>
+                            <option value="normal">Normal</option>
+                          </select>
+                        </div>
+
+                        <div className="mb-3">
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                          <textarea
+                            value={currentAdminTask.description}
+                            onChange={(e) => setCurrentAdminTask({ ...currentAdminTask, description: e.target.value })}
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            placeholder="Enter task description"
+                          />
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={addAdminTask}
+                            disabled={savingTasks}
+                            className="flex-1 px-3 py-2 bg-[#00486D] text-white rounded-md text-sm"
+                          >
+                            {savingTasks ? 'Saving...' : 'Save'}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsAddingAdminTask(false);
+                              setCurrentAdminTask({ date: '', title: '', description: '', type: '' });
+                            }}
+                            className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Admin Tasks Table */}
+                    {adminTasksList.length > 0 ? (
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Date</th>
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Title</th>
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Type</th>
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Description</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {adminTasksList.map((task, idx) => (
+                            <React.Fragment key={task.id || idx}>
+                              <tr 
+                                onClick={() => setExpandedAdminTaskId(expandedAdminTaskId === idx ? null : idx)}
+                                className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
+                              >
+                                <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</td>
+                                <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.title || 'N/A'}</td>
+                                <td className="px-2 py-2 text-gray-600 text-xs">
+                                  {task.type ? (
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                      task.type === 'urgent' ? 'bg-red-100 text-red-700' :
+                                      task.type === 'recurring' ? 'bg-blue-100 text-blue-700' :
+                                      task.type === 'non-recurring' ? 'bg-green-100 text-green-700' :
+                                      'bg-gray-100 text-gray-700'
+                                    }`}>
+                                      {task.type.charAt(0).toUpperCase() + task.type.slice(1)}
+                                    </span>
+                                  ) : 'N/A'}
+                                </td>
+                                <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.description || 'N/A'}</td>
+                              </tr>
+                              {expandedAdminTaskId === idx && (
+                                <tr className="bg-gray-50">
+                                  <td colSpan="4" className="px-3 py-3">
+                                    <div className="space-y-2 text-xs">
+                                      <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</span></div>
+                                      <div><span className="font-medium text-gray-700">Title:</span> <span className="text-gray-600">{task.title || 'N/A'}</span></div>
+                                      <div><span className="font-medium text-gray-700">Type:</span> <span className="text-gray-600">{task.type ? task.type.charAt(0).toUpperCase() + task.type.slice(1) : 'N/A'}</span></div>
+                                      <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1 whitespace-pre-wrap">{task.description || 'No description'}</p></div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                            </React.Fragment>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <p className="text-gray-600 text-center py-4 text-xs">No admin tasks added yet</p>
+                    )}
                   </div>
-                ) : (
-                  <p className="text-gray-600">No tasks available</p>
-                )}
+
+                  {/* User Tasks - Right Side */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-semibold text-gray-900">User Tasks (Read Only)</h4>
+                    </div>
+
+                    {/* User Tasks Table */}
+                    {userTasksList.length > 0 ? (
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Date</th>
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Title</th>
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Type</th>
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {userTasksList.map((task, idx) => (
+                            <React.Fragment key={task.id || idx}>
+                              <tr 
+                                onClick={() => setExpandedUserTaskId(expandedUserTaskId === idx ? null : idx)}
+                                className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
+                              >
+                                <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</td>
+                                <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.title || 'N/A'}</td>
+                                <td className="px-2 py-2 text-gray-600 text-xs">
+                                  {task.type ? (
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                      task.type === 'urgent' ? 'bg-red-100 text-red-700' :
+                                      task.type === 'recurring' ? 'bg-blue-100 text-blue-700' :
+                                      task.type === 'non-recurring' ? 'bg-green-100 text-green-700' :
+                                      'bg-gray-100 text-gray-700'
+                                    }`}>
+                                      {task.type.charAt(0).toUpperCase() + task.type.slice(1)}
+                                    </span>
+                                  ) : 'N/A'}
+                                </td>
+                                <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.description || 'N/A'}</td>
+                              </tr>
+                              {expandedUserTaskId === idx && (
+                                <tr className="bg-gray-50">
+                                  <td colSpan="4" className="px-3 py-3">
+                                    <div className="space-y-2 text-xs">
+                                      <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</span></div>
+                                      <div><span className="font-medium text-gray-700">Title:</span> <span className="text-gray-600">{task.title || 'N/A'}</span></div>
+                                      <div><span className="font-medium text-gray-700">Type:</span> <span className="text-gray-600">{task.type ? task.type.charAt(0).toUpperCase() + task.type.slice(1) : 'N/A'}</span></div>
+                                      <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1 whitespace-pre-wrap">{task.description || 'No description'}</p></div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                            </React.Fragment>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <p className="text-gray-600 text-center py-4 text-xs">No user tasks added yet</p>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Save Button */}
+                <div className="flex justify-end mt-6">
+                  <button 
+                    onClick={handleSaveTasks}
+                    disabled={savingTasks}
+                    className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {savingTasks ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -1142,14 +1972,36 @@ function AdminClientOverview() {
               <div className="flex items-center gap-4 flex-1">
                 {/* Avatar */}
                 <div className="w-12 h-12 rounded-full bg-[#01334C] text-white flex items-center justify-center font-semibold text-lg">
-                  {registration.business_name ? registration.business_name.charAt(0).toUpperCase() : registration.ticket_id.startsWith('PVT_') ? 'P' : 'Pr'}
+                  {registration.business_name ? registration.business_name.charAt(0).toUpperCase() : 
+                   registration.ticket_id?.startsWith('PVT_') ? 'P' : 
+                   registration.ticket_id?.startsWith('SI_') ? 'S' : 
+                   registration.ticket_id?.startsWith('PROP_') ? 'Pr' :
+                   registration.ticket_id?.startsWith('GST_') ? 'G' : 'R'}
                 </div>
                 
                 {/* Name */}
                 <div className="flex-1">
                   <h2 className="text-xl font-semibold text-gray-900">{registration.business_name || 'Pending'}</h2>
                   <p className="text-xs text-gray-500 mt-1">
-                    {registration.ticket_id.startsWith('PVT_') ? 'Private Limited' : 'Proprietorship'}
+                    {(() => {
+                      // Determine registration type by ticket_id prefix first
+                      if (registration.ticket_id?.startsWith('GST_')) return 'GST Registration';
+                      if (registration.ticket_id?.startsWith('SI_')) return 'Startup India';
+                      if (registration.ticket_id?.startsWith('PROP_')) return 'Proprietorship';
+                      if (registration.ticket_id?.startsWith('PVT_')) return 'Private Limited';
+                      
+                      // Fallback: Check package name/price to determine type (for incorrectly created records)
+                      const packageName = (registration.package_name || '').toLowerCase();
+                      const packagePrice = registration.package_price;
+                      
+                      // GST packages: Starter (₹2,599), Growth (₹5,599), Pro (₹12,999)
+                      if (packageName.includes('gst') || 
+                          packagePrice === 2599 || packagePrice === 5599 || packagePrice === 12999) {
+                        return 'GST Registration';
+                      }
+                      
+                      return 'Registration';
+                    })()}
                   </p>
                 </div>
 
@@ -1174,7 +2026,7 @@ function AdminClientOverview() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setIsStatusDropdownOpen(!isStatusDropdownOpen);
+                      setIsStatusDropdownOpen(isStatusDropdownOpen === index ? null : index);
                     }}
                     className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
                       serviceStatus === 'registered' 
@@ -1191,13 +2043,13 @@ function AdminClientOverview() {
                   </button>
 
                   {/* Dropdown Menu */}
-                  {isStatusDropdownOpen && (
+                  {isStatusDropdownOpen === index && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleUpdateServiceStatus('in-progress');
-                          setIsStatusDropdownOpen(false);
+                          setIsStatusDropdownOpen(null);
                         }}
                         className="w-full px-4 py-2 text-left text-sm hover:bg-blue-50 flex items-center gap-2 text-blue-800 rounded-t-lg"
                       >
@@ -1208,7 +2060,7 @@ function AdminClientOverview() {
                         onClick={(e) => {
                           e.stopPropagation();
                           handleUpdateServiceStatus('registered');
-                          setIsStatusDropdownOpen(false);
+                          setIsStatusDropdownOpen(null);
                         }}
                         className="w-full px-4 py-2 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-green-800 rounded-b-lg"
                       >
@@ -1221,13 +2073,13 @@ function AdminClientOverview() {
               </div>
 
               {/* Chevron Icon */}
-              <svg className={`w-5 h-5 text-gray-600 transition-transform ml-4 ${isServiceCardExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 text-gray-600 transition-transform ml-4 ${isServiceCardExpanded === index ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </div>
 
             {/* Bottom Section - White Background - Expandable */}
-            {isServiceCardExpanded && (
+            {isServiceCardExpanded === index && (
               <div className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -1263,10 +2115,63 @@ function AdminClientOverview() {
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-2 ml-6">
                   <button
-                    onClick={() => navigate(`/admin/client-details/${registration.ticket_id}`)}
+                    onClick={async () => {
+                      // Determine registration type
+                      const ticketId = registration.ticket_id;
+                      const packageName = (registration.package_name || '').toLowerCase();
+                      const packagePrice = registration.package_price;
+                      
+                      // Check ticket_id prefix first
+                      if (ticketId?.startsWith('GST_')) {
+                        navigate(`/admin/gst-form?ticketId=${ticketId}&admin=true&clientId=${userId}`);
+                      } else if (ticketId?.startsWith('SI_')) {
+                        navigate(`/admin/startup-india-form?ticketId=${ticketId}&admin=true&clientId=${userId}`);
+                      } else if (ticketId?.startsWith('PROP_')) {
+                        navigate(`/admin/proprietorship-form?ticketId=${ticketId}&admin=true&clientId=${userId}`);
+                      } else if (ticketId?.startsWith('PVT_')) {
+                        // Check if this is actually a GST registration with wrong prefix
+                        // GST packages: Starter (₹2,599), Growth (₹5,599), Pro (₹12,999)
+                        if (packageName.includes('gst') || 
+                            packagePrice === 2599 || packagePrice === 5599 || packagePrice === 12999) {
+                          // This is likely a GST registration with wrong ticketId prefix
+                          // Try to find the correct GST ticketId by checking GST registrations
+                          try {
+                            const gstResponse = await apiClient.get(`/gst/user-registrations/${userId}`);
+                            if (gstResponse.success && gstResponse.data) {
+                              const gstRegs = Array.isArray(gstResponse.data) ? gstResponse.data : (gstResponse.data?.data || []);
+                              // Find GST registration with matching package price
+                              const matchingGST = gstRegs.find(reg => 
+                                reg.package_price === packagePrice || 
+                                (reg.package_name && reg.package_name.toLowerCase().includes('gst'))
+                              );
+                              if (matchingGST && matchingGST.ticket_id?.startsWith('GST_')) {
+                                // Use the correct GST ticketId
+                                navigate(`/admin/gst-form?ticketId=${matchingGST.ticket_id}&admin=true&clientId=${userId}`);
+                                return;
+                              }
+                            }
+                          } catch (err) {
+                            console.error('Error fetching GST registrations:', err);
+                          }
+                          // If no matching GST found, still try to navigate to GST form with the current ticketId
+                          // The form will handle it or show an error
+                          navigate(`/admin/gst-form?ticketId=${ticketId}&admin=true&clientId=${userId}`);
+                        } else {
+                          navigate(`/admin/client-details/${ticketId}`);
+                        }
+                      } else {
+                        // Fallback: Check package details to determine type
+                        if (packageName.includes('gst') || 
+                            packagePrice === 2599 || packagePrice === 5599 || packagePrice === 12999) {
+                          navigate(`/admin/gst-form?ticketId=${ticketId}&admin=true&clientId=${userId}`);
+                        } else {
+                          navigate(`/admin/client-details/${ticketId}`);
+                        }
+                      }
+                    }}
                     className="px-4 py-2 text-sm bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors whitespace-nowrap"
                   >
-                    View Details
+                    {(registration.ticket_id?.startsWith('SI_') || registration.ticket_id?.startsWith('PROP_') || registration.ticket_id?.startsWith('GST_')) && (registration.status === 'draft' || registration.status === 'incomplete') ? 'Fill Form' : 'View Details'}
                   </button>
                 </div>
               </div>
@@ -1330,23 +2235,129 @@ function AdminClientOverview() {
 
               {/* Content - Scrollable */}
               <div className="p-4 overflow-y-auto flex-1">
-                {/* Simple Textarea for Client Persona */}
-                <div className="mb-3">
+                <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Client Personality & Preferences
                     <span className="ml-2 text-xs text-gray-500">(Private - Not visible to client)</span>
                   </label>
-                  <textarea
-                    value={clientPersona}
-                    onChange={(e) => setClientPersona(e.target.value)}
-                    placeholder="Describe client's personality, preferences, communication style, etc..."
-                    className="w-full h-64 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00486D] focus:border-transparent resize-none text-sm"
-                  />
-                </div>
+                  
+                  {/* Add New Entry Button */}
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="text-sm font-semibold text-gray-900">Persona Entries</h4>
+                    <button
+                      onClick={() => setIsAddingPersona(true)}
+                      className="flex items-center gap-1 px-2 py-1 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add Entry
+                    </button>
+                  </div>
 
-                {/* Character Count */}
-                <div className="text-xs text-gray-500">
-                  <span>{clientPersona.length} characters</span>
+                  {/* Add Entry Form */}
+                  {isAddingPersona && (
+                    <div className="mb-4 p-4 border border-gray-300 rounded-lg bg-gray-50">
+                      <h4 className="text-sm font-semibold text-gray-900 mb-3">New Persona Entry</h4>
+                      
+                      <div className="mb-3">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
+                        <input
+                          type="date"
+                          value={currentPersona.date}
+                          onChange={(e) => setCurrentPersona({ ...currentPersona, date: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        />
+                      </div>
+
+                      <div className="mb-3">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                        <textarea
+                          value={currentPersona.description}
+                          onChange={(e) => setCurrentPersona({ ...currentPersona, description: e.target.value })}
+                          placeholder="Describe client's personality, preferences, communication style, etc..."
+                          rows={4}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        />
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={addPersonaEntry}
+                          className="flex-1 px-3 py-2 bg-[#00486D] text-white rounded-md text-sm"
+                        >
+                          Add
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsAddingPersona(false);
+                            setCurrentPersona({ date: '', description: '' });
+                          }}
+                          className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Persona Entries Table */}
+                  {clientPersonaList.length > 0 ? (
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Date</th>
+                          <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Description</th>
+                          <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[...clientPersonaList].sort((a, b) => {
+                          const dateA = a.date ? new Date(a.date) : new Date(0);
+                          const dateB = b.date ? new Date(b.date) : new Date(0);
+                          return dateB - dateA; // Newest first
+                        }).map((entry, idx) => {
+                          const originalIdx = clientPersonaList.findIndex(e => (e.id || clientPersonaList.indexOf(e)) === (entry.id || clientPersonaList.indexOf(entry)));
+                          return (
+                          <React.Fragment key={entry.id || idx}>
+                            <tr 
+                              onClick={() => setExpandedPersonaId(expandedPersonaId === originalIdx ? null : originalIdx)}
+                              className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
+                            >
+                              <td className="px-2 py-2 text-gray-600 text-xs">
+                                {entry.date ? new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+                              </td>
+                              <td className="px-2 py-2 text-gray-600 truncate text-xs">{entry.description || 'N/A'}</td>
+                              <td className="px-2 py-2 text-gray-600 text-xs">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removePersonaEntry(originalIdx);
+                                  }}
+                                  className="text-red-600 hover:text-red-800 text-xs"
+                                >
+                                  Delete
+                                </button>
+                              </td>
+                            </tr>
+                            {expandedPersonaId === originalIdx && (
+                              <tr className="bg-gray-50">
+                                <td colSpan="3" className="px-3 py-3">
+                                  <div className="space-y-2 text-xs">
+                                    <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{entry.date ? new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</span></div>
+                                    <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1 whitespace-pre-wrap">{entry.description || 'No description'}</p></div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p className="text-gray-600 text-center py-4 text-xs">No persona entries added yet. Click "Add Entry" to add one.</p>
+                  )}
                 </div>
               </div>
 
