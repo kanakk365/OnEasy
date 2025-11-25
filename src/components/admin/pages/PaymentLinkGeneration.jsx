@@ -12,6 +12,7 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
   const [generatingLink, setGeneratingLink] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [paymentLink, setPaymentLink] = useState(null);
+  const [paymentLinkData, setPaymentLinkData] = useState(null);
   const [showEmailOption, setShowEmailOption] = useState(false);
 
   const handleApplyCoupon = async () => {
@@ -79,6 +80,7 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
 
       if (response.success) {
         setPaymentLink(response.data.paymentLink);
+        setPaymentLinkData(response.data); // Store the full response data
         setShowEmailOption(true);
         if (onPaymentLinkGenerated) {
           onPaymentLinkGenerated(response.data);

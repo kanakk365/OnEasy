@@ -15,6 +15,7 @@ import useSidebarStore from "../../../stores/sidebarStore";
 import useLogoutModalStore from "../../../stores/logoutModalStore";
 import LogoutModal from "../../common/LogoutModal";
 import { AUTH_CONFIG } from "../../../config/auth";
+import apiClient from "../../../utils/api";
 import logo from "../../../assets/logo.png";
 
 function SuperAdminSidebar() {
@@ -25,23 +26,49 @@ function SuperAdminSidebar() {
   const [userData, setUserData] = React.useState(null);
   const { showLogoutModal, setShowLogoutModal, closeLogoutModal, handleLogout } = useLogoutModalStore();
 
-  // Load user data from localStorage
-  const loadUserData = React.useCallback(() => {
-    const storedUser = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER);
-    if (storedUser) {
-      try {
-        setUserData(JSON.parse(storedUser));
-      } catch (e) {
-        console.error('Error parsing user data:', e);
+  // Load user data directly from database
+  const loadUserData = React.useCallback(async () => {
+    try {
+      const response = await apiClient.getMe();
+      
+      if (response.success && response.data) {
+        console.log('✅ SuperAdminSidebar - Fetched user data from database:', response.data);
+        setUserData(response.data);
+        // Also update localStorage for other components that might need it
+        localStorage.setItem(AUTH_CONFIG.STORAGE_KEYS.USER, JSON.stringify(response.data));
+      } else {
+        console.error('❌ SuperAdminSidebar - Failed to fetch user data:', response);
+        // Fallback to localStorage if API fails
+        const storedUser = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER);
+        if (storedUser) {
+          try {
+            setUserData(JSON.parse(storedUser));
+          } catch (e) {
+            console.error('Error parsing user data from localStorage:', e);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('❌ SuperAdminSidebar - Error fetching user data from database:', error);
+      // Fallback to localStorage if API fails
+      const storedUser = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER);
+      if (storedUser) {
+        try {
+          setUserData(JSON.parse(storedUser));
+        } catch (e) {
+          console.error('Error parsing user data from localStorage:', e);
+        }
       }
     }
   }, []);
 
   React.useEffect(() => {
+    // Load initial user data from database
     loadUserData();
 
+    // Listen for profile updates
     const handleProfileUpdate = () => {
-      loadUserData();
+      loadUserData(); // Fetch fresh data from database
     };
 
     window.addEventListener('profileUpdated', handleProfileUpdate);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import apiClient from '../../utils/api';
+import { AUTH_CONFIG } from '../../config/auth';
 
 function SetEmailPasswordModal({ isOpen, onClose, onSuccess, required = false }) {
   const [formData, setFormData] = useState({
@@ -59,19 +60,53 @@ function SetEmailPasswordModal({ isOpen, onClose, onSuccess, required = false })
       );
 
       if (response.success) {
-        // Update user in localStorage
-        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-        const updatedUser = { 
-          ...storedUser, 
-          email: formData.email.trim(),
-          ...response.data
-        };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-
-        // Call onSuccess callback
-        if (onSuccess) {
-          onSuccess(updatedUser);
+        // Fetch fresh user data from backend to get complete user info (including name)
+        try {
+          const freshUserResponse = await apiClient.getMe();
+          
+          if (freshUserResponse.success && freshUserResponse.data) {
+            // Update localStorage with complete fresh user data from backend
+            localStorage.setItem(AUTH_CONFIG.STORAGE_KEYS.USER, JSON.stringify(freshUserResponse.data));
+            console.log('✅ Updated localStorage with fresh user data after email/password set:', freshUserResponse.data);
+            
+            // Dispatch event to notify sidebar and header to refresh
+            window.dispatchEvent(new Event('profileUpdated'));
+            console.log('📢 Dispatched profileUpdated event');
+            
+            // Call onSuccess callback with fresh data
+            if (onSuccess) {
+              onSuccess(freshUserResponse.data);
+            }
+          } else {
+            // Fallback: Update with response data if getMe fails
+            const storedUser = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || '{}');
+            const updatedUser = { 
+              ...storedUser, 
+              email: formData.email.trim(),
+              ...response.data
+            };
+            localStorage.setItem(AUTH_CONFIG.STORAGE_KEYS.USER, JSON.stringify(updatedUser));
+            window.dispatchEvent(new Event('profileUpdated'));
+            if (onSuccess) {
+              onSuccess(updatedUser);
+            }
+          }
+        } catch (refreshError) {
+          console.error('⚠️ Could not refresh user data, using response data:', refreshError);
+          // Fallback: Update with response data
+          const storedUser = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || '{}');
+          const updatedUser = { 
+            ...storedUser, 
+            email: formData.email.trim(),
+            ...response.data
+          };
+          localStorage.setItem(AUTH_CONFIG.STORAGE_KEYS.USER, JSON.stringify(updatedUser));
+          window.dispatchEvent(new Event('profileUpdated'));
+          if (onSuccess) {
+            onSuccess(updatedUser);
+          }
         }
+        
         onClose();
       } else {
         setError(response.message || 'Failed to set email and password');

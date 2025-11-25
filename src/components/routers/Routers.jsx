@@ -26,6 +26,7 @@ import ProprietorshipDetails from "../pages/ProprietorshipDetails";
 import ProprietorshipForm from "../forms/ProprietorshipForm";
 import ProprietorshipDashboard from "../pages/ProprietorshipDashboard";
 import ProprietorshipViewDetails from "../pages/ProprietorshipViewDetails";
+import PartnershipDetails from "../pages/PartnershipDetails";
 import GSTDetails from "../pages/GSTDetails";
 import GSTPackageSelection from "../pages/GSTPackageSelection";
 import GSTForm from "../pages/GSTForm";
@@ -136,6 +137,11 @@ function Routers() {
       <Route path="/company/proprietorship" element={
         <ProtectedRoute>
           <ProprietorshipDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/company/partnership" element={
+        <ProtectedRoute>
+          <PartnershipDetails />
         </ProtectedRoute>
       } />
       <Route path="/company/:type" element={
