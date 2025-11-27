@@ -7,7 +7,8 @@ function AdminAddUser() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    name: ''
+    name: '',
+    phone: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -41,6 +42,13 @@ function AdminAddUser() {
     return emailRegex.test(email);
   };
 
+  const validatePhone = (phone) => {
+    // Remove all non-digit characters
+    const digits = phone.replace(/\D/g, '');
+    // Check if it's a valid 10-digit Indian mobile number
+    return digits.length === 10 && /^[6-9]/.test(digits);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -67,13 +75,25 @@ function AdminAddUser() {
       return;
     }
 
+    // Validate phone number (now mandatory)
+    if (!formData.phone.trim()) {
+      setError('Please enter a mobile number');
+      return;
+    }
+
+    if (!validatePhone(formData.phone)) {
+      setError('Please enter a valid 10-digit mobile number');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const response = await apiClient.createUser({
         email: formData.email.trim(),
         password: formData.password,
-        name: formData.name.trim() || null
+        name: formData.name.trim() || null,
+        phone: formData.phone.trim()
       });
 
       if (response.success) {
@@ -82,7 +102,8 @@ function AdminAddUser() {
         setFormData({
           email: '',
           password: '',
-          name: ''
+          name: '',
+          phone: ''
         });
         
         // Clear success message after 5 seconds
@@ -146,6 +167,27 @@ function AdminAddUser() {
               disabled={loading}
               required
             />
+          </div>
+
+          {/* Mobile Field (Required) */}
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+              Mobile Number <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="tel"
+              id="phone"
+              value={formData.phone}
+              onChange={(e) => handleInputChange('phone', e.target.value)}
+              placeholder="Enter 10-digit mobile number"
+              className="w-full h-12 px-4 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent placeholder-gray-400 text-sm"
+              disabled={loading}
+              maxLength="10"
+              required
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              User can login with this mobile number
+            </p>
           </div>
 
           {/* Password Field */}
