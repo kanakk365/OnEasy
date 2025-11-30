@@ -167,7 +167,7 @@ function PackagesSection({ packages, onGetStarted }) {
                   </span>
                 )}
                 <span className={`${pkg.isHighlighted ? "text-white/60" : "text-[#475467]"} text-sm`}>
-                  /per month
+                  {pkg.period ? `/${pkg.period.toLowerCase()}` : '/per month'}
                 </span>
               </div>
             </div>

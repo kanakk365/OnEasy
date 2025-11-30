@@ -33,11 +33,9 @@ function Settings() {
       panFile: null,
       tan: '',
       cin: '',
-      registeredAddress: ''
+      registeredAddress: '',
+      websites: []
     }
-  ]);
-  const [websites, setWebsites] = useState([
-    { id: 1, type: '', url: '', login: '', password: '', showPassword: false }
   ]);
   const [selectedOrgId, setSelectedOrgId] = useState(null);
   const [isAddingNewOrg, setIsAddingNewOrg] = useState(false);
@@ -92,22 +90,59 @@ function Settings() {
           signature: user.signature || null
         });
         
-        // Populate Organisation Details - now supports multiple organizations
+        // Populate Organisation Details - now supports multiple organizations with websites
         if (user.organisations && user.organisations.length > 0) {
-          setOrganizations(user.organisations.map((org, idx) => ({
-            id: org.id || idx + 1,
-            organisationType: org.organisation_type || '',
-            legalName: org.legal_name || '',
-            tradeName: org.trade_name || '',
-            gstin: org.gstin || '',
-            incorporationDate: org.incorporation_date || '',
-            panFile: org.pan_file || null,
-            tan: org.tan || '',
-            cin: org.cin || '',
-            registeredAddress: org.registered_address || ''
-          })));
+          setOrganizations(user.organisations.map((org, idx) => {
+            // Parse websites from JSON or use empty array
+            let websites = [];
+            if (org.websites) {
+              try {
+                websites = typeof org.websites === 'string' ? JSON.parse(org.websites) : org.websites;
+                if (!Array.isArray(websites)) websites = [];
+              } catch {
+                websites = [];
+              }
+            }
+            
+            // Map websites to include showPassword
+            websites = websites.map(w => ({
+              id: w.id || Date.now(),
+              type: w.type || '',
+              url: w.url || '',
+              login: w.login || '',
+              password: w.password || '',
+              showPassword: false
+            }));
+            
+            return {
+              id: org.id || idx + 1,
+              organisationType: org.organisation_type || '',
+              legalName: org.legal_name || '',
+              tradeName: org.trade_name || '',
+              gstin: org.gstin || '',
+              incorporationDate: org.incorporation_date || '',
+              panFile: org.pan_file || null,
+              tan: org.tan || '',
+              cin: org.cin || '',
+              registeredAddress: org.registered_address || '',
+              websites: websites
+            };
+          }));
         } else if (user.organisation_type || user.legal_name) {
           // Backward compatibility - single organization from old schema
+          // Migrate old websites to first organization
+          let websites = [];
+          if (userWebsites && userWebsites.length > 0) {
+            websites = userWebsites.map(w => ({
+              id: w.id || Date.now(),
+              type: w.website_type || '',
+              url: w.website_url || '',
+              login: w.login || '',
+              password: w.password || '',
+              showPassword: false
+            }));
+          }
+          
           setOrganizations([{
             id: 1,
             organisationType: user.organisation_type || '',
@@ -118,20 +153,9 @@ function Settings() {
             panFile: user.pan_file || null,
             tan: user.tan || '',
             cin: user.cin || '',
-            registeredAddress: user.registered_address || ''
+            registeredAddress: user.registered_address || '',
+            websites: websites
           }]);
-        }
-        
-        // Populate Websites
-        if (userWebsites && userWebsites.length > 0) {
-          setWebsites(userWebsites.map(w => ({
-            id: w.id || Date.now(),
-            type: w.website_type || '',
-            url: w.website_url || '',
-            login: w.login || '',
-            password: w.password || '',
-            showPassword: false
-          })));
         }
         
         // Parse admin tasks (array of tasks)
@@ -246,7 +270,7 @@ function Settings() {
 
   const handleSaveOrganisation = async () => {
     try {
-      console.log('💾 Saving Organisation Details...');
+      console.log('💾 Saving Organisation Details with Websites...');
       setSaving(true);
       
       const payload = {
@@ -259,7 +283,13 @@ function Settings() {
           panFile: org.panFile,
           tan: org.tan,
           cin: org.cin,
-          registeredAddress: org.registeredAddress
+          registeredAddress: org.registeredAddress,
+          websites: (org.websites || []).filter(w => w.url && w.url.trim() !== '').map(w => ({
+            type: w.type,
+            url: w.url,
+            login: w.login,
+            password: w.password
+          }))
         }))
       };
       
@@ -273,34 +303,6 @@ function Settings() {
       }
     } catch (error) {
       console.error('❌ Error saving Organisation:', error);
-      alert(`❌ Failed to save: ${error.message}`);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveWebsites = async () => {
-    try {
-      console.log('💾 Saving Website Details...');
-      setSaving(true);
-      
-      const payload = {
-        websites: websites.map(w => ({
-          type: w.type,
-          url: w.url,
-          login: w.login,
-          password: w.password
-        }))
-      };
-      
-      const response = await updateUsersPageData(payload);
-      
-      if (response.success) {
-        alert('✅ Website Details saved successfully!');
-        await loadUserData();
-      }
-    } catch (error) {
-      console.error('❌ Error saving Websites:', error);
       alert(`❌ Failed to save: ${error.message}`);
     } finally {
       setSaving(false);
@@ -422,7 +424,8 @@ function Settings() {
       panFile: null,
       tan: '',
       cin: '',
-      registeredAddress: ''
+      registeredAddress: '',
+      websites: []
     };
     setOrganizations([...organizations, newOrg]);
     setSelectedOrgId(newOrg.id);
@@ -441,42 +444,46 @@ function Settings() {
     ));
   };
 
-  const addWebsite = () => {
-    setWebsites([...websites, { 
-      id: Date.now(), 
-      type: '', 
-      url: '', 
-      login: '', 
-      password: '', 
-      showPassword: false 
-    }]);
-  };
-
-  const removeWebsite = (id) => {
-    if (websites.length > 1) {
-      setWebsites(websites.filter(w => w.id !== id));
-    } else {
-      // If only one website, reset it to empty instead of removing
-      setWebsites([{ 
-        id: Date.now(), 
-        type: '', 
-        url: '', 
-        login: '', 
-        password: '', 
-        showPassword: false 
-      }]);
-    }
-  };
-
-  const updateWebsite = (id, field, value) => {
-    setWebsites(websites.map(website => 
-      website.id === id ? { ...website, [field]: value } : website
+  const addWebsite = (orgId) => {
+    setOrganizations(organizations.map(org => 
+      org.id === orgId 
+        ? { ...org, websites: [...(org.websites || []), { 
+            id: Date.now(), 
+            type: '', 
+            url: '', 
+            login: '', 
+            password: '', 
+            showPassword: false 
+          }] }
+        : org
     ));
   };
 
-  const togglePasswordVisibility = (id) => {
-    setWebsites(websites.map(website => 
-      website.id === id ? { ...website, showPassword: !website.showPassword } : website
+  const removeWebsite = (orgId, websiteId) => {
+    setOrganizations(organizations.map(org => 
+      org.id === orgId 
+        ? { ...org, websites: (org.websites || []).filter(w => w.id !== websiteId) }
+        : org
+    ));
+  };
+
+  const updateWebsite = (orgId, websiteId, field, value) => {
+    setOrganizations(organizations.map(org => 
+      org.id === orgId 
+        ? { ...org, websites: (org.websites || []).map(website => 
+            website.id === websiteId ? { ...website, [field]: value } : website
+          ) }
+        : org
+    ));
+  };
+
+  const togglePasswordVisibility = (orgId, websiteId) => {
+    setOrganizations(organizations.map(org => 
+      org.id === orgId 
+        ? { ...org, websites: (org.websites || []).map(website => 
+            website.id === websiteId ? { ...website, showPassword: !website.showPassword } : website
+          ) }
+        : org
     ));
   };
   
@@ -1124,206 +1131,6 @@ function Settings() {
     );
   };
 
-  const WebsiteDetailsContent = () => {
-    // Filter out empty websites for table display
-    const savedWebsites = websites.filter(w => w.url && w.url.trim() !== '');
-    const hasNoWebsites = savedWebsites.length === 0 && websites.every(w => !w.url || w.url.trim() === '');
-
-    return (
-      <div className="px-6 pb-6 pt-6">
-        <div className="space-y-4">
-          {/* Show message if no websites */}
-          {hasNoWebsites && (
-            <div className="text-center py-8 text-gray-500">
-              <p>No websites yet. Click the + button to add a new website.</p>
-            </div>
-          )}
-
-          {/* Table and Add Button side by side */}
-          {savedWebsites.length > 0 && (
-            <div className="flex items-start gap-4 mb-4">
-              {/* Websites Table View */}
-              <div className="flex-1 overflow-x-auto">
-              <table className="w-full border-collapse bg-white">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Website Type</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Website URL</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Login</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Password</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {savedWebsites.map((website) => (
-                    <tr key={website.id} className="bg-white border-b border-gray-200">
-                      <td className="px-4 py-3 text-gray-900 border border-gray-300">{website.type || 'N/A'}</td>
-                      <td className="px-4 py-3 border border-gray-300">
-                        {website.url ? (
-                          <a href={website.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                            {website.url}
-                          </a>
-                        ) : (
-                          <span className="text-gray-600">N/A</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-gray-900 border border-gray-300">{website.login || 'N/A'}</td>
-                      <td className="px-4 py-3 border border-gray-300">
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-900">
-                            {website.password ? (
-                              website.showPassword ? website.password : '••••••••'
-                            ) : (
-                              'N/A'
-                            )}
-                          </span>
-                          {website.password && (
-                            <button
-                              type="button"
-                              onClick={() => togglePasswordVisibility(website.id)}
-                              className="text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer"
-                              title={website.showPassword ? 'Hide password' : 'Show password'}
-                            >
-                              {website.showPassword ? (
-                                <FiEyeOff className="w-4 h-4" />
-                              ) : (
-                                <FiEye className="w-4 h-4" />
-                              )}
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              </div>
-              
-              {/* Add Button beside table */}
-              <button
-                type="button"
-                onClick={addWebsite}
-                className="w-12 h-12 bg-[#01334C] text-white rounded-full flex items-center justify-center hover:bg-[#00486D] transition-colors flex-shrink-0"
-                title="Add Website"
-              >
-                <AiOutlinePlus className="w-6 h-6" />
-              </button>
-            </div>
-          )}
-
-          {/* Add Button when no table (empty state) */}
-          {hasNoWebsites && (
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={addWebsite}
-                className="w-12 h-12 bg-[#01334C] text-white rounded-full flex items-center justify-center hover:bg-[#00486D] transition-colors"
-                title="Add Website"
-              >
-                <AiOutlinePlus className="w-6 h-6" />
-              </button>
-            </div>
-          )}
-
-          {/* Website Entry Forms - Only show when adding new or when no saved websites */}
-          {(hasNoWebsites || websites.some(w => !w.url || w.url.trim() === '')) && (
-            <div className="space-y-4">
-              {websites.map((website) => {
-                // Only show form if website is empty (new entry)
-                if (website.url && website.url.trim() !== '') return null;
-                
-                return (
-                  <div key={website.id} className="flex items-end gap-4">
-                    {/* Website Type */}
-                    <div className="flex-1">
-                      <label className="block text-sm text-gray-600 mb-2">Website Type</label>
-                      <input
-                        type="text"
-                        value={website.type}
-                        onChange={(e) => updateWebsite(website.id, 'type', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter website type"
-                      />
-                    </div>
-
-                    {/* Website URL */}
-                    <div className="flex-1">
-                      <label className="block text-sm text-gray-600 mb-2">Website URL</label>
-                      <input
-                        type="url"
-                        value={website.url}
-                        onChange={(e) => updateWebsite(website.id, 'url', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter website URL"
-                      />
-                    </div>
-
-                    {/* Login */}
-                    <div className="flex-1">
-                      <label className="block text-sm text-gray-600 mb-2">Login</label>
-                      <input
-                        type="text"
-                        value={website.login}
-                        onChange={(e) => updateWebsite(website.id, 'login', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter login"
-                      />
-                    </div>
-
-                    {/* Password */}
-                    <div className="flex-1">
-                      <label className="block text-sm text-gray-600 mb-2">Password</label>
-                      <div className="relative">
-                        <input
-                          type={website.showPassword ? 'text' : 'password'}
-                          value={website.password}
-                          onChange={(e) => updateWebsite(website.id, 'password', e.target.value)}
-                          className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg bg-[#E8EFF5] focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="Enter password"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => togglePasswordVisibility(website.id)}
-                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                        >
-                          {website.showPassword ? (
-                            <FiEye className="w-5 h-5" />
-                          ) : (
-                            <FiEyeOff className="w-5 h-5" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Remove Button - Show if more than 1 website */}
-                    {websites.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeWebsite(website.id)}
-                        className="text-red-600 hover:text-red-800 text-sm"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          
-          {/* Save Button */}
-          <div className="flex justify-end pt-4">
-            <button 
-              onClick={handleSaveWebsites}
-              disabled={saving}
-              className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const OrganisationDetailsContent = () => {
     // Filter out empty organizations for table display
@@ -1641,6 +1448,178 @@ function Settings() {
                       </div>
                     </div>
 
+                    {/* Websites Section */}
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-md font-semibold text-gray-900">Website Details</h4>
+                        <button
+                          type="button"
+                          onClick={() => addWebsite(org.id)}
+                          className="flex items-center gap-2 px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors text-sm"
+                        >
+                          <AiOutlinePlus className="w-4 h-4" />
+                          Add Website
+                        </button>
+                      </div>
+                      
+                      {/* Saved Websites Table */}
+                      {org.websites && org.websites.filter(w => w.url && w.url.trim() !== '').length > 0 && (
+                        <div className="mb-4 overflow-x-auto">
+                          <table className="w-full border-collapse bg-white">
+                            <thead>
+                              <tr className="bg-gray-100">
+                                <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Type</th>
+                                <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">URL</th>
+                                <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Login</th>
+                                <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Password</th>
+                                <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {org.websites.filter(w => w.url && w.url.trim() !== '').map((website) => (
+                                <tr key={website.id} className="bg-white border-b border-gray-200">
+                                  <td className="px-4 py-3 text-gray-900 border border-gray-300 text-sm">{website.type || 'N/A'}</td>
+                                  <td className="px-4 py-3 border border-gray-300 text-sm">
+                                    {website.url ? (
+                                      <a href={website.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                        {website.url}
+                                      </a>
+                                    ) : (
+                                      <span className="text-gray-600">N/A</span>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-3 text-gray-900 border border-gray-300 text-sm">{website.login || 'N/A'}</td>
+                                  <td className="px-4 py-3 border border-gray-300 text-sm">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-gray-900">
+                                        {website.password ? (
+                                          website.showPassword ? website.password : '••••••••'
+                                        ) : (
+                                          'N/A'
+                                        )}
+                                      </span>
+                                      {website.password && (
+                                        <button
+                                          type="button"
+                                          onClick={() => togglePasswordVisibility(org.id, website.id)}
+                                          className="text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer"
+                                          title={website.showPassword ? 'Hide password' : 'Show password'}
+                                        >
+                                          {website.showPassword ? (
+                                            <FiEyeOff className="w-4 h-4" />
+                                          ) : (
+                                            <FiEye className="w-4 h-4" />
+                                          )}
+                                        </button>
+                                      )}
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-3 border border-gray-300 text-sm">
+                                    <button
+                                      type="button"
+                                      onClick={() => removeWebsite(org.id, website.id)}
+                                      className="text-red-600 hover:text-red-800 text-sm"
+                                    >
+                                      Remove
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                      
+                      {/* Website Entry Forms */}
+                      {(org.websites || []).filter(w => !w.url || w.url.trim() === '').map((website) => (
+                        <div key={website.id} className="mb-4 p-4 border border-gray-300 rounded-lg bg-gray-50">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                              <label className="block text-sm text-gray-600 mb-2">Website Type</label>
+                              <select
+                                value={website.type}
+                                onChange={(e) => updateWebsite(org.id, website.id, 'type', e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm appearance-none bg-white"
+                              >
+                                <option value="">Select Website Type</option>
+                                <option value="Income Tax">Income Tax</option>
+                                <option value="GST">GST</option>
+                                <option value="Income Tax – TAN Based">Income Tax – TAN Based</option>
+                                <option value="Professional Tax">Professional Tax</option>
+                                <option value="Provident Fund">Provident Fund</option>
+                                <option value="ESIC">ESIC</option>
+                                <option value="MCA">MCA</option>
+                                <option value="Labour license">Labour license</option>
+                                <option value="TRACES">TRACES</option>
+                                <option value="ICEGATE">ICEGATE</option>
+                                <option value="Service Tax">Service Tax</option>
+                                <option value="VAT">VAT</option>
+                                <option value="Others 1">Others 1</option>
+                                <option value="Others 2">Others 2</option>
+                                <option value="Others 3">Others 3</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm text-gray-600 mb-2">Website URL</label>
+                              <input
+                                type="url"
+                                value={website.url}
+                                onChange={(e) => updateWebsite(org.id, website.id, 'url', e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                placeholder="Enter website URL"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm text-gray-600 mb-2">Login</label>
+                              <input
+                                type="text"
+                                value={website.login}
+                                onChange={(e) => updateWebsite(org.id, website.id, 'login', e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                placeholder="Enter login"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm text-gray-600 mb-2">Password</label>
+                              <div className="relative">
+                                <input
+                                  type={website.showPassword ? 'text' : 'password'}
+                                  value={website.password}
+                                  onChange={(e) => updateWebsite(org.id, website.id, 'password', e.target.value)}
+                                  className="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                  placeholder="Enter password"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => togglePasswordVisibility(org.id, website.id)}
+                                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                >
+                                  {website.showPassword ? (
+                                    <FiEye className="w-4 h-4" />
+                                  ) : (
+                                    <FiEyeOff className="w-4 h-4" />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex justify-end mt-3">
+                            <button
+                              type="button"
+                              onClick={() => removeWebsite(org.id, website.id)}
+                              className="text-red-600 hover:text-red-800 text-sm"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
                     {/* Delete Button */}
                     {!isAddingNewOrg && (
                       <div className="flex justify-end">
@@ -1881,10 +1860,9 @@ function Settings() {
   // Define sections metadata only (components rendered inline to maintain state)
   const sections = [
     { id: 'client-profile', label: 'A. Client Profile' },
-    { id: 'organisation-details', label: 'B. Organisation Details' },
-    { id: 'website-details', label: 'C. Website Details' },
-    { id: 'tasks', label: 'D. Tasks' },
-    { id: 'notes', label: 'E. Notes' }
+    { id: 'organisation-details', label: 'B. Organisation Details (with Websites)' },
+    { id: 'tasks', label: 'C. Tasks' },
+    { id: 'notes', label: 'D. Notes' }
   ];
 
   // Show loading state while fetching data
@@ -1925,7 +1903,6 @@ function Settings() {
                 <div className="border-t border-gray-100">
                   {section.id === 'client-profile' && ClientProfileContent()}
                   {section.id === 'organisation-details' && OrganisationDetailsContent()}
-                  {section.id === 'website-details' && WebsiteDetailsContent()}
                   {section.id === 'tasks' && TasksContent()}
                   {section.id === 'notes' && renderNotesContent()}
                 </div>

@@ -75,7 +75,7 @@ function FAQSection({ faqs }) {
               <p className="font-medium text-gray-900">{faq.question}</p>
             </div>
             <div className="ml-4">
-              <p className="text-neutral-500 leading-relaxed">{faq.answer}</p>
+              <p className="text-neutral-500 leading-relaxed whitespace-pre-line">{faq.answer}</p>
             </div>
           </div>
         ))}

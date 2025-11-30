@@ -26,8 +26,8 @@ function PrivateLimitedForm({
   const [isFillingOnBehalf, setIsFillingOnBehalf] = useState(isAdminFilling);
   const [nameApplicationStatus, setNameApplicationStatus] = useState('pending');
   const [formData, setFormData] = useState({
-    numberOfDirectors: 1,
-    numberOfShareholders: 1
+    numberOfDirectors: 2,
+    numberOfShareholders: 2
   });
   
   // Check if user is admin or superadmin
@@ -186,9 +186,83 @@ function PrivateLimitedForm({
                 isAuthorizedSignatory: d.is_authorized_signatory ? 'Yes' : 'No',
                 specimenSignature: d.specimen_signature || null,
                 isDirectorInOtherCompany: d.is_director_in_other_company ? 'Yes' : 'No',
+                // Load other companies array or fallback to single company for backward compatibility
+                otherCompanies: (() => {
+                  if (d.other_companies_data) {
+                    try {
+                      const parsed = typeof d.other_companies_data === 'string' 
+                        ? JSON.parse(d.other_companies_data) 
+                        : d.other_companies_data;
+                      return Array.isArray(parsed) ? parsed : [];
+                    } catch (e) {
+                      console.warn('Failed to parse other_companies_data:', e);
+                      return [];
+                    }
+                  }
+                  // Backward compatibility: create array from old single fields
+                  if (d.other_company_name) {
+                    return [{
+                      companyName: d.other_company_name || '',
+                      position: d.other_company_position || '',
+                      dinNumber: ''
+                    }];
+                  }
+                  return [];
+                })(),
+                numberOfOtherCompanies: (() => {
+                  if (d.other_companies_data) {
+                    try {
+                      const parsed = typeof d.other_companies_data === 'string' 
+                        ? JSON.parse(d.other_companies_data) 
+                        : d.other_companies_data;
+                      return Array.isArray(parsed) ? parsed.length : 0;
+                    } catch (e) {
+                      return 0;
+                    }
+                  }
+                  return d.other_company_name ? 1 : 0;
+                })(),
+                // Keep old fields for backward compatibility
                 otherCompanyName: d.other_company_name || '',
                 otherCompanyPosition: d.other_company_position || '',
                 isShareholderInOtherCompany: d.is_shareholder_in_other_company ? 'Yes' : 'No',
+                // Load shareholder companies array or fallback to single company for backward compatibility
+                shareholderCompanies: (() => {
+                  if (d.shareholder_companies_data) {
+                    try {
+                      const parsed = typeof d.shareholder_companies_data === 'string' 
+                        ? JSON.parse(d.shareholder_companies_data) 
+                        : d.shareholder_companies_data;
+                      return Array.isArray(parsed) ? parsed : [];
+                    } catch (e) {
+                      console.warn('Failed to parse shareholder_companies_data:', e);
+                      return [];
+                    }
+                  }
+                  // Backward compatibility: create array from old single fields
+                  if (d.other_shareholder_company_name) {
+                    return [{
+                      companyName: d.other_shareholder_company_name || '',
+                      numberOfShares: d.other_company_shares?.toString() || '',
+                      faceValue: d.other_company_share_value?.toString() || ''
+                    }];
+                  }
+                  return [];
+                })(),
+                numberOfShareholderCompanies: (() => {
+                  if (d.shareholder_companies_data) {
+                    try {
+                      const parsed = typeof d.shareholder_companies_data === 'string' 
+                        ? JSON.parse(d.shareholder_companies_data) 
+                        : d.shareholder_companies_data;
+                      return Array.isArray(parsed) ? parsed.length : 0;
+                    } catch (e) {
+                      return 0;
+                    }
+                  }
+                  return d.other_shareholder_company_name ? 1 : 0;
+                })(),
+                // Keep old fields for backward compatibility
                 otherShareholderCompanyName: d.other_shareholder_company_name || '',
                 otherCompanyShares: d.other_company_shares || '',
                 otherCompanyShareValue: d.other_company_share_value || '',
@@ -379,7 +453,7 @@ function PrivateLimitedForm({
   return (
     <>
       <div className={`min-h-screen bg-[#f3f5f7] ${showStep1CompleteModal ? 'transition-all duration-300' : ''}`}>
-        <div className="max-w-6xl mx-auto px-6 py-10">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-10">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-xl font-semibold text-[#28303F]">
               Add your Details

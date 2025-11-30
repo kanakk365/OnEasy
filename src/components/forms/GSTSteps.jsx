@@ -103,7 +103,7 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
 
       {/* Basic Information */}
       <div className="space-y-6">
-        <Field label="Name of the Business" required>
+        <Field label="Legal Name of the Business" required>
           <input
             type="text"
             disabled={disabled}
@@ -111,6 +111,17 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
             placeholder="Proposed name of the business (As per PAN in case of Business Other than Proprietorship, Partnership Firm)"
             value={step1.businessName || ''}
             onChange={(e) => updateStep1('businessName', e.target.value)}
+          />
+        </Field>
+
+        <Field label="Trade Name of the Business">
+          <input
+            type="text"
+            disabled={disabled}
+            className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+            placeholder="Enter trade name if different from legal name"
+            value={step1.tradeName || ''}
+            onChange={(e) => updateStep1('tradeName', e.target.value)}
           />
         </Field>
 
@@ -397,20 +408,17 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
       {/* Additional Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Field label="Number of Directors/Partners/ Members" required>
-          <input
-            type="number"
-            disabled={disabled}
-            className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
-            placeholder="Enter number"
-            value={step1.numberOfDirectorsPartners || 1}
-            onChange={(e) => {
-              const value = parseInt(e.target.value) || 1;
-              updateStep1('numberOfDirectorsPartners', value);
+          <CustomDropdown
+            options={['1', '2', '3', '4', '5']}
+            value={String(step1.numberOfDirectorsPartners || 1)}
+            onChange={(value) => {
+              const numValue = parseInt(value) || 1;
+              updateStep1('numberOfDirectorsPartners', numValue);
               // Update directors array in step2
               const step2 = formData.step2 || { directors: [] };
               const currentDirectors = step2.directors || [];
               const newDirectors = [];
-              for (let i = 0; i < value; i++) {
+              for (let i = 0; i < numValue; i++) {
                 newDirectors.push(currentDirectors[i] || {
                   name: '',
                   isAuthorizedSignatory: 'No',
@@ -423,11 +431,12 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
               }
               setFormData({
                 ...formData,
-                step1: { ...step1, numberOfDirectorsPartners: value },
+                step1: { ...step1, numberOfDirectorsPartners: numValue },
                 step2: { ...step2, directors: newDirectors }
               });
             }}
-            min={1}
+            placeholder="Select number"
+            disabled={disabled}
           />
         </Field>
 
@@ -542,99 +551,239 @@ export function Step2Content({ formData, setFormData, disabled = false }) {
       </p>
 
       {directors.map((director, index) => (
-        <div key={index} className="border border-gray-200 rounded-lg p-6 space-y-6">
+        <div key={index} className="border border-gray-200 rounded-lg p-6 space-y-6 mb-6">
           <h3 className="text-lg font-medium text-[#28303F] mb-4">
             {isProprietorship ? 'Proprietor' : `Director/Partner ${index + 1}`} Details
           </h3>
 
-          <Field label="Name of the Proprietor/ Managing Director/ Managing Partner" required>
-            <input
-              type="text"
-              disabled={disabled}
-              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
-              placeholder="Enter the name as per the PAN card"
-              value={director.name || ''}
-              onChange={(e) => updateDirector(index, 'name', e.target.value)}
-            />
-          </Field>
+          {/* Director/Partner Information Section */}
+          <div className="space-y-6">
+            <h4 className="text-base font-semibold text-[#28303F] mb-4 pb-2 border-b border-gray-300">
+              {isProprietorship ? 'Proprietor' : 'Director/Partner'} Information
+            </h4>
 
-          {!isProprietorship && (
-            <Field label="Authorised Signatory (Not required for Proprietorship)">
-              <CustomDropdown
-                options={['Yes', 'No']}
-                value={director.isAuthorizedSignatory || 'No'}
-                onChange={(value) => updateDirector(index, 'isAuthorizedSignatory', value)}
-                placeholder="Select"
-                disabled={disabled || (hasAuthorizedSignatory && director.isAuthorizedSignatory !== 'Yes')}
+            <Field label="Name of the Proprietor/ Managing Director/ Managing Partner" required>
+              <input
+                type="text"
+                disabled={disabled}
+                className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                placeholder="Enter the name as per the PAN card"
+                value={director.name || ''}
+                onChange={(e) => updateDirector(index, 'name', e.target.value)}
               />
-              {hasAuthorizedSignatory && director.isAuthorizedSignatory !== 'Yes' && (
-                <p className="text-xs text-gray-500 mt-1">
-                  Another director/partner is already set as Authorized Signatory
-                </p>
-              )}
             </Field>
-          )}
 
-          {director.isAuthorizedSignatory === 'Yes' && !isProprietorship && (
+            <Field label="Email ID of the Proprietor/ Managing Director/ Managing Partner" required>
+              <input
+                type="email"
+                disabled={disabled}
+                className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                placeholder="Enter email address"
+                value={director.email || ''}
+                onChange={(e) => updateDirector(index, 'email', e.target.value)}
+              />
+            </Field>
+
+            <Field label="Mobile Number" required>
+              <input
+                type="tel"
+                disabled={disabled}
+                className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                placeholder="Enter mobile number"
+                value={director.mobileNumber || ''}
+                onChange={(e) => updateDirector(index, 'mobileNumber', e.target.value)}
+                maxLength={10}
+              />
+            </Field>
+          </div>
+
+          {/* Director/Partner Documents Section */}
+          <div className="space-y-6 pt-6 border-t border-gray-200">
+            <h4 className="text-base font-semibold text-[#28303F] mb-4 pb-2 border-b border-gray-300">
+              {isProprietorship ? 'Proprietor' : 'Director/Partner'} Documents
+            </h4>
+
             <FileUploadField
-              label="Letter of Authorization"
-              buttonLabel="Upload Letter of Authorization (PDF)"
-              accept=".pdf"
-              onFileSelect={(file) => handleFileUpload(index, 'authorizationLetter', file)}
+              label="Aadhaar Card"
+              buttonLabel="Upload Aadhaar Card"
+              accept=".pdf,.jpg,.jpeg,.png"
+              onFileSelect={(file) => handleFileUpload(index, 'aadhaarCard', file)}
               required
               disabled={disabled}
             />
+
+            <FileUploadField
+              label="Passport Size Photo"
+              buttonLabel="Upload Passport Size Photo"
+              accept=".pdf,.jpg,.jpeg,.png"
+              onFileSelect={(file) => handleFileUpload(index, 'passportPhoto', file)}
+              required
+              disabled={disabled}
+            />
+
+            <FileUploadField
+              label="PAN Card Photo"
+              buttonLabel="Upload PAN Card"
+              accept=".pdf,.jpg,.jpeg,.png"
+              onFileSelect={(file) => handleFileUpload(index, 'panCard', file)}
+              required
+              disabled={disabled}
+            />
+          </div>
+
+          {/* Authorized Signatory Section */}
+          {!isProprietorship && (
+            <>
+              <div className="space-y-6 pt-6 border-t-2 border-gray-400">
+                <h4 className="text-base font-semibold text-[#28303F] mb-4 pb-2 border-b border-gray-300">
+                  Authorized Signatory
+                </h4>
+
+                <Field label="Is this person an Authorised Signatory? (Not required for Proprietorship)">
+                  <CustomDropdown
+                    options={['Yes', 'No']}
+                    value={director.isAuthorizedSignatory || 'No'}
+                    onChange={(value) => updateDirector(index, 'isAuthorizedSignatory', value)}
+                    placeholder="Select"
+                    disabled={disabled || (hasAuthorizedSignatory && director.isAuthorizedSignatory !== 'Yes')}
+                  />
+                  {hasAuthorizedSignatory && director.isAuthorizedSignatory !== 'Yes' && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Another director/partner is already set as Authorized Signatory
+                    </p>
+                  )}
+                </Field>
+              </div>
+
+              {director.isAuthorizedSignatory === 'Yes' && (
+                <div className="space-y-6 pt-6 border-t-2 border-[#00486D] bg-blue-50 rounded-lg p-6">
+                  <h4 className="text-lg font-semibold text-[#00486D] mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    Authorized Signatory Details
+                  </h4>
+
+                  {/* Authorized Signatory Information */}
+                  <div className="space-y-6 mb-6">
+                    <h5 className="text-sm font-semibold text-[#00486D] mb-4">
+                      Personal Information
+                    </h5>
+                    
+                    <Field label="Name of the authorised person" required>
+                      <input
+                        type="text"
+                        disabled={disabled}
+                        className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                        placeholder="Enter name of the authorised person"
+                        value={director.authorizedPersonName || ''}
+                        onChange={(e) => updateDirector(index, 'authorizedPersonName', e.target.value)}
+                      />
+                    </Field>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <Field label="Mobile" required>
+                        <input
+                          type="tel"
+                          disabled={disabled}
+                          className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                          placeholder="Enter mobile number"
+                          value={director.authorizedPersonMobile || ''}
+                          onChange={(e) => updateDirector(index, 'authorizedPersonMobile', e.target.value)}
+                          maxLength={10}
+                        />
+                      </Field>
+
+                      <Field label="Email" required>
+                        <input
+                          type="email"
+                          disabled={disabled}
+                          className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                          placeholder="Enter email address"
+                          value={director.authorizedPersonEmail || ''}
+                          onChange={(e) => updateDirector(index, 'authorizedPersonEmail', e.target.value)}
+                        />
+                      </Field>
+                    </div>
+
+                    <Field label="Designation" required>
+                      <input
+                        type="text"
+                        disabled={disabled}
+                        className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                        placeholder="Enter designation"
+                        value={director.authorizedPersonDesignation || ''}
+                        onChange={(e) => updateDirector(index, 'authorizedPersonDesignation', e.target.value)}
+                      />
+                    </Field>
+                  </div>
+
+                  {/* Authorized Signatory Documents */}
+                  <div className="space-y-6 pt-6 border-t border-blue-200">
+                    <h5 className="text-sm font-semibold text-[#00486D] mb-4">
+                      Authorized Signatory Documents
+                    </h5>
+
+                    <FileUploadField
+                      label="Photo"
+                      buttonLabel="Upload Photo"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onFileSelect={(file) => handleFileUpload(index, 'authorizedPersonPhoto', file)}
+                      required
+                      disabled={disabled}
+                    />
+
+                    <FileUploadField
+                      label="PAN"
+                      buttonLabel="Upload PAN Card"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onFileSelect={(file) => handleFileUpload(index, 'authorizedPersonPAN', file)}
+                      required
+                      disabled={disabled}
+                    />
+
+                    <FileUploadField
+                      label="Aadhar"
+                      buttonLabel="Upload Aadhar Card"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onFileSelect={(file) => handleFileUpload(index, 'authorizedPersonAadhar', file)}
+                      required
+                      disabled={disabled}
+                    />
+
+                    <FileUploadField
+                      label="Bank Statement"
+                      buttonLabel="Upload Bank Statement"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onFileSelect={(file) => handleFileUpload(index, 'authorizedPersonBankStatement', file)}
+                      required
+                      disabled={disabled}
+                    />
+
+                    <FileUploadField
+                      label="Letter of Authorization"
+                      buttonLabel="Upload Letter of Authorization (PDF)"
+                      accept=".pdf"
+                      onFileSelect={(file) => handleFileUpload(index, 'authorizationLetter', file)}
+                      required
+                      disabled={disabled}
+                    />
+
+                    <Field label="Optional Field 1">
+                      <input
+                        type="text"
+                        disabled={disabled}
+                        className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                        placeholder="Enter optional information"
+                        value={director.authorizedPersonOptionalField1 || ''}
+                        onChange={(e) => updateDirector(index, 'authorizedPersonOptionalField1', e.target.value)}
+                      />
+                    </Field>
+                  </div>
+                </div>
+              )}
+            </>
           )}
-
-          <FileUploadField
-            label="Aadhaar Card"
-            buttonLabel="Upload Aadhaar Card"
-            accept=".pdf,.jpg,.jpeg,.png"
-            onFileSelect={(file) => handleFileUpload(index, 'aadhaarCard', file)}
-            required
-            disabled={disabled}
-          />
-
-          <FileUploadField
-            label="Passport Size Photo"
-            buttonLabel="Upload Passport Size Photo"
-            accept=".pdf,.jpg,.jpeg,.png"
-            onFileSelect={(file) => handleFileUpload(index, 'passportPhoto', file)}
-            required
-            disabled={disabled}
-          />
-
-          <FileUploadField
-            label="PAN Card Photo"
-            buttonLabel="Upload PAN Card"
-            accept=".pdf,.jpg,.jpeg,.png"
-            onFileSelect={(file) => handleFileUpload(index, 'panCard', file)}
-            required
-            disabled={disabled}
-          />
-
-          <Field label="Email ID of the Proprietor/ Managing Director/ Managing Partner" required>
-            <input
-              type="email"
-              disabled={disabled}
-              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
-              placeholder="Enter email address"
-              value={director.email || ''}
-              onChange={(e) => updateDirector(index, 'email', e.target.value)}
-            />
-          </Field>
-
-          <Field label="Mobile Number" required>
-            <input
-              type="tel"
-              disabled={disabled}
-              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
-              placeholder="Enter mobile number"
-              value={director.mobileNumber || ''}
-              onChange={(e) => updateDirector(index, 'mobileNumber', e.target.value)}
-              maxLength={10}
-            />
-          </Field>
         </div>
       ))}
     </div>

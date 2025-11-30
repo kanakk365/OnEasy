@@ -192,7 +192,7 @@ function PrivateLimitedDetails() {
 
   return (
     <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-6xl mx-auto px-6 py-10">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-10">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>

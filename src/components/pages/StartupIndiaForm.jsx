@@ -95,6 +95,18 @@ function StartupIndiaForm() {
                 uniquenessOfSolution: draftData.uniqueness_of_solution || '',
                 revenueModel: draftData.revenue_model || '',
                 innovationNote: draftData.innovation_note || '',
+                innovationOptions: (() => {
+                  if (!draftData.innovation_options) return [];
+                  try {
+                    const parsed = typeof draftData.innovation_options === 'string' 
+                      ? JSON.parse(draftData.innovation_options)
+                      : draftData.innovation_options;
+                    return Array.isArray(parsed) ? parsed : [];
+                  } catch (e) {
+                    console.warn('Failed to parse innovation_options:', e);
+                    return [];
+                  }
+                })(),
                 hasIpr: draftData.has_ipr || false,
                 iprDocument: draftData.ipr_document_url || ''
               },

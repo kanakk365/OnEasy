@@ -88,11 +88,18 @@ export const initPayment = async (packageData) => {
           handler: function (response) {
             // Payment successful - verify on backend
             console.log('Payment successful, verifying...');
+            
+            // Get registration type from localStorage
+            const registrationType = localStorage.getItem('selectedRegistrationType');
+            
             const verifyPayload = {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
-              packageDetails: packageData // Send package details for invoice email
+              packageDetails: {
+                ...packageData,
+                registrationType: registrationType || null // Include registration type
+              }
             };
 
             // Include coupon code if applied

@@ -91,30 +91,35 @@ function RegistrationCategories() {
       title: "Letter of Undertaking",
       description: "LOU for business transactions",
       icon: <FaFileContract />,
+      registrationType: "gst-lut",
     },
     {
       id: 11,
       title: "Employee State Insurance (ESI) Registration",
       description: "ESI registration for employee insurance",
       icon: <FaShieldAlt />,
+      registrationType: "esi",
     },
     {
       id: 12,
       title: "Digital Signature Certificate",
       description: "DSC for digital authentication",
       icon: <FaKey />,
+      registrationType: "dsc",
     },
     {
       id: 13,
       title: "12A Registration",
       description: "Income tax exemption for NGOs/Trusts",
       icon: <FaHandHoldingHeart />,
+      registrationType: "registration-12a",
     },
     {
       id: 14,
       title: "80G Registration",
       description: "Tax deduction certificate for donations",
       icon: <FaDonate />,
+      registrationType: "registration-80g",
     },
   ];
 
@@ -161,6 +166,42 @@ function RegistrationCategories() {
                 } else if (registration.registrationType === 'gst') {
                   // Navigate to GST details page with packages
                   navigate('/gst-details');
+                } else if (registration.registrationType === 'professional-tax') {
+                  // Navigate to Professional Tax details page with packages
+                  navigate('/professional-tax-details');
+                } else if (registration.registrationType === 'labour-license') {
+                  // Navigate to Labour License details page with packages
+                  navigate('/labour-license-details');
+                } else if (registration.registrationType === 'provident-fund') {
+                  // Navigate to Provident Fund details page with packages
+                  navigate('/provident-fund-details');
+                } else if (registration.registrationType === 'udyam') {
+                  // Navigate to Udyam details page with packages
+                  navigate('/udyam-details');
+                } else if (registration.registrationType === 'fssai') {
+                  // Navigate to FSSAI details page with packages
+                  navigate('/fssai-details');
+                } else if (registration.registrationType === 'trade-license') {
+                  // Navigate to Trade License details page with packages
+                  navigate('/trade-license-details');
+                } else if (registration.registrationType === 'iec') {
+                  // Navigate to IEC details page with packages
+                  navigate('/iec-details');
+                } else if (registration.registrationType === 'gst-lut') {
+                  // Navigate to GST LUT details page with packages
+                  navigate('/gst-lut-details');
+                } else if (registration.registrationType === 'esi') {
+                  // Navigate to ESI details page with packages
+                  navigate('/esi-details');
+                } else if (registration.registrationType === 'dsc') {
+                  // Navigate to DSC details page with packages
+                  navigate('/dsc-details');
+                } else if (registration.registrationType === 'registration-12a') {
+                  // Navigate to 12A Registration details page with packages
+                  navigate('/registration-12a-details');
+                } else if (registration.registrationType === 'registration-80g') {
+                  // Navigate to 80G Registration details page with packages
+                  navigate('/registration-80g-details');
                 } else if (registration.registrationType) {
                   // Navigate to package selection for other registration services
                   navigate('/registration-packages', {

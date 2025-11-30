@@ -120,11 +120,11 @@ function AdminClients() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="bg-white rounded-xl p-5 mb-6 transition-all duration-300 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
-          <div className="flex gap-4">
+      <div className="bg-white rounded-xl p-3 md:p-5 mb-4 md:mb-6 transition-all duration-300 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
+          <div className="flex gap-2 md:gap-4 overflow-x-auto scrollbar-hide -mx-3 md:mx-0 px-3 md:px-0">
             <button
               onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-3 md:px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 filter === 'all'
                   ? 'bg-[#01334C] text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -134,7 +134,7 @@ function AdminClients() {
             </button>
             <button
               onClick={() => setFilter('registered')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-3 md:px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 filter === 'registered'
                   ? 'bg-[#01334C] text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -144,13 +144,13 @@ function AdminClients() {
             </button>
             <button
               onClick={() => setFilter('team-fill')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-3 md:px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 filter === 'team-fill'
                   ? 'bg-[#01334C] text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              Team Fill Requests ({clients.filter(c => c.team_fill_requested).length})
+              Team Fill ({clients.filter(c => c.team_fill_requested).length})
             </button>
           </div>
         </div>
@@ -169,7 +169,8 @@ function AdminClients() {
       ) : (
         <div className="bg-white rounded-xl overflow-hidden border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
           {/* Table View */}
-          <table className="w-full">
+          <div className="overflow-x-auto table-responsive">
+            <table className="w-full min-w-[600px]">
             <thead className="bg-gray-50 border-b-2 border-gray-200">
               <tr>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Client Name</th>
@@ -200,6 +201,7 @@ function AdminClients() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

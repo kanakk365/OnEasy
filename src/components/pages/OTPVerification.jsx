@@ -121,18 +121,18 @@ function OTPVerification() {
         return // Don't navigate yet
       }
       
-      // Priority 2: If user doesn't have BOTH email AND password, they must set email and password
-      // Only show modal if both email and password are missing
-      if (!hasEmail && !hasPassword) {
-        console.log('⚠️ User missing both email and password, showing email/password setup modal')
-        setUserDataAfterOTP(result.user)
-        setShowEmailPasswordModal(true)
-        setIsLoading(false)
-        return // Don't navigate yet
+      // Note: For new users without email, they will proceed to dashboard first
+      // Then a modal will appear after 5 seconds to complete their profile
+      if (!hasEmail) {
+        console.log('⚠️ New user missing email - will show modal after dashboard loads')
+        console.log('📝 Setting should_check_email flag in localStorage')
+        // Store a flag to indicate we should check for email in dashboard
+        localStorage.setItem('should_check_email', 'true')
+        console.log('✅ Flag set:', localStorage.getItem('should_check_email'))
       }
       
-      // User has email or password (or both) and doesn't need to change password - proceed to dashboard
-      console.log('✅ User profile is complete, proceeding to dashboard')
+      // User has email or is new user - proceed to dashboard
+      console.log('✅ Proceeding to dashboard')
       
       // Ensure user data in localStorage is up-to-date by refreshing from backend
       // This ensures name and other fields are included if they exist in database

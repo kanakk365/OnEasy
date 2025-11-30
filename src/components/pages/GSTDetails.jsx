@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import building from '../../assets/building.png';
 import TopTabs from './company-details/TopTabs';
 import PackagesSection from './company-details/PackagesSection';
 import ProcessSection from './company-details/ProcessSection';
@@ -129,11 +130,6 @@ function GSTDetails() {
   ];
 
   const aboutSections = [
-    {
-      id: 'overview',
-      title: 'About Goods & Services Tax Registration',
-      content: 'GST Registration is crucial for businesses in India. If your business revenue exceeds certain threshold levels or belongs to specific categories that require GST registration, it is important to comply with the GST regulations.\n\nOnEasy is here to assist you in obtaining your GST registration effortlessly. Contact our experts today to streamline your GST registration process!'
-    },
     {
       id: 'gst-overview',
       title: 'Overview of GST Registration Online',
@@ -270,10 +266,12 @@ function GSTDetails() {
       case 'about':
         return (
           <AboutSection
-            building={null}
+            building={building}
             aboutSections={aboutSections}
             expandedSection={expandedSection}
             setExpandedSection={setExpandedSection}
+            introTitle="About Goods & Services Tax Registration"
+            introDescription="GST Registration is crucial for businesses in India. If your business revenue exceeds certain threshold levels or belongs to specific categories that require GST registration, it is important to comply with the GST regulations. OnEasy is here to assist you in obtaining your GST registration effortlessly. Contact our experts today to streamline your GST registration process!"
           />
         );
 

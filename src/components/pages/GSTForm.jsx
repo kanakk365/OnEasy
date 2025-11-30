@@ -40,7 +40,7 @@ function GSTForm() {
     // Check if user clicked "OnEasy Team Fill" button
     const teamFillStatus = localStorage.getItem('oneasyTeamFill');
     setOneasyTeamFill(teamFillStatus === 'true');
-  }, []);
+  }, [searchParams]);
 
   // Load draft data if ticketId is provided, or load from localStorage
   useEffect(() => {
@@ -72,6 +72,7 @@ function GSTForm() {
             setFormData({
               step1: {
                 businessName: draftData.business_name || '',
+                tradeName: draftData.trade_name || '',
                 natureOfBusiness: draftData.nature_of_business || '',
                 constitutionOfBusiness: draftData.constitution_of_business || '',
                 businessEmail: draftData.business_email || '',
@@ -336,7 +337,7 @@ function GSTForm() {
         </button>
       )}
 
-      <div className="max-w-6xl mx-auto px-6 py-10">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-10">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-xl font-semibold text-[#28303F]">
             Add your Details

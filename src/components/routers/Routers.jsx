@@ -18,6 +18,7 @@ import StartupIndiaViewDetails from "../pages/StartupIndiaViewDetails";
 import StartupIndiaDashboard from "../pages/StartupIndiaDashboard";
 import Settings from "../pages/Settings";
 import Organization from "../pages/Organization";
+import ComingSoon from "../pages/ComingSoon";
 import CouponCodeGenerator from "../pages/CouponCodeGenerator";
 import PrivateLimitedForm from "../forms/PrivateLimitedForm";
 import PrivateLimitedDashboard from "../pages/PrivateLimitedDashboard";
@@ -27,11 +28,31 @@ import ProprietorshipForm from "../forms/ProprietorshipForm";
 import ProprietorshipDashboard from "../pages/ProprietorshipDashboard";
 import ProprietorshipViewDetails from "../pages/ProprietorshipViewDetails";
 import PartnershipDetails from "../pages/PartnershipDetails";
+import OPCDetails from "../pages/OPCDetails";
+import OPCPackageSelection from "../pages/OPCPackageSelection";
+import LLPDetails from "../pages/LLPDetails";
+import LLPPackageSelection from "../pages/LLPPackageSelection";
+import Section8Details from "../pages/Section8Details";
+import PublicLimitedDetails from "../pages/PublicLimitedDetails";
+import MCANameApprovalDetails from "../pages/MCANameApprovalDetails";
+import IndianSubsidiaryDetails from "../pages/IndianSubsidiaryDetails";
 import GSTDetails from "../pages/GSTDetails";
 import GSTPackageSelection from "../pages/GSTPackageSelection";
 import GSTForm from "../pages/GSTForm";
 import GSTDashboard from "../pages/GSTDashboard";
 import GSTViewDetails from "../pages/GSTViewDetails";
+import ProfessionalTaxDetails from "../pages/ProfessionalTaxDetails";
+import LabourLicenseDetails from "../pages/LabourLicenseDetails";
+import ProvidentFundDetails from "../pages/ProvidentFundDetails";
+import UdyamDetails from "../pages/UdyamDetails";
+import FSSAIDetails from "../pages/FSSAIDetails";
+import TradeLicenseDetails from "../pages/TradeLicenseDetails";
+import IECDetails from "../pages/IECDetails";
+import GSTLUTDetails from "../pages/GSTLUTDetails";
+import ESIDetails from "../pages/ESIDetails";
+import DSCDetails from "../pages/DSCDetails";
+import Registration12ADetails from "../pages/Registration12ADetails";
+import Registration80GDetails from "../pages/Registration80GDetails";
 import PaymentSuccess from "../pages/PaymentSuccess";
 import AdminLayout from "../admin/layout/AdminLayout";
 import AdminClients from "../admin/pages/AdminClients";
@@ -144,6 +165,56 @@ function Routers() {
           <PartnershipDetails />
         </ProtectedRoute>
       } />
+      <Route path="/company/opc" element={
+        <ProtectedRoute>
+          <OPCDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/opc-package-selection" element={
+        <ProtectedRoute>
+          <OPCPackageSelection />
+        </ProtectedRoute>
+      } />
+      <Route path="/company/llp" element={
+        <ProtectedRoute>
+          <LLPDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/llp-package-selection" element={
+        <ProtectedRoute>
+          <LLPPackageSelection />
+        </ProtectedRoute>
+      } />
+      <Route path="/company/public-limited" element={
+        <ProtectedRoute>
+          <PublicLimitedDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/public-limited-form" element={
+        <ProtectedRoute>
+          <PrivateLimitedForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/company/mca-name" element={
+        <ProtectedRoute>
+          <MCANameApprovalDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/mca-name-approval-form" element={
+        <ProtectedRoute>
+          <PrivateLimitedForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/company/indian-subsidiary" element={
+        <ProtectedRoute>
+          <IndianSubsidiaryDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/indian-subsidiary-form" element={
+        <ProtectedRoute>
+          <PrivateLimitedForm />
+        </ProtectedRoute>
+      } />
       <Route path="/company/:type" element={
         <ProtectedRoute>
           <CompanyDetails />
@@ -170,6 +241,26 @@ function Routers() {
         </ProtectedRoute>
       } />
       <Route path="/private-limited-form" element={
+        <ProtectedRoute>
+          <PrivateLimitedForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/opc-form" element={
+        <ProtectedRoute>
+          <PrivateLimitedForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/llp-form" element={
+        <ProtectedRoute>
+          <PrivateLimitedForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/company/section-8" element={
+        <ProtectedRoute>
+          <Section8Details />
+        </ProtectedRoute>
+      } />
+      <Route path="/section-8-form" element={
         <ProtectedRoute>
           <PrivateLimitedForm />
         </ProtectedRoute>
@@ -224,6 +315,66 @@ function Routers() {
           <GSTViewDetails />
         </ProtectedRoute>
       } />
+      <Route path="/professional-tax-details" element={
+        <ProtectedRoute>
+          <ProfessionalTaxDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/labour-license-details" element={
+        <ProtectedRoute>
+          <LabourLicenseDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/provident-fund-details" element={
+        <ProtectedRoute>
+          <ProvidentFundDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/udyam-details" element={
+        <ProtectedRoute>
+          <UdyamDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/fssai-details" element={
+        <ProtectedRoute>
+          <FSSAIDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/trade-license-details" element={
+        <ProtectedRoute>
+          <TradeLicenseDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/iec-details" element={
+        <ProtectedRoute>
+          <IECDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/gst-lut-details" element={
+        <ProtectedRoute>
+          <GSTLUTDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/esi-details" element={
+        <ProtectedRoute>
+          <ESIDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/dsc-details" element={
+        <ProtectedRoute>
+          <DSCDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration-12a-details" element={
+        <ProtectedRoute>
+          <Registration12ADetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration-80g-details" element={
+        <ProtectedRoute>
+          <Registration80GDetails />
+        </ProtectedRoute>
+      } />
       <Route path="/settings" element={
         <ProtectedRoute>
           <Settings />
@@ -232,6 +383,26 @@ function Routers() {
       <Route path="/organization" element={
         <ProtectedRoute>
           <Organization />
+        </ProtectedRoute>
+      } />
+      <Route path="/compliance" element={
+        <ProtectedRoute>
+          <ComingSoon />
+        </ProtectedRoute>
+      } />
+      <Route path="/ai-agent" element={
+        <ProtectedRoute>
+          <ComingSoon />
+        </ProtectedRoute>
+      } />
+      <Route path="/resources" element={
+        <ProtectedRoute>
+          <ComingSoon />
+        </ProtectedRoute>
+      } />
+      <Route path="/documents" element={
+        <ProtectedRoute>
+          <ComingSoon />
         </ProtectedRoute>
       } />
       

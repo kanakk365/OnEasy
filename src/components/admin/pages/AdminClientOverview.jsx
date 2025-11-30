@@ -17,6 +17,7 @@ function AdminClientOverview() {
   const [allRegistrations, setAllRegistrations] = useState([]);
   const [savingNotes, setSavingNotes] = useState(false);
   const [expandedOrgId, setExpandedOrgId] = useState(null);
+  const [editingOrgId, setEditingOrgId] = useState(null);
   const [documentUrls, setDocumentUrls] = useState({});
   const [showNotepad, setShowNotepad] = useState(false);
   const [clientPersonaList, setClientPersonaList] = useState([]);
@@ -113,20 +114,40 @@ function AdminClientOverview() {
       if (response.success && response.data) {
         setClientProfile(response.data);
         
-        // Initialize organisations and websites for editing
+        // Initialize organisations with websites included
         if (response.data.user?.organisations && response.data.user.organisations.length > 0) {
-          setOrganisations(response.data.user.organisations.map((org, idx) => ({
-            id: org.id || idx + 1,
-            organisationType: org.organisation_type || '',
-            legalName: org.legal_name || '',
-            tradeName: org.trade_name || '',
-            gstin: org.gstin || '',
-            incorporationDate: org.incorporation_date || '',
-            panFile: org.pan_file || null,
-            tan: org.tan || '',
-            cin: org.cin || '',
-            registeredAddress: org.registered_address || ''
-          })));
+          setOrganisations(response.data.user.organisations.map((org, idx) => {
+            // Parse websites from JSONB or use empty array
+            let websites = [];
+            if (org.websites) {
+              try {
+                websites = typeof org.websites === 'string' ? JSON.parse(org.websites) : org.websites;
+              } catch (e) {
+                websites = [];
+              }
+            }
+            
+            return {
+              id: org.id || idx + 1,
+              organisationType: org.organisation_type || '',
+              legalName: org.legal_name || '',
+              tradeName: org.trade_name || '',
+              gstin: org.gstin || '',
+              incorporationDate: org.incorporation_date || '',
+              panFile: org.pan_file || null,
+              tan: org.tan || '',
+              cin: org.cin || '',
+              registeredAddress: org.registered_address || '',
+              websites: websites.map((w, wIdx) => ({
+                id: w.id || wIdx + 1,
+                type: w.type || '',
+                url: w.url || '',
+                login: w.login || '',
+                password: w.password || '',
+                showPassword: false
+              }))
+            };
+          }));
         } else {
           setOrganisations([{ 
             id: 1, 
@@ -138,29 +159,13 @@ function AdminClientOverview() {
             panFile: null,
             tan: '',
             cin: '',
-            registeredAddress: ''
+            registeredAddress: '',
+            websites: []
           }]);
         }
         
-        if (response.data.websites && response.data.websites.length > 0) {
-          setWebsites(response.data.websites.map((web, idx) => ({
-            id: web.id || idx + 1,
-            type: web.website_type || '',
-            url: web.website_url || '',
-            login: web.login || '',
-            password: web.password || '',
-            showPassword: false
-          })));
-        } else {
-          setWebsites([{ 
-            id: 1, 
-            type: '', 
-            url: '', 
-            login: '', 
-            password: '', 
-            showPassword: false 
-          }]);
-        }
+        // Keep separate websites state for backward compatibility but don't use it
+        setWebsites([]);
         
         const adminNotesRaw = response.data.user?.admin_notes || '';
         
@@ -560,7 +565,8 @@ function AdminClientOverview() {
       panFile: null,
       tan: '',
       cin: '',
-      registeredAddress: ''
+      registeredAddress: '',
+      websites: []
     }]);
   };
 
@@ -574,6 +580,72 @@ function AdminClientOverview() {
     setOrganisations(organisations.map(org => 
       org.id === id ? { ...org, [field]: value } : org
     ));
+  };
+
+  // Website handlers for organizations
+  const addWebsiteToOrg = (orgId) => {
+    setOrganisations(organisations.map(org => 
+      org.id === orgId 
+        ? { 
+            ...org, 
+            websites: [...(org.websites || []), { 
+              id: Date.now(), 
+              type: '', 
+              url: '', 
+              login: '', 
+              password: '', 
+              showPassword: false 
+            }]
+          } 
+        : org
+    ));
+  };
+
+  const removeWebsiteFromOrg = (orgId, websiteId) => {
+    setOrganisations(organisations.map(org => 
+      org.id === orgId 
+        ? { 
+            ...org, 
+            websites: (org.websites || []).filter(w => w.id !== websiteId)
+          } 
+        : org
+    ));
+  };
+
+  const updateWebsiteInOrg = (orgId, websiteId, field, value) => {
+    setOrganisations(organisations.map(org => 
+      org.id === orgId 
+        ? { 
+            ...org, 
+            websites: (org.websites || []).map(website => 
+              website.id === websiteId ? { ...website, [field]: value } : website
+            )
+          } 
+        : org
+    ));
+  };
+
+  const togglePasswordVisibilityInOrg = (orgId, websiteId) => {
+    setOrganisations(organisations.map(org => 
+      org.id === orgId 
+        ? { 
+            ...org, 
+            websites: (org.websites || []).map(website => 
+              website.id === websiteId ? { ...website, showPassword: !website.showPassword } : website
+            )
+          } 
+        : org
+    ));
+  };
+
+  // Helper function to convert file to base64
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
   };
 
   const handleSaveOrganisations = async () => {
@@ -590,7 +662,13 @@ function AdminClientOverview() {
           panFile: org.panFile,
           tan: org.tan,
           cin: org.cin,
-          registeredAddress: org.registeredAddress
+          registeredAddress: org.registeredAddress,
+          websites: (org.websites || []).filter(w => w.url && w.url.trim() !== '').map(w => ({
+            type: w.type,
+            url: w.url,
+            login: w.login,
+            password: w.password
+          }))
         }))
       };
       
@@ -599,6 +677,7 @@ function AdminClientOverview() {
       if (response.success) {
         alert('✅ Organisation Details saved successfully!');
         setIsEditingOrganisations(false);
+        setEditingOrgId(null);
         await fetchClientProfile();
       }
     } catch (error) {
@@ -811,11 +890,11 @@ function AdminClientOverview() {
       </button>
 
       {/* Top Tabs Navigation */}
-      <div className="bg-white rounded-xl p-5 mb-6 transition-all duration-300 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
-        <div className="flex gap-4">
+      <div className="bg-white rounded-xl p-3 md:p-5 mb-4 md:mb-6 transition-all duration-300 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
+        <div className="flex gap-2 md:gap-4 overflow-x-auto -mx-3 md:mx-0 px-3 md:px-0 scrollbar-hide">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 md:px-6 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
               activeTab === 'profile'
                 ? 'bg-[#01334C] text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -825,7 +904,7 @@ function AdminClientOverview() {
           </button>
           <button
             onClick={() => setActiveTab('services')}
-            className={`px-6 py-2 rounded-lg font-medium transition-colors relative ${
+            className={`px-4 md:px-6 py-2 rounded-lg font-medium transition-colors relative whitespace-nowrap flex-shrink-0 ${
               activeTab === 'services'
                 ? 'bg-[#01334C] text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -844,7 +923,7 @@ function AdminClientOverview() {
           </button>
           <button
             onClick={() => setActiveTab('compliance')}
-            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 md:px-6 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
               activeTab === 'compliance'
                 ? 'bg-[#01334C] text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -854,7 +933,7 @@ function AdminClientOverview() {
           </button>
           <button
             onClick={() => setActiveTab('subscriptions')}
-            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 md:px-6 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
               activeTab === 'subscriptions'
                 ? 'bg-[#01334C] text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -998,14 +1077,14 @@ function AdminClientOverview() {
                     </button>
                   </div>
                 )}
-                <button
-                  onClick={() => setExpandedSection(expandedSection === 'organisation' ? null : 'organisation')}
+            <button
+              onClick={() => setExpandedSection(expandedSection === 'organisation' ? null : 'organisation')}
                   className="text-gray-500 hover:text-gray-700"
-                >
-                  <svg className={`w-5 h-5 transition-transform ${expandedSection === 'organisation' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
+            >
+              <svg className={`w-5 h-5 transition-transform ${expandedSection === 'organisation' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
               </div>
             </div>
             {expandedSection === 'organisation' && (
@@ -1118,16 +1197,18 @@ function AdminClientOverview() {
                   </div>
                 ) : clientProfile.user?.organisations && clientProfile.user.organisations.length > 0 ? (
                   <div className="space-y-4">
-                    <table className="w-full text-sm table-fixed">
-                      <colgroup>
-                        <col className="w-12" />
-                        <col className="w-28" />
-                        <col className="w-auto" />
-                        <col className="w-auto" />
-                        <col className="w-32" />
-                        <col className="w-28" />
-                        <col className="w-28" />
-                      </colgroup>
+                    <div className="overflow-x-auto -mx-4 md:mx-0 table-responsive">
+                      <div className="inline-block min-w-full align-middle px-4 md:px-0">
+                        <table className="w-full text-sm table-fixed min-w-[600px]">
+                          <colgroup>
+                            <col className="w-12" />
+                            <col className="w-28" />
+                            <col className="w-auto" />
+                            <col className="w-auto" />
+                            <col className="w-32" />
+                            <col className="w-28" />
+                            <col className="w-28" />
+                          </colgroup>
                       <thead className="bg-gray-100">
                         <tr>
                           <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">ID</th>
@@ -1154,80 +1235,418 @@ function AdminClientOverview() {
                               <td className="px-2 py-2 text-gray-600 text-xs truncate" title={org.tan}>{org.tan || 'N/A'}</td>
                               <td className="px-2 py-2 text-gray-600 text-xs truncate" title={org.cin}>{org.cin || 'N/A'}</td>
                             </tr>
-                            {expandedOrgId === idx && (
-                              <tr className="bg-white">
-                                <td colSpan="7" className="p-6">
-                                  <div className="bg-white rounded-lg border border-gray-200 p-6">
-                                    <h4 className="text-lg font-semibold text-gray-900 mb-4">{org.legal_name || 'Organization Details'}</h4>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                      {/* Column 1 */}
-                                      <div className="space-y-4">
-                                        <div>
-                                          <label className="block text-sm font-medium text-gray-700 mb-1">Organisation Type</label>
-                                          <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.organisation_type || 'N/A'}</div>
-                                        </div>
-                                        <div>
-                                          <label className="block text-sm font-medium text-gray-700 mb-1">GSTIN</label>
-                                          <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.gstin || 'N/A'}</div>
-                                        </div>
-                                        <div>
-                                          <label className="block text-sm font-medium text-gray-700 mb-1">TAN</label>
-                                          <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.tan || 'N/A'}</div>
-                                        </div>
+                            {expandedOrgId === idx && (() => {
+                              const isEditingThisOrg = editingOrgId === idx;
+                              // Find or get organization from state
+                              let orgInState = organisations[idx];
+                              // If not found in state, try to match by id
+                              if (!orgInState && org.id) {
+                                orgInState = organisations.find(o => o.id === org.id);
+                              }
+                              // Parse websites from org
+                              let orgWebsites = [];
+                              if (isEditingThisOrg && orgInState?.websites) {
+                                orgWebsites = orgInState.websites || [];
+                              } else if (org.websites) {
+                                try {
+                                  orgWebsites = typeof org.websites === 'string' ? JSON.parse(org.websites) : org.websites;
+                                } catch (e) {
+                                  orgWebsites = [];
+                                }
+                              }
+                              
+                              return (
+                                <tr className="bg-white">
+                                  <td colSpan="7" className="p-6">
+                                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                                      <div className="flex justify-between items-center mb-4">
+                                        <h4 className="text-lg font-semibold text-gray-900">{isEditingThisOrg ? (orgInState?.legalName || 'Organization Details') : (org.legal_name || 'Organization Details')}</h4>
+                                        {!isEditingThisOrg && !isEditingOrganisations && (
+                                          <button
+                                            onClick={async (e) => {
+                                              e.stopPropagation();
+                                              // Create org object to edit
+                                              let orgWebsites = [];
+                                              if (org.websites) {
+                                                try {
+                                                  orgWebsites = typeof org.websites === 'string' ? JSON.parse(org.websites) : org.websites;
+                                                } catch (e) {
+                                                  orgWebsites = [];
+                                                }
+                                              }
+                                              
+                                              const orgToEdit = {
+                                                id: org.id || idx + 1,
+                                                organisationType: org.organisation_type || '',
+                                                legalName: org.legal_name || '',
+                                                tradeName: org.trade_name || '',
+                                                gstin: org.gstin || '',
+                                                incorporationDate: org.incorporation_date || '',
+                                                panFile: org.pan_file || null,
+                                                tan: org.tan || '',
+                                                cin: org.cin || '',
+                                                registeredAddress: org.registered_address || '',
+                                                websites: orgWebsites.map((w, wIdx) => ({
+                                                  id: w.id || Date.now() + wIdx,
+                                                  type: w.type || '',
+                                                  url: w.url || '',
+                                                  login: w.login || '',
+                                                  password: w.password || '',
+                                                  showPassword: false
+                                                }))
+                                              };
+                                              
+                                              // Update organisations state - ensure array is long enough
+                                              const updatedOrgs = [...organisations];
+                                              while (updatedOrgs.length <= idx) {
+                                                updatedOrgs.push({
+                                                  id: Date.now() + updatedOrgs.length,
+                                                  organisationType: '',
+                                                  legalName: '',
+                                                  tradeName: '',
+                                                  gstin: '',
+                                                  incorporationDate: '',
+                                                  panFile: null,
+                                                  tan: '',
+                                                  cin: '',
+                                                  registeredAddress: '',
+                                                  websites: []
+                                                });
+                                              }
+                                              updatedOrgs[idx] = orgToEdit;
+                                              setOrganisations(updatedOrgs);
+                                              setEditingOrgId(idx);
+                                            }}
+                                            className="px-4 py-2 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm"
+                                          >
+                                            Edit
+                                          </button>
+                                        )}
                                       </div>
-
-                                      {/* Column 2 */}
-                                      <div className="space-y-4">
-                                        <div>
-                                          <label className="block text-sm font-medium text-gray-700 mb-1">Legal Name</label>
-                                          <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.legal_name || 'N/A'}</div>
-                                        </div>
-                                        <div>
-                                          <label className="block text-sm font-medium text-gray-700 mb-1">Incorporation Date</label>
-                                          <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900 flex items-center gap-2">
-                                            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                            {org.incorporation_date ? new Date(org.incorporation_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
-                                          </div>
-                                        </div>
-                                        <div>
-                                          <label className="block text-sm font-medium text-gray-700 mb-1">CIN</label>
-                                          <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.cin || 'N/A'}</div>
-                                        </div>
-                                      </div>
-
-                                      {/* Column 3 */}
-                                      <div className="space-y-4">
-                                        <div>
-                                          <label className="block text-sm font-medium text-gray-700 mb-1">Trade Name</label>
-                                          <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.trade_name || 'N/A'}</div>
-                                        </div>
-                                        <div>
-                                          <label className="block text-sm font-medium text-gray-700 mb-1">PAN File</label>
-                                          <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                            {org.pan_file ? (
-                                              <a href={org.pan_file} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View File</a>
+                                      
+                                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                        {/* Column 1 */}
+                                        <div className="space-y-4">
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Organisation Type</label>
+                                            {isEditingThisOrg ? (
+                                              <input
+                                                type="text"
+                                                value={orgInState?.organisationType || ''}
+                                                onChange={(e) => updateOrganization(orgInState.id, 'organisationType', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                              />
                                             ) : (
-                                              'Not uploaded'
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.organisation_type || 'N/A'}</div>
+                                            )}
+                                          </div>
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">GSTIN</label>
+                                            {isEditingThisOrg ? (
+                                              <input
+                                                type="text"
+                                                value={orgInState?.gstin || ''}
+                                                onChange={(e) => updateOrganization(orgInState.id, 'gstin', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
+                                              />
+                                            ) : (
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.gstin || 'N/A'}</div>
+                                            )}
+                                          </div>
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">TAN</label>
+                                            {isEditingThisOrg ? (
+                                              <input
+                                                type="text"
+                                                value={orgInState?.tan || ''}
+                                                onChange={(e) => updateOrganization(orgInState.id, 'tan', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
+                                              />
+                                            ) : (
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.tan || 'N/A'}</div>
                                             )}
                                           </div>
                                         </div>
-                                        <div>
-                                          <label className="block text-sm font-medium text-gray-700 mb-1">Registered Address</label>
-                                          <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.registered_address || 'N/A'}</div>
+
+                                        {/* Column 2 */}
+                                        <div className="space-y-4">
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Legal Name</label>
+                                            {isEditingThisOrg ? (
+                                              <input
+                                                type="text"
+                                                value={orgInState?.legalName || ''}
+                                                onChange={(e) => updateOrganization(orgInState.id, 'legalName', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                              />
+                                            ) : (
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.legal_name || 'N/A'}</div>
+                                            )}
+                                          </div>
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Incorporation Date</label>
+                                            {isEditingThisOrg ? (
+                                              <input
+                                                type="date"
+                                                value={orgInState?.incorporationDate || ''}
+                                                onChange={(e) => updateOrganization(orgInState.id, 'incorporationDate', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                              />
+                                            ) : (
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900 flex items-center gap-2">
+                                                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                {org.incorporation_date ? new Date(org.incorporation_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                                              </div>
+                                            )}
+                                          </div>
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">CIN</label>
+                                            {isEditingThisOrg ? (
+                                              <input
+                                                type="text"
+                                                value={orgInState?.cin || ''}
+                                                onChange={(e) => updateOrganization(orgInState.id, 'cin', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
+                                              />
+                                            ) : (
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.cin || 'N/A'}</div>
+                                            )}
+                                          </div>
+                                        </div>
+
+                                        {/* Column 3 */}
+                                        <div className="space-y-4">
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Trade Name</label>
+                                            {isEditingThisOrg ? (
+                                              <input
+                                                type="text"
+                                                value={orgInState?.tradeName || ''}
+                                                onChange={(e) => updateOrganization(orgInState.id, 'tradeName', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                              />
+                                            ) : (
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.trade_name || 'N/A'}</div>
+                                            )}
+                                          </div>
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">PAN File</label>
+                                            {isEditingThisOrg ? (
+                                              <div className="flex items-center gap-1.5">
+                                                <input
+                                                  type="text"
+                                                  readOnly
+                                                  value={orgInState?.panFile ? 'File uploaded' : 'No file chosen'}
+                                                  className="flex-1 min-w-0 px-2 py-1.5 border border-gray-300 rounded-md text-xs bg-gray-50 text-gray-500"
+                                                />
+                                                <label className="cursor-pointer flex-shrink-0">
+                                                  <input
+                                                    type="file"
+                                                    onChange={async (e) => {
+                                                      const file = e.target.files[0];
+                                                      if (file) {
+                                                        const base64 = await fileToBase64(file);
+                                                        updateOrganization(orgInState.id, 'panFile', base64);
+                                                      }
+                                                    }}
+                                                    className="hidden"
+                                                    accept=".pdf,.jpg,.jpeg,.png"
+                                                  />
+                                                  <span className="px-2 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-xs whitespace-nowrap">
+                                                    {orgInState?.panFile ? 'Change' : 'Upload'}
+                                                  </span>
+                                                </label>
+                                              </div>
+                                            ) : (
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                {org.pan_file ? (
+                                                  <a href={org.pan_file} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View File</a>
+                                                ) : (
+                                                  'Not uploaded'
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Registered Address</label>
+                                            {isEditingThisOrg ? (
+                                              <textarea
+                                                rows={3}
+                                                value={orgInState?.registeredAddress || ''}
+                                                onChange={(e) => updateOrganization(orgInState.id, 'registeredAddress', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-y"
+                                              />
+                                            ) : (
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.registered_address || 'N/A'}</div>
+                                            )}
+                                          </div>
                                         </div>
                                       </div>
+
+                                      {/* Website Details Section */}
+                                      <div className="mt-6 pt-6 border-t border-gray-200">
+                                        <div className="flex items-center justify-between mb-4">
+                                          <h5 className="text-md font-semibold text-gray-900">Website Details</h5>
+                                          {isEditingThisOrg && (
+                                            <button
+                                              onClick={() => addWebsiteToOrg(orgInState.id)}
+                                              className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                                            >
+                                              <AiOutlinePlus className="w-4 h-4" />
+                                              Add Website
+                                            </button>
+                                          )}
+                                        </div>
+
+                                        {orgWebsites && orgWebsites.length > 0 && orgWebsites.filter(w => w.url && w.url.trim() !== '').length > 0 ? (
+                                          <div className="overflow-x-auto">
+                                            <table className="w-full border-collapse bg-white text-sm">
+                                              <thead>
+                                                <tr className="bg-gray-100 border-b border-gray-300">
+                                                  <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">Type</th>
+                                                  <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">URL</th>
+                                                  <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">Login</th>
+                                                  <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">Password</th>
+                                                  {isEditingThisOrg && <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">Actions</th>}
+                                                </tr>
+                                              </thead>
+                                              <tbody>
+                                                {orgWebsites.filter(w => w.url && w.url.trim() !== '').map((website) => (
+                                                  <tr key={website.id} className="bg-white border-b border-gray-200">
+                                                    <td className="px-3 py-2 border border-gray-300">
+                                                      {isEditingThisOrg ? (
+                                                        <select
+                                                          value={website.type}
+                                                          onChange={(e) => updateWebsiteInOrg(orgInState.id, website.id, 'type', e.target.value)}
+                                                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                                        >
+                                                          <option value="">Select Type</option>
+                                                          <option value="Income Tax">Income Tax</option>
+                                                          <option value="GST">GST</option>
+                                                          <option value="Income Tax – TAN Based">Income Tax – TAN Based</option>
+                                                          <option value="Professional Tax">Professional Tax</option>
+                                                          <option value="Provident Fund">Provident Fund</option>
+                                                          <option value="ESIC">ESIC</option>
+                                                          <option value="MCA">MCA</option>
+                                                          <option value="Labour license">Labour license</option>
+                                                          <option value="TRACES">TRACES</option>
+                                                          <option value="ICEGATE">ICEGATE</option>
+                                                          <option value="Service Tax">Service Tax</option>
+                                                          <option value="VAT">VAT</option>
+                                                          <option value="Others 1">Others 1</option>
+                                                          <option value="Others 2">Others 2</option>
+                                                          <option value="Others 3">Others 3</option>
+                                                        </select>
+                                                      ) : (
+                                                        website.type || 'N/A'
+                                                      )}
+                                                    </td>
+                                                    <td className="px-3 py-2 border border-gray-300">
+                                                      {isEditingThisOrg ? (
+                                                        <input
+                                                          type="text"
+                                                          value={website.url}
+                                                          onChange={(e) => updateWebsiteInOrg(orgInState.id, website.id, 'url', e.target.value)}
+                                                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                                        />
+                                                      ) : (
+                                                        website.url ? (
+                                                          <a href={website.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                                            {website.url}
+                                                          </a>
+                                                        ) : (
+                                                          'N/A'
+                                                        )
+                                                      )}
+                                                    </td>
+                                                    <td className="px-3 py-2 border border-gray-300">
+                                                      {isEditingThisOrg ? (
+                                                        <input
+                                                          type="text"
+                                                          value={website.login}
+                                                          onChange={(e) => updateWebsiteInOrg(orgInState.id, website.id, 'login', e.target.value)}
+                                                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                                        />
+                                                      ) : (
+                                                        website.login || 'N/A'
+                                                      )}
+                                                    </td>
+                                                    <td className="px-3 py-2 border border-gray-300">
+                                                      {isEditingThisOrg ? (
+                                                        <div className="relative">
+                                                          <input
+                                                            type={website.showPassword ? 'text' : 'password'}
+                                                            value={website.password}
+                                                            onChange={(e) => updateWebsiteInOrg(orgInState.id, website.id, 'password', e.target.value)}
+                                                            className="w-full px-2 py-1 pr-8 border border-gray-300 rounded text-sm"
+                                                          />
+                                                          <button
+                                                            type="button"
+                                                            onClick={() => togglePasswordVisibilityInOrg(orgInState.id, website.id)}
+                                                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                                          >
+                                                            {website.showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
+                                                          </button>
+                                                        </div>
+                                                      ) : (
+                                                        website.password ? '••••••••' : 'N/A'
+                                                      )}
+                                                    </td>
+                                                    {isEditingThisOrg && (
+                                                      <td className="px-3 py-2 border border-gray-300">
+                                                        <button
+                                                          onClick={() => removeWebsiteFromOrg(orgInState.id, website.id)}
+                                                          className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                                                        >
+                                                          Remove
+                                                        </button>
+                                                      </td>
+                                                    )}
+                                                  </tr>
+                                                ))}
+                                              </tbody>
+                                            </table>
+                                          </div>
+                                        ) : (
+                                          <p className="text-gray-500 text-sm">No websites added yet.</p>
+                                        )}
+
+                                        {isEditingThisOrg && (
+                                          <div className="mt-4 flex justify-end gap-2">
+                                            <button
+                                              onClick={() => {
+                                                setEditingOrgId(null);
+                                                fetchClientProfile();
+                                              }}
+                                              className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                                            >
+                                              Cancel
+                                            </button>
+                                            <button
+                                              onClick={async () => {
+                                                await handleSaveOrganisations();
+                                              }}
+                                              disabled={savingOrg}
+                                              className="px-4 py-2 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm disabled:opacity-50"
+                                            >
+                                              {savingOrg ? 'Saving...' : 'Save Changes'}
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
+                                  </td>
+                                </tr>
+                              );
+                            })()}
                           </React.Fragment>
                         ))}
                       </tbody>
                     </table>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <p className="text-gray-600">No organisation details available</p>
@@ -1236,191 +1655,7 @@ function AdminClientOverview() {
             )}
           </div>
 
-          {/* Website Details */}
-          <div className="bg-white rounded-xl border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012] overflow-hidden">
-            <div className="w-full px-6 py-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Website Details</h3>
-              <div className="flex items-center gap-2">
-                {!isEditingWebsites ? (
-                  <button
-                    onClick={() => setIsEditingWebsites(true)}
-                    className="px-4 py-2 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm"
-                  >
-                    Add/Edit
-                  </button>
-                ) : (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleSaveWebsites}
-                      disabled={savingWebsites}
-                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm disabled:opacity-50"
-                    >
-                      {savingWebsites ? 'Saving...' : 'Save'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsEditingWebsites(false);
-                        fetchClientProfile(); // Reload to reset changes
-                      }}
-                      className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                )}
-                <button
-                  onClick={() => setExpandedSection(expandedSection === 'website' ? null : 'website')}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <svg className={`w-5 h-5 transition-transform ${expandedSection === 'website' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            {expandedSection === 'website' && (
-              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                {isEditingWebsites ? (
-                  <div className="space-y-4">
-                    {websites.map((website, index) => (
-                      <div key={website.id} className="bg-white rounded-lg border border-gray-200 p-4">
-                        <div className="flex justify-between items-center mb-4">
-                          <h4 className="text-md font-semibold text-gray-900">Website {index + 1}</h4>
-                          {websites.length > 1 && (
-                            <button
-                              onClick={() => removeWebsite(website.id)}
-                              className="text-red-600 hover:text-red-800 text-sm"
-                            >
-                              Remove
-                            </button>
-                          )}
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Website Type</label>
-                            <input
-                              type="text"
-                              value={website.type}
-                              onChange={(e) => updateWebsite(website.id, 'type', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                              placeholder="e.g., Company Website, Portal"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
-                            <input
-                              type="url"
-                              value={website.url}
-                              onChange={(e) => updateWebsite(website.id, 'url', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                              placeholder="https://example.com"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Login</label>
-                            <input
-                              type="text"
-                              value={website.login}
-                              onChange={(e) => updateWebsite(website.id, 'login', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                              placeholder="Username/Email"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                            <div className="relative">
-                              <input
-                                type={website.showPassword ? 'text' : 'password'}
-                                value={website.password}
-                                onChange={(e) => updateWebsite(website.id, 'password', e.target.value)}
-                                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md text-sm"
-                                placeholder="Password"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => togglePasswordVisibility(website.id)}
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                              >
-                                {website.showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    <button
-                      onClick={addWebsite}
-                      className="w-full py-2 border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-[#01334C] hover:text-[#01334C] transition-colors flex items-center justify-center gap-2"
-                    >
-                      <AiOutlinePlus className="w-5 h-5" />
-                      Add Another Website
-                    </button>
-                  </div>
-                ) : clientProfile.websites && clientProfile.websites.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm border-collapse">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Website Type</th>
-                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Website URL</th>
-                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Login</th>
-                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300">Password</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {clientProfile.websites.map((website, idx) => (
-                          <tr key={idx} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 text-gray-900 border border-gray-300">{website.website_type || 'N/A'}</td>
-                            <td className="px-4 py-3 border border-gray-300">
-                              {website.website_url ? (
-                                <a href={website.website_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                                  {website.website_url}
-                                </a>
-                              ) : (
-                                <span className="text-gray-600">N/A</span>
-                              )}
-                            </td>
-                            <td className="px-4 py-3 text-gray-600 border border-gray-300">{website.login || 'N/A'}</td>
-                            <td className="px-4 py-3 border border-gray-300">
-                              <div className="flex items-center gap-2">
-                                <span className="text-gray-600">
-                                  {website.password ? (
-                                    visiblePasswords[idx] ? website.password : '••••••••'
-                                  ) : (
-                                    'N/A'
-                                  )}
-                                </span>
-                                {website.password && (
-                                  <button
-                                    onClick={() => setVisiblePasswords(prev => ({ ...prev, [idx]: !prev[idx] }))}
-                                    className="text-gray-500 hover:text-gray-700 focus:outline-none"
-                                    title={visiblePasswords[idx] ? 'Hide password' : 'Show password'}
-                                  >
-                                    {visiblePasswords[idx] ? (
-                                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                      </svg>
-                                    ) : (
-                                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                      </svg>
-                                    )}
-                                  </button>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-gray-600">No website details available</p>
-                )}
-              </div>
-            )}
-          </div>
+          {/* Website Details section removed - Websites are now managed within each organization */}
 
           {/* Tasks */}
           <div className="bg-white rounded-xl border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012] overflow-hidden">
@@ -1485,10 +1720,8 @@ function AdminClientOverview() {
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                           >
                             <option value="">Select type</option>
-                            <option value="recurring">Recurring</option>
-                            <option value="non-recurring">Non-Recurring</option>
-                            <option value="urgent">Urgent</option>
-                            <option value="normal">Normal</option>
+                            <option value="ongoing">Ongoing</option>
+                            <option value="completed">Completed</option>
                           </select>
                         </div>
 
@@ -1526,16 +1759,16 @@ function AdminClientOverview() {
 
                     {/* Admin Tasks Table */}
                     {adminTasksList.length > 0 ? (
-                      <table className="w-full text-sm">
-                        <thead className="bg-gray-100">
-                          <tr>
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-100">
+                        <tr>
                             <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Date</th>
                             <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Title</th>
                             <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Type</th>
                             <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
+                        </tr>
+                      </thead>
+                      <tbody>
                           {adminTasksList.map((task, idx) => (
                             <React.Fragment key={task.id || idx}>
                               <tr 
@@ -1547,9 +1780,8 @@ function AdminClientOverview() {
                                 <td className="px-2 py-2 text-gray-600 text-xs">
                                   {task.type ? (
                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                      task.type === 'urgent' ? 'bg-red-100 text-red-700' :
-                                      task.type === 'recurring' ? 'bg-blue-100 text-blue-700' :
-                                      task.type === 'non-recurring' ? 'bg-green-100 text-green-700' :
+                                      task.type === 'ongoing' ? 'bg-blue-100 text-blue-700' :
+                                      task.type === 'completed' ? 'bg-green-100 text-green-700' :
                                       'bg-gray-100 text-gray-700'
                                     }`}>
                                       {task.type.charAt(0).toUpperCase() + task.type.slice(1)}
@@ -1557,7 +1789,7 @@ function AdminClientOverview() {
                                   ) : 'N/A'}
                                 </td>
                                 <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.description || 'N/A'}</td>
-                              </tr>
+                          </tr>
                               {expandedAdminTaskId === idx && (
                                 <tr className="bg-gray-50">
                                   <td colSpan="4" className="px-3 py-3">
@@ -1571,9 +1803,9 @@ function AdminClientOverview() {
                                 </tr>
                               )}
                             </React.Fragment>
-                          ))}
-                        </tbody>
-                      </table>
+                        ))}
+                      </tbody>
+                    </table>
                     ) : (
                       <p className="text-gray-600 text-center py-4 text-xs">No admin tasks added yet</p>
                     )}
@@ -1587,7 +1819,8 @@ function AdminClientOverview() {
 
                     {/* User Tasks Table */}
                     {userTasksList.length > 0 ? (
-                      <table className="w-full text-sm">
+                      <div className="overflow-x-auto table-responsive">
+                        <table className="w-full text-sm min-w-[500px]">
                         <thead className="bg-gray-100">
                           <tr>
                             <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Date</th>
@@ -1608,9 +1841,8 @@ function AdminClientOverview() {
                                 <td className="px-2 py-2 text-gray-600 text-xs">
                                   {task.type ? (
                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                      task.type === 'urgent' ? 'bg-red-100 text-red-700' :
-                                      task.type === 'recurring' ? 'bg-blue-100 text-blue-700' :
-                                      task.type === 'non-recurring' ? 'bg-green-100 text-green-700' :
+                                      task.type === 'ongoing' ? 'bg-blue-100 text-blue-700' :
+                                      task.type === 'completed' ? 'bg-green-100 text-green-700' :
                                       'bg-gray-100 text-gray-700'
                                     }`}>
                                       {task.type.charAt(0).toUpperCase() + task.type.slice(1)}
@@ -1632,9 +1864,10 @@ function AdminClientOverview() {
                                 </tr>
                               )}
                             </React.Fragment>
-                          ))}
-                        </tbody>
-                      </table>
+                        ))}
+                      </tbody>
+                    </table>
+                      </div>
                     ) : (
                       <p className="text-gray-600 text-center py-4 text-xs">No user tasks added yet</p>
                     )}
@@ -1751,7 +1984,8 @@ function AdminClientOverview() {
 
               {/* Notes Table */}
               {adminNotesList.length > 0 ? (
-                <table className="w-full text-sm">
+                <div className="overflow-x-auto table-responsive">
+                  <table className="w-full text-sm min-w-[500px]">
                   <thead className="bg-gray-100">
                     <tr>
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Date</th>
@@ -1855,6 +2089,7 @@ function AdminClientOverview() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               ) : (
                 <p className="text-gray-600 text-center py-4 text-xs">No admin notes</p>
               )}
@@ -1865,7 +2100,8 @@ function AdminClientOverview() {
                   <h4 className="text-sm font-semibold text-gray-900 mb-3">User Notes (Read Only)</h4>
                   
                   {userNotesList.length > 0 ? (
-                    <table className="w-full text-sm">
+                    <div className="overflow-x-auto table-responsive">
+                      <table className="w-full text-sm min-w-[500px]">
                       <thead className="bg-gray-100">
                         <tr>
                           <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Date</th>
@@ -1942,6 +2178,7 @@ function AdminClientOverview() {
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   ) : (
                     <p className="text-gray-600 text-center py-4 text-xs">No user notes</p>
                   )}
@@ -2272,14 +2509,14 @@ function AdminClientOverview() {
 
                       <div className="mb-3">
                         <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
-                        <textarea
+                  <textarea
                           value={currentPersona.description}
                           onChange={(e) => setCurrentPersona({ ...currentPersona, description: e.target.value })}
-                          placeholder="Describe client's personality, preferences, communication style, etc..."
+                    placeholder="Describe client's personality, preferences, communication style, etc..."
                           rows={4}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                        />
-                      </div>
+                  />
+                </div>
 
                       <div className="flex gap-2">
                         <button
@@ -2303,7 +2540,8 @@ function AdminClientOverview() {
 
                   {/* Persona Entries Table */}
                   {clientPersonaList.length > 0 ? (
-                    <table className="w-full text-sm">
+                    <div className="overflow-x-auto table-responsive">
+                      <table className="w-full text-sm min-w-[500px]">
                       <thead className="bg-gray-100">
                         <tr>
                           <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Date</th>
@@ -2355,6 +2593,7 @@ function AdminClientOverview() {
                         })}
                       </tbody>
                     </table>
+                    </div>
                   ) : (
                     <p className="text-gray-600 text-center py-4 text-xs">No persona entries added yet. Click "Add Entry" to add one.</p>
                   )}

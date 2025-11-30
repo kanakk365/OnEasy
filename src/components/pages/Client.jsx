@@ -1,8 +1,12 @@
 import React from "react";
 import { TriangleAlert } from "lucide-react";
 import logo from "../../assets/logo.png";
+import { useProfileCompletionModal } from "../../hooks/useProfileCompletionModal";
 
 function Client() {
+  // Check for missing email and show modal after 5 seconds
+  const { ModalComponent } = useProfileCompletionModal();
+
   React.useEffect(() => {
     // Add smooth scrolling behavior
     document.documentElement.style.scrollBehavior = "smooth";
@@ -12,7 +16,11 @@ function Client() {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-4 md:py-6">
+    <>
+      {/* Profile Completion Modal - Shows after 5 seconds for users without email */}
+      {ModalComponent}
+      
+      <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-4 md:py-6">
       <div className="mb-6 md:mb-8">
         <h1 className="text-xl md:text-2xl font-semibold text-gray-900 mb-1">
           The Intelligent Business Owner Dashboard
@@ -240,6 +248,7 @@ function Client() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

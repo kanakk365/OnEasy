@@ -4,6 +4,7 @@ import { AUTH_CONFIG } from '../../config/auth';
 
 function SetEmailPasswordModal({ isOpen, onClose, onSuccess, required = false }) {
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -31,8 +32,13 @@ function SetEmailPasswordModal({ isOpen, onClose, onSuccess, required = false })
     setError('');
 
     // Validation
-    if (!formData.email || !formData.password || !formData.confirmPassword) {
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
       setError('All fields are required');
+      return;
+    }
+
+    if (formData.name.trim().length < 2) {
+      setError('Name must be at least 2 characters long');
       return;
     }
 
@@ -56,7 +62,8 @@ function SetEmailPasswordModal({ isOpen, onClose, onSuccess, required = false })
     try {
       const response = await apiClient.setEmailPassword(
         formData.email.trim(),
-        formData.password
+        formData.password,
+        formData.name.trim()
       );
 
       if (response.success) {
@@ -122,18 +129,35 @@ function SetEmailPasswordModal({ isOpen, onClose, onSuccess, required = false })
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-xl">
-      <div className="bg-white rounded-xl w-full max-w-md mx-4 shadow-2xl">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-xl p-4 overflow-y-auto">
+      <div className="bg-white rounded-xl w-full max-w-md mx-auto my-auto shadow-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">Complete Your Profile</h2>
           <p className="text-sm text-gray-600 mt-1">
-            Please set your email and password to complete your profile
+            Please provide your name, email and password to complete your profile
           </p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="px-6 py-4">
+          {/* Name */}
+          <div className="mb-4">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+              Full Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="name"
+              value={formData.name}
+              onChange={(e) => handleChange('name', e.target.value)}
+              className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+              placeholder="Enter your full name"
+              disabled={loading}
+              required
+            />
+          </div>
+
           {/* Email */}
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">

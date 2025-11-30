@@ -2,10 +2,12 @@ import React from "react";
 
 function TopTabs({ tabs, activeTab, onChange, disabled = false }) {
   return (
-    <div className="bg-white rounded-t-xl">
+    <div className="bg-white rounded-t-xl overflow-x-auto scrollbar-hide">
       <div 
-        className="grid"
-        style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
+        className="grid min-w-max md:min-w-0"
+        style={{ 
+          gridTemplateColumns: `repeat(${tabs.length}, minmax(120px, 1fr))`
+        }}
       >
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
