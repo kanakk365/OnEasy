@@ -49,10 +49,6 @@ function ProprietorshipDetails() {
   const handleContinue = () => {
     // Navigate to the form after completing the flow
     navigate('/proprietorship-form');
-    } else {
-      setActiveTab(flowSteps[currentIndex - 1]);
-    }
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const aboutSections = [
