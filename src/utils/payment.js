@@ -110,6 +110,8 @@ export const initPayment = async (packageData) => {
           name: 'OnEasy',
           description: serviceDescription,
           order_id: orderId,
+          // After successful payment, Razorpay will redirect here (covers email link flow too)
+          callback_url: 'https://businessportal.oneasy.ai/',
           prefill: {
             name: userData.name || '',
             email: userData.email || '',
@@ -146,6 +148,13 @@ export const initPayment = async (packageData) => {
               packageDetails: packageData, // Send package details for invoice email
               registrationType: registrationType // Send registration type to backend
             };
+
+            console.log('🔎 Verify payload prepared:', {
+              orderId: response.razorpay_order_id,
+              paymentId: response.razorpay_payment_id,
+              registrationType,
+              hasForm
+            });
 
             // Include coupon code if applied
             if (packageData.couponCode) {
