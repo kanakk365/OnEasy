@@ -8,45 +8,21 @@ import DocumentsSection from './company-details/DocumentsSection';
 import PrerequisitesSection from './company-details/PrerequisitesSection';
 import AboutSection from './company-details/AboutSection';
 import FAQSection from './company-details/FAQSection';
+import PaymentSuccessPopup from '../common/PaymentSuccessPopup';
 import { initPayment } from '../../utils/payment';
+import { usePackages } from '../../hooks/usePackages';
 
 function Registration12ADetails() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('packages');
   const [expandedSection, setExpandedSection] = useState(null);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
-  // Packages as per user requirements - only 2 packages
-  const packages = [
-    {
-      name: 'Starter',
-      price: '7,499',
-      priceValue: 7499,
-      period: 'One Time',
-      description: 'Basic 12A registration package',
-      icon: '★',
-      features: [
-        'Form 12A Application',
-        'Form 12A Temporary Registration'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Growth',
-      price: '17,499',
-      priceValue: 17499,
-      period: 'One Time',
-      description: 'Complete 12A and 80G registration package',
-      icon: '✢',
-      features: [
-        'Form 12A Application',
-        'Form 12A Temporary Registration',
-        '80G Application',
-        '80G Temporary Registration'
-      ],
-      isHighlighted: true,
-      color: 'blue'
-    }
-  ];
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('12a');
+  
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages;
 
   const processSteps = [
     {
@@ -217,9 +193,14 @@ function Registration12ADetails() {
                   
                   const result = await initPayment(selectedPackage);
                   
-                  if (result.success && result.redirect) {
-                    console.log('✅ Payment successful! Redirecting to form...');
-                    navigate('/registration-12a-form');
+                  if (result.success) {
+                    if (result.showPopup) {
+                      console.log('✅ Payment successful! Showing popup...');
+                      setShowPaymentPopup(true);
+                    } else if (result.redirect) {
+                      console.log('✅ Payment successful! Redirecting to form...');
+                      navigate('/registration-12a-form');
+                    }
                   }
                 } catch (error) {
                   console.error('Payment error:', error);
@@ -267,7 +248,7 @@ function Registration12ADetails() {
         {/* My Registrations Button - Top Right */}
         <div className="flex justify-end mb-4">
           <button
-            onClick={() => navigate('/registrations')}
+            onClick={() => navigate('/registrations/registration-12a')}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -276,6 +257,11 @@ function Registration12ADetails() {
             My Registrations
           </button>
         </div>
+
+        {/* Payment Success Popup */}
+        {showPaymentPopup && (
+          <PaymentSuccessPopup onClose={() => setShowPaymentPopup(false)} />
+        )}
 
         {/* Tabs */}
         <TopTabs

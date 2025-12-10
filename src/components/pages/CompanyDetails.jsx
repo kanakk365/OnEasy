@@ -13,6 +13,7 @@ import { initPayment } from "../../utils/payment";
 import PrivateLimitedForm from "../forms/PrivateLimitedForm";
 import { getMyRegistrations } from "../../utils/privateLimitedApi";
 import PaymentSuccessPopup from "../common/PaymentSuccessPopup";
+import { usePackages } from "../../hooks/usePackages";
 
 function CompanyDetails() {
   const { type } = useParams();
@@ -24,6 +25,22 @@ function CompanyDetails() {
   const [showForm, setShowForm] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
+
+  // Map route type to service_type for API
+  const serviceTypeMap = {
+    'private-limited': 'private-limited',
+    'opc': 'opc',
+    'llp': 'llp',
+    'partnership': 'partnership',
+    'section-8': 'section-8',
+    'public-limited': 'public-limited',
+    'mca-name-approval': 'mca-name-approval',
+    'indian-subsidiary': 'indian-subsidiary'
+  };
+  const serviceType = serviceTypeMap[type] || 'private-limited';
+  
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages(serviceType);
 
   // Listen for payment success event
   useEffect(() => {
@@ -291,81 +308,11 @@ function CompanyDetails() {
     ? tabs.filter((tab) => tab.id !== "packages")
     : tabs;
 
-  const packages = [
-    {
-      name: "Starter",
-      price: "12,999",
-      priceValue: 12999,
-      period: "One Time",
-      description: "Key Features",
-      icon: "★",
-      features: [
-        "CA Assisted Incorporation",
-        "Certificate of Incorporation",
-        "Legal drafting of MOA and AOA",
-        "PAN and TAN",
-        "Digital Signatures (2 No's)",
-        "Name Reservation",
-        "PF and ESIC Registration",
-        "MSME Registration",
-        "Director Identification Number",
-        "Bank account in one day",
-      ],
-      color: "red",
-    },
-    {
-      name: "Growth",
-      price: "16,999",
-      priceValue: 16999,
-      period: "One Time",
-      description: "Key Features",
-      icon: "✢",
-      features: [
-        "CA Assisted Incorporation",
-        "Certificate of Incorporation",
-        "Legal drafting of MOA and AOA",
-        "PAN and TAN",
-        "Digital Signatures (2 No's)",
-        "MSME Registration",
-        "Director Identification Number",
-        "Bank account in one day",
-        "GST Registration",
-        "Shops & Establishment Reg",
-        "Post incorporation checklist",
-        "Partner collaboration",
-      ],
-      color: "red",
-    },
-    {
-      name: "Pro",
-      price: "25,499",
-      priceValue: 25499,
-      period: "One Time",
-      description: "Key Features",
-      icon: "✤",
-      features: [
-        "CA Assisted Incorporation",
-        "Certificate of Incorporation",
-        "Legal drafting of MOA and AOA",
-        "PAN and TAN",
-        "Digital Signatures (2 No's)",
-        "MSME Registration",
-        "Director Identification Number",
-        "Bank account in one day",
-        "GST Registration",
-        "Shops & Establishment Reg",
-        "Post incorporation checklist",
-        "Partner collaboration",
-        "Startup India Registration",
-        "CA Consultation for 30min",
-        "1000+ Finance Dashboards",
-        "Free GST filings for 6 months",
-        "Professional Tax Registration",
-        "Dedicated Account Manager",
-      ],
-      isHighlighted: true,
-    },
-  ];
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages.map(pkg => ({
+    ...pkg,
+    color: 'red' // Default color for private limited
+  }));
 
   const processSteps = [
     {

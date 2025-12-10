@@ -66,6 +66,7 @@ function Sidebar() {
   }, [loadUserData]);
   const menuItems = [
     { icon: <RiDashboardLine />, text: "Dashboard", path: "/client" },
+    { icon: <RiUser3Line />, text: "Profile", path: "/settings" },
     {
       icon: <HiOutlineClipboardList />,
       text: "Registrations",
@@ -75,13 +76,14 @@ function Sidebar() {
     { icon: <RiRobot2Line />, text: "AI Agent", path: "/ai-agent" },
     { icon: <TbCopy />, text: "Resources", path: "/resources" },
     { icon: <RiFileEditLine />, text: "My Documents", path: "/documents" },
+    
+    { icon: <BsBuilding />, text: "My Companies", path: "/organization" },
     {
       icon: <MdOutlineSubscriptions />,
-      text: "Subscriptions",
+      text: "Invoices",
       path: "/subscriptions",
     },
-    { icon: <BsBuilding />, text: "Organization", path: "/organization" },
-    { icon: <RiUser3Line />, text: "Profile", path: "/settings" },
+    
   ];
 
   return (

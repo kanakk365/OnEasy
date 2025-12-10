@@ -11,6 +11,7 @@ import FAQSection from "./company-details/FAQSection";
 import TopTabs from "./company-details/TopTabs";
 import { initPayment } from "../../utils/payment";
 import PaymentSuccessPopup from "../common/PaymentSuccessPopup";
+import { usePackages } from "../../hooks/usePackages";
 
 function LLPDetails() {
   const navigate = useNavigate();
@@ -18,6 +19,9 @@ function LLPDetails() {
   const [expandedSection, setExpandedSection] = useState("");
   const [hidePackagesTab, setHidePackagesTab] = useState(false);
   const [isInFlow, setIsInFlow] = useState(false);
+
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('llp');
 
   // Ensure we start with packages tab on mount
   useEffect(() => {
@@ -165,90 +169,11 @@ function LLPDetails() {
     ? tabs.filter((tab) => tab.id !== "packages")
     : tabs;
 
-  const packages = [
-    {
-      name: "Starter",
-      price: "12,999",
-      priceValue: 12999,
-      period: "One Time",
-      description: "Key Features",
-      icon: "★",
-      features: [
-        "CA Assisted Incorporation",
-        "LLP Name Reservation",
-        "Filing of FILLIP form",
-        "Filing of LLP Agreement",
-        "Digital Signatures (2 No's)",
-        "DIN for 2 persons",
-        "Drafting of LLP Agreement",
-        "LLP E-Pan and E-Tan",
-        "100% online process",
-        "PF & ESIC Registration",
-        "MSME Registration",
-        "Bank Account Opening"
-      ],
-      color: "blue",
-    },
-    {
-      name: "Growth",
-      price: "16,999",
-      priceValue: 16999,
-      period: "One Time",
-      description: "Key Features",
-      icon: "✢",
-      features: [
-        "CA Assisted Incorporation",
-        "LLP Name Reservation",
-        "Filing of FILLIP form",
-        "Filing of LLP Agreement",
-        "Digital Signatures (2 No's)",
-        "DIN for 2 persons",
-        "Drafting of LLP Agreement",
-        "LLP E-Pan and E-Tan",
-        "100% online process",
-        "PF & ESIC Registration",
-        "MSME Registration",
-        "Bank Account Opening",
-        "GST Registration",
-        "Shop & Establishment Registration",
-        "Post Incorporation Checklist",
-        "Partner Collaboration"
-      ],
-      isHighlighted: true,
-      color: "blue",
-    },
-    {
-      name: "Pro",
-      price: "25,499",
-      priceValue: 25499,
-      period: "One Time",
-      description: "Key Features",
-      icon: "✤",
-      features: [
-        "CA Assisted Incorporation",
-        "LLP Name Reservation",
-        "Filing of FILLIP form",
-        "Filing of LLP Agreement",
-        "Digital Signatures (2 No's)",
-        "DIN for 2 persons",
-        "Drafting of LLP Agreement",
-        "LLP E-Pan and E-Tan",
-        "100% online process",
-        "PF & ESIC Registration",
-        "MSME Registration",
-        "Bank Account Opening",
-        "GST Registration",
-        "Shop & Establishment Registration",
-        "Post Incorporation Checklist",
-        "Partner Collaboration",
-        "1000+ Finance Dashboards",
-        "CA Consultation of 30 Minutes",
-        "Free GST filings for 6 Months",
-        "Profesional Tax Registration"
-      ],
-      color: "blue",
-    },
-  ];
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages.map(pkg => ({
+    ...pkg,
+    color: 'blue' // Default color for LLP
+  }));
 
   const processSteps = [
     {

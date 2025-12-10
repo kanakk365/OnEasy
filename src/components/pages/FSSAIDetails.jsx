@@ -8,50 +8,21 @@ import DocumentsSection from './company-details/DocumentsSection';
 import PrerequisitesSection from './company-details/PrerequisitesSection';
 import AboutSection from './company-details/AboutSection';
 import FAQSection from './company-details/FAQSection';
+import PaymentSuccessPopup from '../common/PaymentSuccessPopup';
 import { initPayment } from '../../utils/payment';
+import { usePackages } from '../../hooks/usePackages';
 
 function FSSAIDetails() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('packages');
   const [expandedSection, setExpandedSection] = useState(null);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
-  // Packages as per user requirements
-  const packages = [
-    {
-      name: 'Starter',
-      price: '1,999',
-      priceValue: 1999,
-      originalPrice: '3,999',
-      originalPriceValue: 3999,
-      period: 'One Time',
-      description: 'Basic FSSAI application package',
-      icon: '★',
-      features: [
-        'Basic Application preparation',
-        'Basic Application filing',
-        '1 year registration'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Growth',
-      price: '9,999',
-      priceValue: 9999,
-      originalPrice: '14,999',
-      originalPriceValue: 14999,
-      period: 'One Time',
-      description: 'Advanced FSSAI package',
-      icon: '✢',
-      features: [
-        'Advanced Application preparation',
-        'Advanced Application filing',
-        '1 year registration',
-        'CA Consultation'
-      ],
-      isHighlighted: true,
-      color: 'blue'
-    }
-  ];
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('fssai');
+  
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages;
 
   const processSteps = [
     {
@@ -230,9 +201,14 @@ function FSSAIDetails() {
                   
                   const result = await initPayment(selectedPackage);
                   
-                  if (result.success && result.redirect) {
-                    console.log('✅ Payment successful! Redirecting to form...');
-                    navigate('/fssai-form');
+                  if (result.success) {
+                    if (result.showPopup) {
+                      console.log('✅ Payment successful! Showing popup...');
+                      setShowPaymentPopup(true);
+                    } else if (result.redirect) {
+                      console.log('✅ Payment successful! Redirecting to form...');
+                      navigate('/fssai-form');
+                    }
                   }
                 } catch (error) {
                   console.error('Payment error:', error);
@@ -280,7 +256,7 @@ function FSSAIDetails() {
         {/* My Registrations Button - Top Right */}
         <div className="flex justify-end mb-4">
           <button
-            onClick={() => navigate('/registrations')}
+            onClick={() => navigate('/registrations/fssai')}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -289,6 +265,11 @@ function FSSAIDetails() {
             My Registrations
           </button>
         </div>
+
+        {/* Payment Success Popup */}
+        {showPaymentPopup && (
+          <PaymentSuccessPopup onClose={() => setShowPaymentPopup(false)} />
+        )}
 
         {/* Tabs */}
         <TopTabs

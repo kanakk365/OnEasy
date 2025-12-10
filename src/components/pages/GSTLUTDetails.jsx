@@ -8,71 +8,21 @@ import DocumentsSection from './company-details/DocumentsSection';
 import PrerequisitesSection from './company-details/PrerequisitesSection';
 import AboutSection from './company-details/AboutSection';
 import FAQSection from './company-details/FAQSection';
+import PaymentSuccessPopup from '../common/PaymentSuccessPopup';
 import { initPayment } from '../../utils/payment';
+import { usePackages } from '../../hooks/usePackages';
 
 function GSTLUTDetails() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('packages');
   const [expandedSection, setExpandedSection] = useState(null);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
-  // Packages as per user requirements
-  const packages = [
-    {
-      name: 'Starter',
-      price: '999',
-      priceValue: 999,
-      originalPrice: '1,999',
-      originalPriceValue: 1999,
-      period: 'One Time',
-      description: 'Basic LUT registration package',
-      icon: '★',
-      features: [
-        'LUT Application',
-        'LUT Certificate',
-        'GST Exemption'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Growth',
-      price: '3,999',
-      priceValue: 3999,
-      originalPrice: '4,999',
-      originalPriceValue: 4999,
-      period: 'One Time',
-      description: 'Enhanced LUT package',
-      icon: '✢',
-      features: [
-        'LUT Application',
-        'LUT Certificate',
-        'GST Exemption',
-        'GST Registration',
-        'CA Consultation',
-        'GST returns filings for one month'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Pro',
-      price: '10,999',
-      priceValue: 10999,
-      originalPrice: '13,999',
-      originalPriceValue: 13999,
-      period: 'One Time',
-      description: 'Complete LUT solution',
-      icon: '✤',
-      features: [
-        'LUT Application',
-        'LUT Certificate',
-        'GST Exemption',
-        'GST Registration',
-        'CA Consultation',
-        'GST returns filings for 12 months'
-      ],
-      isHighlighted: true,
-      color: 'blue'
-    }
-  ];
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('lut');
+  
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages;
 
   const processSteps = [
     {
@@ -226,9 +176,14 @@ function GSTLUTDetails() {
                   
                   const result = await initPayment(selectedPackage);
                   
-                  if (result.success && result.redirect) {
-                    console.log('✅ Payment successful! Redirecting to form...');
-                    navigate('/gst-lut-form');
+                  if (result.success) {
+                    if (result.showPopup) {
+                      console.log('✅ Payment successful! Showing popup...');
+                      setShowPaymentPopup(true);
+                    } else if (result.redirect) {
+                      console.log('✅ Payment successful! Redirecting to form...');
+                      navigate('/gst-lut-form');
+                    }
                   }
                 } catch (error) {
                   console.error('Payment error:', error);
@@ -276,7 +231,7 @@ function GSTLUTDetails() {
         {/* My Registrations Button - Top Right */}
         <div className="flex justify-end mb-4">
           <button
-            onClick={() => navigate('/registrations')}
+            onClick={() => navigate('/registrations/gst-lut')}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -285,6 +240,11 @@ function GSTLUTDetails() {
             My Registrations
           </button>
         </div>
+
+        {/* Payment Success Popup */}
+        {showPaymentPopup && (
+          <PaymentSuccessPopup onClose={() => setShowPaymentPopup(false)} />
+        )}
 
         {/* Tabs */}
         <TopTabs

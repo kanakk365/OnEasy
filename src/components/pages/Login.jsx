@@ -96,8 +96,8 @@ function Login() {
     
     // Check by role_id or role string
     if (userRole === '1' || userRole === '2' || userRole === 1 || userRole === 2 || userRoleString === 'admin' || userRoleString === 'superadmin') {
-      console.log("➡️  Redirecting to /admin");
-      navigate("/admin");
+      console.log("➡️  Redirecting to /admin/clients");
+      navigate("/admin/clients");
     } else if (userRole === '3' || userRole === 3 || userRoleString === 'partner') {
       console.log("➡️  Redirecting to /partner");
       navigate("/partner");
@@ -250,7 +250,7 @@ function Login() {
       const userRole = result.user?.role_id;
       
       if (userRole === '1' || userRole === '2') {
-        navigate("/admin");
+        navigate("/admin/clients");
       } else if (userRole === '3') {
         navigate("/partner");
       } else {

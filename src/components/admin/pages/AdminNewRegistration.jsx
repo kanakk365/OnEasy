@@ -1,19 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import apiClient from '../../../utils/api';
-import { FaBuilding, FaStore, FaFileInvoiceDollar, FaRocket } from 'react-icons/fa';
+import {
+  FaBuilding,
+  FaStore,
+  FaFileInvoiceDollar,
+  FaRocket,
+  FaUserTie,
+  FaHandshake,
+  FaUniversity,
+  FaGlobe,
+  FaCertificate,
+  FaIndustry,
+  FaIdBadge,
+  FaShieldAlt
+} from 'react-icons/fa';
 import PaymentLinkGeneration from './PaymentLinkGeneration';
+import { usePackages } from '../../../hooks/usePackages';
 
 function AdminNewRegistration() {
-  const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1: Select User, 2: Select Type, 3: Select Plan, 4: Payment Link, 5: Fill Form
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedType, setSelectedType] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
-  const [paymentLinkData, setPaymentLinkData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [typeSearch, setTypeSearch] = useState('');
+
+  // Fetch packages for selected service type
+  const serviceTypeForApi = selectedType?.id || null;
+  const { packages: apiPackages, loading: packagesLoading } = usePackages(serviceTypeForApi, !!selectedType);
 
   const registrationTypes = [
     {
@@ -39,31 +55,129 @@ function AdminNewRegistration() {
       name: 'GST Registration',
       icon: <FaFileInvoiceDollar className="w-8 h-8" />,
       description: 'Register for Goods and Services Tax'
+    },
+    {
+      id: 'opc',
+      name: 'One Person Company',
+      icon: <FaUserTie className="w-8 h-8" />,
+      description: 'Register a one person company'
+    },
+    {
+      id: 'llp',
+      name: 'Limited Liability Partnership',
+      icon: <FaHandshake className="w-8 h-8" />,
+      description: 'Register an LLP'
+    },
+    {
+      id: 'partnership',
+      name: 'Partnership Firm',
+      icon: <FaHandshake className="w-8 h-8" />,
+      description: 'Register a partnership firm'
+    },
+    {
+      id: 'section-8',
+      name: 'Section 8 Company',
+      icon: <FaUniversity className="w-8 h-8" />,
+      description: 'Register a Section 8 company'
+    },
+    {
+      id: 'public-limited',
+      name: 'Public Limited Company',
+      icon: <FaGlobe className="w-8 h-8" />,
+      description: 'Register a public limited company'
+    },
+    {
+      id: 'mca-name-approval',
+      name: 'MCA Name Approval',
+      icon: <FaCertificate className="w-8 h-8" />,
+      description: 'Apply for MCA name approval'
+    },
+    {
+      id: 'indian-subsidiary',
+      name: 'Indian Subsidiary',
+      icon: <FaIndustry className="w-8 h-8" />,
+      description: 'Register an Indian subsidiary'
+    },
+    {
+      id: 'professional-tax',
+      name: 'Professional Tax Registration',
+      icon: <FaIdBadge className="w-8 h-8" />,
+      description: 'Register for Professional Tax'
+    },
+    {
+      id: 'labour-license',
+      name: 'Labour License',
+      icon: <FaShieldAlt className="w-8 h-8" />,
+      description: 'Apply for Labour License'
+    },
+    {
+      id: 'udyam',
+      name: 'Udyam / MSME',
+      icon: <FaIdBadge className="w-8 h-8" />,
+      description: 'Register for Udyam/MSME'
+    },
+    {
+      id: 'fssai',
+      name: 'FSSAI / Food License',
+      icon: <FaCertificate className="w-8 h-8" />,
+      description: 'Apply for FSSAI/Food license'
+    },
+    {
+      id: 'trade-license',
+      name: 'Trade License',
+      icon: <FaIdBadge className="w-8 h-8" />,
+      description: 'Apply for Trade License'
+    },
+    {
+      id: 'iec',
+      name: 'Import Export Code (IEC)',
+      icon: <FaGlobe className="w-8 h-8" />,
+      description: 'Apply for IEC'
+    },
+    {
+      id: 'lut',
+      name: 'GST LUT',
+      icon: <FaFileInvoiceDollar className="w-8 h-8" />,
+      description: 'Apply for GST LUT'
+    },
+    {
+      id: 'dsc',
+      name: 'Digital Signature (DSC)',
+      icon: <FaCertificate className="w-8 h-8" />,
+      description: 'Apply for DSC'
+    },
+    {
+      id: 'esi',
+      name: 'ESI Registration',
+      icon: <FaShieldAlt className="w-8 h-8" />,
+      description: 'Apply for ESI'
+    },
+    {
+      id: '12a',
+      name: '12A Registration',
+      icon: <FaCertificate className="w-8 h-8" />,
+      description: 'Apply for 12A registration'
+    },
+    {
+      id: '80g',
+      name: '80G Registration',
+      icon: <FaCertificate className="w-8 h-8" />,
+      description: 'Apply for 80G registration'
     }
   ];
 
-  // Package plans - matching actual packages from the system
-  const packagePlans = {
-    'private-limited': [
-      { id: 'starter', name: 'Starter', price: 12999, description: 'For solo entrepreneurs' },
-      { id: 'growth', name: 'Growth', price: 16999, description: 'As your business scales' },
-      { id: 'pro', name: 'Pro', price: 24999, description: 'Complete solution with priority support' }
-    ],
-    'proprietorship': [
-      { id: 'starter1', name: 'Starter', price: 999, description: 'Basic proprietorship registration' },
-      { id: 'starter2', name: 'Starter Enhanced', price: 1499, description: 'Enhanced proprietorship package' },
-      { id: 'growth', name: 'Growth', price: 3499, description: 'Complete proprietorship solution' }
-    ],
-    'startup-india': [
-      { id: 'starter', name: 'Starter', price: 2999, description: 'Basic Startup India registration' },
-      { id: 'growth', name: 'Growth', price: 5999, description: 'Enhanced Startup India package' },
-      { id: 'pro', name: 'Pro', price: 14999, description: 'Complete Startup India solution' }
-    ],
-    'gst': [
-      { id: 'starter', name: 'Starter', price: 2599, description: 'Basic GST registration package' },
-      { id: 'growth', name: 'Growth', price: 5599, description: 'Enhanced GST package' },
-      { id: 'pro', name: 'Pro', price: 12999, description: 'Complete GST solution' }
-    ]
+  // Transform API packages to match component format
+  const getPlansFromApi = () => {
+    if (!apiPackages || apiPackages.length === 0) return [];
+    
+    return apiPackages.map((pkg, index) => ({
+      id: pkg.name?.toLowerCase().replace(/\s+/g, '-') || `package-${index}`,
+      name: pkg.name || 'Package',
+      price: pkg.priceValue || 0,
+      description: pkg.description || 'Key Features',
+      originalPrice: pkg.originalPriceValue || null,
+      features: Array.isArray(pkg.features) ? pkg.features : []
+    }));
   };
 
   useEffect(() => {
@@ -116,23 +230,8 @@ function AdminNewRegistration() {
     setStep(4); // Go to payment link generation step
   };
 
-  const handlePaymentLinkGenerated = (data) => {
-    setPaymentLinkData(data);
-  };
-
-  const handleContinueToForm = () => {
-    // Navigate to fill form with user, type, plan, and payment link info
-    navigate(`/admin/fill-form-new`, {
-      state: {
-        userId: selectedUser.id,
-        userName: selectedUser.name,
-        userEmail: selectedUser.email,
-        registrationType: selectedType.id,
-        packagePlan: selectedPlan,
-        paymentLinkGenerated: true,
-        paymentLinkData: paymentLinkData
-      }
-    });
+  const handlePaymentLinkGenerated = () => {
+    // Payment link generated successfully
   };
 
   const handleBack = () => {
@@ -145,7 +244,6 @@ function AdminNewRegistration() {
     } else if (step === 4) {
       setStep(3);
       setSelectedPlan(null);
-      setPaymentLinkData(null);
     }
   };
 
@@ -245,8 +343,24 @@ function AdminNewRegistration() {
           </p>
         </div>
 
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search services..."
+            value={typeSearch}
+            onChange={(e) => setTypeSearch(e.target.value)}
+            className="w-full h-11 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {registrationTypes.map((type) => (
+          {registrationTypes
+            .filter((type) => {
+              if (!typeSearch.trim()) return true;
+              const s = typeSearch.toLowerCase();
+              return type.name.toLowerCase().includes(s) || type.id.toLowerCase().includes(s);
+            })
+            .map((type) => (
             <div
               key={type.id}
               onClick={() => handleTypeSelect(type)}
@@ -265,7 +379,7 @@ function AdminNewRegistration() {
   }
 
   if (step === 3) {
-    const plans = packagePlans[selectedType?.id] || [];
+    const plans = getPlansFromApi();
 
     return (
       <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-4 md:py-6">
@@ -288,22 +402,34 @@ function AdminNewRegistration() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {plans.map((plan) => (
-            <div
-              key={plan.id}
-              onClick={() => handlePlanSelect(plan)}
-              className="bg-white rounded-xl p-8 border-2 border-gray-200 cursor-pointer hover:border-[#01334C] hover:shadow-lg transition-all"
-            >
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">{plan.name}</h3>
-              <p className="text-3xl font-bold text-[#01334C] mb-1">₹{plan.price.toLocaleString('en-IN')}</p>
-              <p className="text-sm text-gray-600 mb-6">{plan.description}</p>
-              <button className="w-full px-4 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium">
-                Select Plan
-              </button>
-            </div>
-          ))}
-        </div>
+        {packagesLoading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading packages...</p>
+          </div>
+        ) : plans.length === 0 ? (
+          <div className="bg-white rounded-xl p-8 border border-dashed border-gray-300 text-center text-gray-700">
+            <p className="mb-2 font-semibold">No packages available for this service.</p>
+            <p className="text-sm text-gray-600">You can go back and choose another service or add packages in CMS.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {plans.map((plan) => (
+              <div
+                key={plan.id}
+                onClick={() => handlePlanSelect(plan)}
+                className="bg-white rounded-xl p-8 border-2 border-gray-200 cursor-pointer hover:border-[#01334C] hover:shadow-lg transition-all"
+              >
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">{plan.name}</h3>
+                <p className="text-3xl font-bold text-[#01334C] mb-1">₹{plan.price.toLocaleString('en-IN')}</p>
+                <p className="text-sm text-gray-600 mb-6">{plan.description}</p>
+                <button className="w-full px-4 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium">
+                  Select Plan
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }

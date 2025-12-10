@@ -8,64 +8,21 @@ import DocumentsSection from './company-details/DocumentsSection';
 import PrerequisitesSection from './company-details/PrerequisitesSection';
 import AboutSection from './company-details/AboutSection';
 import FAQSection from './company-details/FAQSection';
+import PaymentSuccessPopup from '../common/PaymentSuccessPopup';
 import { initPayment } from '../../utils/payment';
+import { usePackages } from '../../hooks/usePackages';
 
 function LabourLicenseDetails() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('packages');
   const [expandedSection, setExpandedSection] = useState(null);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
-  // Packages as per user requirements
-  const packages = [
-    {
-      name: 'Starter',
-      price: '999',
-      priceValue: 999,
-      period: 'One Time',
-      description: 'Key Features',
-      icon: '★',
-      features: [
-        'CA Assisted Registration',
-        'Shops & establishment act registration',
-        'Labour License / Shops & establishment certificate',
-        'Assistance Startup Bank Current Account'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Growth',
-      price: '1,499',
-      priceValue: 1499,
-      period: 'One Time',
-      description: 'Key Features',
-      icon: '✢',
-      features: [
-        'CA Assisted Registration',
-        'Shops & establishment act registration ( 5 employees )',
-        'Labour License / Shops & establishment certificate',
-        'Assistance Startup Bank Current Account'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Pro',
-      price: '3,499',
-      priceValue: 3499,
-      period: 'One Time',
-      description: 'Key Features',
-      icon: '✤',
-      features: [
-        'CA Assisted Registration',
-        'Shops & establishment act registration',
-        'Labour License / Shops & establishment certificate',
-        'Assistance Startup Bank Current Account',
-        'MSME registration',
-        '15 mins CA consultation'
-      ],
-      isHighlighted: true,
-      color: 'blue'
-    }
-  ];
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('labour-license');
+  
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages;
 
   const processSteps = [
     {
@@ -286,9 +243,14 @@ function LabourLicenseDetails() {
                   
                   const result = await initPayment(selectedPackage);
                   
-                  if (result.success && result.redirect) {
-                    console.log('✅ Payment successful! Redirecting to form...');
-                    navigate('/labour-license-form');
+                  if (result.success) {
+                    if (result.showPopup) {
+                      console.log('✅ Payment successful! Showing popup...');
+                      setShowPaymentPopup(true);
+                    } else if (result.redirect) {
+                      console.log('✅ Payment successful! Redirecting to form...');
+                      navigate('/labour-license-form');
+                    }
                   }
                 } catch (error) {
                   console.error('Payment error:', error);
@@ -336,7 +298,7 @@ function LabourLicenseDetails() {
         {/* My Registrations Button - Top Right */}
         <div className="flex justify-end mb-4">
           <button
-            onClick={() => navigate('/registrations')}
+            onClick={() => navigate('/registrations/labour-license')}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -345,6 +307,11 @@ function LabourLicenseDetails() {
             My Registrations
           </button>
         </div>
+
+        {/* Payment Success Popup */}
+        {showPaymentPopup && (
+          <PaymentSuccessPopup onClose={() => setShowPaymentPopup(false)} />
+        )}
 
         {/* Tabs */}
         <TopTabs

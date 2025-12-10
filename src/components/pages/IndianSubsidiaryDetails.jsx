@@ -11,6 +11,7 @@ import FAQSection from "./company-details/FAQSection";
 import TopTabs from "./company-details/TopTabs";
 import { initPayment } from "../../utils/payment";
 import PaymentSuccessPopup from "../common/PaymentSuccessPopup";
+import { usePackages } from "../../hooks/usePackages";
 
 function IndianSubsidiaryDetails() {
   const navigate = useNavigate();
@@ -18,6 +19,9 @@ function IndianSubsidiaryDetails() {
   const [expandedSection, setExpandedSection] = useState("");
   const [hidePackagesTab, setHidePackagesTab] = useState(false);
   const [isInFlow, setIsInFlow] = useState(false);
+
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('indian-subsidiary');
 
   // Ensure we start with packages tab on mount
   useEffect(() => {
@@ -235,86 +239,11 @@ function IndianSubsidiaryDetails() {
     ? tabs.filter((tab) => tab.id !== "packages")
     : tabs;
 
-  const packages = [
-    {
-      name: "Starter",
-      price: "12,999",
-      priceValue: 12999,
-      period: "One Time",
-      description: "Key Features",
-      icon: "★",
-      features: [
-        "CA Assisted Incorporation",
-        "Certificate of Incorporation",
-        "Legal drafting of MOA and AOA",
-        "PAN and TAN",
-        "Digital Signatures (2 No's)",
-        "Name Reservation",
-        "PF and ESIC Registration",
-        "MSME Registration",
-        "Director Identification Number",
-        "Bank account in one day",
-      ],
-      color: "blue",
-    },
-    {
-      name: "Growth",
-      price: "16,999",
-      priceValue: 16999,
-      period: "One Time",
-      description: "Key Features",
-      icon: "✢",
-      features: [
-        "CA Assisted Incorporation",
-        "Certificate of Incorporation",
-        "Legal drafting of MOA and AOA",
-        "PAN and TAN",
-        "Digital Signatures (2 No's)",
-        "Name Reservation",
-        "PF and ESIC Registration",
-        "MSME Registration",
-        "Director Identification Number",
-        "Bank account in one day",
-        "GST Registration",
-        "Shops & Establishment Reg",
-        "Post incorporation checklist",
-        "Partner collaboration",
-      ],
-      isHighlighted: true,
-      color: "blue",
-    },
-    {
-      name: "Pro",
-      price: "25,499",
-      priceValue: 25499,
-      period: "One Time",
-      description: "Key Features",
-      icon: "✤",
-      features: [
-        "CA Assisted Incorporation",
-        "Certificate of Incorporation",
-        "Legal drafting of MOA and AOA",
-        "PAN and TAN",
-        "Digital Signatures (2 No's)",
-        "Name Reservation",
-        "PF and ESIC Registration",
-        "MSME Registration",
-        "Director Identification Number",
-        "Bank account in one day",
-        "GST Registration",
-        "Shops & Establishment Reg",
-        "Post incorporation checklist",
-        "Partner collaboration",
-        "Startup India Registration",
-        "CA Consultation for 30min",
-        "1000+ Finance Dashboards",
-        "Free GST filings for 6 months",
-        "Professional Tax Registration",
-        "Dedicated Account Manager",
-      ],
-      color: "blue",
-    },
-  ];
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages.map(pkg => ({
+    ...pkg,
+    color: 'blue' // Default color for Indian Subsidiary
+  }));
 
   const processSteps = [
     {

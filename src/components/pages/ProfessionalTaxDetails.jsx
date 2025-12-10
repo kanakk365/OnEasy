@@ -8,49 +8,21 @@ import DocumentsSection from './company-details/DocumentsSection';
 import PrerequisitesSection from './company-details/PrerequisitesSection';
 import AboutSection from './company-details/AboutSection';
 import FAQSection from './company-details/FAQSection';
+import PaymentSuccessPopup from '../common/PaymentSuccessPopup';
 import { initPayment } from '../../utils/payment';
+import { usePackages } from '../../hooks/usePackages';
 
 function ProfessionalTaxDetails() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('packages');
   const [expandedSection, setExpandedSection] = useState(null);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
-  // Packages as per user requirements
-  const packages = [
-    {
-      name: 'Starter',
-      price: '3,999',
-      priceValue: 3999,
-      period: 'One Time',
-      description: 'Basic professional tax registration',
-      icon: '★',
-      features: [
-        'Application Preparation',
-        'Application Submission',
-        'PTRC and PTEC number',
-        'PT Registration Certificate'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Growth',
-      price: '5,999',
-      priceValue: 5999,
-      period: 'One Time',
-      description: 'Complete professional tax solution',
-      icon: '✢',
-      features: [
-        'Application Preparation',
-        'Application Submission',
-        'PTRC and PTEC number',
-        'PT Registration Certificate',
-        'PT Payments for 6 months',
-        'PT Filings for 6 months'
-      ],
-      isHighlighted: true,
-      color: 'blue'
-    }
-  ];
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('professional-tax');
+  
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages;
 
   const processSteps = [
     {
@@ -258,9 +230,14 @@ function ProfessionalTaxDetails() {
                   
                   const result = await initPayment(selectedPackage);
                   
-                  if (result.success && result.redirect) {
-                    console.log('✅ Payment successful! Redirecting to form...');
-                    navigate('/professional-tax-form');
+                  if (result.success) {
+                    if (result.showPopup) {
+                      console.log('✅ Payment successful! Showing popup...');
+                      setShowPaymentPopup(true);
+                    } else if (result.redirect) {
+                      console.log('✅ Payment successful! Redirecting to form...');
+                      navigate('/professional-tax-form');
+                    }
                   }
                 } catch (error) {
                   console.error('Payment error:', error);
@@ -308,7 +285,7 @@ function ProfessionalTaxDetails() {
         {/* My Registrations Button - Top Right */}
         <div className="flex justify-end mb-4">
           <button
-            onClick={() => navigate('/registrations')}
+            onClick={() => navigate('/registrations/professional-tax')}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,6 +294,11 @@ function ProfessionalTaxDetails() {
             My Registrations
           </button>
         </div>
+
+        {/* Payment Success Popup */}
+        {showPaymentPopup && (
+          <PaymentSuccessPopup onClose={() => setShowPaymentPopup(false)} />
+        )}
 
         {/* Tabs */}
         <TopTabs

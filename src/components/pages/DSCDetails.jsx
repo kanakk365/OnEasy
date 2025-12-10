@@ -8,47 +8,21 @@ import DocumentsSection from './company-details/DocumentsSection';
 import PrerequisitesSection from './company-details/PrerequisitesSection';
 import AboutSection from './company-details/AboutSection';
 import FAQSection from './company-details/FAQSection';
+import PaymentSuccessPopup from '../common/PaymentSuccessPopup';
 import { initPayment } from '../../utils/payment';
+import { usePackages } from '../../hooks/usePackages';
 
 function DSCDetails() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('packages');
   const [expandedSection, setExpandedSection] = useState(null);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
-  // Packages as per user requirements - only 2 packages
-  const packages = [
-    {
-      name: 'Starter',
-      price: '1,999',
-      priceValue: 1999,
-      originalPrice: '3,500',
-      originalPriceValue: 3500,
-      period: 'One Time',
-      description: 'Class 3 - Individual',
-      icon: '★',
-      features: [
-        'Digital Signature Application',
-        'Digital Signature Certificate'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Growth',
-      price: '2,999',
-      priceValue: 2999,
-      originalPrice: '3,999',
-      originalPriceValue: 3999,
-      period: 'One Time',
-      description: 'Class 3- Company',
-      icon: '✢',
-      features: [
-        'Digital Signature Application',
-        'Digital Signature Certificate'
-      ],
-      isHighlighted: true,
-      color: 'blue'
-    }
-  ];
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('dsc');
+  
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages;
 
   const processSteps = [
     {
@@ -234,9 +208,14 @@ function DSCDetails() {
                   
                   const result = await initPayment(selectedPackage);
                   
-                  if (result.success && result.redirect) {
-                    console.log('✅ Payment successful! Redirecting to form...');
-                    navigate('/dsc-form');
+                  if (result.success) {
+                    if (result.showPopup) {
+                      console.log('✅ Payment successful! Showing popup...');
+                      setShowPaymentPopup(true);
+                    } else if (result.redirect) {
+                      console.log('✅ Payment successful! Redirecting to form...');
+                      navigate('/dsc-form');
+                    }
                   }
                 } catch (error) {
                   console.error('Payment error:', error);
@@ -284,7 +263,7 @@ function DSCDetails() {
         {/* My Registrations Button - Top Right */}
         <div className="flex justify-end mb-4">
           <button
-            onClick={() => navigate('/registrations')}
+            onClick={() => navigate('/registrations/dsc')}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -293,6 +272,11 @@ function DSCDetails() {
             My Registrations
           </button>
         </div>
+
+        {/* Payment Success Popup */}
+        {showPaymentPopup && (
+          <PaymentSuccessPopup onClose={() => setShowPaymentPopup(false)} />
+        )}
 
         {/* Tabs */}
         <TopTabs

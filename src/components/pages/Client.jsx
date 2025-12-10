@@ -15,6 +15,7 @@ function Client() {
   const [activeServiceTab, setActiveServiceTab] = React.useState('Open');
   const [organizations, setOrganizations] = React.useState([]);
   const [loadingOrganizations, setLoadingOrganizations] = React.useState(true);
+  const [greeting, setGreeting] = React.useState("");
 
   React.useEffect(() => {
     // Add smooth scrolling behavior
@@ -29,6 +30,19 @@ function Client() {
       try {
         const storedUser = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}");
         const userId = storedUser.id;
+        const rawName = storedUser.name || storedUser.fullName || storedUser.email || "there";
+        const userName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+
+        const motivationalLines = [
+          `Hi ${userName}, welcome back! Hope you have a good day!`,
+          `Great to see you, ${userName}! Let's make today productive!`,
+          `${userName}, you're doing amazing. Keep going!`,
+          `Welcome, ${userName}! Small steps lead to big wins!`,
+          `Hey ${userName}, you've got this! Let's get it done!`
+        ];
+        const pick = motivationalLines[Math.floor(Math.random() * motivationalLines.length)];
+        setGreeting(pick);
+
         if (!userId) {
           setAllServices([]);
           return;
@@ -235,10 +249,10 @@ function Client() {
     <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-4 md:py-6">
       <div className="mb-6 md:mb-8">
         <h1 className="text-xl md:text-2xl font-semibold text-gray-900 mb-1">
-          The Intelligent Business Owner Dashboard
+          {greeting || "Welcome back!"}
         </h1>
         <p className="text-sm md:text-base text-gray-600">
-          A Unified Hub for Management and Insights
+          The Intelligent Business Owner Dashboard
         </p>
       </div>
 

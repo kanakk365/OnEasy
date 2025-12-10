@@ -153,6 +153,13 @@ function CouponCodeGenerator() {
     URL.revokeObjectURL(url);
   };
 
+  const parsedDiscountPercentage = typeof discountPercentage === 'string' ? parseFloat(discountPercentage) || 0 : discountPercentage;
+  const parsedDiscountAmount = typeof discountAmount === 'string' ? parseFloat(discountAmount) || 0 : discountAmount;
+  const displayDiscountLabel =
+    discountType === 'percentage'
+      ? `${parsedDiscountPercentage}%`
+      : `₹${parsedDiscountAmount}`;
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
@@ -376,7 +383,7 @@ function CouponCodeGenerator() {
             {generatedCodes.length === 1 ? (
               <div className="bg-gradient-to-r from-[#01334C] to-[#00486D] rounded-lg p-6 text-center">
                 <div className="mb-2">
-                  <span className="text-white/80 text-sm">Discount: {typeof discountPercentage === 'string' ? parseFloat(discountPercentage) || 0 : discountPercentage}%</span>
+                  <span className="text-white/80 text-sm">Discount: {displayDiscountLabel}</span>
                 </div>
                 <div className="flex items-center justify-center gap-4">
                   <code className="text-2xl font-mono font-bold text-white tracking-wider">
@@ -409,7 +416,7 @@ function CouponCodeGenerator() {
                       <code className="text-lg font-mono font-semibold text-gray-900 block">
                         {code}
                       </code>
-                      <span className="text-sm text-gray-600 mt-1">Discount: {typeof discountPercentage === 'string' ? parseFloat(discountPercentage) || 0 : discountPercentage}%</span>
+                      <span className="text-sm text-gray-600 mt-1">Discount: {displayDiscountLabel}</span>
                     </div>
                     <button
                       onClick={() => copyToClipboard(code)}

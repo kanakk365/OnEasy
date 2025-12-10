@@ -11,6 +11,17 @@ const typeLabels = {
   "public-limited": "Public Limited",
   "mca-name-approval": "MCA Name Approval",
   "indian-subsidiary": "Indian Subsidiary",
+  "professional-tax": "Professional Tax",
+  "labour-license": "Labour License",
+  "udyam": "Udyam / MSME",
+  "fssai": "FSSAI / Food License",
+  "trade-license": "Trade License",
+  "iec": "Import Export Code (IEC)",
+  "gst-lut": "GST LUT",
+  "dsc": "Digital Signature (DSC)",
+  "esi": "ESI Registration",
+  "registration-12a": "12A Registration",
+  "registration-80g": "80G Registration",
 };
 
 // Check if a registration row matches the requested type
@@ -67,6 +78,64 @@ const matchesType = (reg, type) => {
              text.includes("private limited") ||
              text.includes("private-limited") ||
              businessName === "private limited";
+    case "professional-tax":
+      return ticketId.startsWith("PT_") || 
+             ticketId.startsWith("PROF_TAX_") ||
+             text.includes("professional tax") ||
+             businessName === "professional-tax" || businessName === "professional tax";
+    case "labour-license":
+      return ticketId.startsWith("LAB_") || 
+             ticketId.startsWith("LABOUR_") ||
+             text.includes("labour license") ||
+             businessName === "labour-license" || businessName === "labour license";
+    case "udyam":
+      return ticketId.startsWith("UDYAM_") || 
+             ticketId.startsWith("MSME_") ||
+             text.includes("udyam") ||
+             text.includes("msme") ||
+             businessName === "udyam" || businessName === "msme";
+    case "fssai":
+      return ticketId.startsWith("FSSAI_") ||
+             text.includes("fssai") ||
+             text.includes("food license") ||
+             businessName === "fssai";
+    case "trade-license":
+      return ticketId.startsWith("TRADE_") ||
+             text.includes("trade license") ||
+             businessName === "trade-license" || businessName === "trade license";
+    case "iec":
+      return ticketId.startsWith("IEC_") ||
+             text.includes("import export") ||
+             text.includes("iec") ||
+             businessName === "iec";
+    case "gst-lut":
+      return ticketId.startsWith("LUT_") ||
+             ticketId.startsWith("GST_LUT_") ||
+             text.includes("lut") ||
+             text.includes("letter of undertaking") ||
+             businessName === "gst-lut" || businessName === "lut";
+    case "dsc":
+      return ticketId.startsWith("DSC_") ||
+             text.includes("digital signature") ||
+             text.includes("dsc") ||
+             businessName === "dsc";
+    case "esi":
+      return ticketId.startsWith("ESI_") ||
+             text.includes("employee state insurance") ||
+             text.includes("esi") ||
+             businessName === "esi";
+    case "registration-12a":
+    case "12a":
+      return ticketId.startsWith("12A_") ||
+             ticketId.startsWith("REG_12A_") ||
+             text.includes("12a") ||
+             businessName === "registration-12a" || businessName === "12a";
+    case "registration-80g":
+    case "80g":
+      return ticketId.startsWith("80G_") ||
+             ticketId.startsWith("REG_80G_") ||
+             text.includes("80g") ||
+             businessName === "registration-80g" || businessName === "80g";
     default:
       return false;
   }

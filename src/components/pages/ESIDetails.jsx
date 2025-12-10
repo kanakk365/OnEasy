@@ -8,77 +8,21 @@ import DocumentsSection from './company-details/DocumentsSection';
 import PrerequisitesSection from './company-details/PrerequisitesSection';
 import AboutSection from './company-details/AboutSection';
 import FAQSection from './company-details/FAQSection';
+import PaymentSuccessPopup from '../common/PaymentSuccessPopup';
 import { initPayment } from '../../utils/payment';
+import { usePackages } from '../../hooks/usePackages';
 
 function ESIDetails() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('packages');
   const [expandedSection, setExpandedSection] = useState(null);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
-  // Packages as per user requirements
-  const packages = [
-    {
-      name: 'Starter',
-      price: '4,999',
-      priceValue: 4999,
-      originalPrice: '7,599',
-      originalPriceValue: 7599,
-      period: 'One Time',
-      description: 'Basic ESI registration package',
-      icon: '★',
-      features: [
-        'ESIC Application',
-        'ESIC Submission',
-        'ESIC Certificate',
-        'Setting up of the policies',
-        'Adding 5 employees'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Growth',
-      price: '7,599',
-      priceValue: 7599,
-      originalPrice: '10,599',
-      originalPriceValue: 10599,
-      period: 'One Time',
-      description: 'Enhanced ESI package',
-      icon: '✢',
-      features: [
-        'ESIC Application',
-        'ESIC Submission',
-        'ESIC Certificate',
-        'Setting up of the policies',
-        'Adding 5 employees',
-        'PF registration',
-        'PF returns for 3 Months'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Pro',
-      price: '11,999',
-      priceValue: 11999,
-      originalPrice: '13,999',
-      originalPriceValue: 13999,
-      period: 'One Time',
-      description: 'Complete ESI solution',
-      icon: '✤',
-      features: [
-        'ESIC Application',
-        'ESIC Submission',
-        'ESIC Certificate',
-        'Setting up of the policies',
-        'Adding 5 employees',
-        'PF registration',
-        'PF returns for 3 Months',
-        'PT Registration',
-        'Labour License'
-      ],
-      isHighlighted: true,
-      color: 'blue'
-    }
-  ];
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('esi');
+  
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages;
 
   const processSteps = [
     {
@@ -248,9 +192,14 @@ function ESIDetails() {
                   
                   const result = await initPayment(selectedPackage);
                   
-                  if (result.success && result.redirect) {
-                    console.log('✅ Payment successful! Redirecting to form...');
-                    navigate('/esi-form');
+                  if (result.success) {
+                    if (result.showPopup) {
+                      console.log('✅ Payment successful! Showing popup...');
+                      setShowPaymentPopup(true);
+                    } else if (result.redirect) {
+                      console.log('✅ Payment successful! Redirecting to form...');
+                      navigate('/esi-form');
+                    }
                   }
                 } catch (error) {
                   console.error('Payment error:', error);
@@ -298,7 +247,7 @@ function ESIDetails() {
         {/* My Registrations Button - Top Right */}
         <div className="flex justify-end mb-4">
           <button
-            onClick={() => navigate('/registrations')}
+            onClick={() => navigate('/registrations/esi')}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -307,6 +256,11 @@ function ESIDetails() {
             My Registrations
           </button>
         </div>
+
+        {/* Payment Success Popup */}
+        {showPaymentPopup && (
+          <PaymentSuccessPopup onClose={() => setShowPaymentPopup(false)} />
+        )}
 
         {/* Tabs */}
         <TopTabs

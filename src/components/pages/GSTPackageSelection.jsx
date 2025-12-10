@@ -2,61 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { initPayment } from '../../utils/payment';
 import PackagesSection from './company-details/PackagesSection';
+import { usePackages } from '../../hooks/usePackages';
 
 function GSTPackageSelection() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  // Packages as per user requirements
-  const packages = [
-    {
-      name: 'Starter',
-      price: '2,599',
-      priceValue: 2599,
-      originalPrice: '4,599',
-      period: 'One Time',
-      description: 'Basic GST registration package',
-      icon: '★',
-      features: [
-        'GST Application',
-        'GST registration',
-        'Filing GST return for one month'
-      ]
-    },
-    {
-      name: 'Growth',
-      price: '5,599',
-      priceValue: 5599,
-      originalPrice: '7,499',
-      period: 'One Time',
-      description: 'Enhanced GST package',
-      icon: '✢',
-      features: [
-        'GST Application',
-        'GST registration',
-        'Filing GST returns for two months',
-        'MSME Registration',
-        'GST Consultation'
-      ]
-    },
-    {
-      name: 'Pro',
-      price: '12,999',
-      priceValue: 12999,
-      originalPrice: '17,499',
-      period: 'One Time',
-      description: 'Complete GST solution',
-      icon: '✤',
-      features: [
-        'GST Application',
-        'GST registration',
-        'Filing GST returns for one year',
-        'MSME Registration',
-        'GST Consultation'
-      ],
-      isHighlighted: true
-    }
-  ];
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('gst');
 
   const handleGetStarted = async (pkg) => {
     try {
@@ -118,7 +71,14 @@ function GSTPackageSelection() {
           </div>
         )}
 
-        <PackagesSection packages={packages} onGetStarted={handleGetStarted} />
+        {packagesLoading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#01334C]"></div>
+            <p className="mt-2 text-gray-600">Loading packages...</p>
+          </div>
+        ) : (
+          <PackagesSection packages={apiPackages} onGetStarted={handleGetStarted} />
+        )}
       </div>
     </div>
   );

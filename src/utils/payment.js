@@ -78,6 +78,19 @@ export const initPayment = async (packageData) => {
           if (name.includes('gst') || name.includes('goods and services tax')) return 'gst';
           if (name.includes('startup') || name.includes('startup india')) return 'startup-india';
           if (name.includes('private limited') || name.includes('private-limited') || name.includes('pvt ltd') || name.includes('pvt. ltd')) return 'private-limited';
+          // Registration services
+          if (name.includes('professional tax') || name.includes('professional-tax')) return 'professional-tax';
+          if (name.includes('labour license') || name.includes('labour-license')) return 'labour-license';
+          if (name.includes('udyam') || name.includes('msme')) return 'udyam';
+          if (name.includes('fssai') || name.includes('food license')) return 'fssai';
+          if (name.includes('trade license') || name.includes('trade-license')) return 'trade-license';
+          if (name.includes('iec') || name.includes('import export')) return 'iec';
+          if (name.includes('lut') || name.includes('letter of undertaking')) return 'lut';
+          if (name.includes('dsc') || name.includes('digital signature')) return 'dsc';
+          if (name.includes('esi') || name.includes('employee state insurance')) return 'esi';
+          if (name.includes('12a') || name.includes('registration-12a')) return 'registration-12a';
+          if (name.includes('80g') || name.includes('registration-80g')) return 'registration-80g';
+          if (name.includes('provident fund') || name.includes('provident-fund')) return 'provident-fund';
           return null;
         })();
         const registrationType = storedRegistrationType || detectedTypeFromName;
@@ -137,7 +150,23 @@ export const initPayment = async (packageData) => {
               'section-8',
               'public-limited',
               'mca-name-approval',
-              'indian-subsidiary'
+              'indian-subsidiary',
+              // Registration services without forms (except startup-india and gst)
+              'professional-tax',
+              'labour-license',
+              'udyam',
+              'fssai',
+              'trade-license',
+              'iec',
+              'lut',
+              'gst-lut',
+              'dsc',
+              'esi',
+              '12a',
+              'registration-12a',
+              '80g',
+              'registration-80g',
+              'provident-fund'
             ];
             const hasForm = !servicesWithoutForms.includes(registrationTypeLower);
             

@@ -9,62 +9,15 @@ import PrerequisitesSection from './company-details/PrerequisitesSection';
 import AboutSection from './company-details/AboutSection';
 import FAQSection from './company-details/FAQSection';
 import { initPayment } from '../../utils/payment';
+import { usePackages } from '../../hooks/usePackages';
 
 function GSTDetails() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('packages');
   const [expandedSection, setExpandedSection] = useState(null);
 
-  // Packages as per user requirements
-  const packages = [
-    {
-      name: 'Starter',
-      price: '2,599',
-      priceValue: 2599,
-      originalPrice: '4,599',
-      period: 'One Time',
-      description: 'Basic GST registration package',
-      icon: '★',
-      features: [
-        'GST Application',
-        'GST registration',
-        'Filing GST return for one month'
-      ]
-    },
-    {
-      name: 'Growth',
-      price: '5,599',
-      priceValue: 5599,
-      originalPrice: '7,499',
-      period: 'One Time',
-      description: 'Enhanced GST package',
-      icon: '✢',
-      features: [
-        'GST Application',
-        'GST registration',
-        'Filing GST returns for two months',
-        'MSME Registration',
-        'GST Consultation'
-      ]
-    },
-    {
-      name: 'Pro',
-      price: '12,999',
-      priceValue: 12999,
-      originalPrice: '17,499',
-      period: 'One Time',
-      description: 'Complete GST solution',
-      icon: '✤',
-      features: [
-        'GST Application',
-        'GST registration',
-        'Filing GST returns for one year',
-        'MSME Registration',
-        'GST Consultation'
-      ],
-      isHighlighted: true
-    }
-  ];
+  // Fetch packages from API
+  const { packages, loading: packagesLoading } = usePackages('gst');
 
   const processSteps = [
     {
@@ -227,6 +180,14 @@ function GSTDetails() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'packages':
+        if (packagesLoading) {
+          return (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#01334C]"></div>
+              <p className="mt-2 text-gray-600">Loading packages...</p>
+            </div>
+          );
+        }
         return (
           <PackagesSection
             packages={packages}

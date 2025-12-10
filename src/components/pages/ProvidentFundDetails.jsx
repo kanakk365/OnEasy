@@ -9,70 +9,18 @@ import PrerequisitesSection from './company-details/PrerequisitesSection';
 import AboutSection from './company-details/AboutSection';
 import FAQSection from './company-details/FAQSection';
 import { initPayment } from '../../utils/payment';
+import { usePackages } from '../../hooks/usePackages';
 
 function ProvidentFundDetails() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('packages');
   const [expandedSection, setExpandedSection] = useState(null);
 
-  // Packages as per user requirements
-  const packages = [
-    {
-      name: 'Starter',
-      price: '6,999',
-      priceValue: 6999,
-      period: 'One Time',
-      description: 'Basic PF registration package',
-      icon: '★',
-      features: [
-        'Provident fund Application',
-        'Provident fund registration',
-        'PF Certificate',
-        'PF number'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Growth',
-      price: '8,999',
-      priceValue: 8999,
-      period: 'One Time',
-      description: 'Enhanced PF package',
-      icon: '✢',
-      features: [
-        'Provident fund Application',
-        'Provident fund registration',
-        'PF Certificate',
-        'PF number',
-        'Adding employees to the portal',
-        "Setting up the UAN's",
-        'Professional Consultation for the Payroll setup',
-        'Filing PF returns for 2 months'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Pro',
-      price: '8,999',
-      priceValue: 8999,
-      period: 'One Time',
-      description: 'Complete PF solution',
-      icon: '✤',
-      features: [
-        'Provident fund Application',
-        'Provident fund registration',
-        'PF Certificate',
-        'PF number',
-        'Adding employees to the portal',
-        "Setting up the UAN's",
-        'Professional Consultation for the Payroll setup',
-        'Filing PF returns for 6 months',
-        'MSME Registration'
-      ],
-      isHighlighted: true,
-      color: 'blue'
-    }
-  ];
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('provident-fund');
+  
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages;
 
   const processSteps = [
     {

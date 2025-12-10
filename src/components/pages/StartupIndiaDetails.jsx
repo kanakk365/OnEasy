@@ -8,6 +8,7 @@ import PrerequisitesSection from './company-details/PrerequisitesSection';
 import AboutSection from './company-details/AboutSection';
 import FAQSection from './company-details/FAQSection';
 import { initPayment } from '../../utils/payment';
+import { usePackages } from '../../hooks/usePackages';
 
 function StartupIndiaDetails() {
   const navigate = useNavigate();
@@ -16,55 +17,11 @@ function StartupIndiaDetails() {
   const [showForm, setShowForm] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
 
-  // Packages as per the 2nd image
-  const packages = [
-    {
-      name: 'Starter',
-      price: '2,999',
-      priceValue: 2999,
-      period: 'One Time',
-      description: 'Key Features',
-      icon: '★',
-      features: [
-        'Application Filing',
-        'DPIIT Registration',
-        'Startup India certificate'
-      ]
-    },
-    {
-      name: 'Growth',
-      price: '5,999',
-      priceValue: 5999,
-      period: 'One Time',
-      description: 'Key Features',
-      icon: '✢',
-      features: [
-        'Application Filing',
-        'DPIIT Registration',
-        'Startup India certificate',
-        'Business Consultation',
-        'Class 3 Digital Signature'
-      ]
-    },
-    {
-      name: 'Pro',
-      price: '14,999',
-      priceValue: 14999,
-      period: 'One Time',
-      description: 'Key Features',
-      icon: '✤',
-      features: [
-        'Application Filing',
-        'DPIIT Registration',
-        'Startup India certificate',
-        'Business Consultation',
-        'Class 3 Digital Signature',
-        'Pitch Deck',
-        'Startup Course'
-      ],
-      isHighlighted: true
-    }
-  ];
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('startup-india');
+  
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages;
 
   const processSteps = [
     {

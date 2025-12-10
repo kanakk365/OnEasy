@@ -11,6 +11,7 @@ import FAQSection from "./company-details/FAQSection";
 import TopTabs from "./company-details/TopTabs";
 import { initPayment } from "../../utils/payment";
 import PaymentSuccessPopup from "../common/PaymentSuccessPopup";
+import { usePackages } from "../../hooks/usePackages";
 
 function PartnershipDetails() {
   const navigate = useNavigate();
@@ -19,6 +20,9 @@ function PartnershipDetails() {
   const [hidePackagesTab, setHidePackagesTab] = useState(false);
   const [isInFlow, setIsInFlow] = useState(false);
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
+
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('partnership');
 
   // Define the sequential flow steps
   const flowSteps = ["process", "documents", "prerequisites", "about", "faq"];
@@ -212,67 +216,11 @@ function PartnershipDetails() {
     ? tabs.filter((tab) => tab.id !== "packages")
     : tabs;
 
-  const packages = [
-    {
-      name: "Starter",
-      price: "6,999",
-      priceValue: 6999,
-      period: "One Time",
-      description: "Key Features",
-      icon: "★",
-      features: [
-        "Drafting of the partnership deed",
-        "Registration of the partnership deed",
-        "PAN of the business",
-        "Partnership Certificate"
-      ],
-      color: "blue",
-    },
-    {
-      name: "Growth",
-      price: "12,999",
-      priceValue: 12999,
-      period: "One Time",
-      description: "Key Features",
-      icon: "✢",
-      features: [
-        "Drafting of the partnership deed",
-        "Registration of the partnership deed",
-        "PAN of the business",
-        "Partnership Certificate",
-        "MSME registration",
-        "Shops and Establishment registration",
-        "Start-up current account"
-      ],
-      isHighlighted: true,
-      color: "blue",
-    },
-    {
-      name: "Pro",
-      price: "25,499",
-      priceValue: 25499,
-      period: "One Time",
-      description: "Key Features",
-      icon: "✤",
-      features: [
-        "Drafting of the partnership deed",
-        "Registration of the partnership deed",
-        "PAN of the business",
-        "Partnership Certificate",
-        "MSME registration",
-        "Shops and Establishment registration",
-        "Start-up current account",
-        "GST Registration",
-        "Startup India Registration",
-        "CA Consultation for 30min",
-        "1000+ Finance Dashboards",
-        "Free GST filings for 6 months",
-        "Professional Tax Registration",
-        "Dedicated Account Manager"
-      ],
-      color: "blue",
-    },
-  ];
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages.map(pkg => ({
+    ...pkg,
+    color: 'blue' // Default color for partnership
+  }));
 
   const processSteps = [
     {

@@ -11,6 +11,7 @@ import FAQSection from "./company-details/FAQSection";
 import TopTabs from "./company-details/TopTabs";
 import PaymentSuccessPopup from "../common/PaymentSuccessPopup";
 import { initPayment } from "../../utils/payment";
+import { usePackages } from "../../hooks/usePackages";
 
 function MCANameApprovalDetails() {
   const navigate = useNavigate();
@@ -18,6 +19,9 @@ function MCANameApprovalDetails() {
   const [expandedSection, setExpandedSection] = useState("");
   const [hidePackagesTab, setHidePackagesTab] = useState(false);
   const [isInFlow, setIsInFlow] = useState(false);
+
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('mca-name-approval');
 
   // Ensure we start with packages tab on mount
   useEffect(() => {
@@ -225,24 +229,11 @@ function MCANameApprovalDetails() {
     ? tabs.filter((tab) => tab.id !== "packages")
     : tabs;
 
-  // Package - Only one package for MCA Name Approval
-  const packages = [
-    {
-      name: "Starter",
-      price: "1,499",
-      priceValue: 1499,
-      period: "One Time",
-      description: "Get your company name approved",
-      icon: "★",
-      features: [
-        "Guidance of choosing a name",
-        "Assistance in registering the name",
-        "Name approval certificate"
-      ],
-      color: "blue",
-      isHighlighted: true,
-    },
-  ];
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages.map(pkg => ({
+    ...pkg,
+    color: 'blue' // Default color for MCA Name Approval
+  }));
 
   const processSteps = [
     {

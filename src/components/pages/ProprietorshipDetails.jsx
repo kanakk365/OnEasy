@@ -10,6 +10,7 @@ import AboutSection from "./company-details/AboutSection";
 import FAQSection from "./company-details/FAQSection";
 import TopTabs from "./company-details/TopTabs";
 import { initPayment } from "../../utils/payment";
+import { usePackages } from "../../hooks/usePackages";
 
 function ProprietorshipDetails() {
   const navigate = useNavigate();
@@ -17,6 +18,9 @@ function ProprietorshipDetails() {
   const [expandedSection, setExpandedSection] = useState("");
   const [hidePackagesTab, setHidePackagesTab] = useState(false);
   const [isInFlow, setIsInFlow] = useState(false);
+
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('proprietorship');
 
   // Define the sequential flow steps
   const flowSteps = ["process", "documents", "prerequisites", "about", "faq"];
@@ -141,55 +145,11 @@ function ProprietorshipDetails() {
     ? tabs.filter((tab) => tab.id !== "packages")
     : tabs;
 
-  const packages = [
-    {
-      name: "Starter",
-      price: "999",
-      priceValue: 999,
-      period: "One Time",
-      description: "Key Features",
-      icon: "★",
-      features: [
-        "CA Assisted Registration",
-        "Shops & establishment act registration",
-        "Proprietorship certificate",
-        "Assistance Startup Bank Current Account",
-      ],
-      color: "blue",
-    },
-    {
-      name: "Growth",
-      price: "1,499",
-      priceValue: 1499,
-      period: "One Time",
-      description: "Key Features",
-      icon: "✢",
-      features: [
-        "CA Assisted Registration",
-        "Shops & establishment act registration (5 employees)",
-        "Proprietorship certificate",
-        "Assistance Startup Bank Current Account",
-      ],
-      color: "blue",
-    },
-    {
-      name: "Pro",
-      price: "3,499",
-      priceValue: 3499,
-      period: "One Time",
-      description: "Key Features",
-      icon: "✤",
-      features: [
-        "CA Assisted Registration",
-        "Shops & establishment act registration",
-        "Proprietorship certificate",
-        "Assistance Startup Bank Current Account",
-        "MSME registration",
-        "15 mins CA consultation",
-      ],
-      isHighlighted: true,
-    },
-  ];
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages.map(pkg => ({
+    ...pkg,
+    color: 'blue' // Default color for proprietorship
+  }));
 
   const processSteps = [
     {

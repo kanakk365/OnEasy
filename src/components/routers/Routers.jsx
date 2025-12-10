@@ -64,6 +64,7 @@ import AdminFillFormNew from "../admin/pages/AdminFillFormNew";
 import RegistrationDetailsRouter from "../admin/pages/RegistrationDetailsRouter";
 import AdminServices from "../admin/pages/AdminServices";
 import AdminNoticeBoard from "../admin/pages/AdminNoticeBoard";
+import AdminCMSPackage from "../admin/pages/AdminCMSPackage";
 import SuperAdminLayout from "../superadmin/layout/SuperAdminLayout";
 import SuperAdminClients from "../superadmin/pages/SuperAdminClients";
 import SuperAdminProfile from "../superadmin/pages/SuperAdminProfile";
@@ -376,6 +377,7 @@ function Routers() {
         <Route path="services" element={<AdminServices />} />
         <Route path="notice-board" element={<AdminNoticeBoard />} />
         <Route path="coupon-generator" element={<CouponCodeGenerator />} />
+        <Route path="cms-package" element={<AdminCMSPackage />} />
         <Route path="profile" element={<AdminProfile />} />
         <Route path="client-details/:ticketId" element={<RegistrationDetailsRouter />} />
         <Route path="fill-form/:ticketId" element={<AdminFillForm />} />

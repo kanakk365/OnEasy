@@ -8,65 +8,21 @@ import DocumentsSection from './company-details/DocumentsSection';
 import PrerequisitesSection from './company-details/PrerequisitesSection';
 import AboutSection from './company-details/AboutSection';
 import FAQSection from './company-details/FAQSection';
+import PaymentSuccessPopup from '../common/PaymentSuccessPopup';
 import { initPayment } from '../../utils/payment';
+import { usePackages } from '../../hooks/usePackages';
 
 function UdyamDetails() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('packages');
   const [expandedSection, setExpandedSection] = useState(null);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
-  const packages = [
-    {
-      name: 'Starter',
-      price: '1,299',
-      priceValue: 1299,
-      period: 'One Time',
-      description: 'Key Features',
-      icon: '★',
-      features: [
-        'MSME/Udyam Application',
-        'MSME/Udyam Registration',
-        'MSME/Udyam Certificate'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Growth',
-      price: '2,399',
-      priceValue: 2399,
-      period: 'One Time',
-      description: 'Key Features',
-      icon: '✢',
-      features: [
-        'GST Application',
-        'GST registration',
-        'Filing GST returns for two months',
-        'MSME/Udyam Registration',
-        'MSME/Udyam Certificate',
-        'GST Consultation'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Pro',
-      price: '4,999',
-      priceValue: 4999,
-      period: 'One Time',
-      description: 'Key Features',
-      icon: '✤',
-      features: [
-        'License Application',
-        'Labour license certificate',
-        'GST Application',
-        'GST registration',
-        'Filing GST returns for one month',
-        'MSME/Udyam Registration',
-        'MSME/Udyam Certificate'
-      ],
-      isHighlighted: true,
-      color: 'blue'
-    }
-  ];
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('udyam');
+  
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages;
 
   const processSteps = [
     {
@@ -247,9 +203,14 @@ function UdyamDetails() {
                   
                   const result = await initPayment(selectedPackage);
                   
-                  if (result.success && result.redirect) {
-                    console.log('✅ Payment successful! Redirecting to form...');
-                    navigate('/udyam-registration-form');
+                  if (result.success) {
+                    if (result.showPopup) {
+                      console.log('✅ Payment successful! Showing popup...');
+                      setShowPaymentPopup(true);
+                    } else if (result.redirect) {
+                      console.log('✅ Payment successful! Redirecting to form...');
+                      navigate('/udyam-registration-form');
+                    }
                   }
                 } catch (error) {
                   console.error('Payment error:', error);
@@ -297,7 +258,7 @@ function UdyamDetails() {
         {/* My Registrations Button - Top Right */}
         <div className="flex justify-end mb-4">
           <button
-            onClick={() => navigate('/registrations')}
+            onClick={() => navigate('/registrations/udyam')}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -306,6 +267,11 @@ function UdyamDetails() {
             My Registrations
           </button>
         </div>
+
+        {/* Payment Success Popup */}
+        {showPaymentPopup && (
+          <PaymentSuccessPopup onClose={() => setShowPaymentPopup(false)} />
+        )}
 
         {/* Tabs */}
         <TopTabs

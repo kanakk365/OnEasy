@@ -2,68 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { initPayment } from '../../utils/payment';
 import PackagesSection from './company-details/PackagesSection';
+import { usePackages } from '../../hooks/usePackages';
 
 function OPCPackageSelection() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  // Packages - same as Private Limited Company
-  const packages = [
-    {
-      name: 'Starter',
-      price: '12,999',
-      priceValue: 12999,
-      period: 'One Time',
-      description: 'For solo entrepreneurs',
-      icon: '★',
-      features: [
-        'Company Name Reservation',
-        'DSC for Director',
-        'DIN Application',
-        'MOA & AOA Drafting',
-        'SPICe+ Form Filing',
-        'Certificate of Incorporation',
-        'PAN & TAN Application',
-        'GST Registration (if applicable)'
-      ]
-    },
-    {
-      name: 'Growth',
-      price: '16,999',
-      priceValue: 16999,
-      period: 'One Time',
-      description: 'As your business scales',
-      icon: '✢',
-      features: [
-        'Everything in Starter',
-        'Professional Tax Registration',
-        'Shops & Establishment License',
-        'MSME Registration',
-        'Bank Account Opening Assistance',
-        'CA Consultation (15 mins)',
-        'Priority Support'
-      ],
-      isHighlighted: true
-    },
-    {
-      name: 'Pro',
-      price: '25,499',
-      priceValue: 25499,
-      period: 'One Time',
-      description: 'For more complex businesses',
-      icon: '✤',
-      features: [
-        'Everything in Growth',
-        'Startup India Registration',
-        'FSSAI License (if applicable)',
-        'Trade License',
-        'CA Consultation (30 mins)',
-        'Dedicated Account Manager',
-        '1 Year Compliance Support',
-        'Legal Document Templates'
-      ]
-    }
-  ];
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('opc');
 
   const handleGetStarted = async (pkg) => {
     try {
@@ -125,7 +71,14 @@ function OPCPackageSelection() {
           </div>
         )}
 
-        <PackagesSection packages={packages} onGetStarted={handleGetStarted} />
+        {packagesLoading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#01334C]"></div>
+            <p className="mt-2 text-gray-600">Loading packages...</p>
+          </div>
+        ) : (
+          <PackagesSection packages={apiPackages} onGetStarted={handleGetStarted} />
+        )}
       </div>
     </div>
   );

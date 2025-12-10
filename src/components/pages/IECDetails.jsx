@@ -8,74 +8,21 @@ import DocumentsSection from './company-details/DocumentsSection';
 import PrerequisitesSection from './company-details/PrerequisitesSection';
 import AboutSection from './company-details/AboutSection';
 import FAQSection from './company-details/FAQSection';
+import PaymentSuccessPopup from '../common/PaymentSuccessPopup';
 import { initPayment } from '../../utils/payment';
+import { usePackages } from '../../hooks/usePackages';
 
 function IECDetails() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('packages');
   const [expandedSection, setExpandedSection] = useState(null);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
-  // Packages as per user requirements
-  const packages = [
-    {
-      name: 'Starter',
-      price: '1,999',
-      priceValue: 1999,
-      originalPrice: '3,500',
-      originalPriceValue: 3500,
-      period: 'One Time',
-      description: 'Basic IEC registration package',
-      icon: '★',
-      features: [
-        'Import Export Code Application',
-        'Import Export code submission',
-        'ICE Certificate',
-        'CA Consultation'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Growth',
-      price: '3,599',
-      priceValue: 3599,
-      originalPrice: '4,999',
-      originalPriceValue: 4999,
-      period: 'One Time',
-      description: 'Enhanced IEC package',
-      icon: '✢',
-      features: [
-        'Import Export Code Application',
-        'Import Export code submission',
-        'ICE Certificate',
-        'Digital Signature Certificate',
-        'CA Consultation'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Pro',
-      price: '7,999',
-      priceValue: 7999,
-      originalPrice: '12,999',
-      originalPriceValue: 12999,
-      period: 'One Time',
-      description: 'Complete IEC solution',
-      icon: '✤',
-      features: [
-        'Import Export Code Application',
-        'Import Export code submission',
-        'ICE Certificate',
-        'Digital Signature Certificate',
-        'GST Registration',
-        'Labour License',
-        'GST filings for one month',
-        'CA Consultation',
-        'Startup Mastery Course'
-      ],
-      isHighlighted: true,
-      color: 'blue'
-    }
-  ];
+  // Fetch packages from API
+  const { packages: apiPackages, loading: packagesLoading } = usePackages('iec');
+  
+  // Use packages from API, fallback to empty array if loading
+  const packages = packagesLoading ? [] : apiPackages;
 
   const processSteps = [
     {
@@ -233,9 +180,14 @@ function IECDetails() {
                   
                   const result = await initPayment(selectedPackage);
                   
-                  if (result.success && result.redirect) {
-                    console.log('✅ Payment successful! Redirecting to form...');
-                    navigate('/iec-form');
+                  if (result.success) {
+                    if (result.showPopup) {
+                      console.log('✅ Payment successful! Showing popup...');
+                      setShowPaymentPopup(true);
+                    } else if (result.redirect) {
+                      console.log('✅ Payment successful! Redirecting to form...');
+                      navigate('/iec-form');
+                    }
                   }
                 } catch (error) {
                   console.error('Payment error:', error);
@@ -283,7 +235,7 @@ function IECDetails() {
         {/* My Registrations Button - Top Right */}
         <div className="flex justify-end mb-4">
           <button
-            onClick={() => navigate('/registrations')}
+            onClick={() => navigate('/registrations/iec')}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -292,6 +244,11 @@ function IECDetails() {
             My Registrations
           </button>
         </div>
+
+        {/* Payment Success Popup */}
+        {showPaymentPopup && (
+          <PaymentSuccessPopup onClose={() => setShowPaymentPopup(false)} />
+        )}
 
         {/* Tabs */}
         <TopTabs
