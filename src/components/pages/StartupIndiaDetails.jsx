@@ -23,7 +23,7 @@ function StartupIndiaDetails() {
       price: '2,999',
       priceValue: 2999,
       period: 'One Time',
-      description: 'Basic Startup India registration',
+      description: 'Key Features',
       icon: '★',
       features: [
         'Application Filing',
@@ -36,14 +36,14 @@ function StartupIndiaDetails() {
       price: '5,999',
       priceValue: 5999,
       period: 'One Time',
-      description: 'Enhanced Startup India package',
+      description: 'Key Features',
       icon: '✢',
       features: [
-        'Business Consultation',
         'Application Filing',
         'DPIIT Registration',
         'Startup India certificate',
-        'Class 3 digital Signature'
+        'Business Consultation',
+        'Class 3 Digital Signature'
       ]
     },
     {
@@ -51,16 +51,16 @@ function StartupIndiaDetails() {
       price: '14,999',
       priceValue: 14999,
       period: 'One Time',
-      description: 'Complete Startup India solution',
+      description: 'Key Features',
       icon: '✤',
       features: [
-        'Pitch Deck',
-        'Startup Course',
-        'Business Consultation',
         'Application Filing',
         'DPIIT Registration',
         'Startup India certificate',
-        'Class 3 digital Signature'
+        'Business Consultation',
+        'Class 3 Digital Signature',
+        'Pitch Deck',
+        'Startup Course'
       ],
       isHighlighted: true
     }

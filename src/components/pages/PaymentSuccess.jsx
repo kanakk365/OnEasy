@@ -9,6 +9,11 @@ function PaymentSuccess() {
   const [message, setMessage] = useState('Processing your payment...');
 
   useEffect(() => {
+    // Restore body scroll on mount (in case Razorpay left overflow:hidden)
+    document.body.style.overflow = '';
+    document.body.classList.remove('rzp-modal-open');
+    document.documentElement.classList.remove('rzp-modal-open');
+    
     const processPayment = async () => {
       try {
         let payment_id = searchParams.get('payment_id');

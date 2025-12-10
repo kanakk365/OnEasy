@@ -50,11 +50,15 @@ function Organization() {
               cin: org.cin || 'N/A',
               registeredAddress: org.registered_address || 'N/A',
               panFile: org.pan_file || null,
-              websites: websites.map(w => ({
-                ...w,
-                id: w.id || Date.now(),
-                showPassword: false
-              }))
+              websites: websites.map((w, index) => {
+                // Ensure unique IDs - use existing id or generate one with index offset
+                const baseId = Date.now();
+                return {
+                  ...w, // Spread to create a new object
+                  id: w.id || (baseId + index * 1000), // Ensure unique IDs with index offset
+                  showPassword: w.showPassword || false
+                };
+              })
             };
           }));
         }
@@ -117,9 +121,14 @@ function Organization() {
     if (!editingOrg) return;
     const updatedOrg = {
       ...editingOrg,
-      websites: (editingOrg.websites || []).map(website =>
-        website.id === websiteId ? { ...website, [field]: value } : website
-      )
+      websites: (editingOrg.websites || []).map(website => {
+        // Create a new object for the matching website, keep others as-is
+        if (website.id === websiteId) {
+          return { ...website, [field]: value };
+        }
+        // Return a copy to avoid reference issues
+        return { ...website };
+      })
     };
     setEditingOrg(updatedOrg);
   };
@@ -151,12 +160,14 @@ function Organization() {
     let websites = selectedOrg.websites || [];
     if (!Array.isArray(websites)) websites = [];
     
+    // Ensure each website has a unique ID
+    let idCounter = Date.now();
     const orgToEdit = {
       ...selectedOrg,
-      websites: websites.map(w => ({
-        ...w,
-        id: w.id || Date.now(),
-        showPassword: false
+      websites: websites.map((w) => ({
+        ...w, // Spread to create a new object
+        id: w.id || (idCounter++), // Ensure unique IDs with counter
+        showPassword: w.showPassword || false
       }))
     };
     setEditingOrg(orgToEdit);
@@ -174,6 +185,17 @@ function Organization() {
   const handleSaveOrganization = async () => {
     if (!editingOrg) return;
     
+    // Validate that at least one required field is filled
+    const hasLegalName = editingOrg.legalName && editingOrg.legalName.trim() !== '' && editingOrg.legalName !== 'N/A';
+    const hasTradeName = editingOrg.tradeName && editingOrg.tradeName.trim() !== '' && editingOrg.tradeName !== 'N/A';
+    const hasGstin = editingOrg.gstin && editingOrg.gstin.trim() !== '' && editingOrg.gstin !== 'N/A';
+    
+    // At least one of legal name, trade name, or GST number should be filled
+    if (!hasLegalName && !hasTradeName && !hasGstin) {
+      alert('⚠️ Please fill at least one of the following: Legal Name, Trade Name, or GST Number');
+      return;
+    }
+    
     try {
       setSaving(true);
       
@@ -182,8 +204,23 @@ function Organization() {
         org.id === editingOrg.id ? editingOrg : org
       );
       
+      // Filter out empty organizations (those with no meaningful data)
+      const validOrganizations = updatedOrganizations.filter(org => {
+        const hasLegalName = org.legalName && org.legalName.trim() !== '' && org.legalName !== 'N/A';
+        const hasTradeName = org.tradeName && org.tradeName.trim() !== '' && org.tradeName !== 'N/A';
+        const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== 'N/A';
+        return hasLegalName || hasTradeName || hasGstin;
+      });
+      
+      // If no valid organizations, don't save
+      if (validOrganizations.length === 0) {
+        alert('⚠️ Please fill at least one organization with required details before saving.');
+        setSaving(false);
+        return;
+      }
+      
       const payload = {
-        organisations: updatedOrganizations.map(org => ({
+        organisations: validOrganizations.map(org => ({
           organisationType: org.organisationType !== 'N/A' ? org.organisationType : '',
           legalName: org.legalName !== 'N/A' ? org.legalName : '',
           tradeName: org.tradeName !== 'N/A' ? org.tradeName : '',
@@ -206,8 +243,14 @@ function Organization() {
       
       if (response.success) {
         alert('✅ Organization Details saved successfully!');
-        setOrganizations(updatedOrganizations);
-        setSelectedOrg(editingOrg);
+        setOrganizations(validOrganizations);
+        // If the saved org is still valid, keep it selected, otherwise clear selection
+        const savedOrg = validOrganizations.find(o => o.id === editingOrg.id);
+        if (savedOrg) {
+          setSelectedOrg(savedOrg);
+        } else {
+          setSelectedOrg(null);
+        }
         setEditingOrg(null);
         await loadOrganizationData();
       }
@@ -221,9 +264,35 @@ function Organization() {
 
   const handleCancelEdit = () => {
     setEditingOrg(null);
-    // Restore original selectedOrg
-    const org = organizations.find(o => o.id === selectedOrg.id);
-    if (org) setSelectedOrg(org);
+    // If it was a new organization, remove it from the list
+    if (selectedOrg && !selectedOrg.id || selectedOrg.id > Date.now() - 10000) {
+      // It's a new organization (created less than 10 seconds ago), remove it
+      setOrganizations(organizations.filter(o => o.id !== selectedOrg.id));
+      setSelectedOrg(null);
+    } else {
+      // Restore original selectedOrg
+      const org = organizations.find(o => o.id === selectedOrg.id);
+      if (org) setSelectedOrg(org);
+    }
+  };
+
+  const addOrganization = () => {
+    const newOrg = {
+      id: Date.now(),
+      organisationType: '',
+      legalName: '',
+      tradeName: '',
+      gstin: '',
+      incorporationDate: '',
+      panFile: null,
+      tan: '',
+      cin: '',
+      registeredAddress: '',
+      websites: []
+    };
+    setOrganizations([...organizations, newOrg]);
+    setSelectedOrg(newOrg);
+    setEditingOrg(newOrg);
   };
 
   if (loading) {
@@ -237,41 +306,7 @@ function Organization() {
     );
   }
 
-  if (!organizations || organizations.length === 0) {
-    return (
-      <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-4 md:py-6">
-        <div className="bg-white rounded-xl p-12 text-center transition-all duration-300 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
-          <div className="mb-6">
-            <svg 
-              className="w-24 h-24 mx-auto text-gray-300" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" 
-              />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-3">
-            No Organizations Found
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Please add your organization details in the Profile page first.
-          </p>
-          <button 
-            onClick={() => navigate('/settings')}
-            className="inline-block px-6 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium"
-          >
-            Go to Profile
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Empty state is now handled in the default return below
 
   // If an organization is selected, show detailed view
   if (selectedOrg) {
@@ -780,8 +815,9 @@ function Organization() {
         </button>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
+      {/* Table and Add Button */}
+      <div className="flex items-start gap-4 mb-6">
+        <div className="flex-1 bg-white rounded-xl overflow-hidden transition-all duration-300 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
         <div className="overflow-x-auto table-responsive">
           <table className="w-full min-w-[600px]">
           <thead className="bg-gray-50 border-b border-gray-200">
@@ -862,46 +898,42 @@ function Organization() {
           </tbody>
         </table>
         </div>
+        </div>
+        
+        {/* Add Organization Button */}
+        <button
+          type="button"
+          onClick={addOrganization}
+          className="w-12 h-12 bg-[#01334C] text-white rounded-full flex items-center justify-center hover:bg-[#00486D] transition-colors flex-shrink-0"
+          title="Add Organization"
+        >
+          <AiOutlinePlus className="w-6 h-6" />
+        </button>
       </div>
+
+      {/* Empty State Message */}
+      {organizations.length === 0 && (
+        <div className="bg-white rounded-xl p-8 text-center transition-all duration-300 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
+          <p className="text-gray-600">
+            No organizations yet. Click the + button above to add a new organization.
+          </p>
+        </div>
+      )}
 
       {/* Edit Button */}
       <div className="mt-6 flex justify-end">
-        <button 
+        {/* <button 
           onClick={() => navigate('/settings')}
           className="px-6 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium inline-flex items-center shadow-sm"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
-          Edit Organizations
-        </button>
+         
+        </button> */}
       </div>
     </div>
   );
 }
 
 export default Organization;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

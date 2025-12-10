@@ -311,26 +311,7 @@ function ProfileModal({ isOpen, onClose }) {
       
       if (response.success) {
         setSuccess('Profile updated successfully!');
-        
-        // Fetch fresh user data from backend to ensure we have all updated fields
-        try {
-          const freshUserResponse = await apiClient.getMe();
-          if (freshUserResponse.success && freshUserResponse.data) {
-            // Update localStorage with fresh data from backend
-            localStorage.setItem(AUTH_CONFIG.STORAGE_KEYS.USER, JSON.stringify(freshUserResponse.data));
-            console.log('✅ Updated localStorage with fresh user data:', freshUserResponse.data);
-            
-            // Dispatch event to notify sidebar and header to refresh
-            window.dispatchEvent(new Event('profileUpdated'));
-            console.log('📢 Dispatched profileUpdated event');
-          }
-        } catch (refreshError) {
-          console.error('⚠️ Could not refresh user data:', refreshError);
-          // Still dispatch event even if refresh fails - localStorage was already updated by updateProfile
-          window.dispatchEvent(new Event('profileUpdated'));
-        }
-        
-        // Reload user data in this modal after update
+        // Reload user data from database after update
         await loadUserData();
         setTimeout(() => {
           onClose();
@@ -428,7 +409,7 @@ function ProfileModal({ isOpen, onClose }) {
                 placeholder="9858015257"
               />
               {/* Debug: Show phone value */}
-              {import.meta.env.DEV && (
+              {process.env.NODE_ENV === 'development' && (
                 <p className="text-xs text-gray-500 mt-1">Debug: {formData.phone || 'empty'}</p>
               )}
             </div>

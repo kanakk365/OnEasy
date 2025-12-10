@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import apiClient from '../../utils/api'
-import { AUTH_CONFIG } from '../../config/auth'
 import logo from '../../assets/logo.png'
 import bgImage from '../../assets/bg.png'
 import SetEmailPasswordModal from '../common/SetEmailPasswordModal'
@@ -95,22 +94,11 @@ function OTPVerification() {
                        result.user.email !== null && 
                        result.user.email !== undefined
       
-      // Check if user has password - use hasPassword flag from backend if available,
-      // otherwise fallback to checking password field (for backward compatibility)
-      const hasPassword = result.user?.hasPassword !== undefined 
-        ? result.user.hasPassword 
-        : (result.user?.password && 
-           result.user.password !== null && 
-           result.user.password !== undefined &&
-           result.user.password !== '')
-      
       // Check if user must change password (admin-created users)
       const mustChangePassword = result.user?.must_change_password === true
       
       console.log('📧 User has email:', hasEmail)
-      console.log('🔒 User has password:', hasPassword)
       console.log('🔒 Must change password:', mustChangePassword)
-      console.log('🔒 hasPassword flag from backend:', result.user?.hasPassword)
       
       // Priority 1: If admin created user with email/password, they must change password on first login
       if (mustChangePassword && hasEmail) {
@@ -121,36 +109,17 @@ function OTPVerification() {
         return // Don't navigate yet
       }
       
-      // Note: For new users without email, they will proceed to dashboard first
-      // Then a modal will appear after 5 seconds to complete their profile
+      // Priority 2: If user doesn't have email (new phone-only user), they must set email and password
       if (!hasEmail) {
-        console.log('⚠️ New user missing email - will show modal after dashboard loads')
-        console.log('📝 Setting should_check_email flag in localStorage')
-        // Store a flag to indicate we should check for email in dashboard
-        localStorage.setItem('should_check_email', 'true')
-        console.log('✅ Flag set:', localStorage.getItem('should_check_email'))
+        console.log('⚠️ User missing email, showing email/password setup modal')
+        setUserDataAfterOTP(result.user)
+        setShowEmailPasswordModal(true)
+        setIsLoading(false)
+        return // Don't navigate yet
       }
       
-      // User has email or is new user - proceed to dashboard
-      console.log('✅ Proceeding to dashboard')
-      
-      // Ensure user data in localStorage is up-to-date by refreshing from backend
-      // This ensures name and other fields are included if they exist in database
-      try {
-        const freshUserResponse = await apiClient.getMe();
-        if (freshUserResponse.success && freshUserResponse.data) {
-          // Update localStorage with fresh user data (includes name if set)
-          localStorage.setItem(AUTH_CONFIG.STORAGE_KEYS.USER, JSON.stringify(freshUserResponse.data));
-          console.log('✅ Updated localStorage with fresh user data after OTP:', freshUserResponse.data);
-          
-          // Dispatch event to notify sidebar and header to refresh
-          window.dispatchEvent(new Event('profileUpdated'));
-          console.log('📢 Dispatched profileUpdated event');
-        }
-      } catch (refreshError) {
-        console.error('⚠️ Could not refresh user data after OTP:', refreshError);
-        // Continue anyway - user data is already in localStorage from verifyOTP
-      }
+      // User has email and doesn't need to change password - proceed to dashboard
+      console.log('✅ User has email and password set, proceeding to dashboard')
       
       // Navigate to appropriate dashboard based on user role
       const userRole = result.user?.role || result.user?.role_id

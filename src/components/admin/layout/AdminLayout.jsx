@@ -14,7 +14,7 @@ function AdminLayout() {
 
       {/* Main Content Area - Matches user layout structure */}
       <div
-        className={`transition-all duration-300 ml-0 ${
+        className={`transition-all duration-300 ${
           isCollapsed ? 'lg:ml-[70px]' : 'lg:ml-60'
         }`}
       >
@@ -22,7 +22,7 @@ function AdminLayout() {
         <AdminHeader />
 
         {/* Page Content */}
-        <main className="min-h-[calc(100vh-4rem)] pb-4">
+        <main className="min-h-[calc(100vh-4rem)]">
           <Outlet />
         </main>
       </div>

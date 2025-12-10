@@ -90,10 +90,10 @@ export function NameApplicationContent({ formData, setFormData, disabled = false
         </div>
       )}
       
-      {/* Proposed Name of the Company Section */}
+      {/* Name of the Company Section */}
       <div>
         <h3 className="text-sm font-medium text-gray-700 mb-4">
-          Proposed Name of the Company
+          Name of the Company
         </h3>
         
         {/* Name Options - Side by Side */}
@@ -207,27 +207,27 @@ export function StartupInformationContent({ formData, setFormData, disabled = fa
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Field label="Number of Proposed Directors">
           <CustomDropdown
-            options={['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']}
+            options={['1', '2', '3']}
             placeholder="Select number of directors"
-            value={formData.numberOfDirectors ? formData.numberOfDirectors.toString() : '2'}
+            value={formData.numberOfDirectors ? formData.numberOfDirectors.toString() : '1'}
             onChange={(value) => setFormData({ ...formData, numberOfDirectors: parseInt(value) })}
             disabled={disabled}
           />
           <p className="text-xs text-gray-500 mt-1">
-            Up to 10 New Directors (additional directors excess of 2 incur a fee of ₹1500 each for digital signature)
+            Up to 3 New Directors (additional directors excess of 2 incur a fee of ₹1500 each for digital signature)
           </p>
         </Field>
 
         <Field label="Number of Proposed Shareholders">
           <CustomDropdown
-            options={['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']}
+            options={['1', '2', '3', '4', '5', '6']}
             placeholder="Select number of shareholders"
-            value={formData.numberOfShareholders ? formData.numberOfShareholders.toString() : '2'}
+            value={formData.numberOfShareholders ? formData.numberOfShareholders.toString() : '1'}
             onChange={(value) => setFormData({ ...formData, numberOfShareholders: parseInt(value) })}
             disabled={disabled}
           />
           <p className="text-xs text-gray-500 mt-1">
-            Up to 10 shareholders (additional shareholders will incur a fee)
+            Up to 6 shareholders (additional shareholders will incur a fee)
           </p>
         </Field>
       </div>
@@ -455,56 +455,6 @@ export function StartupInformationContent({ formData, setFormData, disabled = fa
               disabled={disabled}
             />
           </Field>
-
-          <FileUploadField
-            label="Upload NOC Document"
-            accept=".pdf,.jpg,.jpeg,.png"
-            buttonLabel="Upload NOC Document (PDF, JPG, PNG)"
-            onFileSelect={async (file) => {
-              const base64 = await fileToBase64(file);
-              updateStep2('nocDocument', base64);
-            }}
-            disabled={disabled}
-          />
-          
-          {step2.nocDocument && (
-            <div className="flex items-center gap-4 mt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  // Handle download for base64 data or URLs
-                  if (step2.nocDocument.startsWith('data:')) {
-                    // Base64 data
-                    const link = document.createElement('a');
-                    link.href = step2.nocDocument;
-                    link.download = 'noc-document.pdf';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  } else if (step2.nocDocument.startsWith('http://') || step2.nocDocument.startsWith('https://')) {
-                    // URL - open in new tab
-                    window.open(step2.nocDocument, '_blank');
-                  } else {
-                    // Fallback for base64 without data: prefix
-                    const link = document.createElement('a');
-                    link.href = `data:application/pdf;base64,${step2.nocDocument}`;
-                    link.download = 'noc-document.pdf';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  }
-                }}
-                className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors flex items-center gap-2"
-                disabled={disabled}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Download NOC Document
-              </button>
-              <p className="text-sm text-gray-600">NOC document uploaded</p>
-            </div>
-          )}
         </div>
       </div>
 
@@ -530,7 +480,7 @@ export function StartupInformationContent({ formData, setFormData, disabled = fa
 
 // Step 3: Basic Directors and Shareholders Details
 export function OfficeAddressContent({ formData, setFormData, disabled = false }) {
-  const numberOfDirectors = formData?.numberOfDirectors || 2;
+  const numberOfDirectors = formData?.numberOfDirectors || 1;
   
   // Initialize directors from formData or create empty array
   const directors = formData.directors || Array.from({ length: numberOfDirectors }, () => ({}));
@@ -1018,85 +968,25 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
           </Field>
 
           {director.isDirectorInOtherCompany === 'Yes' && (
-            <div className="space-y-6">
-              <Field label="How many companies?">
-                <CustomDropdown
-                  options={['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']}
-                  placeholder="Select number of companies"
-                  value={director.numberOfOtherCompanies ? director.numberOfOtherCompanies.toString() : '1'}
-                  onChange={(value) => {
-                    const numCompanies = parseInt(value) || 1;
-                    const currentCompanies = director.otherCompanies || [];
-                    const newCompanies = [];
-                    for (let i = 0; i < numCompanies; i++) {
-                      newCompanies.push(currentCompanies[i] || {
-                        companyName: '',
-                        position: '',
-                        dinNumber: ''
-                      });
-                    }
-                    updateDirector(index, 'numberOfOtherCompanies', numCompanies);
-                    updateDirector(index, 'otherCompanies', newCompanies);
-                  }}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="Company Name">
+                <input
+                  className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  placeholder="Enter company name"
+                  value={director.otherCompanyName || ''}
+                  onChange={(e) => updateDirector(index, 'otherCompanyName', e.target.value)}
                   disabled={disabled}
                 />
               </Field>
-
-              {(director.otherCompanies || Array.from({ length: director.numberOfOtherCompanies || 1 })).map((company, companyIndex) => (
-                <div key={companyIndex} className="border border-gray-200 rounded-lg p-4 space-y-4">
-                  <h5 className="text-sm font-semibold text-gray-700">Company {companyIndex + 1}</h5>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Field label="Company Name">
-                      <input
-                        className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        placeholder="Enter company name"
-                        value={company?.companyName || ''}
-                        onChange={(e) => {
-                          const updatedCompanies = [...(director.otherCompanies || [])];
-                          updatedCompanies[companyIndex] = {
-                            ...updatedCompanies[companyIndex],
-                            companyName: e.target.value
-                          };
-                          updateDirector(index, 'otherCompanies', updatedCompanies);
-                        }}
-                        disabled={disabled}
-                      />
-                    </Field>
-                    <Field label="Position Held">
-                      <input
-                        className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        placeholder="e.g., Director"
-                        value={company?.position || ''}
-                        onChange={(e) => {
-                          const updatedCompanies = [...(director.otherCompanies || [])];
-                          updatedCompanies[companyIndex] = {
-                            ...updatedCompanies[companyIndex],
-                            position: e.target.value
-                          };
-                          updateDirector(index, 'otherCompanies', updatedCompanies);
-                        }}
-                        disabled={disabled}
-                      />
-                    </Field>
-                    <Field label="DIN Number">
-                      <input
-                        className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        placeholder="Enter DIN number"
-                        value={company?.dinNumber || ''}
-                        onChange={(e) => {
-                          const updatedCompanies = [...(director.otherCompanies || [])];
-                          updatedCompanies[companyIndex] = {
-                            ...updatedCompanies[companyIndex],
-                            dinNumber: e.target.value
-                          };
-                          updateDirector(index, 'otherCompanies', updatedCompanies);
-                        }}
-                        disabled={disabled}
-                      />
-                    </Field>
-                  </div>
-                </div>
-              ))}
+              <Field label="Position Held">
+                <input
+                  className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  placeholder="e.g., Director"
+                  value={director.otherCompanyPosition || ''}
+                  onChange={(e) => updateDirector(index, 'otherCompanyPosition', e.target.value)}
+                  disabled={disabled}
+                />
+              </Field>
             </div>
           )}
 
@@ -1112,87 +1002,36 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
           </Field>
 
           {director.isShareholderInOtherCompany === 'Yes' && (
-            <div className="space-y-6">
-              <Field label="How many companies?">
-                <CustomDropdown
-                  options={['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']}
-                  placeholder="Select number of companies"
-                  value={director.numberOfShareholderCompanies ? director.numberOfShareholderCompanies.toString() : '1'}
-                  onChange={(value) => {
-                    const numCompanies = parseInt(value) || 1;
-                    const currentCompanies = director.shareholderCompanies || [];
-                    const newCompanies = [];
-                    for (let i = 0; i < numCompanies; i++) {
-                      newCompanies.push(currentCompanies[i] || {
-                        companyName: '',
-                        numberOfShares: '',
-                        faceValue: ''
-                      });
-                    }
-                    updateDirector(index, 'numberOfShareholderCompanies', numCompanies);
-                    updateDirector(index, 'shareholderCompanies', newCompanies);
-                  }}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Field label="Company Name">
+                <input
+                  className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  placeholder="Enter company name"
+                  value={director.shareholderCompanyName || ''}
+                  onChange={(e) => updateDirector(index, 'shareholderCompanyName', e.target.value)}
                   disabled={disabled}
                 />
               </Field>
-
-              {(director.shareholderCompanies || Array.from({ length: director.numberOfShareholderCompanies || 1 })).map((company, companyIndex) => (
-                <div key={companyIndex} className="border border-gray-200 rounded-lg p-4 space-y-4">
-                  <h5 className="text-sm font-semibold text-gray-700">Company {companyIndex + 1}</h5>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Field label="Company Name">
-                      <input
-                        className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        placeholder="Enter company name"
-                        value={company?.companyName || ''}
-                        onChange={(e) => {
-                          const updatedCompanies = [...(director.shareholderCompanies || [])];
-                          updatedCompanies[companyIndex] = {
-                            ...updatedCompanies[companyIndex],
-                            companyName: e.target.value
-                          };
-                          updateDirector(index, 'shareholderCompanies', updatedCompanies);
-                        }}
-                        disabled={disabled}
-                      />
-                    </Field>
-                    <Field label="Number of Shares Held">
-                      <input
-                        type="number"
-                        className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        placeholder="Enter shares"
-                        value={company?.numberOfShares || ''}
-                        onChange={(e) => {
-                          const updatedCompanies = [...(director.shareholderCompanies || [])];
-                          updatedCompanies[companyIndex] = {
-                            ...updatedCompanies[companyIndex],
-                            numberOfShares: e.target.value
-                          };
-                          updateDirector(index, 'shareholderCompanies', updatedCompanies);
-                        }}
-                        disabled={disabled}
-                      />
-                    </Field>
-                    <Field label="Face Value of Share">
-                      <input
-                        type="number"
-                        className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        placeholder="Enter face value"
-                        value={company?.faceValue || ''}
-                        onChange={(e) => {
-                          const updatedCompanies = [...(director.shareholderCompanies || [])];
-                          updatedCompanies[companyIndex] = {
-                            ...updatedCompanies[companyIndex],
-                            faceValue: e.target.value
-                          };
-                          updateDirector(index, 'shareholderCompanies', updatedCompanies);
-                        }}
-                        disabled={disabled}
-                      />
-                    </Field>
-                  </div>
-                </div>
-              ))}
+              <Field label="Number of Shares Held">
+                <input
+                  type="number"
+                  className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  placeholder="Enter shares"
+                  value={director.shareholderCompanyShares || ''}
+                  onChange={(e) => updateDirector(index, 'shareholderCompanyShares', e.target.value)}
+                  disabled={disabled}
+                />
+              </Field>
+              <Field label="Face Value of Share">
+                <input
+                  type="number"
+                  className="w-full px-4 py-3 rounded-lg bg-white outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  placeholder="Enter face value"
+                  value={director.shareholderCompanyFaceValue || ''}
+                  onChange={(e) => updateDirector(index, 'shareholderCompanyFaceValue', e.target.value)}
+                  disabled={disabled}
+                />
+              </Field>
             </div>
           )}
 

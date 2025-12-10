@@ -40,12 +40,12 @@ const Layout = () => {
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
       <div
-        className={`transition-all duration-300 ml-0 ${
+        className={`transition-all duration-300 ${
           isCollapsed ? "lg:ml-[70px]" : "lg:ml-60"
         }`}
       >
         <Header />
-        <main className="min-h-[calc(100vh-4rem)] pb-4">
+        <main className="min-h-[calc(100vh-4rem)]">
           <Routers />
         </main>
         <Footer />

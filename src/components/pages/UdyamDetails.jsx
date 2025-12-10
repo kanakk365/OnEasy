@@ -15,20 +15,18 @@ function UdyamDetails() {
   const [activeTab, setActiveTab] = useState('packages');
   const [expandedSection, setExpandedSection] = useState(null);
 
-  // Packages as per user requirements
   const packages = [
     {
       name: 'Starter',
       price: '1,299',
       priceValue: 1299,
-      originalPrice: '1,999',
-      originalPriceValue: 1999,
       period: 'One Time',
-      description: 'Basic MSME registration',
+      description: 'Key Features',
       icon: '★',
       features: [
-        'MSME Application',
-        'MSME registration'
+        'MSME/Udyam Application',
+        'MSME/Udyam Registration',
+        'MSME/Udyam Certificate'
       ],
       color: 'blue'
     },
@@ -36,15 +34,16 @@ function UdyamDetails() {
       name: 'Growth',
       price: '2,399',
       priceValue: 2399,
-      originalPrice: '3,599',
-      originalPriceValue: 3599,
       period: 'One Time',
-      description: 'Enhanced MSME package',
+      description: 'Key Features',
       icon: '✢',
       features: [
-        'MSME Application',
-        'MSME registration',
-        'Startup Mastery Course'
+        'GST Application',
+        'GST registration',
+        'Filing GST returns for two months',
+        'MSME/Udyam Registration',
+        'MSME/Udyam Certificate',
+        'GST Consultation'
       ],
       color: 'blue'
     },
@@ -52,17 +51,17 @@ function UdyamDetails() {
       name: 'Pro',
       price: '4,999',
       priceValue: 4999,
-      originalPrice: '7,499',
-      originalPriceValue: 7499,
       period: 'One Time',
-      description: 'Complete MSME solution',
+      description: 'Key Features',
       icon: '✤',
       features: [
+        'License Application',
+        'Labour license certificate',
         'GST Application',
         'GST registration',
-        'Filing GST returns for two months',
-        'MSME Registration',
-        'GST Consultation'
+        'Filing GST returns for one month',
+        'MSME/Udyam Registration',
+        'MSME/Udyam Certificate'
       ],
       isHighlighted: true,
       color: 'blue'

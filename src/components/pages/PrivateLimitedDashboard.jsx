@@ -15,11 +15,26 @@ function PrivateLimitedDashboard() {
     setOneasyTeamFill(teamFillStatus === 'true');
   }, []);
 
+  // Helper to check if a registration belongs to Private Limited
+  const isPrivateLimited = (reg) => {
+    const ticketId = (reg?.ticket_id || '').toString().toUpperCase();
+    const businessName = (reg?.business_name || '').toLowerCase();
+    const packageName = (reg?.package_name || '').toLowerCase();
+    return (
+      ticketId.startsWith('PVT_') ||
+      ticketId.startsWith('PRIVATE_') ||
+      businessName.includes('private limited') ||
+      packageName.includes('private limited')
+    );
+  };
+
   const fetchRegistrations = async () => {
     try {
       const result = await getMyRegistrations();
       if (result.success) {
-        setRegistrations(result.data || []);
+        const allRegs = result.data || [];
+        const filtered = allRegs.filter(isPrivateLimited);
+        setRegistrations(filtered);
       }
     } catch (error) {
       console.error('Error fetching registrations:', error);
@@ -187,45 +202,35 @@ function PrivateLimitedDashboard() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-semibold text-[#28303F]">
-                        {registration.business_name || 'Company Name Pending'}
+                        {registration.business_name || 'Private Limited Registration'}
                       </h3>
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                          registration.status || 'pending'
+                          registration.service_status || registration.status || 'pending'
                         )}`}
                       >
-                        {registration.status || 'Pending'}
+                        {registration.service_status || registration.status || 'Draft'}
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
                       <div>
-                        <span className="font-medium text-gray-700">Ticket ID:</span>{' '}
-                        {registration.ticket_id || 'N/A'}
+                        <span className="font-medium">Ticket ID:</span>{' '}
+                        <span className="text-[#00486D]">{registration.ticket_id || 'N/A'}</span>
                       </div>
                       <div>
-                        <span className="font-medium text-gray-700">Submitted:</span>{' '}
-                        {formatDate(registration.created_at)}
+                        <span className="font-medium">Package:</span>{' '}
+                        {registration.package_name || 'N/A'}
                       </div>
                       <div>
-                        <span className="font-medium text-gray-700">Company Type:</span>{' '}
-                        {registration.business_type || 'Private Limited'}
+                        <span className="font-medium">Amount:</span>{' '}
+                        ₹{registration.package_price ? Number(registration.package_price).toLocaleString('en-IN') : 'N/A'}
+                      </div>
+                      <div>
+                        <span className="font-medium">Created:</span>{' '}
+                        {formatDate(registration.created_at || registration.submission_date)}
                       </div>
                     </div>
-
-                    {registration.business_email && (
-                      <div className="mt-2 text-sm text-gray-600">
-                        <span className="font-medium text-gray-700">Email:</span>{' '}
-                        {registration.business_email}
-                      </div>
-                    )}
-
-                    {registration.directors_partners_count && (
-                      <div className="mt-2 text-sm text-gray-600">
-                        <span className="font-medium text-gray-700">Directors:</span>{' '}
-                        {registration.directors_partners_count}
-                      </div>
-                    )}
                   </div>
 
                   <div className="flex flex-col gap-2 ml-4">
@@ -269,17 +274,6 @@ function PrivateLimitedDashboard() {
                   </div>
                 </div>
 
-                {/* Additional Info Bar */}
-                <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                  <div>
-                    Last Updated: {formatDate(registration.updated_at)}
-                  </div>
-                  {registration.authorized_capital && (
-                    <div>
-                      Authorized Capital: ₹{Number(registration.authorized_capital).toLocaleString('en-IN')}
-                    </div>
-                  )}
-                </div>
               </div>
               );
             })}

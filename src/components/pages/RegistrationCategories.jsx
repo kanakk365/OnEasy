@@ -158,52 +158,28 @@ function RegistrationCategories() {
             <div
               key={registration.id}
               onClick={() => {
+                const registrationPaths = {
+                  'startup-india': '/startup-india-details',
+                  'gst': '/gst-details',
+                  'professional-tax': '/registration/professional-tax',
+                  'labour-license': '/registration/labour-license',
+                  'provident-fund': '/registration/provident-fund',
+                  'udyam': '/registration/udyam',
+                  'fssai': '/registration/fssai',
+                  'trade-license': '/registration/trade-license',
+                  'iec': '/registration/iec',
+                  'esi': '/registration/esi',
+                  'dsc': '/registration/dsc',
+                  'gst-lut': '/registration/gst-lut',
+                  'registration-80g': '/registration/registration-80g',
+                  'registration-12a': '/registration/registration-12a'
+                };
+
                 if (registration.path) {
                   navigate(registration.path);
-                } else if (registration.registrationType === 'startup-india') {
-                  // Navigate to Startup India details page with packages
-                  navigate('/startup-india-details');
-                } else if (registration.registrationType === 'gst') {
-                  // Navigate to GST details page with packages
-                  navigate('/gst-details');
-                } else if (registration.registrationType === 'professional-tax') {
-                  // Navigate to Professional Tax details page with packages
-                  navigate('/professional-tax-details');
-                } else if (registration.registrationType === 'labour-license') {
-                  // Navigate to Labour License details page with packages
-                  navigate('/labour-license-details');
-                } else if (registration.registrationType === 'provident-fund') {
-                  // Navigate to Provident Fund details page with packages
-                  navigate('/provident-fund-details');
-                } else if (registration.registrationType === 'udyam') {
-                  // Navigate to Udyam details page with packages
-                  navigate('/udyam-details');
-                } else if (registration.registrationType === 'fssai') {
-                  // Navigate to FSSAI details page with packages
-                  navigate('/fssai-details');
-                } else if (registration.registrationType === 'trade-license') {
-                  // Navigate to Trade License details page with packages
-                  navigate('/trade-license-details');
-                } else if (registration.registrationType === 'iec') {
-                  // Navigate to IEC details page with packages
-                  navigate('/iec-details');
-                } else if (registration.registrationType === 'gst-lut') {
-                  // Navigate to GST LUT details page with packages
-                  navigate('/gst-lut-details');
-                } else if (registration.registrationType === 'esi') {
-                  // Navigate to ESI details page with packages
-                  navigate('/esi-details');
-                } else if (registration.registrationType === 'dsc') {
-                  // Navigate to DSC details page with packages
-                  navigate('/dsc-details');
-                } else if (registration.registrationType === 'registration-12a') {
-                  // Navigate to 12A Registration details page with packages
-                  navigate('/registration-12a-details');
-                } else if (registration.registrationType === 'registration-80g') {
-                  // Navigate to 80G Registration details page with packages
-                  navigate('/registration-80g-details');
+                } else if (registration.registrationType && registrationPaths[registration.registrationType]) {
+                  navigate(registrationPaths[registration.registrationType]);
                 } else if (registration.registrationType) {
-                  // Navigate to package selection for other registration services
                   navigate('/registration-packages', {
                     state: {
                       registrationType: registration.registrationType,

@@ -4,6 +4,7 @@ import Login from "../pages/Login";
 import OTPVerification from "../pages/OTPVerification";
 import ReferralCode from "../pages/ReferralCode";
 import Client from "../pages/Client";
+import ClientServices from "../pages/ClientServices";
 import Admin from "../pages/Admin";
 import Partner from "../pages/Partner";
 import Registrations from "../pages/Registrations";
@@ -12,13 +13,20 @@ import RegistrationPackageSelection from "../pages/RegistrationPackageSelection"
 import RegistrationForm from "../forms/RegistrationForm";
 import CompanyCategories from "../pages/CompanyCategories";
 import CompanyDetails from "../pages/CompanyDetails";
+import OPCDetails from "../pages/OPCDetails";
+import ServiceRegistrations from "../pages/ServiceRegistrations";
+import LLPDetails from "../pages/LLPDetails";
+import PartnershipDetails from "../pages/PartnershipDetails";
+import Section8Details from "../pages/Section8Details";
+import PublicLimitedDetails from "../pages/PublicLimitedDetails";
+import MCANameApprovalDetails from "../pages/MCANameApprovalDetails";
+import IndianSubsidiaryDetails from "../pages/IndianSubsidiaryDetails";
 import StartupIndiaForm from "../pages/StartupIndiaForm";
 import StartupIndiaDetails from "../pages/StartupIndiaDetails";
 import StartupIndiaViewDetails from "../pages/StartupIndiaViewDetails";
 import StartupIndiaDashboard from "../pages/StartupIndiaDashboard";
 import Settings from "../pages/Settings";
 import Organization from "../pages/Organization";
-import ComingSoon from "../pages/ComingSoon";
 import CouponCodeGenerator from "../pages/CouponCodeGenerator";
 import PrivateLimitedForm from "../forms/PrivateLimitedForm";
 import PrivateLimitedDashboard from "../pages/PrivateLimitedDashboard";
@@ -27,33 +35,24 @@ import ProprietorshipDetails from "../pages/ProprietorshipDetails";
 import ProprietorshipForm from "../forms/ProprietorshipForm";
 import ProprietorshipDashboard from "../pages/ProprietorshipDashboard";
 import ProprietorshipViewDetails from "../pages/ProprietorshipViewDetails";
-import PartnershipDetails from "../pages/PartnershipDetails";
-import OPCDetails from "../pages/OPCDetails";
-import OPCPackageSelection from "../pages/OPCPackageSelection";
-import LLPDetails from "../pages/LLPDetails";
-import LLPPackageSelection from "../pages/LLPPackageSelection";
-import Section8Details from "../pages/Section8Details";
-import PublicLimitedDetails from "../pages/PublicLimitedDetails";
-import MCANameApprovalDetails from "../pages/MCANameApprovalDetails";
-import IndianSubsidiaryDetails from "../pages/IndianSubsidiaryDetails";
 import GSTDetails from "../pages/GSTDetails";
 import GSTPackageSelection from "../pages/GSTPackageSelection";
 import GSTForm from "../pages/GSTForm";
 import GSTDashboard from "../pages/GSTDashboard";
 import GSTViewDetails from "../pages/GSTViewDetails";
-import ProfessionalTaxDetails from "../pages/ProfessionalTaxDetails";
-import LabourLicenseDetails from "../pages/LabourLicenseDetails";
-import ProvidentFundDetails from "../pages/ProvidentFundDetails";
-import UdyamDetails from "../pages/UdyamDetails";
-import FSSAIDetails from "../pages/FSSAIDetails";
-import TradeLicenseDetails from "../pages/TradeLicenseDetails";
-import IECDetails from "../pages/IECDetails";
-import GSTLUTDetails from "../pages/GSTLUTDetails";
-import ESIDetails from "../pages/ESIDetails";
-import DSCDetails from "../pages/DSCDetails";
-import Registration12ADetails from "../pages/Registration12ADetails";
-import Registration80GDetails from "../pages/Registration80GDetails";
 import PaymentSuccess from "../pages/PaymentSuccess";
+import UdyamDetails from "../pages/UdyamDetails";
+import TradeLicenseDetails from "../pages/TradeLicenseDetails";
+import FSSAIDetails from "../pages/FSSAIDetails";
+import ProfessionalTaxDetails from "../pages/ProfessionalTaxDetails";
+import ProvidentFundDetails from "../pages/ProvidentFundDetails";
+import LabourLicenseDetails from "../pages/LabourLicenseDetails";
+import IECDetails from "../pages/IECDetails";
+import DSCDetails from "../pages/DSCDetails";
+import ESIDetails from "../pages/ESIDetails";
+import GSTLUTDetails from "../pages/GSTLUTDetails";
+import Registration80GDetails from "../pages/Registration80GDetails";
+import Registration12ADetails from "../pages/Registration12ADetails";
 import AdminLayout from "../admin/layout/AdminLayout";
 import AdminClients from "../admin/pages/AdminClients";
 import AdminClientOverview from "../admin/pages/AdminClientOverview";
@@ -63,6 +62,8 @@ import AdminAddUser from "../admin/pages/AdminAddUser";
 import AdminNewRegistration from "../admin/pages/AdminNewRegistration";
 import AdminFillFormNew from "../admin/pages/AdminFillFormNew";
 import RegistrationDetailsRouter from "../admin/pages/RegistrationDetailsRouter";
+import AdminServices from "../admin/pages/AdminServices";
+import AdminNoticeBoard from "../admin/pages/AdminNoticeBoard";
 import SuperAdminLayout from "../superadmin/layout/SuperAdminLayout";
 import SuperAdminClients from "../superadmin/pages/SuperAdminClients";
 import SuperAdminProfile from "../superadmin/pages/SuperAdminProfile";
@@ -85,6 +86,11 @@ function Routers() {
           <Client />
         </ProtectedRoute>
       } />
+      <Route path="/client-services" element={
+        <ProtectedRoute allowedRoles={['user', 5]}>
+          <ClientServices />
+        </ProtectedRoute>
+      } />
       <Route path="/partner" element={
         <ProtectedRoute allowedRoles={['user', 5]}>
           <Partner />
@@ -103,6 +109,66 @@ function Routers() {
       <Route path="/registration-packages" element={
         <ProtectedRoute>
           <RegistrationPackageSelection />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration/udyam" element={
+        <ProtectedRoute>
+          <UdyamDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration/trade-license" element={
+        <ProtectedRoute>
+          <TradeLicenseDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration/fssai" element={
+        <ProtectedRoute>
+          <FSSAIDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration/professional-tax" element={
+        <ProtectedRoute>
+          <ProfessionalTaxDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration/provident-fund" element={
+        <ProtectedRoute>
+          <ProvidentFundDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration/labour-license" element={
+        <ProtectedRoute>
+          <LabourLicenseDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration/iec" element={
+        <ProtectedRoute>
+          <IECDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration/dsc" element={
+        <ProtectedRoute>
+          <DSCDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration/esi" element={
+        <ProtectedRoute>
+          <ESIDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration/gst-lut" element={
+        <ProtectedRoute>
+          <GSTLUTDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration/registration-80g" element={
+        <ProtectedRoute>
+          <Registration80GDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/registration/registration-12a" element={
+        <ProtectedRoute>
+          <Registration12ADetails />
         </ProtectedRoute>
       } />
       <Route path="/gst-registration-form" element={
@@ -155,24 +221,9 @@ function Routers() {
           <CompanyCategories />
         </ProtectedRoute>
       } />
-      <Route path="/company/proprietorship" element={
-        <ProtectedRoute>
-          <ProprietorshipDetails />
-        </ProtectedRoute>
-      } />
-      <Route path="/company/partnership" element={
-        <ProtectedRoute>
-          <PartnershipDetails />
-        </ProtectedRoute>
-      } />
       <Route path="/company/opc" element={
         <ProtectedRoute>
           <OPCDetails />
-        </ProtectedRoute>
-      } />
-      <Route path="/opc-package-selection" element={
-        <ProtectedRoute>
-          <OPCPackageSelection />
         </ProtectedRoute>
       } />
       <Route path="/company/llp" element={
@@ -180,9 +231,14 @@ function Routers() {
           <LLPDetails />
         </ProtectedRoute>
       } />
-      <Route path="/llp-package-selection" element={
+      <Route path="/company/partnership" element={
         <ProtectedRoute>
-          <LLPPackageSelection />
+          <PartnershipDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/company/section-8" element={
+        <ProtectedRoute>
+          <Section8Details />
         </ProtectedRoute>
       } />
       <Route path="/company/public-limited" element={
@@ -190,9 +246,9 @@ function Routers() {
           <PublicLimitedDetails />
         </ProtectedRoute>
       } />
-      <Route path="/public-limited-form" element={
+      <Route path="/company/mca-name-approval" element={
         <ProtectedRoute>
-          <PrivateLimitedForm />
+          <MCANameApprovalDetails />
         </ProtectedRoute>
       } />
       <Route path="/company/mca-name" element={
@@ -200,24 +256,24 @@ function Routers() {
           <MCANameApprovalDetails />
         </ProtectedRoute>
       } />
-      <Route path="/mca-name-approval-form" element={
-        <ProtectedRoute>
-          <PrivateLimitedForm />
-        </ProtectedRoute>
-      } />
       <Route path="/company/indian-subsidiary" element={
         <ProtectedRoute>
           <IndianSubsidiaryDetails />
         </ProtectedRoute>
       } />
-      <Route path="/indian-subsidiary-form" element={
+      <Route path="/company/proprietorship" element={
         <ProtectedRoute>
-          <PrivateLimitedForm />
+          <ProprietorshipDetails />
         </ProtectedRoute>
       } />
       <Route path="/company/:type" element={
         <ProtectedRoute>
           <CompanyDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/registrations/:type" element={
+        <ProtectedRoute>
+          <ServiceRegistrations />
         </ProtectedRoute>
       } />
       <Route path="/startup-india-details" element={
@@ -241,26 +297,6 @@ function Routers() {
         </ProtectedRoute>
       } />
       <Route path="/private-limited-form" element={
-        <ProtectedRoute>
-          <PrivateLimitedForm />
-        </ProtectedRoute>
-      } />
-      <Route path="/opc-form" element={
-        <ProtectedRoute>
-          <PrivateLimitedForm />
-        </ProtectedRoute>
-      } />
-      <Route path="/llp-form" element={
-        <ProtectedRoute>
-          <PrivateLimitedForm />
-        </ProtectedRoute>
-      } />
-      <Route path="/company/section-8" element={
-        <ProtectedRoute>
-          <Section8Details />
-        </ProtectedRoute>
-      } />
-      <Route path="/section-8-form" element={
         <ProtectedRoute>
           <PrivateLimitedForm />
         </ProtectedRoute>
@@ -315,66 +351,6 @@ function Routers() {
           <GSTViewDetails />
         </ProtectedRoute>
       } />
-      <Route path="/professional-tax-details" element={
-        <ProtectedRoute>
-          <ProfessionalTaxDetails />
-        </ProtectedRoute>
-      } />
-      <Route path="/labour-license-details" element={
-        <ProtectedRoute>
-          <LabourLicenseDetails />
-        </ProtectedRoute>
-      } />
-      <Route path="/provident-fund-details" element={
-        <ProtectedRoute>
-          <ProvidentFundDetails />
-        </ProtectedRoute>
-      } />
-      <Route path="/udyam-details" element={
-        <ProtectedRoute>
-          <UdyamDetails />
-        </ProtectedRoute>
-      } />
-      <Route path="/fssai-details" element={
-        <ProtectedRoute>
-          <FSSAIDetails />
-        </ProtectedRoute>
-      } />
-      <Route path="/trade-license-details" element={
-        <ProtectedRoute>
-          <TradeLicenseDetails />
-        </ProtectedRoute>
-      } />
-      <Route path="/iec-details" element={
-        <ProtectedRoute>
-          <IECDetails />
-        </ProtectedRoute>
-      } />
-      <Route path="/gst-lut-details" element={
-        <ProtectedRoute>
-          <GSTLUTDetails />
-        </ProtectedRoute>
-      } />
-      <Route path="/esi-details" element={
-        <ProtectedRoute>
-          <ESIDetails />
-        </ProtectedRoute>
-      } />
-      <Route path="/dsc-details" element={
-        <ProtectedRoute>
-          <DSCDetails />
-        </ProtectedRoute>
-      } />
-      <Route path="/registration-12a-details" element={
-        <ProtectedRoute>
-          <Registration12ADetails />
-        </ProtectedRoute>
-      } />
-      <Route path="/registration-80g-details" element={
-        <ProtectedRoute>
-          <Registration80GDetails />
-        </ProtectedRoute>
-      } />
       <Route path="/settings" element={
         <ProtectedRoute>
           <Settings />
@@ -383,26 +359,6 @@ function Routers() {
       <Route path="/organization" element={
         <ProtectedRoute>
           <Organization />
-        </ProtectedRoute>
-      } />
-      <Route path="/compliance" element={
-        <ProtectedRoute>
-          <ComingSoon />
-        </ProtectedRoute>
-      } />
-      <Route path="/ai-agent" element={
-        <ProtectedRoute>
-          <ComingSoon />
-        </ProtectedRoute>
-      } />
-      <Route path="/resources" element={
-        <ProtectedRoute>
-          <ComingSoon />
-        </ProtectedRoute>
-      } />
-      <Route path="/documents" element={
-        <ProtectedRoute>
-          <ComingSoon />
         </ProtectedRoute>
       } />
       
@@ -417,6 +373,8 @@ function Routers() {
         <Route path="add-user" element={<AdminAddUser />} />
         <Route path="new-registration" element={<AdminNewRegistration />} />
         <Route path="fill-form-new" element={<AdminFillFormNew />} />
+        <Route path="services" element={<AdminServices />} />
+        <Route path="notice-board" element={<AdminNoticeBoard />} />
         <Route path="coupon-generator" element={<CouponCodeGenerator />} />
         <Route path="profile" element={<AdminProfile />} />
         <Route path="client-details/:ticketId" element={<RegistrationDetailsRouter />} />

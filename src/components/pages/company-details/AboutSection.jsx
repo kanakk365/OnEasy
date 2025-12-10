@@ -6,13 +6,9 @@ function AboutSection({
   aboutSections,
   expandedSection,
   setExpandedSection,
-  introTitle,
-  introDescription,
+  introTitle = "About Private Limited Company",
+  introDescription = "A Private Limited Company is one of the most popular and trusted business structures in India, known for providing limited liability protection to its shareholders. It requires a minimum of two shareholders and two directors and allows easy ownership transferability while offering credibility in the business world. This structure is ideal for small to medium-sized businesses aiming for long-term growth."
 }) {
-  // Default values for Private Limited Company
-  const defaultIntroTitle = introTitle || "About Private Limited Company";
-  const defaultIntroDescription = introDescription || "A Private Limited Company is one of the most popular and trusted business structures in India, known for providing limited liability protection to its shareholders. It requires a minimum of two shareholders and two directors and allows easy ownership transferability while offering credibility in the business world. This structure is ideal for small to medium-sized businesses aiming for long-term growth.";
-
   return (
     <div className="mt-8">
       {building && (
@@ -24,10 +20,10 @@ function AboutSection({
         >
           <div className="relative z-10 max-w-[60%]">
             <h2 className="text-[18px] font-semibold tracking-[0.03em] text-white mb-4">
-              {defaultIntroTitle}
+              {introTitle}
             </h2>
             <p className="text-white text-[14px] font-medium leading-7 tracking-[0.03em] opacity-95">
-              {defaultIntroDescription}
+              {introDescription}
             </p>
           </div>
           <div className="absolute -right-4 -bottom-4 w-[45%] h-[110%]">

@@ -42,13 +42,8 @@ function ProprietorshipDetails() {
       setHidePackagesTab(false);
     } else {
       setActiveTab(flowSteps[currentIndex - 1]);
-      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  };
-
-  const handleContinue = () => {
-    // Navigate to the form after completing the flow
-    navigate('/proprietorship-form');
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const aboutSections = [
@@ -152,44 +147,43 @@ function ProprietorshipDetails() {
       price: "999",
       priceValue: 999,
       period: "One Time",
-      description: "Basic proprietorship registration",
+      description: "Key Features",
       icon: "★",
       features: [
         "CA Assisted Registration",
         "Shops & establishment act registration",
         "Proprietorship certificate",
-        "Startup Bank Current Account",
-      ],
-      color: "blue",
-    },
-    {
-      name: "Starter",
-      price: "1,499",
-      priceValue: 1499,
-      period: "One Time",
-      description: "Enhanced proprietorship package",
-      icon: "✢",
-      features: [
-        "CA Assisted Registration",
-        "Shops & establishment act registration (5 employees)",
-        "Proprietorship certificate",
-        "Startup Bank Current Account",
-        "Guidance",
+        "Assistance Startup Bank Current Account",
       ],
       color: "blue",
     },
     {
       name: "Growth",
+      price: "1,499",
+      priceValue: 1499,
+      period: "One Time",
+      description: "Key Features",
+      icon: "✢",
+      features: [
+        "CA Assisted Registration",
+        "Shops & establishment act registration (5 employees)",
+        "Proprietorship certificate",
+        "Assistance Startup Bank Current Account",
+      ],
+      color: "blue",
+    },
+    {
+      name: "Pro",
       price: "3,499",
       priceValue: 3499,
       period: "One Time",
-      description: "Complete proprietorship solution",
+      description: "Key Features",
       icon: "✤",
       features: [
         "CA Assisted Registration",
         "Shops & establishment act registration",
         "Proprietorship certificate",
-        "Startup Bank Current Account",
+        "Assistance Startup Bank Current Account",
         "MSME registration",
         "15 mins CA consultation",
       ],
@@ -296,6 +290,11 @@ function ProprietorshipDetails() {
             onGetStarted={async (selectedPackage) => {
               try {
                 console.log('Initiating payment for:', selectedPackage.name);
+                
+                // Store registration type in localStorage for payment verification
+                localStorage.setItem('selectedRegistrationType', 'proprietorship');
+                localStorage.setItem('selectedRegistrationTitle', 'Proprietorship Registration');
+                
                 const result = await initPayment(selectedPackage);
                 
                 if (result.success && result.redirect) {

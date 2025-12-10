@@ -245,17 +245,11 @@ class APIClient {
     });
   }
 
-  async setEmailPassword(email, password, name = null) {
-    const body = {
+  async setEmailPassword(email, password) {
+    return this.put('/auth/set-email-password', {
       email,
       password
-    };
-    
-    if (name && name.trim()) {
-      body.name = name.trim();
-    }
-    
-    return this.put('/auth/set-email-password', body);
+    });
   }
 
   // Company methods

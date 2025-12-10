@@ -1515,13 +1515,13 @@ function Settings() {
                                     </div>
                                   </td>
                                   <td className="px-4 py-3 border border-gray-300 text-sm">
-                                    <button
+                                    {/* <button
                                       type="button"
                                       onClick={() => removeWebsite(org.id, website.id)}
                                       className="text-red-600 hover:text-red-800 text-sm"
                                     >
-                                      Remove
-                                    </button>
+                                    
+                                    </button> */}
                                   </td>
                                 </tr>
                               ))}
@@ -1621,7 +1621,7 @@ function Settings() {
                     </div>
 
                     {/* Delete Button */}
-                    {!isAddingNewOrg && (
+                    {/* {!isAddingNewOrg && (
                       <div className="flex justify-end">
                         <button
                           type="button"
@@ -1636,7 +1636,7 @@ function Settings() {
                           Delete Organization
                         </button>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 );
               })}
@@ -1916,26 +1916,3 @@ function Settings() {
 }
 
 export default Settings;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

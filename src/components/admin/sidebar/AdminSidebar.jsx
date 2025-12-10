@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { RiUser3Line, RiUserAddLine, RiTicketLine } from "react-icons/ri";
+import { RiUser3Line, RiUserAddLine, RiTicketLine, RiSettings3Line, RiAlertLine } from "react-icons/ri";
 import { HiOutlineUsers } from "react-icons/hi";
 import {
   MdMenu,
@@ -15,7 +15,6 @@ import useSidebarStore from "../../../stores/sidebarStore";
 import useLogoutModalStore from "../../../stores/logoutModalStore";
 import LogoutModal from "../../common/LogoutModal";
 import { AUTH_CONFIG } from "../../../config/auth";
-import apiClient from "../../../utils/api";
 import logo from "../../../assets/logo.png";
 
 function AdminSidebar() {
@@ -26,49 +25,23 @@ function AdminSidebar() {
   const [userData, setUserData] = React.useState(null);
   const { showLogoutModal, setShowLogoutModal, closeLogoutModal, handleLogout } = useLogoutModalStore();
 
-  // Load user data directly from database
-  const loadUserData = React.useCallback(async () => {
-    try {
-      const response = await apiClient.getMe();
-      
-      if (response.success && response.data) {
-        console.log('✅ AdminSidebar - Fetched user data from database:', response.data);
-        setUserData(response.data);
-        // Also update localStorage for other components that might need it
-        localStorage.setItem(AUTH_CONFIG.STORAGE_KEYS.USER, JSON.stringify(response.data));
-      } else {
-        console.error('❌ AdminSidebar - Failed to fetch user data:', response);
-        // Fallback to localStorage if API fails
-        const storedUser = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER);
-        if (storedUser) {
-          try {
-            setUserData(JSON.parse(storedUser));
-          } catch (e) {
-            console.error('Error parsing user data from localStorage:', e);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('❌ AdminSidebar - Error fetching user data from database:', error);
-      // Fallback to localStorage if API fails
-      const storedUser = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER);
-      if (storedUser) {
-        try {
-          setUserData(JSON.parse(storedUser));
-        } catch (e) {
-          console.error('Error parsing user data from localStorage:', e);
-        }
+  // Load user data from localStorage
+  const loadUserData = React.useCallback(() => {
+    const storedUser = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER);
+    if (storedUser) {
+      try {
+        setUserData(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('Error parsing user data:', e);
       }
     }
   }, []);
 
   React.useEffect(() => {
-    // Load initial user data from database
     loadUserData();
 
-    // Listen for profile updates
     const handleProfileUpdate = () => {
-      loadUserData(); // Fetch fresh data from database
+      loadUserData();
     };
 
     window.addEventListener('profileUpdated', handleProfileUpdate);
@@ -82,6 +55,8 @@ function AdminSidebar() {
     { icon: <HiOutlineUsers />, text: "Clients", path: "/admin/clients", subPaths: ['/admin/client-overview', '/admin/client-details', '/admin/fill-form', '/admin/gst-form', '/admin/startup-india-form', '/admin/proprietorship-form', '/admin/private-limited-form'] },
     { icon: <RiUserAddLine />, text: "Add User", path: "/admin/add-user" },
     { icon: <RiUserAddLine />, text: "New Registration", path: "/admin/new-registration" },
+    { icon: <RiSettings3Line />, text: "Services", path: "/admin/services" },
+    { icon: <RiAlertLine />, text: "Notice Board", path: "/admin/notice-board" },
     { icon: <RiTicketLine />, text: "Coupon Code Generator", path: "/admin/coupon-generator" },
     { icon: <RiUser3Line />, text: "Profile", path: "/admin/profile" },
   ];

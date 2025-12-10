@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-// import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import building from "../../assets/building.png";
 import documentsIllustration from "../../assets/OBJECTS.png";
 import PackagesSection from "./company-details/PackagesSection";
@@ -13,9 +12,10 @@ import TopTabs from "./company-details/TopTabs";
 import { initPayment } from "../../utils/payment";
 import PrivateLimitedForm from "../forms/PrivateLimitedForm";
 import { getMyRegistrations } from "../../utils/privateLimitedApi";
+import PaymentSuccessPopup from "../common/PaymentSuccessPopup";
 
 function CompanyDetails() {
-  // const { type } = useParams();
+  const { type } = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("packages");
   const [expandedSection, setExpandedSection] = useState("");
@@ -23,6 +23,7 @@ function CompanyDetails() {
   const [isInFlow, setIsInFlow] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
   // Listen for payment success event
   useEffect(() => {
@@ -295,16 +296,20 @@ function CompanyDetails() {
       name: "Starter",
       price: "12,999",
       priceValue: 12999,
-      period: "Month",
-      description: "For solo entrepreneurs",
+      period: "One Time",
+      description: "Key Features",
       icon: "★",
-      originalPrice: "18,999",
       features: [
-        "2% 3rd-party payment providers",
-        "Inventory tracking (7 markets)",
-        "24/7 chat support",
-        "Standard global selling (7 markets)",
-        "Limited staff accounts",
+        "CA Assisted Incorporation",
+        "Certificate of Incorporation",
+        "Legal drafting of MOA and AOA",
+        "PAN and TAN",
+        "Digital Signatures (2 No's)",
+        "Name Reservation",
+        "PF and ESIC Registration",
+        "MSME Registration",
+        "Director Identification Number",
+        "Bank account in one day",
       ],
       color: "red",
     },
@@ -312,16 +317,22 @@ function CompanyDetails() {
       name: "Growth",
       price: "16,999",
       priceValue: 16999,
-      period: "Month",
-      description: "As your business scales",
+      period: "One Time",
+      description: "Key Features",
       icon: "✢",
-      originalPrice: "24,999",
       features: [
-        "1.9% 3rd-party payment providers",
-        "Inventory tracking (15 markets)",
-        "24/7 chat & phone support",
-        "Advanced global selling (15 markets)",
-        "Up to 15 staff accounts",
+        "CA Assisted Incorporation",
+        "Certificate of Incorporation",
+        "Legal drafting of MOA and AOA",
+        "PAN and TAN",
+        "Digital Signatures (2 No's)",
+        "MSME Registration",
+        "Director Identification Number",
+        "Bank account in one day",
+        "GST Registration",
+        "Shops & Establishment Reg",
+        "Post incorporation checklist",
+        "Partner collaboration",
       ],
       color: "red",
     },
@@ -329,16 +340,28 @@ function CompanyDetails() {
       name: "Pro",
       price: "25,499",
       priceValue: 25499,
-      period: "Month",
-      description: "For more complex businesses",
+      period: "One Time",
+      description: "Key Features",
       icon: "✤",
-      originalPrice: "34,999",
       features: [
-        "Competitive rates for high-volume merchants",
-        "Custom reports and analytics",
-        "Priority 24/7 phone support",
-        "Unlimited global selling (20 markets)",
-        "Unlimited staff accounts",
+        "CA Assisted Incorporation",
+        "Certificate of Incorporation",
+        "Legal drafting of MOA and AOA",
+        "PAN and TAN",
+        "Digital Signatures (2 No's)",
+        "MSME Registration",
+        "Director Identification Number",
+        "Bank account in one day",
+        "GST Registration",
+        "Shops & Establishment Reg",
+        "Post incorporation checklist",
+        "Partner collaboration",
+        "Startup India Registration",
+        "CA Consultation for 30min",
+        "1000+ Finance Dashboards",
+        "Free GST filings for 6 months",
+        "Professional Tax Registration",
+        "Dedicated Account Manager",
       ],
       isHighlighted: true,
     },
@@ -395,15 +418,50 @@ function CompanyDetails() {
             packages={packages}
             onGetStarted={async (selectedPackage) => {
               try {
-                console.log('Initiating payment for:', selectedPackage.name);
-                const result = await initPayment(selectedPackage);
+                console.log('Initiating payment for:', selectedPackage.name, 'Type:', type);
                 
-                // If payment successful and needs redirect
-                if (result.success && result.redirect) {
-                  console.log('✅ Payment successful! Redirecting to form...');
-                  
-                  // Navigate immediately without alert
-                  navigate('/private-limited-form');
+                // List of services without forms
+                const servicesWithoutForms = ['opc', 'llp', 'partnership', 'section-8', 'public-limited', 'mca-name-approval', 'indian-subsidiary'];
+                const registrationType = type || 'private-limited';
+                
+                // Set registration type in localStorage before payment
+                localStorage.setItem('selectedRegistrationType', registrationType);
+                localStorage.setItem('selectedRegistrationTitle', registrationType.charAt(0).toUpperCase() + registrationType.slice(1).replace(/-/g, ' ') + ' Registration');
+                
+                // Update package name to include type prefix if not already present
+                const packageData = {
+                  ...selectedPackage,
+                  name: selectedPackage.name.includes(registrationType.toUpperCase()) 
+                    ? selectedPackage.name 
+                    : `${registrationType.toUpperCase()} - ${selectedPackage.name}`
+                };
+                
+                const result = await initPayment(packageData);
+                
+                // Handle services without forms (show popup)
+                if (result.success) {
+                  if (result.showPopup) {
+                    console.log('✅ Payment successful! Showing popup...');
+                    setShowPaymentPopup(true);
+                  } else if (result.redirect) {
+                    console.log('✅ Payment successful! Redirecting to form...');
+                    // Restore scroll before navigation
+                    document.body.style.overflow = '';
+                    document.body.classList.remove('rzp-modal-open');
+                    document.documentElement.classList.remove('rzp-modal-open');
+                    if (document.body.style.position === 'fixed') {
+                      document.body.style.position = '';
+                    }
+                    // Small delay to ensure scroll is restored before navigation
+                    setTimeout(() => {
+                      // Navigate to appropriate form based on type
+                      if (registrationType === 'private-limited') {
+                        navigate('/private-limited-form');
+                      } else {
+                        navigate(`/${registrationType}-form`);
+                      }
+                    }, 100);
+                  }
                 }
               } catch (error) {
                 console.error('Payment error:', error);
@@ -469,7 +527,14 @@ function CompanyDetails() {
         {/* My Registrations Button - Top Right */}
         <div className="flex justify-end mb-4">
           <button
-            onClick={() => navigate('/private-limited-dashboard')}
+            onClick={() => {
+              // For Private Limited, go to dashboard. For other services, go to registrations page
+              if (!type || type === 'private-limited') {
+                navigate('/private-limited-dashboard');
+              } else {
+                navigate(`/registrations/${type}`);
+              }
+            }}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -520,6 +585,10 @@ function CompanyDetails() {
           </div>
         )}
       </div>
+      <PaymentSuccessPopup
+        isOpen={showPaymentPopup}
+        onClose={() => setShowPaymentPopup(false)}
+      />
     </div>
   );
 }

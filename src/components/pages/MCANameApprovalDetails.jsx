@@ -9,6 +9,7 @@ import PrerequisitesSection from "./company-details/PrerequisitesSection";
 import AboutSection from "./company-details/AboutSection";
 import FAQSection from "./company-details/FAQSection";
 import TopTabs from "./company-details/TopTabs";
+import PaymentSuccessPopup from "../common/PaymentSuccessPopup";
 import { initPayment } from "../../utils/payment";
 
 function MCANameApprovalDetails() {
@@ -315,6 +316,8 @@ function MCANameApprovalDetails() {
     }
   ];
 
+  const [showPaymentPopup, setShowPaymentPopup] = React.useState(false);
+
   const handleGetStarted = async (pkg) => {
     try {
       console.log('💳 Initiating payment for MCA Name Approval:', pkg);
@@ -331,10 +334,15 @@ function MCANameApprovalDetails() {
         ...pkg
       });
 
-      if (result.success && result.redirect) {
+      if (result.success) {
+        if (result.showPopup) {
+          console.log('✅ Payment successful! Showing popup...');
+          setShowPaymentPopup(true);
+        } else if (result.redirect) {
         console.log('✅ Payment successful! Redirecting to form...');
         // For MCA name approval, we might want to redirect to a specific form or dashboard
         navigate('/mca-name-approval-form');
+        }
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -404,7 +412,7 @@ function MCANameApprovalDetails() {
         {/* My Registrations Button - Top Right */}
         <div className="flex justify-end mb-4">
           <button
-            onClick={() => navigate('/registrations')}
+            onClick={() => navigate('/registrations/mca-name-approval')}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -455,6 +463,10 @@ function MCANameApprovalDetails() {
           </div>
         )}
       </div>
+      <PaymentSuccessPopup
+        isOpen={showPaymentPopup}
+        onClose={() => setShowPaymentPopup(false)}
+      />
     </div>
   );
 }

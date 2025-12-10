@@ -10,6 +10,7 @@ import AboutSection from "./company-details/AboutSection";
 import FAQSection from "./company-details/FAQSection";
 import TopTabs from "./company-details/TopTabs";
 import { initPayment } from "../../utils/payment";
+import PaymentSuccessPopup from "../common/PaymentSuccessPopup";
 
 function LLPDetails() {
   const navigate = useNavigate();
@@ -164,24 +165,27 @@ function LLPDetails() {
     ? tabs.filter((tab) => tab.id !== "packages")
     : tabs;
 
-  // Packages - same as Private Limited Company
   const packages = [
     {
       name: "Starter",
       price: "12,999",
       priceValue: 12999,
       period: "One Time",
-      description: "For solo entrepreneurs",
+      description: "Key Features",
       icon: "★",
       features: [
+        "CA Assisted Incorporation",
         "LLP Name Reservation",
-        "DSC for Partners",
-        "DPIN Application",
-        "LLP Agreement Drafting",
-        "FiLLiP Form Filing",
-        "Certificate of Incorporation",
-        "PAN & TAN Application",
-        "GST Registration (if applicable)"
+        "Filing of FILLIP form",
+        "Filing of LLP Agreement",
+        "Digital Signatures (2 No's)",
+        "DIN for 2 persons",
+        "Drafting of LLP Agreement",
+        "LLP E-Pan and E-Tan",
+        "100% online process",
+        "PF & ESIC Registration",
+        "MSME Registration",
+        "Bank Account Opening"
       ],
       color: "blue",
     },
@@ -190,16 +194,25 @@ function LLPDetails() {
       price: "16,999",
       priceValue: 16999,
       period: "One Time",
-      description: "As your business scales",
+      description: "Key Features",
       icon: "✢",
       features: [
-        "Everything in Starter",
-        "Professional Tax Registration",
-        "Shops & Establishment License",
+        "CA Assisted Incorporation",
+        "LLP Name Reservation",
+        "Filing of FILLIP form",
+        "Filing of LLP Agreement",
+        "Digital Signatures (2 No's)",
+        "DIN for 2 persons",
+        "Drafting of LLP Agreement",
+        "LLP E-Pan and E-Tan",
+        "100% online process",
+        "PF & ESIC Registration",
         "MSME Registration",
-        "Bank Account Opening Assistance",
-        "CA Consultation (15 mins)",
-        "Priority Support"
+        "Bank Account Opening",
+        "GST Registration",
+        "Shop & Establishment Registration",
+        "Post Incorporation Checklist",
+        "Partner Collaboration"
       ],
       isHighlighted: true,
       color: "blue",
@@ -209,17 +222,29 @@ function LLPDetails() {
       price: "25,499",
       priceValue: 25499,
       period: "One Time",
-      description: "For more complex businesses",
+      description: "Key Features",
       icon: "✤",
       features: [
-        "Everything in Growth",
-        "Startup India Registration",
-        "FSSAI License (if applicable)",
-        "Trade License",
-        "CA Consultation (30 mins)",
-        "Dedicated Account Manager",
-        "1 Year Compliance Support",
-        "Legal Document Templates"
+        "CA Assisted Incorporation",
+        "LLP Name Reservation",
+        "Filing of FILLIP form",
+        "Filing of LLP Agreement",
+        "Digital Signatures (2 No's)",
+        "DIN for 2 persons",
+        "Drafting of LLP Agreement",
+        "LLP E-Pan and E-Tan",
+        "100% online process",
+        "PF & ESIC Registration",
+        "MSME Registration",
+        "Bank Account Opening",
+        "GST Registration",
+        "Shop & Establishment Registration",
+        "Post Incorporation Checklist",
+        "Partner Collaboration",
+        "1000+ Finance Dashboards",
+        "CA Consultation of 30 Minutes",
+        "Free GST filings for 6 Months",
+        "Profesional Tax Registration"
       ],
       color: "blue",
     },
@@ -313,6 +338,8 @@ function LLPDetails() {
     }
   ];
 
+  const [showPaymentPopup, setShowPaymentPopup] = React.useState(false);
+
   const handleGetStarted = async (pkg) => {
     try {
       console.log('💳 Initiating payment for LLP:', pkg);
@@ -329,9 +356,14 @@ function LLPDetails() {
         ...pkg
       });
 
-      if (result.success && result.redirect) {
+      if (result.success) {
+        if (result.showPopup) {
+          console.log('✅ Payment successful! Showing popup...');
+          setShowPaymentPopup(true);
+        } else if (result.redirect) {
         console.log('✅ Payment successful! Redirecting to form...');
         navigate('/llp-form');
+        }
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -399,7 +431,7 @@ function LLPDetails() {
         {/* My Registrations Button - Top Right */}
         <div className="flex justify-end mb-4">
           <button
-            onClick={() => navigate('/registrations')}
+            onClick={() => navigate('/registrations/llp')}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -450,6 +482,10 @@ function LLPDetails() {
           </div>
         )}
       </div>
+      <PaymentSuccessPopup
+        isOpen={showPaymentPopup}
+        onClose={() => setShowPaymentPopup(false)}
+      />
     </div>
   );
 }

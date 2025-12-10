@@ -7,9 +7,10 @@ import ProcessSection from "./company-details/ProcessSection";
 import DocumentsSection from "./company-details/DocumentsSection";
 import PrerequisitesSection from "./company-details/PrerequisitesSection";
 import AboutSection from "./company-details/AboutSection";
+import PaymentSuccessPopup from "../common/PaymentSuccessPopup";
+import { initPayment } from "../../utils/payment";
 import FAQSection from "./company-details/FAQSection";
 import TopTabs from "./company-details/TopTabs";
-import { initPayment } from "../../utils/payment";
 
 function OPCDetails() {
   const navigate = useNavigate();
@@ -153,17 +154,19 @@ function OPCDetails() {
       price: "12,999",
       priceValue: 12999,
       period: "One Time",
-      description: "For solo entrepreneurs",
+      description: "Key Features",
       icon: "★",
       features: [
-        "Company Name Reservation",
-        "DSC for Director",
-        "DIN Application",
-        "MOA & AOA Drafting",
-        "SPICe+ Form Filing",
+        "CA Assisted Incorporation",
         "Certificate of Incorporation",
-        "PAN & TAN Application",
-        "GST Registration (if applicable)"
+        "Legal drafting of MOA and AOA",
+        "PAN and TAN",
+        "Digital Signatures (2 No's)",
+        "Name Reservation",
+        "PF and ESIC Registration",
+        "MSME Registration",
+        "Director Identification Number",
+        "Bank account in one day",
       ],
       color: "blue",
     },
@@ -172,16 +175,21 @@ function OPCDetails() {
       price: "16,999",
       priceValue: 16999,
       period: "One Time",
-      description: "As your business scales",
+      description: "Key Features",
       icon: "✢",
       features: [
-        "Everything in Starter",
-        "Professional Tax Registration",
-        "Shops & Establishment License",
+        "CA Assisted Incorporation",
+        "Certificate of Incorporation",
+        "Legal drafting of MOA and AOA",
+        "PAN and TAN",
+        "Digital Signatures (2 No's)",
         "MSME Registration",
-        "Bank Account Opening Assistance",
-        "CA Consultation (15 mins)",
-        "Priority Support"
+        "Director Identification Number",
+        "Bank account in one day",
+        "GST Registration",
+        "Shops & Establishment Reg",
+        "Post incorporation checklist",
+        "Partner collaboration",
       ],
       isHighlighted: true,
       color: "blue",
@@ -191,17 +199,27 @@ function OPCDetails() {
       price: "25,499",
       priceValue: 25499,
       period: "One Time",
-      description: "For more complex businesses",
+      description: "Key Features",
       icon: "✤",
       features: [
-        "Everything in Growth",
+        "CA Assisted Incorporation",
+        "Certificate of Incorporation",
+        "Legal drafting of MOA and AOA",
+        "PAN and TAN",
+        "Digital Signatures (2 No's)",
+        "MSME Registration",
+        "Director Identification Number",
+        "Bank account in one day",
+        "GST Registration",
+        "Shops & Establishment Reg",
+        "Post incorporation checklist",
+        "Partner collaboration",
         "Startup India Registration",
-        "FSSAI License (if applicable)",
-        "Trade License",
-        "CA Consultation (30 mins)",
+        "CA Consultation for 30min",
+        "1000+ Finance Dashboards",
+        "Free GST filings for 6 months",
+        "Professional Tax Registration",
         "Dedicated Account Manager",
-        "1 Year Compliance Support",
-        "Legal Document Templates"
       ],
       color: "blue",
     },
@@ -295,6 +313,8 @@ function OPCDetails() {
     }
   ];
 
+  const [showPaymentPopup, setShowPaymentPopup] = React.useState(false);
+
   const handleGetStarted = async (pkg) => {
     try {
       console.log('💳 Initiating payment for OPC:', pkg);
@@ -311,9 +331,14 @@ function OPCDetails() {
         ...pkg
       });
 
-      if (result.success && result.redirect) {
+      if (result.success) {
+        if (result.showPopup) {
+          console.log('✅ Payment successful! Showing popup...');
+          setShowPaymentPopup(true);
+        } else if (result.redirect) {
         console.log('✅ Payment successful! Redirecting to form...');
         navigate('/opc-form');
+        }
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -381,7 +406,7 @@ function OPCDetails() {
         {/* My Registrations Button - Top Right */}
         <div className="flex justify-end mb-4">
           <button
-            onClick={() => navigate('/registrations')}
+            onClick={() => navigate('/registrations/opc')}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -432,6 +457,10 @@ function OPCDetails() {
           </div>
         )}
       </div>
+      <PaymentSuccessPopup
+        isOpen={showPaymentPopup}
+        onClose={() => setShowPaymentPopup(false)}
+      />
     </div>
   );
 }

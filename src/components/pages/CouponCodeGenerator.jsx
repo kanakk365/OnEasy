@@ -11,21 +11,40 @@ function CouponCodeGenerator() {
   const [includeLetters, setIncludeLetters] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [generatedCodes, setGeneratedCodes] = useState([]);
+  const [discountType, setDiscountType] = useState('percentage');
   const [discountPercentage, setDiscountPercentage] = useState(10);
+  const [discountAmount, setDiscountAmount] = useState(500);
   const [saving, setSaving] = useState(false);
 
   const generateCode = () => {
-    const discount = typeof discountPercentage === 'string' ? parseFloat(discountPercentage) : discountPercentage;
-    if (!discount || isNaN(discount) || discount <= 0 || discount > 100) {
-      alert('Please enter a valid discount percentage (1-100)');
+    const discount =
+      discountType === 'percentage'
+        ? typeof discountPercentage === 'string'
+          ? parseFloat(discountPercentage)
+          : discountPercentage
+        : typeof discountAmount === 'string'
+          ? parseFloat(discountAmount)
+          : discountAmount;
+
+    if (
+      !discount ||
+      isNaN(discount) ||
+      (discountType === 'percentage' && (discount <= 0 || discount > 100)) ||
+      (discountType === 'amount' && discount <= 0)
+    ) {
+      alert(
+        discountType === 'percentage'
+          ? 'Please enter a valid discount percentage (1-100)'
+          : 'Please enter a valid discount amount (> 0)'
+      );
       return;
     }
 
     const codes = [];
     for (let i = 0; i < quantity; i++) {
-      // Start with prefix + discount percentage (e.g., ONEASY10, ONEASY20)
-      const discount = typeof discountPercentage === 'string' ? parseFloat(discountPercentage) : discountPercentage;
-      let code = prefix.toUpperCase() + Math.round(discount || 10).toString();
+      // Start with prefix + discount value (e.g., ONEASY10 or ONEASY500)
+      const baseValue = Math.round(discount || 10).toString();
+      let code = prefix.toUpperCase() + baseValue;
       
       // If we still need more characters, add random characters
       const remainingLength = length - code.length;
@@ -57,9 +76,26 @@ function CouponCodeGenerator() {
       return;
     }
 
-    const discount = typeof discountPercentage === 'string' ? parseFloat(discountPercentage) : discountPercentage;
-    if (!discount || isNaN(discount) || discount <= 0 || discount > 100) {
-      alert('Please enter a valid discount percentage (1-100)');
+    const discount =
+      discountType === 'percentage'
+        ? typeof discountPercentage === 'string'
+          ? parseFloat(discountPercentage)
+          : discountPercentage
+        : typeof discountAmount === 'string'
+          ? parseFloat(discountAmount)
+          : discountAmount;
+
+    if (
+      !discount ||
+      isNaN(discount) ||
+      (discountType === 'percentage' && (discount <= 0 || discount > 100)) ||
+      (discountType === 'amount' && discount <= 0)
+    ) {
+      alert(
+        discountType === 'percentage'
+          ? 'Please enter a valid discount percentage (1-100)'
+          : 'Please enter a valid discount amount (> 0)'
+      );
       return;
     }
 
@@ -67,11 +103,15 @@ function CouponCodeGenerator() {
       setSaving(true);
       const response = await apiClient.post('/coupons/create', {
         couponCodes: generatedCodes,
-        discountPercentage: discount,
-        discountType: 'percentage',
+        discountPercentage: discountType === 'percentage' ? discount : undefined,
+        discountAmount: discountType === 'amount' ? discount : undefined,
+        discountType,
         prefix: prefix,
         codeLength: length,
-        description: `${discount}% discount coupon code`
+        description:
+          discountType === 'percentage'
+            ? `${discount}% discount coupon code`
+            : `₹${discount} discount coupon code`
       });
 
       if (response.success) {
@@ -146,108 +186,142 @@ function CouponCodeGenerator() {
               <p className="text-xs text-gray-500 mt-1">Code will start with this prefix + discount percentage (e.g., ONEASY10 for 10%)</p>
             </div>
 
-            {/* Length */}
-            <div>
+            {/* Discount Type and Value */}
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Code Length
+                Discount Type <span className="text-red-500">*</span>
               </label>
-              <input
-                type="number"
-                value={length}
-                onChange={(e) => setLength(Math.max(4, Math.min(20, parseInt(e.target.value) || 8)))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                min="4"
-                max="20"
-              />
-              <p className="text-xs text-gray-500 mt-1">Length of random characters (4-20)</p>
-            </div>
-
-            {/* Quantity */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Quantity
-              </label>
-              <input
-                type="number"
-                value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                min="1"
-                max="100"
-              />
-              <p className="text-xs text-gray-500 mt-1">Number of codes to generate (1-100)</p>
-            </div>
-
-            {/* Character Types */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Character Types
-              </label>
-              <div className="space-y-2">
-                <label className="flex items-center">
+              <div className="flex flex-wrap gap-4">
+                <label className="flex items-center gap-2 text-sm text-gray-700">
                   <input
-                    type="checkbox"
-                    checked={includeLetters}
-                    onChange={(e) => setIncludeLetters(e.target.checked)}
-                    className="mr-2 w-4 h-4 text-[#01334C] border-gray-300 rounded focus:ring-[#01334C]"
+                    type="radio"
+                    name="discountType"
+                    value="percentage"
+                    checked={discountType === 'percentage'}
+                    onChange={() => setDiscountType('percentage')}
+                    className="text-[#01334C] focus:ring-[#01334C]"
                   />
-                  <span className="text-sm text-gray-700">Include Letters (A-Z)</span>
+                  Percentage (%)
                 </label>
-                <label className="flex items-center">
+                <label className="flex items-center gap-2 text-sm text-gray-700">
                   <input
-                    type="checkbox"
-                    checked={includeNumbers}
-                    onChange={(e) => setIncludeNumbers(e.target.checked)}
-                    className="mr-2 w-4 h-4 text-[#01334C] border-gray-300 rounded focus:ring-[#01334C]"
+                    type="radio"
+                    name="discountType"
+                    value="amount"
+                    checked={discountType === 'amount'}
+                    onChange={() => setDiscountType('amount')}
+                    className="text-[#01334C] focus:ring-[#01334C]"
                   />
-                  <span className="text-sm text-gray-700">Include Numbers (0-9)</span>
+                  Fixed Amount (₹)
                 </label>
               </div>
-            </div>
 
-            {/* Discount Percentage */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Discount Percentage <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  value={discountPercentage}
-                  onChange={(e) => {
-                    const inputValue = e.target.value;
-                    // Allow user to type freely - accept any valid number input
-                    if (inputValue === '') {
-                      setDiscountPercentage('');
-                    } else {
-                      const numValue = parseFloat(inputValue);
-                      if (!isNaN(numValue)) {
-                        // Allow typing any number, we'll clamp on blur
-                        setDiscountPercentage(numValue);
-                      }
-                    }
-                  }}
-                  onBlur={(e) => {
-                    // Validate and clamp on blur
-                    const value = parseFloat(e.target.value);
-                    if (isNaN(value) || e.target.value === '' || value < 1) {
-                      setDiscountPercentage(1);
-                    } else if (value > 100) {
-                      setDiscountPercentage(100);
-                    } else {
-                      // Ensure it's an integer
-                      setDiscountPercentage(Math.round(value));
-                    }
-                  }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] pr-12"
-                  min="1"
-                  max="100"
-                  step="1"
-                  required
-                />
-                <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                <div className={discountType === 'percentage' ? '' : 'opacity-60'}>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={discountPercentage}
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+                        if (inputValue === '') {
+                          setDiscountPercentage('');
+                        } else {
+                          const numValue = parseFloat(inputValue);
+                          if (!isNaN(numValue)) {
+                            setDiscountPercentage(numValue);
+                          }
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const value = parseFloat(e.target.value);
+                        if (isNaN(value) || e.target.value === '' || value < 1) {
+                          setDiscountPercentage(1);
+                        } else if (value > 100) {
+                          setDiscountPercentage(100);
+                        } else {
+                          setDiscountPercentage(Math.round(value));
+                        }
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] pr-12"
+                      min="1"
+                      max="100"
+                      step="1"
+                      disabled={discountType !== 'percentage'}
+                      required={discountType === 'percentage'}
+                    />
+                    <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                  </div>
+                  <select
+                    className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    value=""
+                    disabled={discountType !== 'percentage'}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      if (!isNaN(val)) setDiscountPercentage(val);
+                    }}
+                  >
+                    <option value="">Choose quick %</option>
+                    {[10, 15, 20].map((p) => (
+                      <option key={p} value={p}>
+                        {p}%
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">Discount percentage (1-100%)</p>
+                </div>
+
+                <div className={discountType === 'amount' ? '' : 'opacity-60'}>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={discountAmount}
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+                        if (inputValue === '') {
+                          setDiscountAmount('');
+                        } else {
+                          const numValue = parseFloat(inputValue);
+                          if (!isNaN(numValue)) {
+                            setDiscountAmount(numValue);
+                          }
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const value = parseFloat(e.target.value);
+                        if (isNaN(value) || e.target.value === '' || value < 1) {
+                          setDiscountAmount(1);
+                        } else {
+                          setDiscountAmount(Math.round(value));
+                        }
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] pr-12"
+                      min="1"
+                      step="1"
+                      disabled={discountType !== 'amount'}
+                      required={discountType === 'amount'}
+                    />
+                    <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                  </div>
+                  <select
+                    className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    value=""
+                    disabled={discountType !== 'amount'}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      if (!isNaN(val)) setDiscountAmount(val);
+                    }}
+                  >
+                    <option value="">Choose quick amount</option>
+                    {[500, 1000, 1500, 2000].map((amt) => (
+                      <option key={amt} value={amt}>
+                        ₹{amt}
+                      </option>
+                    ))}
+                  </select>
+                    <p className="text-xs text-gray-500 mt-1">Fixed discount amount (&gt; 0)</p>
+                </div>
               </div>
-              <p className="text-xs text-gray-500 mt-1">Discount percentage (1-100%)</p>
             </div>
           </div>
 

@@ -10,6 +10,7 @@ import AboutSection from "./company-details/AboutSection";
 import FAQSection from "./company-details/FAQSection";
 import TopTabs from "./company-details/TopTabs";
 import { initPayment } from "../../utils/payment";
+import PaymentSuccessPopup from "../common/PaymentSuccessPopup";
 
 function PartnershipDetails() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ function PartnershipDetails() {
   const [expandedSection, setExpandedSection] = useState("");
   const [hidePackagesTab, setHidePackagesTab] = useState(false);
   const [isInFlow, setIsInFlow] = useState(false);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
   // Define the sequential flow steps
   const flowSteps = ["process", "documents", "prerequisites", "about", "faq"];
@@ -216,7 +218,7 @@ function PartnershipDetails() {
       price: "6,999",
       priceValue: 6999,
       period: "One Time",
-      description: "Basic partnership registration",
+      description: "Key Features",
       icon: "★",
       features: [
         "Drafting of the partnership deed",
@@ -231,7 +233,7 @@ function PartnershipDetails() {
       price: "12,999",
       priceValue: 12999,
       period: "One Time",
-      description: "Enhanced partnership package",
+      description: "Key Features",
       icon: "✢",
       features: [
         "Drafting of the partnership deed",
@@ -250,10 +252,17 @@ function PartnershipDetails() {
       price: "25,499",
       priceValue: 25499,
       period: "One Time",
-      description: "Complete partnership solution",
+      description: "Key Features",
       icon: "✤",
       features: [
-        "Everything in Growth",
+        "Drafting of the partnership deed",
+        "Registration of the partnership deed",
+        "PAN of the business",
+        "Partnership Certificate",
+        "MSME registration",
+        "Shops and Establishment registration",
+        "Start-up current account",
+        "GST Registration",
         "Startup India Registration",
         "CA Consultation for 30min",
         "1000+ Finance Dashboards",
@@ -368,10 +377,15 @@ function PartnershipDetails() {
                 
                 const result = await initPayment(selectedPackage);
                 
-                if (result.success && result.redirect) {
+                if (result.success) {
+                  if (result.showPopup) {
+                    console.log('✅ Payment successful! Showing popup...');
+                    setShowPaymentPopup(true);
+                  } else if (result.redirect) {
                   console.log('✅ Payment successful! Redirecting...');
                   // Navigate to partnership form when ready
                   // navigate('/partnership-form');
+                  }
                 }
               } catch (error) {
                 console.error('Payment error:', error);
@@ -423,7 +437,7 @@ function PartnershipDetails() {
         {/* My Registrations Button - Top Right */}
         <div className="flex justify-end mb-4">
           <button
-            onClick={() => navigate('/registrations')}
+            onClick={() => navigate('/registrations/partnership')}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -488,6 +502,10 @@ function PartnershipDetails() {
           </div>
         )}
       </div>
+      <PaymentSuccessPopup
+        isOpen={showPaymentPopup}
+        onClose={() => setShowPaymentPopup(false)}
+      />
     </div>
   );
 }

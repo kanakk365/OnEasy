@@ -22,44 +22,43 @@ function LabourLicenseDetails() {
       price: '999',
       priceValue: 999,
       period: 'One Time',
-      description: 'Basic labour license registration',
+      description: 'Key Features',
       icon: '★',
       features: [
         'CA Assisted Registration',
         'Shops & establishment act registration',
-        'Proprietorship certificate',
-        'Startup Bank Current Account'
-      ],
-      color: 'blue'
-    },
-    {
-      name: 'Starter',
-      price: '1,499',
-      priceValue: 1499,
-      period: 'One Time',
-      description: 'Enhanced labour license package',
-      icon: '✢',
-      features: [
-        'CA Assisted Registration',
-        'Shops & establishment act registration ( 5 employees )',
-        'Proprietorship certificate',
-        'Startup Bank Current Account',
-        'Guidance'
+        'Labour License / Shops & establishment certificate',
+        'Assistance Startup Bank Current Account'
       ],
       color: 'blue'
     },
     {
       name: 'Growth',
+      price: '1,499',
+      priceValue: 1499,
+      period: 'One Time',
+      description: 'Key Features',
+      icon: '✢',
+      features: [
+        'CA Assisted Registration',
+        'Shops & establishment act registration ( 5 employees )',
+        'Labour License / Shops & establishment certificate',
+        'Assistance Startup Bank Current Account'
+      ],
+      color: 'blue'
+    },
+    {
+      name: 'Pro',
       price: '3,499',
       priceValue: 3499,
       period: 'One Time',
-      description: 'Complete labour license solution',
+      description: 'Key Features',
       icon: '✤',
       features: [
         'CA Assisted Registration',
         'Shops & establishment act registration',
-        'Proprietorship certificate',
-        'Startup Bank Current Account',
+        'Labour License / Shops & establishment certificate',
+        'Assistance Startup Bank Current Account',
         'MSME registration',
         '15 mins CA consultation'
       ],

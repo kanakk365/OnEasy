@@ -30,7 +30,13 @@ function AdminClientOverview() {
   const [expandedUserNoteId, setExpandedUserNoteId] = useState(null);
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [editingNoteIndex, setEditingNoteIndex] = useState(null);
-  const [currentNote, setCurrentNote] = useState({ date: '', description: '', attachments: [] });
+  const [currentNote, setCurrentNote] = useState({
+    date: '',
+    description: '',
+    attachments: [],
+    adminActionItems: [''],
+    clientActionItems: ['']
+  });
   // Tasks state
   const [adminTasksList, setAdminTasksList] = useState([]);
   const [userTasksList, setUserTasksList] = useState([]);
@@ -172,16 +178,33 @@ function AdminClientOverview() {
         // Parse admin notes (array of notes)
         try {
           const notesList = JSON.parse(adminNotesRaw);
+          const normalizeNotes = (list) =>
+            list.map((n) => ({
+              ...n,
+              adminActionItems: n.adminActionItems || [],
+              clientActionItems: n.clientActionItems || [],
+              attachments: n.attachments || []
+            }));
           if (Array.isArray(notesList)) {
-            setAdminNotesList(notesList);
+            setAdminNotesList(normalizeNotes(notesList));
           } else if (notesList.note !== undefined) {
-            setAdminNotesList([notesList]);
+            setAdminNotesList(normalizeNotes([notesList]));
           } else if (adminNotesRaw) {
-            setAdminNotesList([{ date: '', description: adminNotesRaw, attachments: [] }]);
+            setAdminNotesList(
+              normalizeNotes([{ date: '', description: adminNotesRaw, attachments: [] }])
+            );
           }
         } catch {
           if (adminNotesRaw) {
-            setAdminNotesList([{ date: '', description: adminNotesRaw, attachments: [] }]);
+            setAdminNotesList([
+              {
+                date: '',
+                description: adminNotesRaw,
+                attachments: [],
+                adminActionItems: [],
+                clientActionItems: []
+              }
+            ]);
           }
         }
         
@@ -299,10 +322,17 @@ function AdminClientOverview() {
       console.log('📊 Startup India:', startupIndia.length, 'registrations');
       console.log('📊 GST:', gst.length, 'registrations');
 
-      // Combine and sort by created_at
-      const combined = [...privateLimited, ...proprietorship, ...startupIndia, ...gst].sort((a, b) => 
-        new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0)
-      );
+      // Keep only paid items (has payment id or payment_status = paid)
+      const isPaid = (r) =>
+        (r.razorpay_payment_id && String(r.razorpay_payment_id).trim() !== '') ||
+        (r.payment_status && String(r.payment_status).toLowerCase() === 'paid');
+
+      // Combine, filter paid, and sort by created_at
+      const combined = [...privateLimited, ...proprietorship, ...startupIndia, ...gst]
+        .filter(isPaid)
+        .sort((a, b) => 
+          new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0)
+        );
 
       setAllRegistrations(combined);
       console.log('📊 Total registrations for this user:', combined.length);
@@ -375,7 +405,9 @@ function AdminClientOverview() {
     setCurrentNote({
       date: note.date,
       description: note.description,
-      attachments: note.attachments || []
+      attachments: note.attachments || [],
+      adminActionItems: (note.adminActionItems && note.adminActionItems.length ? note.adminActionItems : ['']),
+      clientActionItems: (note.clientActionItems && note.clientActionItems.length ? note.clientActionItems : [''])
     });
     setEditingNoteIndex(index);
     setIsAddingNote(true);
@@ -514,11 +546,22 @@ function AdminClientOverview() {
       
       let updatedNotesList;
       
+      const cleanedAdmin = (currentNote.adminActionItems || []).filter((t) => t && t.trim() !== '');
+      const cleanedClient = (currentNote.clientActionItems || []).filter((t) => t && t.trim() !== '');
+
       if (editingNoteIndex !== null) {
         // Update existing note
         updatedNotesList = adminNotesList.map((note, idx) => 
           idx === editingNoteIndex 
-            ? { ...note, date: currentNote.date, description: currentNote.description, attachments: currentNote.attachments, updatedAt: new Date().toISOString() }
+            ? { 
+                ...note, 
+                date: currentNote.date, 
+                description: currentNote.description, 
+                attachments: currentNote.attachments, 
+                adminActionItems: cleanedAdmin,
+                clientActionItems: cleanedClient,
+                updatedAt: new Date().toISOString() 
+              }
             : note
         );
       } else {
@@ -528,6 +571,8 @@ function AdminClientOverview() {
           date: currentNote.date,
           description: currentNote.description,
           attachments: currentNote.attachments,
+          adminActionItems: cleanedAdmin,
+          clientActionItems: cleanedClient,
           createdAt: new Date().toISOString()
         }];
       }
@@ -540,7 +585,7 @@ function AdminClientOverview() {
 
       if (response.success) {
         setAdminNotesList(updatedNotesList);
-        setCurrentNote({ date: '', description: '', attachments: [] });
+        setCurrentNote({ date: '', description: '', attachments: [], adminActionItems: [''], clientActionItems: [''] });
         setIsAddingNote(false);
         setEditingNoteIndex(null);
         alert(editingNoteIndex !== null ? 'Note updated successfully!' : 'Note saved successfully!');
@@ -663,12 +708,15 @@ function AdminClientOverview() {
           tan: org.tan,
           cin: org.cin,
           registeredAddress: org.registeredAddress,
-          websites: (org.websites || []).filter(w => w.url && w.url.trim() !== '').map(w => ({
-            type: w.type,
-            url: w.url,
-            login: w.login,
-            password: w.password
-          }))
+          websites: (org.websites || [])
+            // keep rows that have any field filled or were explicitly added
+            .filter(w => (w.type || w.url || w.login || w.password))
+            .map(w => ({
+              type: w.type || '',
+              url: w.url || '',
+              login: w.login || '',
+              password: w.password || ''
+            }))
         }))
       };
       
@@ -792,20 +840,50 @@ function AdminClientOverview() {
     setClientPersonaList(updatedList);
   };
 
-  const handleUpdateServiceStatus = async (newStatus) => {
+  const handleUpdateServiceStatus = async (newStatus, ticketId) => {
     try {
+      if (!ticketId) {
+        alert('Ticket ID is required to update status');
+        return;
+      }
+
+      // Map progress values to service_status
+      let statusToSet = '';
+      if (newStatus === 'Completed') {
+        statusToSet = 'Completed';
+      } else if (newStatus === 'In Progress') {
+        statusToSet = 'WIP';
+      } else if (newStatus === 'Ongoing') {
+        statusToSet = 'Payment pending';
+      } else {
+        statusToSet = newStatus;
+      }
+
       const response = await apiClient.post('/admin/update-service-status', {
-        userId,
-        status: newStatus
+        ticketId,
+        status: statusToSet
       });
 
+      console.log('📝 Update status response:', response);
+
       if (response.success) {
-        setServiceStatus(newStatus);
+        // Refresh the client data and registrations to show updated status
+        await fetchAllRegistrations();
+        fetchClientProfile();
         console.log('✅ Service status updated:', newStatus);
+      } else {
+        throw new Error(response.message || 'Failed to update status');
       }
     } catch (error) {
       console.error('Error updating service status:', error);
-      alert('Failed to update status');
+      const errorMessage = error.message || error.response?.data?.message || 'Unknown error';
+      
+      // Check if it's a database column error
+      if (errorMessage.includes('service_status') && errorMessage.includes('column')) {
+        alert('The service_status column does not exist in the database. Please run the migration SQL first. See backend/migrations/add_service_status_column.sql');
+      } else {
+        alert('Failed to update status: ' + errorMessage);
+      }
     }
   };
 
@@ -1047,46 +1125,15 @@ function AdminClientOverview() {
 
           {/* Organisation Details */}
           <div className="bg-white rounded-xl border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012] overflow-hidden">
-            <div className="w-full px-6 py-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Organisation Details</h3>
-              <div className="flex items-center gap-2">
-                {!isEditingOrganisations ? (
-                  <button
-                    onClick={() => setIsEditingOrganisations(true)}
-                    className="px-4 py-2 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm"
-                  >
-                    Add/Edit
-                  </button>
-                ) : (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleSaveOrganisations}
-                      disabled={savingOrg}
-                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm disabled:opacity-50"
-                    >
-                      {savingOrg ? 'Saving...' : 'Save'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsEditingOrganisations(false);
-                        fetchClientProfile(); // Reload to reset changes
-                      }}
-                      className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                )}
             <button
               onClick={() => setExpandedSection(expandedSection === 'organisation' ? null : 'organisation')}
-                  className="text-gray-500 hover:text-gray-700"
+              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
             >
+              <h3 className="text-lg font-semibold text-gray-900">Organisation Details</h3>
               <svg className={`w-5 h-5 transition-transform ${expandedSection === 'organisation' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-              </div>
-            </div>
             {expandedSection === 'organisation' && (
               <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
                 {isEditingOrganisations ? (
@@ -1500,7 +1547,7 @@ function AdminClientOverview() {
                                           )}
                                         </div>
 
-                                        {orgWebsites && orgWebsites.length > 0 && orgWebsites.filter(w => w.url && w.url.trim() !== '').length > 0 ? (
+                                        {orgWebsites && orgWebsites.length > 0 ? (
                                           <div className="overflow-x-auto">
                                             <table className="w-full border-collapse bg-white text-sm">
                                               <thead>
@@ -1513,7 +1560,7 @@ function AdminClientOverview() {
                                                 </tr>
                                               </thead>
                                               <tbody>
-                                                {orgWebsites.filter(w => w.url && w.url.trim() !== '').map((website) => (
+                                                {(orgWebsites || []).map((website) => (
                                                   <tr key={website.id} className="bg-white border-b border-gray-200">
                                                     <td className="px-3 py-2 border border-gray-300">
                                                       {isEditingThisOrg ? (
@@ -1938,14 +1985,68 @@ function AdminClientOverview() {
                   </div>
 
                   {/* Description */}
-                  <div className="mb-3">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
-                    <textarea
-                      value={currentNote.description}
-                      onChange={(e) => setCurrentNote({ ...currentNote, description: e.target.value })}
-                      placeholder="Enter note description..."
-                      className="w-full h-24 px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    />
+                  <div className="mb-3 space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Client Action Items</label>
+                      {(currentNote.clientActionItems || ['']).map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-2 mb-2">
+                          <input
+                            type="text"
+                            value={item}
+                            onChange={(e) => {
+                              const updated = [...currentNote.clientActionItems];
+                              updated[idx] = e.target.value;
+                              setCurrentNote({ ...currentNote, clientActionItems: updated });
+                            }}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            placeholder="Add client action item"
+                          />
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setCurrentNote({ ...currentNote, clientActionItems: [...(currentNote.clientActionItems || []), ''] })}
+                        className="mt-1 text-xs text-[#00486D] hover:underline"
+                      >
+                        + Add client action item
+                      </button>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Admin Action Items</label>
+                      {(currentNote.adminActionItems || ['']).map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-2 mb-2">
+                          <input
+                            type="text"
+                            value={item}
+                            onChange={(e) => {
+                              const updated = [...currentNote.adminActionItems];
+                              updated[idx] = e.target.value;
+                              setCurrentNote({ ...currentNote, adminActionItems: updated });
+                            }}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            placeholder="Add admin action item"
+                          />
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setCurrentNote({ ...currentNote, adminActionItems: [...(currentNote.adminActionItems || []), ''] })}
+                        className="mt-1 text-xs text-[#00486D] hover:underline"
+                      >
+                        + Add admin action item
+                      </button>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                      <textarea
+                        value={currentNote.description}
+                        onChange={(e) => setCurrentNote({ ...currentNote, description: e.target.value })}
+                        placeholder="Enter note description..."
+                        className="w-full h-24 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      />
+                    </div>
                   </div>
 
                   {/* Attachments */}
@@ -2011,6 +2112,26 @@ function AdminClientOverview() {
                                 <div className="space-y-2 text-xs flex-1">
                                   <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{note.date || 'N/A'}</span></div>
                                   <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1">{note.description}</p></div>
+                                  {note.clientActionItems && note.clientActionItems.length > 0 && (
+                                    <div>
+                                      <span className="font-medium text-gray-700">Client Action Items:</span>
+                                      <ul className="list-disc list-inside text-gray-600 text-xs mt-1 space-y-1">
+                                        {note.clientActionItems.map((item, i) => (
+                                          <li key={i}>{item}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                  {note.adminActionItems && note.adminActionItems.length > 0 && (
+                                    <div>
+                                      <span className="font-medium text-gray-700">Admin Action Items:</span>
+                                      <ul className="list-disc list-inside text-gray-600 text-xs mt-1 space-y-1">
+                                        {note.adminActionItems.map((item, i) => (
+                                          <li key={i}>{item}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
                                   {note.attachments && note.attachments.length > 0 && (
                                     <div>
                                       <span className="font-medium text-gray-700">Attachments:</span>
@@ -2222,20 +2343,24 @@ function AdminClientOverview() {
                   <p className="text-xs text-gray-500 mt-1">
                     {(() => {
                       // Determine registration type by ticket_id prefix first
-                      if (registration.ticket_id?.startsWith('GST_')) return 'GST Registration';
-                      if (registration.ticket_id?.startsWith('SI_')) return 'Startup India';
-                      if (registration.ticket_id?.startsWith('PROP_')) return 'Proprietorship';
-                      if (registration.ticket_id?.startsWith('PVT_')) return 'Private Limited';
+                      const tid = registration.ticket_id || '';
+                      if (tid.startsWith('GST_')) return 'GST Registration';
+                      if (tid.startsWith('SI_')) return 'Startup India';
+                      if (tid.startsWith('PROP_')) return 'Proprietorship';
+                      if (tid.startsWith('PVT_')) return 'Private Limited';
+                      if (tid.startsWith('OPC_')) return 'OPC Registration';
+                      if (tid.startsWith('LLP_')) return 'LLP Registration';
                       
-                      // Fallback: Check package name/price to determine type (for incorrectly created records)
+                      // Fallback: Check package/business name to determine type
                       const packageName = (registration.package_name || '').toLowerCase();
-                      const packagePrice = registration.package_price;
+                      const businessName = (registration.business_name || '').toLowerCase();
                       
-                      // GST packages: Starter (₹2,599), Growth (₹5,599), Pro (₹12,999)
-                      if (packageName.includes('gst') || 
-                          packagePrice === 2599 || packagePrice === 5599 || packagePrice === 12999) {
-                        return 'GST Registration';
-                      }
+                      if (packageName.includes('opc') || businessName.includes('opc')) return 'OPC Registration';
+                      if (packageName.includes('llp') || businessName.includes('llp')) return 'LLP Registration';
+                      if (packageName.includes('gst') || businessName.includes('gst')) return 'GST Registration';
+                      if (packageName.includes('startup') || businessName.includes('startup')) return 'Startup India';
+                      if (packageName.includes('proprietorship') || businessName.includes('proprietorship')) return 'Proprietorship';
+                      if (packageName.includes('private limited') || businessName.includes('private limited')) return 'Private Limited';
                       
                       return 'Registration';
                     })()}
@@ -2260,24 +2385,40 @@ function AdminClientOverview() {
 
                 {/* Status Badge with Dropdown */}
                 <div className="relative">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsStatusDropdownOpen(isStatusDropdownOpen === index ? null : index);
-                    }}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
-                      serviceStatus === 'registered' 
-                        ? 'bg-green-100 text-green-800' 
-                        : serviceStatus === 'in-progress'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}
-                  >
-                    <span>{serviceStatus === 'registered' ? 'Registered' : serviceStatus === 'in-progress' ? 'In Progress' : 'Pending'}</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
+                  {(() => {
+                    // Determine progress from service_status
+                    const getProgressFromStatus = (status) => {
+                      if (!status) return 'Ongoing';
+                      const statusLower = status.toLowerCase();
+                      if (statusLower === 'completed') return 'Completed';
+                      if (statusLower === 'wip' || statusLower === 'data received' || statusLower === 'awaiting confirmation from the govt' || statusLower === 'data pending from client') return 'In Progress';
+                      if (statusLower === 'payment pending' || statusLower === 'technical issue') return 'Ongoing';
+                      return 'Ongoing';
+                    };
+                    
+                    const currentProgress = getProgressFromStatus(registration.service_status);
+                    
+                    return (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsStatusDropdownOpen(isStatusDropdownOpen === index ? null : index);
+                        }}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
+                          currentProgress === 'Completed'
+                            ? 'bg-green-100 text-green-800' 
+                            : currentProgress === 'In Progress'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}
+                      >
+                        <span>{currentProgress}</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                    );
+                  })()}
 
                   {/* Dropdown Menu */}
                   {isStatusDropdownOpen === index && (
@@ -2285,10 +2426,21 @@ function AdminClientOverview() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleUpdateServiceStatus('in-progress');
+                          handleUpdateServiceStatus('Ongoing', registration.ticket_id);
                           setIsStatusDropdownOpen(null);
                         }}
-                        className="w-full px-4 py-2 text-left text-sm hover:bg-blue-50 flex items-center gap-2 text-blue-800 rounded-t-lg"
+                        className="w-full px-4 py-2 text-left text-sm hover:bg-yellow-50 flex items-center gap-2 text-yellow-800 rounded-t-lg"
+                      >
+                        <span className="w-2 h-2 rounded-full bg-yellow-600"></span>
+                        Ongoing
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUpdateServiceStatus('In Progress', registration.ticket_id);
+                          setIsStatusDropdownOpen(null);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm hover:bg-blue-50 flex items-center gap-2 text-blue-800"
                       >
                         <span className="w-2 h-2 rounded-full bg-blue-600"></span>
                         In Progress
@@ -2296,13 +2448,13 @@ function AdminClientOverview() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleUpdateServiceStatus('registered');
+                          handleUpdateServiceStatus('Completed', registration.ticket_id);
                           setIsStatusDropdownOpen(null);
                         }}
                         className="w-full px-4 py-2 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-green-800 rounded-b-lg"
                       >
                         <span className="w-2 h-2 rounded-full bg-green-600"></span>
-                        Registered
+                        Completed
                       </button>
                     </div>
                   )}
@@ -2640,4 +2792,3 @@ function AdminClientOverview() {
 }
 
 export default AdminClientOverview;
-
