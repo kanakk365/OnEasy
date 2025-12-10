@@ -16,9 +16,10 @@ function PaymentSuccess() {
     
     const processPayment = async () => {
       try {
-        let payment_id = searchParams.get('payment_id');
-        const order_id = searchParams.get('order_id');
-        let paymentStatus = searchParams.get('status');
+        // Razorpay may send `razorpay_payment_id` / `razorpay_payment_link_status`
+        let payment_id = searchParams.get('payment_id') || searchParams.get('razorpay_payment_id');
+        const order_id = searchParams.get('order_id') || searchParams.get('razorpay_order_id');
+        let paymentStatus = searchParams.get('status') || searchParams.get('razorpay_payment_link_status');
 
         console.log('💳 Payment success page loaded:', { payment_id, order_id, paymentStatus });
 
@@ -37,7 +38,7 @@ function PaymentSuccess() {
         // This endpoint works with payment_id directly
         if (payment_id) {
           try {
-            console.log('📞 Calling update-payment-status with payment_id:', payment_id);
+            console.log('📞 Calling update-payment-status with payment_id:', payment_id, 'order_id:', order_id);
             
             const updateResponse = await apiClient.post('/payment/update-payment-status', {
               payment_id: payment_id,
