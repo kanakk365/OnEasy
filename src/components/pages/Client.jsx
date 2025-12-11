@@ -30,7 +30,7 @@ function Client() {
       try {
         const storedUser = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}");
         const userId = storedUser.id;
-        const rawName = storedUser.name || storedUser.fullName || storedUser.email || "there";
+        const rawName = storedUser.name || storedUser.fullName || "there";
         const userName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
 
         const motivationalLines = [

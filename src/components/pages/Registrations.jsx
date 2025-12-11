@@ -10,6 +10,7 @@ function Registrations() {
   const [allServices, setAllServices] = React.useState([]);
   const [search, setSearch] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const [showComingSoon, setShowComingSoon] = React.useState(false);
 
   React.useEffect(() => {
     if (view !== "my") return;
@@ -174,32 +175,73 @@ function Registrations() {
         </div>
 
         {view === "services" ? (
-          <div className="grid gap-4">
-            {[
-              { title: "Start up Services", desc: "Incorporation, funding, and advisory support", onClick: () => navigate("/company-categories") },
-              { title: "Registration Services", desc: "Quick and easy business registrations", onClick: () => navigate("/registration-categories") },
-              { title: "Goods and Services Tax Services", desc: "GST registration, filing, and compliance", onClick: () => navigate("/registration-categories") },
-              { title: "ROC & MCA Services", desc: "Company law filings and MCA compliance", onClick: () => navigate("/registration-categories") },
-            ].map((service, idx) => (
-              <div
-                key={idx}
-                className="relative group bg-white rounded-2xl p-5 hover:bg-[#01334C] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full"
-                onClick={service.onClick}
-              >
-                <div>
-                  <h3 className="text-lg font-medium text-[#00486D] group-hover:text-white">
-                    {service.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-500 group-hover:text-gray-200">
-                    {service.desc}
-                  </p>
+          <>
+            <div className="grid gap-4">
+              {[
+                { title: "Start up Services", desc: "Incorporation, funding, and advisory support", onClick: () => navigate("/company-categories"), comingSoon: false },
+                { title: "Registration Services", desc: "Quick and easy business registrations", onClick: () => navigate("/registration-categories"), comingSoon: false },
+                { title: "Goods and Services Tax Services", desc: "GST registration, filing, and compliance", onClick: () => setShowComingSoon(true), comingSoon: true },
+                { title: "ROC & MCA Services", desc: "Company law filings and MCA compliance", onClick: () => setShowComingSoon(true), comingSoon: true },
+                { title: "Compliance Services", desc: "Ongoing compliance and regulatory support", onClick: () => setShowComingSoon(true), comingSoon: true },
+                { title: "Tax & Accounting Services", desc: "Income tax, accounting, and financial services", onClick: () => setShowComingSoon(true), comingSoon: true },
+              ].map((service, idx) => (
+                <div
+                  key={idx}
+                  className="relative group bg-white rounded-2xl p-5 hover:bg-[#01334C] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full"
+                  onClick={service.onClick}
+                >
+                  <div>
+                    <h3 className="text-lg font-medium text-[#00486D] group-hover:text-white">
+                      {service.title}
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500 group-hover:text-gray-200">
+                      {service.desc}
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-gray-50 group-hover:bg-[#246181] flex items-center justify-center">
+                    <span className="text-[#01334C] group-hover:text-white text-lg">→</span>
+                  </div>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-gray-50 group-hover:bg-[#246181] flex items-center justify-center">
-                  <span className="text-[#01334C] group-hover:text-white text-lg">→</span>
+              ))}
+            </div>
+
+            {/* Coming Soon Popup */}
+            {showComingSoon && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center">
+                {/* Blurred Background */}
+                <div 
+                  className="absolute inset-0 backdrop-blur-lg"
+                  onClick={() => setShowComingSoon(false)}
+                ></div>
+                
+                {/* Popup Content */}
+                <div className="relative bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl transform transition-all">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                      Coming Soon!
+                    </h3>
+                    <p className="text-gray-600 mb-6 leading-relaxed">
+                      We're working hard to bring you this amazing service. We'll deliver it as soon as possible!
+                    </p>
+                    <p className="text-sm text-gray-500 mb-6">
+                      Stay tuned for updates and exciting new features.
+                    </p>
+                    <button
+                      onClick={() => setShowComingSoon(false)}
+                      className="w-full bg-[#00486D] text-white py-3 px-6 rounded-lg font-medium hover:bg-[#003855] transition-colors duration-200"
+                    >
+                      Got it!
+                    </button>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         ) : (
           <div className="bg-white rounded-lg shadow-sm border border-[#F3F3F3]">
             <div className="p-5 overflow-x-auto">

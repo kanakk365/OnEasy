@@ -163,6 +163,12 @@ function AdminNewRegistration() {
       name: '80G Registration',
       icon: <FaCertificate className="w-8 h-8" />,
       description: 'Apply for 80G registration'
+    },
+    {
+      id: 'provident-fund',
+      name: 'Provident Fund Registration',
+      icon: <FaShieldAlt className="w-8 h-8" />,
+      description: 'Register for Provident Fund'
     }
   ];
 
