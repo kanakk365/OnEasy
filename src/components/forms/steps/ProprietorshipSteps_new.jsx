@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Field from '../Field';
 import CustomDropdown from '../CustomDropdown';
 import FileUploadField from '../FileUploadField';

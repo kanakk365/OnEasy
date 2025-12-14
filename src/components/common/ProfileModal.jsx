@@ -230,24 +230,20 @@ function ProfileModal({ isOpen, onClose }) {
               // User might not have password or current password is wrong
               // Try setting password if email exists
               if (formData.email) {
-                try {
-                  const setPasswordResponse = await apiClient.setEmailPassword(formData.email, passwordData.password);
-                  
-                  if (setPasswordResponse.success) {
-                    setSuccess('Password set successfully! You can now login with email and password.');
-                    setHasEmailPassword(true);
-                    setPasswordData({ password: '', confirmPassword: '', currentPassword: '' });
-                    setShowPasswordSection(false);
-                    // Reload user data from database after setting password
-                    await loadUserData();
-                    setTimeout(() => {
-                      setSuccess('');
-                    }, 3000);
-                    setLoading(false);
-                    return;
-                  }
-                } catch (setPasswordError) {
-                  throw setPasswordError;
+                const setPasswordResponse = await apiClient.setEmailPassword(formData.email, passwordData.password);
+                
+                if (setPasswordResponse.success) {
+                  setSuccess('Password set successfully! You can now login with email and password.');
+                  setHasEmailPassword(true);
+                  setPasswordData({ password: '', confirmPassword: '', currentPassword: '' });
+                  setShowPasswordSection(false);
+                  // Reload user data from database after setting password
+                  await loadUserData();
+                  setTimeout(() => {
+                    setSuccess('');
+                  }, 3000);
+                  setLoading(false);
+                  return;
                 }
               }
             }
@@ -409,7 +405,7 @@ function ProfileModal({ isOpen, onClose }) {
                 placeholder="9858015257"
               />
               {/* Debug: Show phone value */}
-              {process.env.NODE_ENV === 'development' && (
+              {import.meta.env.DEV && (
                 <p className="text-xs text-gray-500 mt-1">Debug: {formData.phone || 'empty'}</p>
               )}
             </div>

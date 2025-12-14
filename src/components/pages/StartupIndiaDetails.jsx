@@ -14,8 +14,8 @@ function StartupIndiaDetails() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('packages');
   const [expandedSection, setExpandedSection] = useState(null);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [_showForm] = useState(false);
+  const [_selectedPackage] = useState(null);
 
   // Fetch packages from API
   const { packages: apiPackages, loading: packagesLoading } = usePackages('startup-india');

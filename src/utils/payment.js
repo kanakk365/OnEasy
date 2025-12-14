@@ -91,6 +91,49 @@ export const initPayment = async (packageData) => {
           if (name.includes('12a') || name.includes('registration-12a')) return 'registration-12a';
           if (name.includes('80g') || name.includes('registration-80g')) return 'registration-80g';
           if (name.includes('provident fund') || name.includes('provident-fund')) return 'provident-fund';
+          // GST Services (except gst-registration which has form)
+          if (name.includes('gst returns') || name.includes('gst-returns')) return 'gst-returns';
+          if (name.includes('gst annual return') || name.includes('gst-annual-return')) return 'gst-annual-return';
+          if (name.includes('gst amendment') || name.includes('gst-amendment')) return 'gst-amendment';
+          if (name.includes('gst notice') || name.includes('gst-notice')) return 'gst-notice';
+          // ROC & MCA Services
+          if (name.includes('director addition') || name.includes('director-addition')) return 'director-addition';
+          if (name.includes('share transfer') || name.includes('share-transfer')) return 'share-transfer';
+          if (name.includes('address change') || name.includes('address-change') || name.includes('registered office')) return 'address-change';
+          if (name.includes('charge creation') || name.includes('charge-creation')) return 'charge-creation';
+          if (name.includes('director removal') || name.includes('director-removal')) return 'director-removal';
+          if (name.includes('moa amendment') || name.includes('moa-amendment')) return 'moa-amendment';
+          if (name.includes('aoa amendment') || name.includes('aoa-amendment')) return 'aoa-amendment';
+          if (name.includes('objects clause') || name.includes('objects-clause')) return 'objects-clause-change';
+          if (name.includes('increase share capital') || name.includes('increase-share-capital')) return 'increase-share-capital';
+          if (name.includes('name change') || name.includes('name-change-company')) return 'name-change-company';
+          if (name.includes('din deactivation') || name.includes('din-deactivation')) return 'din-deactivation';
+          if (name.includes('din reactivation') || name.includes('din-reactivation')) return 'din-reactivation';
+          if (name.includes('adt-1') || name.includes('adt 1')) return 'adt-1';
+          if (name.includes('winding up company') || name.includes('winding-up-company')) return 'winding-up-company';
+          if (name.includes('winding up llp') || name.includes('winding-up-llp')) return 'winding-up-llp';
+          if (name.includes('din application') || name.includes('din-application')) return 'din-application';
+          if (name.includes('inc-20a') || name.includes('inc 20a')) return 'inc-20a';
+          // Compliance Services
+          if (name.includes('fssai renewal') || name.includes('fssai-renewal')) return 'fssai-renewal';
+          if (name.includes('fssai return filing') || name.includes('fssai-return-filing')) return 'fssai-return-filing';
+          if (name.includes('business plan') || name.includes('business-plan')) return 'business-plan';
+          if (name.includes('hr payroll') || name.includes('hr-payroll')) return 'hr-payroll';
+          if (name.includes('pf return filing') || name.includes('pf-return-filing')) return 'pf-return-filing';
+          if (name.includes('esi return filing') || name.includes('esi-return-filing')) return 'esi-return-filing';
+          if (name.includes('professional tax return') || name.includes('professional-tax-return')) return 'professional-tax-return';
+          if (name.includes('partnership compliance') || name.includes('partnership-compliance')) return 'partnership-compliance';
+          if (name.includes('proprietorship compliance') || name.includes('proprietorship-compliance')) return 'proprietorship-compliance';
+          if (name.includes('company compliance') || name.includes('company-compliance')) return 'company-compliance';
+          if (name.includes('trademark')) return 'trademark';
+          // Tax & Accounting Services
+          if (name.includes('salary itr') || name.includes('salary-itr') || name.includes('income tax return salary')) return 'salary-itr';
+          if (name.includes('business itr') || name.includes('business-itr') || name.includes('business income tax')) return 'business-itr';
+          if (name.includes('house property itr') || name.includes('house-property-itr')) return 'house-property-itr';
+          if (name.includes('trust itr') || name.includes('trust-itr')) return 'trust-itr';
+          if (name.includes('salary hp capital') || name.includes('salary-hp-capital-gains')) return 'salary-hp-capital-gains';
+          if (name.includes('partnership firm itr') || name.includes('partnership-firm-itr')) return 'partnership-firm-itr';
+          if (name.includes('company itr') || name.includes('company-itr')) return 'company-itr';
           return null;
         })();
         const registrationType = storedRegistrationType || detectedTypeFromName;
@@ -151,7 +194,7 @@ export const initPayment = async (packageData) => {
               'public-limited',
               'mca-name-approval',
               'indian-subsidiary',
-              // Registration services without forms (except startup-india and gst)
+              // Registration services without forms (except startup-india and gst-registration)
               'professional-tax',
               'labour-license',
               'udyam',
@@ -166,7 +209,50 @@ export const initPayment = async (packageData) => {
               'registration-12a',
               '80g',
               'registration-80g',
-              'provident-fund'
+              'provident-fund',
+              // GST Services (except gst-registration which has form)
+              'gst-returns',
+              'gst-annual-return',
+              'gst-amendment',
+              'gst-notice',
+              // ROC & MCA Services
+              'director-addition',
+              'share-transfer',
+              'address-change',
+              'charge-creation',
+              'director-removal',
+              'moa-amendment',
+              'aoa-amendment',
+              'objects-clause-change',
+              'increase-share-capital',
+              'name-change-company',
+              'din-deactivation',
+              'din-reactivation',
+              'adt-1',
+              'winding-up-company',
+              'winding-up-llp',
+              'din-application',
+              'inc-20a',
+              // Compliance Services
+              'fssai-renewal',
+              'fssai-return-filing',
+              'business-plan',
+              'hr-payroll',
+              'pf-return-filing',
+              'esi-return-filing',
+              'professional-tax-return',
+              'partnership-compliance',
+              'proprietorship-compliance',
+              'company-compliance',
+              'trademark',
+              // Tax & Accounting Services
+              'salary-itr',
+              'business-itr',
+              'house-property-itr',
+              'trust-itr',
+              'salary-hp-capital-gains',
+              'partnership-firm-itr',
+              'company-itr'
             ];
             const hasForm = !servicesWithoutForms.includes(registrationTypeLower);
             

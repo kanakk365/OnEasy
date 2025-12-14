@@ -11,7 +11,6 @@ import FAQSection from "./company-details/FAQSection";
 import TopTabs from "./company-details/TopTabs";
 import { initPayment } from "../../utils/payment";
 import PrivateLimitedForm from "../forms/PrivateLimitedForm";
-import { getMyRegistrations } from "../../utils/privateLimitedApi";
 import PaymentSuccessPopup from "../common/PaymentSuccessPopup";
 import { usePackages } from "../../hooks/usePackages";
 
@@ -367,8 +366,6 @@ function CompanyDetails() {
               try {
                 console.log('Initiating payment for:', selectedPackage.name, 'Type:', type);
                 
-                // List of services without forms
-                const servicesWithoutForms = ['opc', 'llp', 'partnership', 'section-8', 'public-limited', 'mca-name-approval', 'indian-subsidiary'];
                 const registrationType = type || 'private-limited';
                 
                 // Set registration type in localStorage before payment

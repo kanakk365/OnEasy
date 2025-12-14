@@ -11,7 +11,7 @@ function PrivateLimitedDetails() {
   const [registration, setRegistration] = useState(null);
   const [directors, setDirectors] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [isEditingForm, setIsEditingForm] = useState(false);
+  const [_isEditingForm] = useState(false);
   const [editData, setEditData] = useState({
     nameApplicationStatus: '',
     businessName: '',

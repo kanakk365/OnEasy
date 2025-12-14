@@ -1099,7 +1099,7 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
 }
 
 // Step 4: Director/Partner Details
-export function DirectorDetailsContent({ formData, setFormData }) {
+export function DirectorDetailsContent() {
   return (
     <div className="grid grid-cols-1 gap-6">
       <p className="text-gray-600">Director/Partner Details step will be implemented based on your requirements...</p>
@@ -1108,7 +1108,7 @@ export function DirectorDetailsContent({ formData, setFormData }) {
 }
 
 // Step 5: Authorization Letter
-export function AuthorizationLetterContent({ formData, setFormData }) {
+export function AuthorizationLetterContent() {
   return (
     <div className="grid grid-cols-1 gap-6">
       <p className="text-gray-600">Authorization Letter step will be implemented based on your requirements...</p>

@@ -1,6 +1,6 @@
 import React from 'react';
 
-function PaymentSuccessPopup({ isOpen, onClose }) {
+function PaymentSuccessPopup({ isOpen = true, onClose }) {
   if (!isOpen) return null;
 
   return (

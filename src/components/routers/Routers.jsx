@@ -9,6 +9,10 @@ import Admin from "../pages/Admin";
 import Partner from "../pages/Partner";
 import Registrations from "../pages/Registrations";
 import RegistrationCategories from "../pages/RegistrationCategories";
+import GSTCategories from "../pages/GSTCategories";
+import ROCCategories from "../pages/ROCCategories";
+import ComplianceCategories from "../pages/ComplianceCategories";
+import TaxAccountingCategories from "../pages/TaxAccountingCategories";
 import RegistrationPackageSelection from "../pages/RegistrationPackageSelection";
 import RegistrationForm from "../forms/RegistrationForm";
 import CompanyCategories from "../pages/CompanyCategories";
@@ -36,6 +40,28 @@ import ProprietorshipForm from "../forms/ProprietorshipForm";
 import ProprietorshipDashboard from "../pages/ProprietorshipDashboard";
 import ProprietorshipViewDetails from "../pages/ProprietorshipViewDetails";
 import GSTDetails from "../pages/GSTDetails";
+import GSTRegistrationDetails from "../pages/GSTRegistrationDetails";
+import GSTReturnsDetails from "../pages/GSTReturnsDetails";
+import GSTAnnualReturnDetails from "../pages/GSTAnnualReturnDetails";
+import GSTAmendmentDetails from "../pages/GSTAmendmentDetails";
+import GSTNoticeDetails from "../pages/GSTNoticeDetails";
+import DirectorAdditionDetails from "../pages/DirectorAdditionDetails";
+import ShareTransferDetails from "../pages/ShareTransferDetails";
+import AddressChangeDetails from "../pages/AddressChangeDetails";
+import ChargeCreationDetails from "../pages/ChargeCreationDetails";
+import DirectorRemovalDetails from "../pages/DirectorRemovalDetails";
+import MOAAmendmentDetails from "../pages/MOAAmendmentDetails";
+import AOAAmendmentDetails from "../pages/AOAAmendmentDetails";
+import ObjectsClauseChangeDetails from "../pages/ObjectsClauseChangeDetails";
+import IncreaseShareCapitalDetails from "../pages/IncreaseShareCapitalDetails";
+import NameChangeCompanyDetails from "../pages/NameChangeCompanyDetails";
+import DINDeactivationDetails from "../pages/DINDeactivationDetails";
+import DINReactivationDetails from "../pages/DINReactivationDetails";
+import ADT1Details from "../pages/ADT1Details";
+import WindingUpCompanyDetails from "../pages/WindingUpCompanyDetails";
+import WindingUpLLPDetails from "../pages/WindingUpLLPDetails";
+import DINApplicationDetails from "../pages/DINApplicationDetails";
+import INC20ADetails from "../pages/INC20ADetails";
 import GSTPackageSelection from "../pages/GSTPackageSelection";
 import GSTForm from "../pages/GSTForm";
 import GSTDashboard from "../pages/GSTDashboard";
@@ -53,6 +79,24 @@ import ESIDetails from "../pages/ESIDetails";
 import GSTLUTDetails from "../pages/GSTLUTDetails";
 import Registration80GDetails from "../pages/Registration80GDetails";
 import Registration12ADetails from "../pages/Registration12ADetails";
+import FSSAIRenewalDetails from "../pages/FSSAIRenewalDetails";
+import FSSAIReturnFilingDetails from "../pages/FSSAIReturnFilingDetails";
+import BusinessPlanDetails from "../pages/BusinessPlanDetails";
+import HRPayrollDetails from "../pages/HRPayrollDetails";
+import PFReturnFilingDetails from "../pages/PFReturnFilingDetails";
+import ESIReturnFilingDetails from "../pages/ESIReturnFilingDetails";
+import ProfessionalTaxReturnDetails from "../pages/ProfessionalTaxReturnDetails";
+import PartnershipComplianceDetails from "../pages/PartnershipComplianceDetails";
+import ProprietorshipComplianceDetails from "../pages/ProprietorshipComplianceDetails";
+import CompanyComplianceDetails from "../pages/CompanyComplianceDetails";
+import TrademarkDetails from "../pages/TrademarkDetails";
+import SalaryITRDetails from "../pages/SalaryITRDetails";
+import BusinessITRDetails from "../pages/BusinessITRDetails";
+import HousePropertyITRDetails from "../pages/HousePropertyITRDetails";
+import TrustITRDetails from "../pages/TrustITRDetails";
+import SalaryHPCapitalGainsDetails from "../pages/SalaryHPCapitalGainsDetails";
+import PartnershipFirmITRDetails from "../pages/PartnershipFirmITRDetails";
+import CompanyITRDetails from "../pages/CompanyITRDetails";
 import AdminLayout from "../admin/layout/AdminLayout";
 import AdminClients from "../admin/pages/AdminClients";
 import AdminClientOverview from "../admin/pages/AdminClientOverview";
@@ -105,6 +149,61 @@ function Routers() {
       <Route path="/registration-categories" element={
         <ProtectedRoute>
           <RegistrationCategories />
+        </ProtectedRoute>
+      } />
+      <Route path="/gst-categories" element={
+        <ProtectedRoute>
+          <GSTCategories />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc-categories" element={
+        <ProtectedRoute>
+          <ROCCategories />
+        </ProtectedRoute>
+      } />
+      <Route path="/compliance-categories" element={
+        <ProtectedRoute>
+          <ComplianceCategories />
+        </ProtectedRoute>
+      } />
+      <Route path="/tax-accounting-categories" element={
+        <ProtectedRoute>
+          <TaxAccountingCategories />
+        </ProtectedRoute>
+      } />
+      <Route path="/tax-accounting/salary-itr-details" element={
+        <ProtectedRoute>
+          <SalaryITRDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/tax-accounting/business-itr-details" element={
+        <ProtectedRoute>
+          <BusinessITRDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/tax-accounting/house-property-itr-details" element={
+        <ProtectedRoute>
+          <HousePropertyITRDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/tax-accounting/trust-itr-details" element={
+        <ProtectedRoute>
+          <TrustITRDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/tax-accounting/multi-income-itr-details" element={
+        <ProtectedRoute>
+          <SalaryHPCapitalGainsDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/tax-accounting/partnership-firm-itr-details" element={
+        <ProtectedRoute>
+          <PartnershipFirmITRDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/tax-accounting/company-itr-details" element={
+        <ProtectedRoute>
+          <CompanyITRDetails />
         </ProtectedRoute>
       } />
       <Route path="/registration-packages" element={
@@ -330,6 +429,171 @@ function Routers() {
       <Route path="/gst-details" element={
         <ProtectedRoute>
           <GSTDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/gst-registration-details" element={
+        <ProtectedRoute>
+          <GSTRegistrationDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/gst-returns-details" element={
+        <ProtectedRoute>
+          <GSTReturnsDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/gst-annual-return-details" element={
+        <ProtectedRoute>
+          <GSTAnnualReturnDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/gst-amendment-details" element={
+        <ProtectedRoute>
+          <GSTAmendmentDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/gst-notice-details" element={
+        <ProtectedRoute>
+          <GSTNoticeDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/director-addition-details" element={
+        <ProtectedRoute>
+          <DirectorAdditionDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/share-transfer-details" element={
+        <ProtectedRoute>
+          <ShareTransferDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/address-change-details" element={
+        <ProtectedRoute>
+          <AddressChangeDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/charge-creation-details" element={
+        <ProtectedRoute>
+          <ChargeCreationDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/director-removal-details" element={
+        <ProtectedRoute>
+          <DirectorRemovalDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/moa-amendment-details" element={
+        <ProtectedRoute>
+          <MOAAmendmentDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/aoa-amendment-details" element={
+        <ProtectedRoute>
+          <AOAAmendmentDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/objects-clause-change-details" element={
+        <ProtectedRoute>
+          <ObjectsClauseChangeDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/increase-share-capital-details" element={
+        <ProtectedRoute>
+          <IncreaseShareCapitalDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/name-change-company-details" element={
+        <ProtectedRoute>
+          <NameChangeCompanyDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/din-deactivation-details" element={
+        <ProtectedRoute>
+          <DINDeactivationDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/din-reactivation-details" element={
+        <ProtectedRoute>
+          <DINReactivationDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/adt-1-details" element={
+        <ProtectedRoute>
+          <ADT1Details />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/winding-up-company-details" element={
+        <ProtectedRoute>
+          <WindingUpCompanyDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/winding-up-llp-details" element={
+        <ProtectedRoute>
+          <WindingUpLLPDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/din-application-details" element={
+        <ProtectedRoute>
+          <DINApplicationDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/roc/inc-20a-details" element={
+        <ProtectedRoute>
+          <INC20ADetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/compliance/fssai-renewal-details" element={
+        <ProtectedRoute>
+          <FSSAIRenewalDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/compliance/fssai-return-filing-details" element={
+        <ProtectedRoute>
+          <FSSAIReturnFilingDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/compliance/business-plan-details" element={
+        <ProtectedRoute>
+          <BusinessPlanDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/compliance/hr-payroll-details" element={
+        <ProtectedRoute>
+          <HRPayrollDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/compliance/pf-return-filing-details" element={
+        <ProtectedRoute>
+          <PFReturnFilingDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/compliance/esi-return-filing-details" element={
+        <ProtectedRoute>
+          <ESIReturnFilingDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/compliance/professional-tax-return-details" element={
+        <ProtectedRoute>
+          <ProfessionalTaxReturnDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/compliance/partnership-compliance-details" element={
+        <ProtectedRoute>
+          <PartnershipComplianceDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/compliance/proprietorship-compliance-details" element={
+        <ProtectedRoute>
+          <ProprietorshipComplianceDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/compliance/company-compliance-details" element={
+        <ProtectedRoute>
+          <CompanyComplianceDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/compliance/trademark-details" element={
+        <ProtectedRoute>
+          <TrademarkDetails />
         </ProtectedRoute>
       } />
       <Route path="/gst-package-selection" element={

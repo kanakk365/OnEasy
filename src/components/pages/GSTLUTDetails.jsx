@@ -43,17 +43,32 @@ function GSTLUTDetails() {
   ];
 
   const documents = [
+    'LUT Cover Letter signed by authorized person',
     'Proof of GST Registration',
     'PAN Card of the entity',
     'KYC of authorized person',
+    'GST RFD-11 Form',
+    'Copy of IEC Code (if involved in exports)',
     'Canceled Cheque',
     'Authorization Letter for the authorized signatory'
   ];
 
   const prerequisites = [
     {
-      title: 'Eligibility Criteria for LUT Registration',
-      description: 'The following are the key eligibility requirements for obtaining an LUT certificate:\n\n• Any registered taxpayer who are engaged in the export of goods and/or services can apply for an LUT. However, individuals who have been prosecuted for tax evasion exceeding Rs. 250 lakh are ineligible.\n• Intent to Supply: The applicant should intend to supply goods or services either within India, to foreign countries, or to Special Economic Zones (SEZs).\n• GST Registration: The business must be registered under GST.\n• Tax-Free Supply: The entity must intend to supply goods without paying integrated tax.'
+      title: 'Registered Taxpayer',
+      description: 'Any registered taxpayer involved in exporting goods or services can apply for an LUT. However, individuals who have been prosecuted for tax evasion exceeding Rs. 250 lakh are ineligible.'
+    },
+    {
+      title: 'Intent to Supply',
+      description: 'The applicant should intend to supply goods or services either within India, to foreign countries, or to Special Economic Zones (SEZs).'
+    },
+    {
+      title: 'GST Registration',
+      description: 'The business must be registered under GST.'
+    },
+    {
+      title: 'Tax-Free Supply',
+      description: 'The entity must intend to supply goods without paying integrated tax.'
     }
   ];
 
@@ -76,24 +91,7 @@ function GSTLUTDetails() {
     {
       id: 'advantages',
       title: 'Advantages of Filing LUT for Exporters',
-      content: [
-        {
-          title: 'Tax-Free Exports',
-          description: 'Exporters can carry out transactions without paying taxes upfront, avoiding the need to claim refunds.'
-        },
-        {
-          title: 'Simplified Process',
-          description: 'Exporters avoid the complexities of refund claims and reduce follow-up with tax authorities.'
-        },
-        {
-          title: 'Unblocked Working Capital',
-          description: 'Funds remain accessible for operational needs instead of being locked in tax payments.'
-        },
-        {
-          title: 'Long-Term Validity',
-          description: 'Once filed, the LUT is valid for the entire financial year, reducing repetitive paperwork.'
-        }
-      ]
+      content: 'Filing a Letter of Undertaking (LUT) offers significant benefits to exporters:\n\n• Tax-Free Exports: Exporters can carry out transactions without paying taxes upfront, avoiding the need to claim refunds.\n\n• Simplified Process: Exporters avoid the complexities of refund claims and reduce follow-up with tax authorities.\n\n• Unblocked Working Capital: Funds remain accessible for operational needs instead of being locked in tax payments.\n\n• Long-Term Validity: Once filed, the LUT is valid for the entire financial year, reducing repetitive paperwork.'
     },
     {
       id: 'key-reminders',
@@ -241,11 +239,6 @@ function GSTLUTDetails() {
           </button>
         </div>
 
-        {/* Payment Success Popup */}
-        {showPaymentPopup && (
-          <PaymentSuccessPopup onClose={() => setShowPaymentPopup(false)} />
-        )}
-
         {/* Tabs */}
         <TopTabs
           tabs={tabs}
@@ -255,6 +248,10 @@ function GSTLUTDetails() {
         
         {renderTabContent()}
       </div>
+      <PaymentSuccessPopup 
+        isOpen={showPaymentPopup}
+        onClose={() => setShowPaymentPopup(false)} 
+      />
     </div>
   );
 }

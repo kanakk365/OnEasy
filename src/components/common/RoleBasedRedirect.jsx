@@ -26,7 +26,6 @@ function RoleBasedRedirect({ children }) {
 
       // If regular user is on admin routes, redirect to client dashboard
       if (userRole !== 'admin' && userRole !== '1' && userRole !== '2') {
-        const adminRoutes = ['/admin'];
         if (location.pathname.startsWith('/admin') && !location.pathname.includes('/admin/clients') && !location.pathname.includes('/admin/profile')) {
           console.log('🔐 Non-admin detected on admin route, redirecting to client dashboard...');
           navigate('/client', { replace: true });

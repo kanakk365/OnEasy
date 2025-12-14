@@ -6,10 +6,10 @@ import apiClient from '../../utils/api';
 function CouponCodeGenerator() {
   const [copied, setCopied] = useState(false);
   const [prefix, setPrefix] = useState('ONEASY');
-  const [length, setLength] = useState(8);
-  const [includeNumbers, setIncludeNumbers] = useState(true);
-  const [includeLetters, setIncludeLetters] = useState(true);
-  const [quantity, setQuantity] = useState(1);
+  const [length] = useState(8);
+  const [includeNumbers] = useState(true);
+  const [includeLetters] = useState(true);
+  const [quantity] = useState(1);
   const [generatedCodes, setGeneratedCodes] = useState([]);
   const [discountType, setDiscountType] = useState('percentage');
   const [discountPercentage, setDiscountPercentage] = useState(10);

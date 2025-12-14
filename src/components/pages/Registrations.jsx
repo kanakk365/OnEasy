@@ -25,16 +25,35 @@ function Registrations() {
           setAllServices([]);
           return;
         }
-        const [pl, prop, si, gst] = await Promise.all([
+        const [pl, prop, si, gst, allServices] = await Promise.all([
           apiClient.get(`/private-limited/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
           apiClient.get(`/proprietorship/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
           apiClient.get(`/startup-india/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
           apiClient.get(`/gst/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
+          apiClient.get(`/registrations`).catch(() => ({ success: false, data: [] })),
         ]);
         const norm = (resp) =>
           resp.success ? (Array.isArray(resp.data) ? resp.data : resp.data?.data || []) : [];
-        const combined = [...norm(pl), ...norm(prop), ...norm(si), ...norm(gst)];
-        const sorted = combined.sort(
+        // Filter allServices to only include paid registrations (with payment_id)
+        const paidAllServices = norm(allServices).filter(reg => 
+          (reg.razorpay_payment_id && reg.razorpay_payment_id.trim() !== '') ||
+          (reg.payment_id && reg.payment_id.trim() !== '') ||
+          (reg.payment_status && reg.payment_status.toLowerCase() === 'paid')
+        );
+        const combined = [...norm(pl), ...norm(prop), ...norm(si), ...norm(gst), ...paidAllServices];
+        
+        // Deduplicate based on ticket_id or payment_id
+        const seen = new Set();
+        const unique = combined.filter(reg => {
+          const key = reg.ticket_id || reg.razorpay_payment_id || reg.payment_id || `${reg.user_id}_${reg.package_name}_${reg.created_at}`;
+          if (seen.has(key)) {
+            return false;
+          }
+          seen.add(key);
+          return true;
+        });
+        
+        const sorted = unique.sort(
           (a, b) =>
             new Date(b.updated_at || b.created_at || b.createdAt || 0) -
             new Date(a.updated_at || a.created_at || a.createdAt || 0)
@@ -92,7 +111,98 @@ function Registrations() {
     if (tid.startsWith("LLP_")) return "LLP";
     if (tid.startsWith("PART_") || tid.startsWith("PARTNERSHIP_")) return "Partnership";
     if (tid.startsWith("SEC8_") || tid.startsWith("SECTION8_")) return "Section 8";
-    return reg.registration_type || reg.service_type || "Service";
+    // GST Services
+    if (tid.startsWith("GST-RETURNS_") || tid.includes("GST-RETURNS")) return "GST Returns";
+    if (tid.startsWith("GST-ANNUAL-RETURN_") || tid.includes("GST-ANNUAL-RETURN")) return "GST Annual Return";
+    if (tid.startsWith("GST-AMENDMENT_") || tid.includes("GST-AMENDMENT")) return "GST Amendment";
+    if (tid.startsWith("GST-NOTICE_") || tid.includes("GST-NOTICE")) return "GST Notice";
+    // ROC & MCA Services
+    if (tid.startsWith("DIRECTOR-ADDITION_") || tid.includes("DIRECTOR-ADDITION")) return "Director Addition";
+    if (tid.startsWith("SHARE-TRANSFER_") || tid.includes("SHARE-TRANSFER")) return "Share Transfer";
+    if (tid.startsWith("ADDRESS-CHANGE_") || tid.includes("ADDRESS-CHANGE")) return "Address Change";
+    if (tid.startsWith("CHARGE-CREATION_") || tid.includes("CHARGE-CREATION")) return "Charge Creation";
+    if (tid.startsWith("DIRECTOR-REMOVAL_") || tid.includes("DIRECTOR-REMOVAL")) return "Director Removal";
+    if (tid.startsWith("MOA-AMENDMENT_") || tid.includes("MOA-AMENDMENT")) return "MOA Amendment";
+    if (tid.startsWith("AOA-AMENDMENT_") || tid.includes("AOA-AMENDMENT")) return "AOA Amendment";
+    if (tid.startsWith("OBJECTS-CLAUSE-CHANGE_") || tid.includes("OBJECTS-CLAUSE")) return "Objects Clause Change";
+    if (tid.startsWith("INCREASE-SHARE-CAPITAL_") || tid.includes("INCREASE-SHARE-CAPITAL")) return "Increase Share Capital";
+    if (tid.startsWith("NAME-CHANGE-COMPANY_") || tid.includes("NAME-CHANGE-COMPANY")) return "Name Change - Company";
+    if (tid.startsWith("DIN-DEACTIVATION_") || tid.includes("DIN-DEACTIVATION")) return "DIN Deactivation";
+    if (tid.startsWith("DIN-REACTIVATION_") || tid.includes("DIN-REACTIVATION")) return "DIN Reactivation";
+    if (tid.startsWith("ADT-1_") || tid.includes("ADT-1")) return "ADT-1";
+    if (tid.startsWith("WINDING-UP-COMPANY_") || tid.includes("WINDING-UP-COMPANY")) return "Winding Up - Company";
+    if (tid.startsWith("WINDING-UP-LLP_") || tid.includes("WINDING-UP-LLP")) return "Winding Up - LLP";
+    if (tid.startsWith("DIN-APPLICATION_") || tid.includes("DIN-APPLICATION")) return "DIN Application";
+    if (tid.startsWith("INC-20A_") || tid.includes("INC-20A")) return "INC 20A";
+    // Compliance Services
+    if (tid.startsWith("FSSAI-RENEWAL_") || tid.includes("FSSAI-RENEWAL")) return "FSSAI Renewal";
+    if (tid.startsWith("FSSAI-RETURN-FILING_") || tid.includes("FSSAI-RETURN-FILING")) return "FSSAI Return Filing";
+    if (tid.startsWith("BUSINESS-PLAN_") || tid.includes("BUSINESS-PLAN")) return "Business Plan";
+    if (tid.startsWith("HR-PAYROLL_") || tid.includes("HR-PAYROLL")) return "HR & Payroll";
+    if (tid.startsWith("PF-RETURN-FILING_") || tid.includes("PF-RETURN-FILING")) return "PF Return Filing";
+    if (tid.startsWith("ESI-RETURN-FILING_") || tid.includes("ESI-RETURN-FILING")) return "ESI Return Filing";
+    if (tid.startsWith("PROFESSIONAL-TAX-RETURN_") || tid.includes("PROFESSIONAL-TAX-RETURN")) return "Professional Tax Return";
+    if (tid.startsWith("PARTNERSHIP-COMPLIANCE_") || tid.includes("PARTNERSHIP-COMPLIANCE")) return "Partnership Compliance";
+    if (tid.startsWith("PROPRIETORSHIP-COMPLIANCE_") || tid.includes("PROPRIETORSHIP-COMPLIANCE")) return "Proprietorship Compliance";
+    if (tid.startsWith("COMPANY-COMPLIANCE_") || tid.includes("COMPANY-COMPLIANCE")) return "Company Compliance";
+    if (tid.startsWith("TRADEMARK_") || tid.includes("TRADEMARK")) return "Trademark";
+    // Tax & Accounting Services
+    if (tid.startsWith("SALARY-ITR_") || tid.includes("SALARY-ITR")) return "Income Tax Return - Salary";
+    if (tid.startsWith("BUSINESS-ITR_") || tid.includes("BUSINESS-ITR")) return "Business - Income Tax Return";
+    if (tid.startsWith("HOUSE-PROPERTY-ITR_") || tid.includes("HOUSE-PROPERTY-ITR")) return "House Property - Income Tax Return";
+    if (tid.startsWith("TRUST-ITR_") || tid.includes("TRUST-ITR")) return "Trust - Income Tax Return";
+    if (tid.startsWith("SALARY-HP-CAPITAL-GAINS_") || tid.includes("SALARY-HP-CAPITAL-GAINS")) return "Income From Salary, HP and Capital gains";
+    if (tid.startsWith("PARTNERSHIP-FIRM-ITR_") || tid.includes("PARTNERSHIP-FIRM-ITR")) return "Partnership Firm";
+    if (tid.startsWith("COMPANY-ITR_") || tid.includes("COMPANY-ITR")) return "Company - ITR";
+    // Fallback to business_name or service_type
+    if (reg.business_name) {
+      const name = reg.business_name.toLowerCase();
+      if (name.includes('gst returns')) return "GST Returns";
+      if (name.includes('gst annual return')) return "GST Annual Return";
+      if (name.includes('gst amendment')) return "GST Amendment";
+      if (name.includes('gst notice')) return "GST Notice";
+      if (name.includes('director addition')) return "Director Addition";
+      if (name.includes('share transfer')) return "Share Transfer";
+      if (name.includes('address change') || name.includes('registered office')) return "Address Change";
+      if (name.includes('charge creation')) return "Charge Creation";
+      if (name.includes('director removal')) return "Director Removal";
+      if (name.includes('moa amendment')) return "MOA Amendment";
+      if (name.includes('aoa amendment')) return "AOA Amendment";
+      if (name.includes('objects clause')) return "Objects Clause Change";
+      if (name.includes('increase share capital')) return "Increase Share Capital";
+      if (name.includes('name change')) return "Name Change - Company";
+      if (name.includes('din deactivation')) return "DIN Deactivation";
+      if (name.includes('din reactivation')) return "DIN Reactivation";
+      if (name.includes('adt-1') || name.includes('adt 1')) return "ADT-1";
+      if (name.includes('winding up company')) return "Winding Up - Company";
+      if (name.includes('winding up llp')) return "Winding Up - LLP";
+      if (name.includes('din application')) return "DIN Application";
+      if (name.includes('inc-20a') || name.includes('inc 20a')) return "INC 20A";
+      if (name.includes('fssai renewal')) return "FSSAI Renewal";
+      if (name.includes('fssai return filing')) return "FSSAI Return Filing";
+      if (name.includes('business plan')) return "Business Plan";
+      if (name.includes('hr payroll')) return "HR & Payroll";
+      if (name.includes('pf return filing')) return "PF Return Filing";
+      if (name.includes('esi return filing')) return "ESI Return Filing";
+      if (name.includes('professional tax return')) return "Professional Tax Return";
+      if (name.includes('partnership compliance')) return "Partnership Compliance";
+      if (name.includes('proprietorship compliance')) return "Proprietorship Compliance";
+      if (name.includes('company compliance')) return "Company Compliance";
+      if (name.includes('trademark')) return "Trademark";
+      if (name.includes('salary itr') || name.includes('income tax return salary')) return "Income Tax Return - Salary";
+      if (name.includes('business itr') || name.includes('business income tax')) return "Business - Income Tax Return";
+      if (name.includes('house property itr')) return "House Property - Income Tax Return";
+      if (name.includes('trust itr')) return "Trust - Income Tax Return";
+      if (name.includes('salary hp capital')) return "Income From Salary, HP and Capital gains";
+      if (name.includes('partnership firm itr')) return "Partnership Firm";
+      if (name.includes('company itr')) return "Company - ITR";
+      // Other registration services
+      if (name.includes('esi') && !name.includes('return filing')) return "ESI";
+      if (name.includes('section 8') || name.includes('section-8')) return "Section 8";
+      if (name.includes('labour license') || name.includes('labour-license')) return "Labour License";
+      if (name.includes('dsc') || name.includes('digital signature')) return "DSC";
+    }
+    return reg.registration_type || reg.service_type || reg.business_name || "Service";
   };
 
   const formatName = (reg) => {
@@ -105,7 +215,11 @@ function Registrations() {
     if (t.includes("private")) return "private-limited";
     if (t.includes("proprietorship")) return "proprietorship";
     if (t.includes("startup")) return "startup-india";
-    if (t === "gst") return "gst";
+    if (t === "gst" || t.includes("gst registration")) return "gst";
+    if (t.includes("gst returns")) return "gst-returns";
+    if (t.includes("gst annual return")) return "gst-annual-return";
+    if (t.includes("gst amendment")) return "gst-amendment";
+    if (t.includes("gst notice")) return "gst-notice";
     if (t === "opc") return "opc";
     if (t === "llp") return "llp";
     if (t.includes("partnership")) return "partnership";
@@ -113,10 +227,109 @@ function Registrations() {
     if (t.includes("public")) return "public-limited";
     if (t.includes("mca")) return "mca-name-approval";
     if (t.includes("indian")) return "indian-subsidiary";
+    if (t.includes("director addition")) return "director-addition";
+    if (t.includes("share transfer")) return "share-transfer";
+    if (t.includes("address change")) return "address-change";
+    if (t.includes("charge creation")) return "charge-creation";
+    if (t.includes("director removal")) return "director-removal";
+    if (t.includes("moa amendment")) return "moa-amendment";
+    if (t.includes("aoa amendment")) return "aoa-amendment";
+    if (t.includes("objects clause")) return "objects-clause-change";
+    if (t.includes("increase share capital")) return "increase-share-capital";
+    if (t.includes("name change")) return "name-change-company";
+    if (t.includes("din deactivation")) return "din-deactivation";
+    if (t.includes("din reactivation")) return "din-reactivation";
+    if (t.includes("adt-1") || t.includes("adt 1")) return "adt-1";
+    if (t.includes("winding up company")) return "winding-up-company";
+    if (t.includes("winding up llp")) return "winding-up-llp";
+    if (t.includes("din application")) return "din-application";
+    if (t.includes("inc-20a") || t.includes("inc 20a")) return "inc-20a";
+    if (t.includes("fssai renewal")) return "fssai-renewal";
+    if (t.includes("fssai return filing")) return "fssai-return-filing";
+    if (t.includes("business plan")) return "business-plan";
+    if (t.includes("hr payroll")) return "hr-payroll";
+    if (t.includes("pf return filing")) return "pf-return-filing";
+    if (t.includes("esi return filing")) return "esi-return-filing";
+    if (t.includes("professional tax return")) return "professional-tax-return";
+    if (t.includes("partnership compliance")) return "partnership-compliance";
+    if (t.includes("proprietorship compliance")) return "proprietorship-compliance";
+    if (t.includes("company compliance")) return "company-compliance";
+    if (t.includes("trademark")) return "trademark";
+    if (t.includes("salary itr") || t.includes("income tax return salary")) return "salary-itr";
+    if (t.includes("business itr") || t.includes("business income tax")) return "business-itr";
+    if (t.includes("house property itr")) return "house-property-itr";
+    if (t.includes("trust itr")) return "trust-itr";
+    if (t.includes("salary hp capital")) return "salary-hp-capital-gains";
+    if (t.includes("partnership firm itr")) return "partnership-firm-itr";
+    if (t.includes("company itr")) return "company-itr";
     return "registrations";
   };
 
   const getTicketId = (reg) => reg.ticket_id || reg.id || "";
+
+  const getDetailRoute = (type, slug) => {
+    // Services with forms - use view route
+    if (["private-limited", "proprietorship", "startup-india", "gst"].includes(slug)) {
+      return null; // Will use view route with ticket ID
+    }
+    
+    // All other services use registration pages (ServiceRegistrations component)
+    // GST Services
+    if (slug === "gst-returns") return "/registrations/gst-returns";
+    if (slug === "gst-annual-return") return "/registrations/gst-annual-return";
+    if (slug === "gst-amendment") return "/registrations/gst-amendment";
+    if (slug === "gst-notice") return "/registrations/gst-notice";
+    if (slug === "lut" || type.toLowerCase().includes("letter of undertaking")) return "/registrations/gst-lut";
+    
+    // ROC & MCA Services
+    if (slug === "director-addition") return "/registrations/director-addition";
+    if (slug === "share-transfer") return "/registrations/share-transfer";
+    if (slug === "address-change") return "/registrations/address-change";
+    if (slug === "charge-creation") return "/registrations/charge-creation";
+    if (slug === "director-removal") return "/registrations/director-removal";
+    if (slug === "moa-amendment") return "/registrations/moa-amendment";
+    if (slug === "aoa-amendment") return "/registrations/aoa-amendment";
+    if (slug === "objects-clause-change") return "/registrations/objects-clause-change";
+    if (slug === "increase-share-capital") return "/registrations/increase-share-capital";
+    if (slug === "name-change-company") return "/registrations/name-change-company";
+    if (slug === "din-deactivation") return "/registrations/din-deactivation";
+    if (slug === "din-reactivation") return "/registrations/din-reactivation";
+    if (slug === "adt-1") return "/registrations/adt-1";
+    if (slug === "winding-up-company") return "/registrations/winding-up-company";
+    if (slug === "winding-up-llp") return "/registrations/winding-up-llp";
+    if (slug === "din-application") return "/registrations/din-application";
+    if (slug === "inc-20a") return "/registrations/inc-20a";
+    
+    // Compliance Services
+    if (slug === "fssai-renewal") return "/registrations/fssai-renewal";
+    if (slug === "fssai-return-filing") return "/registrations/fssai-return-filing";
+    if (slug === "business-plan") return "/registrations/business-plan";
+    if (slug === "hr-payroll") return "/registrations/hr-payroll";
+    if (slug === "pf-return-filing") return "/registrations/pf-return-filing";
+    if (slug === "esi-return-filing") return "/registrations/esi-return-filing";
+    if (slug === "professional-tax-return") return "/registrations/professional-tax-return";
+    if (slug === "partnership-compliance") return "/registrations/partnership-compliance";
+    if (slug === "proprietorship-compliance") return "/registrations/proprietorship-compliance";
+    if (slug === "company-compliance") return "/registrations/company-compliance";
+    if (slug === "trademark") return "/registrations/trademark";
+    
+    // Tax & Accounting Services
+    if (slug === "salary-itr") return "/registrations/salary-itr";
+    if (slug === "business-itr") return "/registrations/business-itr";
+    if (slug === "house-property-itr") return "/registrations/house-property-itr";
+    if (slug === "trust-itr") return "/registrations/trust-itr";
+    if (slug === "salary-hp-capital-gains") return "/registrations/salary-hp-capital-gains";
+    if (slug === "partnership-firm-itr") return "/registrations/partnership-firm-itr";
+    if (slug === "company-itr") return "/registrations/company-itr";
+    
+    // Other registration services
+    if (slug === "esi" || type.toLowerCase().includes("esi")) return "/registrations/esi";
+    if (slug === "section-8") return "/registrations/section-8";
+    if (slug === "labour-license" || type.toLowerCase().includes("labour license")) return "/registrations/labour-license";
+    if (slug === "dsc" || type.toLowerCase().includes("digital signature")) return "/registrations/dsc";
+    
+    return null;
+  };
 
   const filtered = allServices.filter((s) => {
     if (!search) return true;
@@ -180,10 +393,10 @@ function Registrations() {
               {[
                 { title: "Start up Services", desc: "Incorporation, funding, and advisory support", onClick: () => navigate("/company-categories"), comingSoon: false },
                 { title: "Registration Services", desc: "Quick and easy business registrations", onClick: () => navigate("/registration-categories"), comingSoon: false },
-                { title: "Goods and Services Tax Services", desc: "GST registration, filing, and compliance", onClick: () => setShowComingSoon(true), comingSoon: true },
-                { title: "ROC & MCA Services", desc: "Company law filings and MCA compliance", onClick: () => setShowComingSoon(true), comingSoon: true },
-                { title: "Compliance Services", desc: "Ongoing compliance and regulatory support", onClick: () => setShowComingSoon(true), comingSoon: true },
-                { title: "Tax & Accounting Services", desc: "Income tax, accounting, and financial services", onClick: () => setShowComingSoon(true), comingSoon: true },
+                { title: "Goods and Services Tax Services", desc: "GST registration, filing, and compliance", onClick: () => navigate("/gst-categories"), comingSoon: false },
+                { title: "ROC & MCA Services", desc: "Company law filings and MCA compliance", onClick: () => navigate("/roc-categories"), comingSoon: false },
+                { title: "Compliance Services", desc: "Ongoing compliance and regulatory support", onClick: () => navigate("/compliance-categories"), comingSoon: false },
+                { title: "Tax & Accounting Services", desc: "Income tax, accounting, and financial services", onClick: () => navigate("/tax-accounting-categories"), comingSoon: false },
               ].map((service, idx) => (
                 <div
                   key={idx}
@@ -276,7 +489,9 @@ function Registrations() {
                       );
                       const slug = getTypeSlug(type);
                       const ticketId = getTicketId(reg);
-                      const hasDetailRoute = ["private-limited", "proprietorship", "startup-india", "gst"].includes(slug) && ticketId;
+                      const detailRoute = getDetailRoute(type, slug);
+                      // Services with forms - use view route with ticket ID
+                      const hasFormRoute = ["private-limited", "proprietorship", "startup-india", "gst"].includes(slug) && ticketId;
                       return (
                         <tr key={reg.ticket_id || reg.id || idx} className="hover:bg-gray-50 transition-colors">
                           <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -295,18 +510,21 @@ function Registrations() {
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm">
                             <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => {
-                                  if (hasDetailRoute) {
-                                    navigate(`/${slug}/view/${ticketId}`);
-                                  } else {
-                                    navigate(`/registrations/${slug}`);
-                                  }
-                                }}
-                                className="px-3 py-1 text-xs font-medium text-[#00486D] border border-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
-                              >
-                                View Details
-                              </button>
+                              {hasFormRoute ? (
+                                <button
+                                  onClick={() => navigate(`/${slug}/view/${ticketId}`)}
+                                  className="px-3 py-1 text-xs font-medium text-[#00486D] border border-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
+                                >
+                                  View Details
+                                </button>
+                              ) : detailRoute ? (
+                                <button
+                                  onClick={() => navigate(detailRoute)}
+                                  className="px-3 py-1 text-xs font-medium text-[#00486D] border border-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
+                                >
+                                  View Details
+                                </button>
+                              ) : null}
                               {canEdit ? (
                                 <button
                                   onClick={() => handleEdit(reg)}
@@ -314,9 +532,7 @@ function Registrations() {
                                 >
                                   Edit Registration
                                 </button>
-                              ) : (
-                                <span className="text-xs text-gray-500">N/A</span>
-                              )}
+                              ) : null}
                             </div>
                           </td>
                         </tr>

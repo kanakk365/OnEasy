@@ -185,7 +185,7 @@ function Login() {
       const fullPhoneNumber = countryCode + phoneNumber;
 
       // Call backend API to send OTP using apiClient
-      const data = await apiClient.phoneLogin(fullPhoneNumber);
+      await apiClient.phoneLogin(fullPhoneNumber);
 
       console.log("✅ OTP sent successfully to:", fullPhoneNumber);
       
@@ -232,7 +232,7 @@ function Login() {
 
       // Trigger Google Sign-In popup
       window.google.accounts.id.prompt();
-    } catch (err) {
+    } catch {
       setError("Google login failed. Please try again.");
       setIsLoading(false);
     }

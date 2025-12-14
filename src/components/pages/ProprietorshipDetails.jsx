@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import building from "../../assets/building.png";
 import documentsIllustration from "../../assets/OBJECTS.png";
@@ -47,6 +47,14 @@ function ProprietorshipDetails() {
     } else {
       setActiveTab(flowSteps[currentIndex - 1]);
     }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleContinue = () => {
+    // Exit flow and return to packages
+    setActiveTab("packages");
+    setIsInFlow(false);
+    setHidePackagesTab(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 

@@ -11,7 +11,7 @@ import SetEmailPasswordModal from '../components/common/SetEmailPasswordModal';
  */
 export const useProfileCompletionModal = () => {
   const [showModal, setShowModal] = useState(false);
-  const [userData, setUserData] = useState(null);
+  const [, setUserData] = useState(null);
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
@@ -164,7 +164,7 @@ export const useProfileCompletionModal = () => {
     checkAndShowModal();
   }, []);
 
-  const handleModalSuccess = (updatedUser) => {
+  const handleModalSuccess = () => {
     console.log('✅ Email and password set successfully from dashboard modal');
     setShowModal(false);
     

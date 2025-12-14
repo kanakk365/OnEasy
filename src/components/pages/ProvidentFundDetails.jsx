@@ -8,6 +8,7 @@ import DocumentsSection from './company-details/DocumentsSection';
 import PrerequisitesSection from './company-details/PrerequisitesSection';
 import AboutSection from './company-details/AboutSection';
 import FAQSection from './company-details/FAQSection';
+import PaymentSuccessPopup from '../common/PaymentSuccessPopup';
 import { initPayment } from '../../utils/payment';
 import { usePackages } from '../../hooks/usePackages';
 
@@ -15,6 +16,7 @@ function ProvidentFundDetails() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('packages');
   const [expandedSection, setExpandedSection] = useState(null);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
   // Fetch packages from API
   const { packages: apiPackages, loading: packagesLoading } = usePackages('provident-fund');
@@ -199,9 +201,14 @@ function ProvidentFundDetails() {
                   
                   const result = await initPayment(selectedPackage);
                   
-                  if (result.success && result.redirect) {
-                    console.log('✅ Payment successful! Redirecting to form...');
-                    navigate('/provident-fund-form');
+                  if (result.success) {
+                    if (result.showPopup) {
+                      console.log('✅ Payment successful! Showing popup...');
+                      setShowPaymentPopup(true);
+                    } else if (result.redirect) {
+                      console.log('✅ Payment successful! Redirecting to form...');
+                      navigate('/provident-fund-form');
+                    }
                   }
                 } catch (error) {
                   console.error('Payment error:', error);
@@ -268,6 +275,10 @@ function ProvidentFundDetails() {
         
         {renderTabContent()}
       </div>
+      <PaymentSuccessPopup 
+        isOpen={showPaymentPopup}
+        onClose={() => setShowPaymentPopup(false)} 
+      />
     </div>
   );
 }

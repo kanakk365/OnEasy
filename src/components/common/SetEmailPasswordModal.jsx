@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import apiClient from '../../utils/api';
 import { AUTH_CONFIG } from '../../config/auth';
 
-function SetEmailPasswordModal({ isOpen, onClose, onSuccess, required = false }) {
+function SetEmailPasswordModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',

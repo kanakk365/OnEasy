@@ -432,7 +432,7 @@ function Settings() {
     setIsAddingNewOrg(true);
   };
 
-  const removeOrganization = (id) => {
+  const _removeOrganization = (id) => {
     if (organizations.length > 1) {
       setOrganizations(organizations.filter(o => o.id !== id));
     }

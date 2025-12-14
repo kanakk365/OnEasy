@@ -73,7 +73,7 @@ function ClientServices() {
         day: 'numeric',
         timeZone: 'Asia/Kolkata'
       });
-    } catch (error) {
+    } catch {
       return 'N/A';
     }
   };

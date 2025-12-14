@@ -7,11 +7,8 @@ import { requestTeamFill } from '../../utils/teamFillApi';
 
 function ProprietorshipForm({ 
   packageDetails: propPackageDetails,
-  onClose,
   isAdminFilling = false,
-  clientId = null,
   ticketId: propTicketId = null,
-  initialData = null,
   onFormSubmit = null
 }) {
   const navigate = useNavigate();
@@ -259,9 +256,7 @@ function ProprietorshipForm({
     }
   };
 
-  const updateFormData = (stepData) => {
-    setFormData(prev => ({ ...prev, ...stepData }));
-  };
+  // updateFormData function removed - not used
 
   const renderStepContent = () => {
     switch (step) {

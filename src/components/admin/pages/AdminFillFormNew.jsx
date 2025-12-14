@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import apiClient from '../../../utils/api';
 import PrivateLimitedForm from '../../forms/PrivateLimitedForm';
@@ -11,9 +11,17 @@ function AdminFillFormNew() {
   const { userId, userName, userEmail, registrationType, packagePlan } = location.state || {};
   
   const [formData, setFormData] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  const packageDetails = useMemo(() => {
+    if (!packagePlan) return null;
+    return {
+      name: packagePlan.name,
+      price: packagePlan.price,
+      priceValue: packagePlan.price
+    };
+  }, [packagePlan]);
 
   useEffect(() => {
     if (!userId || !registrationType || !packagePlan) {
@@ -21,6 +29,18 @@ function AdminFillFormNew() {
       navigate('/admin/new-registration');
     }
   }, [userId, registrationType, packagePlan, navigate]);
+
+  // Store package and payment details in localStorage for Startup India form
+  useEffect(() => {
+    if (packageDetails && (registrationType === 'startup-india' || registrationType === 'startup india')) {
+      localStorage.setItem('selectedPackage', JSON.stringify(packageDetails));
+      localStorage.setItem('paymentDetails', JSON.stringify({
+        paymentId: null,
+        orderId: null,
+        payment_status: 'unpaid'
+      }));
+    }
+  }, [packageDetails, registrationType]);
 
   const handleFormSubmit = async (submittedFormData) => {
     try {
@@ -71,7 +91,7 @@ function AdminFillFormNew() {
     }
   };
 
-  if (!userId || !registrationType || !packagePlan) {
+  if (!userId || !registrationType || !packagePlan || !packageDetails) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
@@ -86,12 +106,6 @@ function AdminFillFormNew() {
       </div>
     );
   }
-
-  const packageDetails = {
-    name: packagePlan.name,
-    price: packagePlan.price,
-    priceValue: packagePlan.price
-  };
 
   if (registrationType === 'private-limited') {
     return (
@@ -142,16 +156,6 @@ function AdminFillFormNew() {
       </>
     );
   } else if (registrationType === 'startup-india' || registrationType === 'startup india') {
-    // Store package and payment details in localStorage for Startup India form
-    React.useEffect(() => {
-      localStorage.setItem('selectedPackage', JSON.stringify(packageDetails));
-      localStorage.setItem('paymentDetails', JSON.stringify({
-        paymentId: null,
-        orderId: null,
-        payment_status: 'unpaid'
-      }));
-    }, [packageDetails]);
-    
     return (
       <StartupIndiaForm />
     );

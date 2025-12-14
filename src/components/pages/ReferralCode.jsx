@@ -1,11 +1,10 @@
 import React, { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import logo from '../../assets/logo.png'
 import bgImage from '../../assets/bg.png'
 
 function ReferralCode() {
   const navigate = useNavigate()
-  const location = useLocation()
   const [referralCode, setReferralCode] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')

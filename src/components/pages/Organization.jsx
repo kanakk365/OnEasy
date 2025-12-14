@@ -108,7 +108,7 @@ function Organization() {
     setEditingOrg(updatedOrg);
   };
 
-  const removeWebsite = (websiteId) => {
+  const _removeWebsite = (websiteId) => {
     if (!editingOrg) return;
     const updatedOrg = {
       ...editingOrg,

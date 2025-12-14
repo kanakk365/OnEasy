@@ -6,7 +6,7 @@ function PackagesSection({ packages, onGetStarted }) {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState("");
   const [validatingCoupon, setValidatingCoupon] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [_selectedPackage, setSelectedPackage] = useState(null);
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {

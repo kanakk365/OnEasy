@@ -13,7 +13,7 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
   const [sendingEmail, setSendingEmail] = useState(false);
   const [paymentLink, setPaymentLink] = useState(null);
   const [paymentLinkData, setPaymentLinkData] = useState(null);
-  const [showEmailOption, setShowEmailOption] = useState(false);
+  const [_showEmailOption, setShowEmailOption] = useState(false);
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {

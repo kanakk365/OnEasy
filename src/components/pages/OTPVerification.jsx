@@ -143,7 +143,7 @@ function OTPVerification() {
 
     try {
       // Call backend API to resend OTP using apiClient
-      const data = await apiClient.phoneLogin(phoneNumber)
+      await apiClient.phoneLogin(phoneNumber)
       
       // OTP will be sent via SMS (MSG91)
       console.log("✅ OTP resent - check your phone for SMS")

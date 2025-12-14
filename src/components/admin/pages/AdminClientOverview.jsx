@@ -8,7 +8,7 @@ import { FiEye, FiEyeOff } from 'react-icons/fi';
 function AdminClientOverview() {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'services'); // profile, services, compliance, subscriptions
@@ -43,22 +43,22 @@ function AdminClientOverview() {
   const [expandedAdminTaskId, setExpandedAdminTaskId] = useState(null);
   const [expandedUserTaskId, setExpandedUserTaskId] = useState(null);
   const [isAddingAdminTask, setIsAddingAdminTask] = useState(false);
-  const [isAddingUserTask, setIsAddingUserTask] = useState(false);
-  const [editingAdminTaskIndex, setEditingAdminTaskIndex] = useState(null);
-  const [editingUserTaskIndex, setEditingUserTaskIndex] = useState(null);
+  const [_isAddingUserTask, setIsAddingUserTask] = useState(false);
+  const [_editingAdminTaskIndex] = useState(null);
+  const [_editingUserTaskIndex] = useState(null);
   const [currentAdminTask, setCurrentAdminTask] = useState({ date: '', title: '', description: '', type: '' });
   const [currentUserTask, setCurrentUserTask] = useState({ date: '', title: '', description: '', type: '' });
   const [savingTasks, setSavingTasks] = useState(false);
   const [isServiceCardExpanded, setIsServiceCardExpanded] = useState(null); // Track which card index is expanded
-  const [serviceStatus, setServiceStatus] = useState('registered');
+  const [_serviceStatus, setServiceStatus] = useState('registered');
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(null); // Track which card's dropdown is open (by index)
-  const [visiblePasswords, setVisiblePasswords] = useState({});
+  const [_visiblePasswords] = useState({});
   const [isEditingOrganisations, setIsEditingOrganisations] = useState(false);
-  const [isEditingWebsites, setIsEditingWebsites] = useState(false);
+  const [_isEditingWebsites, setIsEditingWebsites] = useState(false);
   const [organisations, setOrganisations] = useState([]);
   const [websites, setWebsites] = useState([]);
   const [savingOrg, setSavingOrg] = useState(false);
-  const [savingWebsites, setSavingWebsites] = useState(false);
+  const [_savingWebsites, setSavingWebsites] = useState(false);
 
   useEffect(() => {
     fetchClientDetails();
@@ -75,7 +75,7 @@ function AdminClientOverview() {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = () => {
       if (isStatusDropdownOpen !== null) {
         setIsStatusDropdownOpen(null);
       }
@@ -128,7 +128,7 @@ function AdminClientOverview() {
             if (org.websites) {
               try {
                 websites = typeof org.websites === 'string' ? JSON.parse(org.websites) : org.websites;
-              } catch (e) {
+              } catch {
                 websites = [];
               }
             }
@@ -478,7 +478,7 @@ function AdminClientOverview() {
     }
   };
 
-  const addUserTask = async () => {
+  const _addUserTask = async () => {
     if (!currentUserTask.title || !currentUserTask.title.trim()) {
       alert('Please enter a task title');
       return;
@@ -737,7 +737,7 @@ function AdminClientOverview() {
   };
 
   // Website handlers
-  const addWebsite = () => {
+  const _addWebsite = () => {
     setWebsites([...websites, { 
       id: Date.now(), 
       type: '', 
@@ -748,25 +748,25 @@ function AdminClientOverview() {
     }]);
   };
 
-  const removeWebsite = (id) => {
+  const _removeWebsite = (id) => {
     if (websites.length > 1) {
       setWebsites(websites.filter(w => w.id !== id));
     }
   };
 
-  const updateWebsite = (id, field, value) => {
+  const _updateWebsite = (id, field, value) => {
     setWebsites(websites.map(website => 
       website.id === id ? { ...website, [field]: value } : website
     ));
   };
 
-  const togglePasswordVisibility = (id) => {
+  const _togglePasswordVisibility = (id) => {
     setWebsites(websites.map(website => 
       website.id === id ? { ...website, showPassword: !website.showPassword } : website
     ));
   };
 
-  const handleSaveWebsites = async () => {
+  const _handleSaveWebsites = async () => {
     try {
       setSavingWebsites(true);
       
@@ -899,7 +899,7 @@ function AdminClientOverview() {
     });
   };
 
-  const getStatusBadge = (client) => {
+  const _getStatusBadge = (client) => {
     if (client.team_fill_requested) {
       return (
         <span className="px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
@@ -1297,7 +1297,7 @@ function AdminClientOverview() {
                               } else if (org.websites) {
                                 try {
                                   orgWebsites = typeof org.websites === 'string' ? JSON.parse(org.websites) : org.websites;
-                                } catch (e) {
+                                } catch {
                                   orgWebsites = [];
                                 }
                               }
@@ -1317,8 +1317,8 @@ function AdminClientOverview() {
                                               if (org.websites) {
                                                 try {
                                                   orgWebsites = typeof org.websites === 'string' ? JSON.parse(org.websites) : org.websites;
-                                                } catch (e) {
-                                                  orgWebsites = [];
+                                } catch {
+                                  orgWebsites = [];
                                                 }
                                               }
                                               
