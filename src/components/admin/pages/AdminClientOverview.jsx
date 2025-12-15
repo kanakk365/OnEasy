@@ -1318,7 +1318,7 @@ function AdminClientOverview() {
                                                 try {
                                                   orgWebsites = typeof org.websites === 'string' ? JSON.parse(org.websites) : org.websites;
                                 } catch {
-                                  orgWebsites = [];
+                                                  orgWebsites = [];
                                                 }
                                               }
                                               

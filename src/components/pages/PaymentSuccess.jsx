@@ -69,20 +69,16 @@ function PaymentSuccess() {
           }
         }
 
-        // Fallback: Call webhook endpoint to process payment (public endpoint, no auth required)
-        // The webhook will fetch payment details from Razorpay if payment_id is not provided
+        // Fallback: call public update-payment-status (POST) instead of GET /payment/webhook (which doesn't exist)
         try {
-          // Build query string for webhook
-          const queryParams = new URLSearchParams({
+          console.log('📞 Calling update-payment-status (fallback) with:', { payment_id, order_id, paymentStatus });
+
+          const response = await apiClient.post('/payment/update-payment-status', {
             ...(payment_id && { payment_id }),
             order_id,
             ...(paymentStatus && { status: paymentStatus })
-          });
-          
-          console.log('📞 Calling webhook with:', queryParams.toString());
-          
-          const response = await apiClient.get(`/payment/webhook?${queryParams.toString()}`, {
-            includeAuth: false // Webhook is public, no auth required
+          }, {
+            includeAuth: false // Public endpoint
           });
 
           console.log('📞 Webhook response:', response);
