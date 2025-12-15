@@ -256,6 +256,7 @@ function AdminServices() {
     'WIP',
     'Awaiting confirmation from the Govt',
     'Data Pending from Client',
+    'Payment completed',
     'Completed',
     'Technical Issue',
     'Payment pending'

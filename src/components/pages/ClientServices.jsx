@@ -95,7 +95,7 @@ function ClientServices() {
     const statusLower = status.toLowerCase();
     
     // Completed statuses go to Resolved
-    if (statusLower === 'completed') {
+    if (statusLower === 'completed' || statusLower === 'payment completed') {
       return 'Resolved';
     }
     
@@ -148,7 +148,7 @@ function ClientServices() {
     }
     
     // Default status colors
-    if (statusLower === "payment_completed" || statusLower === "paid") {
+    if (statusLower === "payment_completed" || statusLower === "paid" || statusLower === "payment completed") {
       return "bg-green-100 text-green-800";
     }
     if (statusLower === "submitted" || statusLower === "registered") {
