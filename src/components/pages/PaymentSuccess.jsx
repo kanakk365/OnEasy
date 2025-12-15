@@ -33,6 +33,8 @@ function PaymentSuccess() {
         let payment_id = searchParams.get('payment_id') || searchParams.get('razorpay_payment_id');
         const order_id = searchParams.get('order_id') || searchParams.get('razorpay_order_id');
         let paymentStatus = searchParams.get('status') || searchParams.get('razorpay_payment_link_status');
+        const ticket_id = searchParams.get('ticket_id');
+        const registration_type = searchParams.get('registration_type');
 
         console.log('💳 Payment success page loaded:', { payment_id, order_id, paymentStatus });
 
@@ -55,7 +57,9 @@ function PaymentSuccess() {
             
             const updateResponse = await apiClient.post('/payment/update-payment-status', {
               payment_id: payment_id,
-              order_id: order_id
+              order_id: order_id,
+              ...(ticket_id && { ticket_id }),
+              ...(registration_type && { registration_type })
             }, {
               includeAuth: false // Public endpoint
             });
@@ -89,7 +93,9 @@ function PaymentSuccess() {
           const response = await apiClient.post('/payment/update-payment-status', {
             ...(payment_id && { payment_id }),
             order_id,
-            ...(paymentStatus && { status: paymentStatus })
+            ...(paymentStatus && { status: paymentStatus }),
+            ...(ticket_id && { ticket_id }),
+            ...(registration_type && { registration_type })
           }, {
             includeAuth: false // Public endpoint
           });
