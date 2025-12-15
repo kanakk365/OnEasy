@@ -3,6 +3,19 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import apiClient from '../../utils/api';
 
 function PaymentSuccess() {
+  const logApiError = (label, err) => {
+    const resp = err?.response?.data;
+    console.error(`❌ ${label}`, {
+      message: err?.message,
+      responseData: resp,
+      status: err?.response?.status
+    });
+  };
+
+  const logApiResponse = (label, resp) => {
+    console.log(`✅ ${label}`, resp);
+  };
+
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState('processing'); // processing, success, error
@@ -47,7 +60,7 @@ function PaymentSuccess() {
               includeAuth: false // Public endpoint
             });
 
-            console.log('📞 Update payment status response:', updateResponse);
+            logApiResponse('Update payment status response', updateResponse);
 
             if (updateResponse.success) {
               setStatus('success');
@@ -64,7 +77,7 @@ function PaymentSuccess() {
               return;
             }
           } catch (updateError) {
-            console.error('Update payment status error:', updateError);
+            logApiError('Update payment status error', updateError);
             // Fall through to webhook call
           }
         }
@@ -81,7 +94,7 @@ function PaymentSuccess() {
             includeAuth: false // Public endpoint
           });
 
-          console.log('📞 Webhook response:', response);
+          logApiResponse('Fallback update-payment-status response', response);
 
           if (response.success) {
             setStatus('success');
@@ -104,7 +117,7 @@ function PaymentSuccess() {
             }, 3000);
           }
         } catch (webhookError) {
-          console.error('Webhook error:', webhookError);
+          logApiError('Fallback update-payment-status error', webhookError);
           // Even if webhook fails, payment might be successful
           // Show success message and redirect to login
           setStatus('success');
