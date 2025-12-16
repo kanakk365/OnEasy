@@ -12,7 +12,26 @@ import {
   FaCertificate,
   FaIndustry,
   FaIdBadge,
-  FaShieldAlt
+  FaShieldAlt,
+  FaUserPlus,
+  FaExchangeAlt,
+  FaMapMarkerAlt,
+  FaFileContract,
+  FaUserMinus,
+  FaFileAlt,
+  FaEdit,
+  FaChartLine,
+  FaTag,
+  FaPowerOff,
+  FaRedo,
+  FaFileInvoice,
+  FaTimesCircle,
+  FaIdCard,
+  FaBriefcase,
+  FaTrademark,
+  FaHome,
+  FaShoppingCart,
+  FaUsers
 } from 'react-icons/fa';
 import PaymentLinkGeneration from './PaymentLinkGeneration';
 import { usePackages } from '../../../hooks/usePackages';
@@ -32,6 +51,7 @@ function AdminNewRegistration() {
   const { packages: apiPackages, loading: packagesLoading } = usePackages(serviceTypeForApi, !!selectedType);
 
   const registrationTypes = [
+    // Startup Services (9)
     {
       id: 'private-limited',
       name: 'Private Limited Company',
@@ -39,28 +59,16 @@ function AdminNewRegistration() {
       description: 'Register a private limited company'
     },
     {
-      id: 'proprietorship',
-      name: 'Proprietorship',
-      icon: <FaStore className="w-8 h-8" />,
-      description: 'Register a proprietorship business'
-    },
-    {
-      id: 'startup-india',
-      name: 'Startup India',
-      icon: <FaRocket className="w-8 h-8" />,
-      description: 'Register for Startup India Certificate'
-    },
-    {
-      id: 'gst',
-      name: 'GST Registration',
-      icon: <FaFileInvoiceDollar className="w-8 h-8" />,
-      description: 'Register for Goods and Services Tax'
-    },
-    {
       id: 'opc',
       name: 'One Person Company',
       icon: <FaUserTie className="w-8 h-8" />,
       description: 'Register a one person company'
+    },
+    {
+      id: 'proprietorship',
+      name: 'Proprietorship',
+      icon: <FaStore className="w-8 h-8" />,
+      description: 'Register a proprietorship business'
     },
     {
       id: 'llp',
@@ -94,81 +102,344 @@ function AdminNewRegistration() {
     },
     {
       id: 'indian-subsidiary',
-      name: 'Indian Subsidiary',
+      name: 'Indian Subsidiary Company',
       icon: <FaIndustry className="w-8 h-8" />,
       description: 'Register an Indian subsidiary'
+    },
+    // Registration Services (14)
+    {
+      id: 'startup-india',
+      name: 'Start - Up India Certificate',
+      icon: <FaRocket className="w-8 h-8" />,
+      description: 'Get certified under Start-Up India initiative'
     },
     {
       id: 'professional-tax',
       name: 'Professional Tax Registration',
       icon: <FaIdBadge className="w-8 h-8" />,
-      description: 'Register for Professional Tax'
+      description: 'Register for professional tax compliance'
     },
     {
       id: 'labour-license',
-      name: 'Labour License',
+      name: 'Labour License Registration',
       icon: <FaShieldAlt className="w-8 h-8" />,
-      description: 'Apply for Labour License'
-    },
-    {
-      id: 'udyam',
-      name: 'Udyam / MSME',
-      icon: <FaIdBadge className="w-8 h-8" />,
-      description: 'Register for Udyam/MSME'
-    },
-    {
-      id: 'fssai',
-      name: 'FSSAI / Food License',
-      icon: <FaCertificate className="w-8 h-8" />,
-      description: 'Apply for FSSAI/Food license'
-    },
-    {
-      id: 'trade-license',
-      name: 'Trade License',
-      icon: <FaIdBadge className="w-8 h-8" />,
-      description: 'Apply for Trade License'
-    },
-    {
-      id: 'iec',
-      name: 'Import Export Code (IEC)',
-      icon: <FaGlobe className="w-8 h-8" />,
-      description: 'Apply for IEC'
-    },
-    {
-      id: 'lut',
-      name: 'GST LUT',
-      icon: <FaFileInvoiceDollar className="w-8 h-8" />,
-      description: 'Apply for GST LUT'
-    },
-    {
-      id: 'dsc',
-      name: 'Digital Signature (DSC)',
-      icon: <FaCertificate className="w-8 h-8" />,
-      description: 'Apply for DSC'
-    },
-    {
-      id: 'esi',
-      name: 'ESI Registration',
-      icon: <FaShieldAlt className="w-8 h-8" />,
-      description: 'Apply for ESI'
-    },
-    {
-      id: '12a',
-      name: '12A Registration',
-      icon: <FaCertificate className="w-8 h-8" />,
-      description: 'Apply for 12A registration'
-    },
-    {
-      id: '80g',
-      name: '80G Registration',
-      icon: <FaCertificate className="w-8 h-8" />,
-      description: 'Apply for 80G registration'
+      description: 'Obtain labor license for your business'
     },
     {
       id: 'provident-fund',
       name: 'Provident Fund Registration',
       icon: <FaShieldAlt className="w-8 h-8" />,
-      description: 'Register for Provident Fund'
+      description: 'Register for PF and employee benefits'
+    },
+    {
+      id: 'gst',
+      name: 'GST Registration',
+      icon: <FaFileInvoiceDollar className="w-8 h-8" />,
+      description: 'Register for Goods and Services Tax'
+    },
+    {
+      id: 'udyam',
+      name: 'Udyam Registration',
+      icon: <FaIdBadge className="w-8 h-8" />,
+      description: 'MSME/Udyog Aadhaar registration'
+    },
+    {
+      id: 'fssai',
+      name: 'FSSAI / Food license',
+      icon: <FaShoppingCart className="w-8 h-8" />,
+      description: 'Food safety and standards authority license'
+    },
+    {
+      id: 'trade-license',
+      name: 'Trade License',
+      icon: <FaBuilding className="w-8 h-8" />,
+      description: 'Municipal trade license for business operations'
+    },
+    {
+      id: 'iec',
+      name: 'Import Export Code (IEC) Registration',
+      icon: <FaGlobe className="w-8 h-8" />,
+      description: 'IEC for import/export business'
+    },
+    {
+      id: 'lut',
+      name: 'Letter of Undertaking',
+      icon: <FaFileContract className="w-8 h-8" />,
+      description: 'LOU for business transactions'
+    },
+    {
+      id: 'esi',
+      name: 'Employee State Insurance (ESI) Registration',
+      icon: <FaShieldAlt className="w-8 h-8" />,
+      description: 'ESI registration for employee insurance'
+    },
+    {
+      id: 'dsc',
+      name: 'Digital Signature Certificate',
+      icon: <FaCertificate className="w-8 h-8" />,
+      description: 'DSC for digital authentication'
+    },
+    {
+      id: '12a',
+      name: '12A Registration',
+      icon: <FaCertificate className="w-8 h-8" />,
+      description: 'Income tax exemption for NGOs/Trusts'
+    },
+    {
+      id: '80g',
+      name: '80G Registration',
+      icon: <FaCertificate className="w-8 h-8" />,
+      description: 'Tax deduction certificate for donations'
+    },
+    // Goods and Services Tax (6)
+    {
+      id: 'gst-registration',
+      name: 'GST Registration',
+      icon: <FaFileInvoiceDollar className="w-8 h-8" />,
+      description: 'Register for Goods and Services Tax'
+    },
+    {
+      id: 'gst-returns',
+      name: 'GST Returns',
+      icon: <FaFileAlt className="w-8 h-8" />,
+      description: 'File your GST returns regularly'
+    },
+    {
+      id: 'gst-lut',
+      name: 'Letter of Undertaking',
+      icon: <FaFileContract className="w-8 h-8" />,
+      description: 'Apply for GST LUT for exports'
+    },
+    {
+      id: 'gst-annual-return',
+      name: 'GST Annual Return Filing',
+      icon: <FaFileInvoice className="w-8 h-8" />,
+      description: 'File your annual GST return'
+    },
+    {
+      id: 'gst-amendment',
+      name: 'GST Amendment',
+      icon: <FaEdit className="w-8 h-8" />,
+      description: 'Amend your GST registration details'
+    },
+    {
+      id: 'gst-notice',
+      name: 'GST Notice',
+      icon: <FaShieldAlt className="w-8 h-8" />,
+      description: 'Respond to GST notices and queries'
+    },
+    // ROC & MCA Services (17)
+    {
+      id: 'director-addition',
+      name: 'Director Addition',
+      icon: <FaUserPlus className="w-8 h-8" />,
+      description: 'Add new directors to your company'
+    },
+    {
+      id: 'share-transfer',
+      name: 'Share Transfer',
+      icon: <FaExchangeAlt className="w-8 h-8" />,
+      description: 'Transfer shares between shareholders'
+    },
+    {
+      id: 'address-change',
+      name: 'Address Change (Registered Office Change)',
+      icon: <FaMapMarkerAlt className="w-8 h-8" />,
+      description: 'Update your company\'s registered office address'
+    },
+    {
+      id: 'charge-creation',
+      name: 'Charge Creation',
+      icon: <FaFileContract className="w-8 h-8" />,
+      description: 'Create charges on company assets'
+    },
+    {
+      id: 'director-removal',
+      name: 'Director Removal',
+      icon: <FaUserMinus className="w-8 h-8" />,
+      description: 'Remove directors from your company'
+    },
+    {
+      id: 'moa-amendment',
+      name: 'MOA Amendment',
+      icon: <FaFileAlt className="w-8 h-8" />,
+      description: 'Amend Memorandum of Association'
+    },
+    {
+      id: 'aoa-amendment',
+      name: 'AOA Amendment',
+      icon: <FaEdit className="w-8 h-8" />,
+      description: 'Amend Articles of Association'
+    },
+    {
+      id: 'objects-clause-change',
+      name: 'Change In Objects clause',
+      icon: <FaBuilding className="w-8 h-8" />,
+      description: 'Modify company\'s main objects clause'
+    },
+    {
+      id: 'increase-share-capital',
+      name: 'Increase in Share Capital',
+      icon: <FaChartLine className="w-8 h-8" />,
+      description: 'Increase authorized share capital'
+    },
+    {
+      id: 'name-change-company',
+      name: 'Name Change - Company',
+      icon: <FaTag className="w-8 h-8" />,
+      description: 'Change your company name'
+    },
+    {
+      id: 'din-deactivation',
+      name: 'DIN Deactivation',
+      icon: <FaPowerOff className="w-8 h-8" />,
+      description: 'Deactivate Director Identification Number'
+    },
+    {
+      id: 'din-reactivation',
+      name: 'DIN Reactivation',
+      icon: <FaRedo className="w-8 h-8" />,
+      description: 'Reactivate Director Identification Number'
+    },
+    {
+      id: 'adt-1',
+      name: 'ADT-1',
+      icon: <FaFileInvoice className="w-8 h-8" />,
+      description: 'Appointment of Auditor'
+    },
+    {
+      id: 'winding-up-company',
+      name: 'Winding Up - Company',
+      icon: <FaTimesCircle className="w-8 h-8" />,
+      description: 'Wind up a company'
+    },
+    {
+      id: 'winding-up-llp',
+      name: 'Winding Up - LLP',
+      icon: <FaHandshake className="w-8 h-8" />,
+      description: 'Wind up a Limited Liability Partnership'
+    },
+    {
+      id: 'din-application',
+      name: 'DIN Application - MCA',
+      icon: <FaIdCard className="w-8 h-8" />,
+      description: 'Apply for Director Identification Number'
+    },
+    {
+      id: 'inc-20a',
+      name: 'INC 20A - MCA',
+      icon: <FaCertificate className="w-8 h-8" />,
+      description: 'Declaration for commencement of business'
+    },
+    // Compliance Services (11)
+    {
+      id: 'fssai-renewal',
+      name: 'FSSAI Renewal',
+      icon: <FaCertificate className="w-8 h-8" />,
+      description: 'Renew your FSSAI license'
+    },
+    {
+      id: 'fssai-return-filing',
+      name: 'FSSAI Return Filing',
+      icon: <FaFileAlt className="w-8 h-8" />,
+      description: 'File your FSSAI returns'
+    },
+    {
+      id: 'business-plan',
+      name: 'Business Plan',
+      icon: <FaFileInvoice className="w-8 h-8" />,
+      description: 'Create a comprehensive business plan'
+    },
+    {
+      id: 'hr-payroll',
+      name: 'HR & Payroll Service',
+      icon: <FaUsers className="w-8 h-8" />,
+      description: 'Manage HR and payroll compliance'
+    },
+    {
+      id: 'pf-return-filing',
+      name: 'PF Return Filing',
+      icon: <FaBuilding className="w-8 h-8" />,
+      description: 'File your Provident Fund returns'
+    },
+    {
+      id: 'esi-return-filing',
+      name: 'ESI Return Filing',
+      icon: <FaFileContract className="w-8 h-8" />,
+      description: 'File your Employee State Insurance returns'
+    },
+    {
+      id: 'professional-tax-return',
+      name: 'Professional Tax Return Filing',
+      icon: <FaFileAlt className="w-8 h-8" />,
+      description: 'File your professional tax returns'
+    },
+    {
+      id: 'partnership-compliance',
+      name: 'Partnership Compliance',
+      icon: <FaHandshake className="w-8 h-8" />,
+      description: 'Ensure partnership firm compliance'
+    },
+    {
+      id: 'proprietorship-compliance',
+      name: 'Proprietorship Compliance',
+      icon: <FaUserTie className="w-8 h-8" />,
+      description: 'Maintain proprietorship compliance'
+    },
+    {
+      id: 'company-compliance',
+      name: 'Company Compliance',
+      icon: <FaBriefcase className="w-8 h-8" />,
+      description: 'Ensure company regulatory compliance'
+    },
+    {
+      id: 'trademark',
+      name: 'Trademark',
+      icon: <FaTrademark className="w-8 h-8" />,
+      description: 'Register and manage your trademarks'
+    },
+    // Tax & Accounting Services (7)
+    {
+      id: 'salary-itr',
+      name: 'Income Tax Return - Salary',
+      icon: <FaFileInvoiceDollar className="w-8 h-8" />,
+      description: 'File income tax returns for salaried individuals'
+    },
+    {
+      id: 'business-itr',
+      name: 'Business - Income Tax Return',
+      icon: <FaBriefcase className="w-8 h-8" />,
+      description: 'File income tax returns for business income'
+    },
+    {
+      id: 'house-property-itr',
+      name: 'House Property - Income Tax Return',
+      icon: <FaHome className="w-8 h-8" />,
+      description: 'File income tax returns for house property income'
+    },
+    {
+      id: 'trust-itr',
+      name: 'Trust - Income Tax Return',
+      icon: <FaHandshake className="w-8 h-8" />,
+      description: 'File income tax returns for trusts'
+    },
+    {
+      id: 'salary-hp-capital-gains',
+      name: 'Income From Salary, HP and Capital gains',
+      icon: <FaChartLine className="w-8 h-8" />,
+      description: 'File returns for salary, house property, and capital gains'
+    },
+    {
+      id: 'partnership-firm-itr',
+      name: 'Partnership Firm - ITR',
+      icon: <FaBuilding className="w-8 h-8" />,
+      description: 'File income tax returns for partnership firms'
+    },
+    {
+      id: 'company-itr',
+      name: 'Company - ITR',
+      icon: <FaFileAlt className="w-8 h-8" />,
+      description: 'File income tax returns for companies'
     }
   ];
 
@@ -346,6 +617,15 @@ function AdminNewRegistration() {
           </h1>
           <p className="text-sm md:text-base text-gray-600">
             Selected User: <span className="font-medium">{selectedUser?.name} ({selectedUser?.email})</span>
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            Total Services Available: <span className="font-semibold">{registrationTypes.length}</span>
+            {typeSearch && (
+              <> | Showing: <span className="font-semibold">{registrationTypes.filter((type) => {
+                const s = typeSearch.toLowerCase();
+                return type.name.toLowerCase().includes(s) || type.id.toLowerCase().includes(s);
+              }).length}</span></>
+            )}
           </p>
         </div>
 

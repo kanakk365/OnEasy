@@ -142,14 +142,33 @@ function AdminServices() {
 
   const deriveServiceFromTicket = useCallback((ticketId) => {
     if (!ticketId) return null;
+    // Registration Services
+    if (ticketId.startsWith('PVT_')) return 'Private Limited Registration';
     if (ticketId.startsWith('OPC_')) return 'OPC Registration';
     if (ticketId.startsWith('LLP_')) return 'LLP Registration';
     if (ticketId.startsWith('PART_') || ticketId.startsWith('PARTNERSHIP_')) return 'Partnership Registration';
     if (ticketId.startsWith('SEC8_') || ticketId.startsWith('SECTION8_')) return 'Section 8 Registration';
-    if (ticketId.startsWith('PVT_')) return 'Private Limited Registration';
+    if (ticketId.startsWith('PLC_')) return 'Public Limited Company';
+    if (ticketId.startsWith('INDSUB_') || ticketId.startsWith('INDIAN_') || ticketId.startsWith('SUBSIDIARY_')) return 'Indian Subsidiary Company';
     if (ticketId.startsWith('PROP_')) return 'Proprietorship Registration';
-    if (ticketId.startsWith('SI_')) return 'Startup India Registration';
+    // Startup Services
+    if (ticketId.startsWith('SI_') || ticketId.startsWith('STARTUP_')) return 'Startup India Registration';
+    // ROC & MCA Services
+    if (ticketId.startsWith('MCA_')) return 'MCA Name Approval';
+    // Compliance Services
+    if (ticketId.startsWith('PTX_')) return 'Professional Tax Registration';
+    if (ticketId.startsWith('LAB_')) return 'Labour License Registration';
+    if (ticketId.startsWith('UDYAM_')) return 'Udyam Registration / MSME';
+    if (ticketId.startsWith('FSSAI_')) return 'FSSAI / Food license';
+    if (ticketId.startsWith('TL_')) return 'Trade License';
+    if (ticketId.startsWith('ESI_')) return 'Employee State Insurance (ESI) Registration';
+    // Tax & Accounting Services
     if (ticketId.startsWith('GST_')) return 'GST Registration';
+    if (ticketId.startsWith('IEC_')) return 'Import Export Code (IEC) Registration';
+    if (ticketId.startsWith('LUT_')) return 'Letter of Undertaking';
+    if (ticketId.startsWith('DSC_')) return 'Digital Signature';
+    if (ticketId.startsWith('12A_')) return '12A Registration';
+    if (ticketId.startsWith('80G_')) return '80G Registration';
     return null;
   }, []);
 
@@ -157,29 +176,76 @@ function AdminServices() {
 
   const CANONICAL_SERVICES = useMemo(
     () => [
+      // Startup Services (9) - from CompanyCategories.jsx
       'Private Limited Company',
       'One Person Company',
       'Proprietorship',
-      'Partnership Firm',
       'Limited Liability Partnership',
+      'Partnership Firm',
       'Section 8 Company',
       'Public Limited Company',
       'MCA Name Approval',
       'Indian Subsidiary Company',
-      'Startup India Registration',
+      // Registration Services (14) - from RegistrationCategories.jsx
+      'Start - Up India Certificate',
       'Professional Tax Registration',
       'Labour License Registration',
       'Provident Fund Registration',
       'GST Registration',
-      'Udyam Registration / MSME',
+      'Udyam Registration',
       'FSSAI / Food license',
       'Trade License',
       'Import Export Code (IEC) Registration',
       'Letter of Undertaking',
       'Employee State Insurance (ESI) Registration',
-      'Digital Signature',
+      'Digital Signature Certificate',
       '12A Registration',
-      '80G Registration'
+      '80G Registration',
+      // Goods and Services Tax (6) - from GSTCategories.jsx
+      'GST Registration',
+      'GST Returns',
+      'Letter of Undertaking',
+      'GST Annual Return Filing',
+      'GST Amendment',
+      'GST Notice',
+      // ROC & MCA Services (17) - from ROCCategories.jsx
+      'Director Addition',
+      'Share Transfer',
+      'Address Change (Registered Office Change)',
+      'Charge Creation',
+      'Director Removal',
+      'MOA Amendment',
+      'AOA Amendment',
+      'Change In Objects clause',
+      'Increase in Share Capital',
+      'Name Change - Company',
+      'DIN Deactivation',
+      'DIN Reactivation',
+      'ADT-1',
+      'Winding Up - Company',
+      'Winding Up - LLP',
+      'DIN Application - MCA',
+      'INC 20A - MCA',
+      // Compliance Services (11) - from ComplianceCategories.jsx
+      'FSSAI Renewal',
+      'FSSAI Return Filing',
+      'Business Plan',
+      'HR & Payroll Service',
+      'PF Return Filing',
+      'ESI Return Filing',
+      'Professional Tax Return Filing',
+      'Partnership Compliance',
+      'Proprietorship Compliance',
+      'Company Compliance',
+      'Trademark',
+      // Tax & Accounting Services (7) - from TaxAccountingCategories.jsx
+      'Income Tax Return - Salary',
+      'Business - Income Tax Return',
+      'House Property - Income Tax Return',
+      'Trust - Income Tax Return',
+      'Income From Salary, HP and Capital gains',
+      'Partnership Firm - ITR',
+      'Company - ITR'
     ],
     []
   );
@@ -187,29 +253,81 @@ function AdminServices() {
   const normalizeService = useCallback((text) => {
     if (!text) return null;
     const lower = text.toLowerCase();
+    
+    // Registration Services (14)
     if (lower.includes('private limited')) return 'Private Limited Company';
-    if (lower.includes('opc') || lower.includes('one person')) return 'One Person Company';
+    if (lower.includes('opc') || lower.includes('one person company')) return 'One Person Company';
     if (lower.includes('propriet')) return 'Proprietorship';
-    if (lower.includes('partnership')) return 'Partnership Firm';
-    if (lower.includes('llp')) return 'Limited Liability Partnership';
+    if (lower.includes('partnership firm') || (lower.includes('partnership') && !lower.includes('llp'))) return 'Partnership Firm';
+    if (lower.includes('llp') || lower.includes('limited liability partnership')) return 'Limited Liability Partnership';
     if (lower.includes('section 8') || lower.includes('sec 8')) return 'Section 8 Company';
     if (lower.includes('public limited')) return 'Public Limited Company';
+    if (lower.includes('indian subsidiary') || lower.includes('subsidiary')) return 'Indian Subsidiary Company';
     if (lower.includes('mca name')) return 'MCA Name Approval';
-    if (lower.includes('subsidiary')) return 'Indian Subsidiary Company';
-    if (lower.includes('startup india')) return 'Startup India Registration';
-    if (lower.includes('professional tax')) return 'Professional Tax Registration';
-    if (lower.includes('labour')) return 'Labour License Registration';
-    if (lower.includes('provident fund') || lower.includes('pf ')) return 'Provident Fund Registration';
-    if (lower.includes('gst')) return 'GST Registration';
-    if (lower.includes('udyam') || lower.includes('msme')) return 'Udyam Registration / MSME';
-    if (lower.includes('fssai') || lower.includes('food')) return 'FSSAI / Food license';
-    if (lower.includes('trade license')) return 'Trade License';
-    if (lower.includes('import export') || lower.includes('iec')) return 'Import Export Code (IEC) Registration';
-    if (lower.includes('letter of undertaking') || lower.includes('lou')) return 'Letter of Undertaking';
+    
+    // Startup Services (9)
+    if (lower.includes('startup india') || lower.includes('start-up india')) return 'Startup India Registration';
+    
+    // Goods and Services Tax (6)
+    if (lower.includes('gst returns') || lower.includes('gst-returns')) return 'GST Returns';
+    if (lower.includes('gst annual return') || lower.includes('gst-annual-return') || lower.includes('gst annual return filing')) return 'GST Annual Return Filing';
+    if (lower.includes('gst amendment') || lower.includes('gst-amendment')) return 'GST Amendment';
+    if (lower.includes('gst notice') || lower.includes('gst-notice')) return 'GST Notice';
+    if (lower.includes('gst registration') || lower.includes('gst-registration') || (lower.includes('gst') && !lower.includes('return') && !lower.includes('amendment') && !lower.includes('notice') && !lower.includes('lut'))) return 'GST Registration';
+    if (lower.includes('letter of undertaking') || lower.includes('lut') || lower.includes('gst-lut')) return 'Letter of Undertaking';
+    
+    // ROC & MCA Services (17)
+    if (lower.includes('director addition') || lower.includes('director-addition')) return 'Director Addition';
+    if (lower.includes('share transfer') || lower.includes('share-transfer')) return 'Share Transfer';
+    if (lower.includes('address change') || lower.includes('address-change') || lower.includes('registered office change')) return 'Address Change (Registered Office Change)';
+    if (lower.includes('charge creation') || lower.includes('charge-creation')) return 'Charge Creation';
+    if (lower.includes('director removal') || lower.includes('director-removal')) return 'Director Removal';
+    if (lower.includes('moa amendment') || lower.includes('moa-amendment')) return 'MOA Amendment';
+    if (lower.includes('aoa amendment') || lower.includes('aoa-amendment')) return 'AOA Amendment';
+    if (lower.includes('objects clause') || lower.includes('objects-clause') || lower.includes('change in objects')) return 'Change In Objects clause';
+    if (lower.includes('increase share capital') || lower.includes('increase-share-capital') || lower.includes('increase in share capital')) return 'Increase in Share Capital';
+    if (lower.includes('name change company') || lower.includes('name-change-company')) return 'Name Change - Company';
+    if (lower.includes('din deactivation') || lower.includes('din-deactivation')) return 'DIN Deactivation';
+    if (lower.includes('din reactivation') || lower.includes('din-reactivation')) return 'DIN Reactivation';
+    if (lower.includes('adt-1') || lower.includes('adt 1')) return 'ADT-1';
+    if (lower.includes('winding up company') || lower.includes('winding-up-company')) return 'Winding Up - Company';
+    if (lower.includes('winding up llp') || lower.includes('winding-up-llp')) return 'Winding Up - LLP';
+    if (lower.includes('din application') || lower.includes('din-application')) return 'DIN Application - MCA';
+    if (lower.includes('inc-20a') || lower.includes('inc 20a') || lower.includes('inc20a')) return 'INC 20A - MCA';
+    
+    // Compliance Services (11)
+    if (lower.includes('professional tax return') || lower.includes('professional-tax-return')) return 'Professional Tax Return Filing';
+    if (lower.includes('professional tax') || lower.includes('professional-tax')) return 'Professional Tax Registration';
+    if (lower.includes('labour license') || lower.includes('labour-license') || lower.includes('labour licence')) return 'Labour License Registration';
+    if (lower.includes('udyam') || lower.includes('msme') || lower.includes('udyog aadhaar')) return 'Udyam Registration';
+    if (lower.includes('fssai return') || lower.includes('fssai-return')) return 'FSSAI Return Filing';
+    if (lower.includes('fssai renewal') || lower.includes('fssai-renewal')) return 'FSSAI Renewal';
+    if (lower.includes('fssai') || lower.includes('food license') || lower.includes('food licence')) return 'FSSAI / Food license';
+    if (lower.includes('trade license') || lower.includes('trade-license') || lower.includes('trade licence')) return 'Trade License';
+    if (lower.includes('esi return') || lower.includes('esi-return')) return 'ESI Return Filing';
     if (lower.includes('esi') || lower.includes('employee state insurance')) return 'Employee State Insurance (ESI) Registration';
-    if (lower.includes('digital signature') || lower.includes('dsc')) return 'Digital Signature';
-    if (lower.includes('12a')) return '12A Registration';
-    if (lower.includes('80g')) return '80G Registration';
+    if (lower.includes('pf return') || lower.includes('pf-return') || lower.includes('provident fund return')) return 'PF Return Filing';
+    if (lower.includes('provident fund') || lower.includes('pf registration')) return 'Provident Fund Registration';
+    if (lower.includes('business plan') || lower.includes('business-plan')) return 'Business Plan';
+    if (lower.includes('hr payroll') || lower.includes('hr-payroll') || lower.includes('hr & payroll')) return 'HR & Payroll Service';
+    if (lower.includes('partnership compliance') || lower.includes('partnership-compliance')) return 'Partnership Compliance';
+    if (lower.includes('proprietorship compliance') || lower.includes('proprietorship-compliance')) return 'Proprietorship Compliance';
+    if (lower.includes('company compliance') || lower.includes('company-compliance')) return 'Company Compliance';
+    if (lower.includes('trademark') || lower.includes('trade mark')) return 'Trademark';
+    
+    // Tax & Accounting Services (7)
+    if (lower.includes('import export') || lower.includes('iec') || lower.includes('import-export')) return 'Import Export Code (IEC) Registration';
+    if (lower.includes('digital signature') || lower.includes('dsc') || lower.includes('digital-signature') || lower.includes('digital signature certificate')) return 'Digital Signature Certificate';
+    if (lower.includes('12a') || lower.includes('12-a')) return '12A Registration';
+    if (lower.includes('80g') || lower.includes('80-g')) return '80G Registration';
+    if (lower.includes('salary itr') || lower.includes('salary-itr') || (lower.includes('itr') && lower.includes('salary'))) return 'Income Tax Return - Salary';
+    if (lower.includes('business itr') || lower.includes('business-itr') || (lower.includes('itr') && lower.includes('business'))) return 'Business - Income Tax Return';
+    if (lower.includes('house property itr') || lower.includes('house-property-itr') || (lower.includes('itr') && lower.includes('house property'))) return 'House Property - Income Tax Return';
+    if (lower.includes('trust itr') || lower.includes('trust-itr') || (lower.includes('itr') && lower.includes('trust'))) return 'Trust - Income Tax Return';
+    if (lower.includes('salary hp capital') || lower.includes('salary-hp-capital')) return 'Income From Salary, HP and Capital gains';
+    if (lower.includes('partnership firm itr') || lower.includes('partnership-firm-itr')) return 'Partnership Firm - ITR';
+    if (lower.includes('company itr') || lower.includes('company-itr')) return 'Company - ITR';
+    
     return null;
   }, []);
 
