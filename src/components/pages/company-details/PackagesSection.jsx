@@ -1,7 +1,12 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { validateCoupon } from "../../../utils/couponApi";
+import { createSupportRequest } from "../../../utils/supportRequestApi";
+import { AUTH_CONFIG } from "../../../config/auth";
+import { getServiceDisplayName } from "../../../utils/serviceNames";
 
-function PackagesSection({ packages, onGetStarted }) {
+function PackagesSection({ packages, onGetStarted, serviceName = null }) {
+  const location = useLocation();
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState("");
@@ -221,6 +226,42 @@ function PackagesSection({ packages, onGetStarted }) {
               }`}
             >
               Get Started
+            </button>
+            <button
+              onClick={async () => {
+                try {
+                  const user = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || '{}');
+                  if (!user.id) {
+                    alert('Please login to contact support.');
+                    return;
+                  }
+                  
+                  // Get service display name using utility function
+                  const requestServiceName = getServiceDisplayName(
+                    serviceName,
+                    pkg.name,
+                    location.pathname
+                  );
+                  const packageName = pkg.name || null;
+                  
+                  const result = await createSupportRequest(requestServiceName, packageName);
+                  if (result.success) {
+                    alert('Support request submitted successfully! Our team will contact you soon.');
+                  } else {
+                    alert('Failed to submit support request. Please try again.');
+                  }
+                } catch (error) {
+                  console.error('Error submitting support request:', error);
+                  alert('An error occurred. Please try again.');
+                }
+              }}
+              className={`w-full py-2 mt-2 rounded-lg font-medium transition-all duration-300 text-sm ${
+                pkg.isHighlighted
+                  ? "bg-white/10 text-white border border-white/30 hover:bg-white/20"
+                  : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              Contact Support for Assistance
             </button>
           </div>
         ))}

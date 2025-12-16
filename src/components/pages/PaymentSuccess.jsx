@@ -20,8 +20,6 @@ function PaymentSuccess() {
   const navigate = useNavigate();
   const [status, setStatus] = useState('processing'); // processing, success, error
   const [message, setMessage] = useState('Processing your payment...');
-  const [logs, setLogs] = useState([]);
-  const [showLogs, setShowLogs] = useState(false);
 
   useEffect(() => {
     // Restore body scroll on mount (in case Razorpay left overflow:hidden)
@@ -80,11 +78,6 @@ function PaymentSuccess() {
 
             logApiResponse('Update payment status response', updateResponse);
 
-            // Store logs from response if available
-            if (updateResponse.logs) {
-              setLogs(updateResponse.logs);
-            }
-
             if (updateResponse.success) {
               setStatus('success');
               setMessage('Payment successful! Redirecting to login...');
@@ -123,11 +116,6 @@ function PaymentSuccess() {
           });
 
           logApiResponse('Fallback update-payment-status response', response);
-
-          // Store logs from response if available
-          if (response.logs) {
-            setLogs(response.logs);
-          }
 
           if (response.success) {
             setStatus('success');
@@ -210,14 +198,6 @@ function PaymentSuccess() {
             <div className="text-sm text-gray-500 mb-4">
               Redirecting to login page...
             </div>
-            {logs.length > 0 && (
-              <button
-                onClick={() => setShowLogs(!showLogs)}
-                className="text-sm text-blue-600 hover:text-blue-800 underline"
-              >
-                {showLogs ? 'Hide' : 'Show'} Backend Logs ({logs.length})
-              </button>
-            )}
           </>
         )}
 
@@ -240,14 +220,6 @@ function PaymentSuccess() {
             </div>
             <h2 className="text-2xl font-semibold text-gray-900 mb-2">Payment Error</h2>
             <p className="text-gray-600 mb-6">{message}</p>
-            {logs.length > 0 && (
-              <button
-                onClick={() => setShowLogs(!showLogs)}
-                className="text-sm text-blue-600 hover:text-blue-800 underline mb-4"
-              >
-                {showLogs ? 'Hide' : 'Show'} Backend Logs ({logs.length})
-              </button>
-            )}
             <button
               onClick={() => navigate('/login')}
               className="px-6 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#003855] transition-colors"
@@ -255,35 +227,6 @@ function PaymentSuccess() {
               Go to Login
             </button>
           </>
-        )}
-
-        {/* Backend Logs Display */}
-        {showLogs && logs.length > 0 && (
-          <div className="mt-6 p-4 bg-gray-100 rounded-lg max-h-96 overflow-y-auto text-left">
-            <h3 className="text-lg font-semibold mb-3 text-gray-900">Backend Logs</h3>
-            <div className="space-y-2">
-              {logs.map((log, index) => (
-                <div key={log.id || index} className="p-2 bg-white rounded border border-gray-200">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold text-gray-700">
-                      {log.type || 'log'}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : ''}
-                    </span>
-                  </div>
-                  {log.message && (
-                    <div className="text-sm text-gray-800 mb-1">{log.message}</div>
-                  )}
-                  {log.data && (
-                    <pre className="text-xs bg-gray-50 p-2 rounded overflow-x-auto">
-                      {JSON.stringify(log.data, null, 2)}
-                    </pre>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
         )}
       </div>
     </div>

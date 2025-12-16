@@ -38,6 +38,19 @@ function CompanyDetails() {
   };
   const serviceType = serviceTypeMap[type] || 'private-limited';
   
+  // Map route type to service display name
+  const serviceNameMap = {
+    'private-limited': 'Private Limited',
+    'opc': 'One Person Company',
+    'llp': 'Limited Liability Partnership',
+    'partnership': 'Partnership',
+    'section-8': 'Section 8 Company',
+    'public-limited': 'Public Limited',
+    'mca-name-approval': 'MCA Name Approval',
+    'indian-subsidiary': 'Indian Subsidiary'
+  };
+  const serviceDisplayName = serviceNameMap[type] || 'Private Limited';
+  
   // Fetch packages from API
   const { packages: apiPackages, loading: packagesLoading } = usePackages(serviceType);
 
@@ -362,6 +375,7 @@ function CompanyDetails() {
         return (
           <PackagesSection
             packages={packages}
+            serviceName={serviceDisplayName}
             onGetStarted={async (selectedPackage) => {
               try {
                 console.log('Initiating payment for:', selectedPackage.name, 'Type:', type);

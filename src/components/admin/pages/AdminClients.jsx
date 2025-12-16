@@ -269,7 +269,12 @@ function AdminClients() {
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Client Name</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Email</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Phone Number</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
+                {filter === 'support-requests' && (
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Support Request</th>
+                )}
+                {filter !== 'support-requests' && (
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -289,7 +294,24 @@ function AdminClients() {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">{client.email || 'N/A'}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{client.phone || 'N/A'}</td>
-                  <td className="px-6 py-4">{getStatusBadge(client)}</td>
+                  {filter === 'support-requests' && (
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {client.support_requests && client.support_requests.length > 0 ? (
+                        <div className="space-y-1">
+                          {client.support_requests.map((req, idx) => (
+                            <div key={idx} className="text-sm">
+                              <span className="font-medium">{client.name}</span> for <span className="font-medium">{req.service_name || 'this service'}</span> wants to contact you
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-500">No support requests</span>
+                      )}
+                    </td>
+                  )}
+                  {filter !== 'support-requests' && (
+                    <td className="px-6 py-4">{getStatusBadge(client)}</td>
+                  )}
                 </tr>
               ))}
             </tbody>

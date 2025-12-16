@@ -191,6 +191,7 @@ function GSTRegistrationDetails() {
         return (
           <PackagesSection
             packages={packages}
+            serviceName="GST Registration"
             onGetStarted={async (selectedPackage) => {
               try {
                 console.log('Initiating payment for GST Registration:', selectedPackage.name);

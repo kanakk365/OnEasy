@@ -169,6 +169,7 @@ function StartupIndiaDetails() {
         return (
           <PackagesSection
             packages={packages}
+            serviceName="Startup India"
             onGetStarted={async (selectedPackage) => {
               try {
                 console.log('Initiating payment for Startup India:', selectedPackage.name);

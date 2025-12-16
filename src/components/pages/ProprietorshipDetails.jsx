@@ -255,6 +255,7 @@ function ProprietorshipDetails() {
         return (
           <PackagesSection
             packages={packages}
+            serviceName="Proprietorship"
             onGetStarted={async (selectedPackage) => {
               try {
                 console.log('Initiating payment for:', selectedPackage.name);
