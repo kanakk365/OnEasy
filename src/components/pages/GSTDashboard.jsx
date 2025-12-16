@@ -185,10 +185,10 @@ function GSTDashboard() {
                               priceValue: registration.package_price
                             }));
                           }
-                          if (registration.order_id || registration.payment_id) {
+                          if (registration.order_id || registration.razorpay_payment_id) {
                             localStorage.setItem('paymentDetails', JSON.stringify({
                               orderId: registration.order_id,
-                              paymentId: registration.payment_id,
+                              paymentId: registration.razorpay_payment_id,
                               timestamp: registration.created_at
                             }));
                           }

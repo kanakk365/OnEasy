@@ -308,7 +308,7 @@ function GSTViewDetails() {
               </div>
               <div>
                 <span className="text-sm font-medium text-gray-600">Payment ID:</span>
-                <p className="text-gray-900">{formatValue(registration.payment_id)}</p>
+                <p className="text-gray-900">{formatValue(registration.razorpay_payment_id || registration.payment_id)}</p>
               </div>
             </div>
           </div>
