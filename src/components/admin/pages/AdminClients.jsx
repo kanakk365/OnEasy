@@ -6,7 +6,7 @@ function AdminClients() {
   const navigate = useNavigate();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, registered, team-fill
+  const [filter, setFilter] = useState('all'); // all, signups, subscribed, pending-payments, oneasy-form-fill, support-requests
 
   useEffect(() => {
     fetchClients();
@@ -90,10 +90,51 @@ function AdminClients() {
   };
 
   const filteredClients = clients.filter(client => {
+    // Debug: log how many clients have team_fill_requested flag
+    if (filter === 'oneasy-form-fill') {
+      const teamFillClients = clients.filter(c => c.team_fill_requested);
+      console.log('🧪 Oneasy Form Fill filter selected. Raw clients with team_fill_requested=true:', teamFillClients);
+    }
     if (filter === 'all') return true;
-    if (filter === 'registered') return client.registration_submitted;
-    if (filter === 'team-fill') return client.team_fill_requested;
-    return true;
+    if (filter === 'signups') {
+      return (
+        !client.registration_submitted &&
+        !client.team_fill_requested &&
+        !client.payment_completed &&
+        !client.ticket_id
+      );
+    }
+    if (filter === 'subscribed') {
+      // Users who have taken at least one service (any ticket/registration/payment)
+      return (
+        !!client.ticket_id ||
+        !!client.registration_submitted ||
+        !!client.payment_completed
+      );
+    }
+    if (filter === 'pending-payments') {
+      return (
+        client.payment_completed === false &&
+        (client.registration_submitted || client.ticket_id)
+      );
+    }
+    if (filter === 'oneasy-form-fill') {
+      return client.team_fill_requested;
+    }
+    if (filter === 'support-requests') {
+      // Clients who have raised support tickets (future-friendly; flag may arrive from backend)
+      return !!client.has_support_request;
+    }
+    const keep = true;
+    console.log('🎯 Filtered client row:', {
+      filter,
+      user_id: client.user_id,
+      name: client.name,
+      team_fill_requested: client.team_fill_requested,
+      registration_submitted: client.registration_submitted,
+      ticket_id: client.ticket_id
+    });
+    return keep;
   });
 
   if (loading) {
@@ -115,45 +156,98 @@ function AdminClients() {
           Clients
         </h1>
         <p className="text-sm md:text-base text-gray-600">
-          Manage all client registrations and team fill requests
+          Manage client signups, pending payments and Oneasy form fill requests
         </p>
       </div>
 
       {/* Filter Tabs */}
       <div className="bg-white rounded-xl p-5 mb-6 transition-all duration-300 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
-          <div className="flex gap-4">
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filter === 'all'
-                  ? 'bg-[#01334C] text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              All ({clients.length})
-            </button>
-            <button
-              onClick={() => setFilter('registered')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filter === 'registered'
-                  ? 'bg-[#01334C] text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Registered ({clients.filter(c => c.registration_submitted).length})
-            </button>
-            <button
-              onClick={() => setFilter('team-fill')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filter === 'team-fill'
-                  ? 'bg-[#01334C] text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Team Fill Requests ({clients.filter(c => c.team_fill_requested).length})
-            </button>
-          </div>
+        <div className="flex gap-4 flex-wrap">
+          <button
+            onClick={() => setFilter('all')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              filter === 'all'
+                ? 'bg-[#01334C] text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            All ({clients.length})
+          </button>
+          <button
+            onClick={() => setFilter('signups')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              filter === 'signups'
+                ? 'bg-[#01334C] text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Signups ({
+              clients.filter(
+                c =>
+                  !c.registration_submitted &&
+                  !c.team_fill_requested &&
+                  !c.payment_completed &&
+                  !c.ticket_id
+              ).length
+            })
+          </button>
+          <button
+            onClick={() => setFilter('pending-payments')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              filter === 'pending-payments'
+                ? 'bg-[#01334C] text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Pending Payments ({
+              clients.filter(
+                c =>
+                  c.payment_completed === false &&
+                  (c.registration_submitted || c.ticket_id)
+              ).length
+            })
+          </button>
+          <button
+            onClick={() => setFilter('subscribed')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              filter === 'subscribed'
+                ? 'bg-[#01334C] text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Subscribed Users ({
+              clients.filter(
+                c =>
+                  c.ticket_id ||
+                  c.registration_submitted ||
+                  c.payment_completed
+              ).length
+            })
+          </button>
+          <button
+            onClick={() => setFilter('oneasy-form-fill')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              filter === 'oneasy-form-fill'
+                ? 'bg-[#01334C] text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Oneasy Form Fill ({clients.filter(c => c.team_fill_requested).length})
+          </button>
+          <button
+            onClick={() => setFilter('support-requests')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              filter === 'support-requests'
+                ? 'bg-[#01334C] text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Support Requests ({
+              clients.filter(c => c.has_support_request).length
+            })
+          </button>
         </div>
+      </div>
 
       {/* Clients Table/List */}
       {filteredClients.length === 0 ? (

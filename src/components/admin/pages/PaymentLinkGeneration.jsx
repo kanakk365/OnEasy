@@ -5,6 +5,7 @@ import apiClient from '../../../utils/api';
 
 function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, onPaymentLinkGenerated }) {
   const navigate = useNavigate();
+  const [customPrice, setCustomPrice] = useState(packagePlan.price || 0);
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState('');
@@ -24,7 +25,8 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
     setValidatingCoupon(true);
     setCouponError('');
 
-    const result = await validateCoupon(couponCode, packagePlan.price);
+    const baseAmount = parseFloat(customPrice) || packagePlan.price;
+    const result = await validateCoupon(couponCode, baseAmount);
 
     setValidatingCoupon(false);
 
@@ -44,10 +46,11 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
   };
 
   const calculateFinalPrice = () => {
+    const baseAmount = parseFloat(customPrice) || packagePlan.price;
     if (appliedCoupon && appliedCoupon.valid) {
       return Math.round(appliedCoupon.finalAmount);
     }
-    return packagePlan.price;
+    return baseAmount;
   };
 
   const calculateDiscount = () => {
@@ -194,7 +197,7 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
         {/* Package Details */}
         <div className="mb-6 pb-6 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Package Details</h2>
-          <div className="space-y-2">
+            <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-600">Package:</span>
               <span className="font-medium">{packagePlan.name}</span>
@@ -203,6 +206,25 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
               <span className="text-gray-600">Original Price:</span>
               <span className="font-medium">₹{packagePlan.price.toLocaleString('en-IN')}</span>
             </div>
+              <div className="flex items-center justify-between pt-2 border-t border-gray-200 gap-4">
+                <span className="text-gray-900 font-semibold">Custom Final Price (₹):</span>
+                <input
+                  type="number"
+                  min="1"
+                  step="0.01"
+                  value={customPrice}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCustomPrice(value);
+                    // reset coupon when amount changes
+                    if (appliedCoupon) {
+                      setAppliedCoupon(null);
+                      setCouponCode('');
+                    }
+                  }}
+                  className="w-40 px-3 py-1.5 border border-gray-300 rounded-lg text-right focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                />
+              </div>
             {appliedCoupon && appliedCoupon.valid && (
               <>
                 <div className="flex justify-between text-green-600">
@@ -218,7 +240,7 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
             {!appliedCoupon && (
               <div className="flex justify-between pt-2 border-t border-gray-200">
                 <span className="text-gray-900 font-semibold">Final Price:</span>
-                <span className="text-[#01334C] font-bold text-lg">₹{packagePlan.price.toLocaleString('en-IN')}</span>
+                <span className="text-[#01334C] font-bold text-lg">₹{calculateFinalPrice().toLocaleString('en-IN')}</span>
               </div>
             )}
           </div>

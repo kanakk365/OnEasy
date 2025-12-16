@@ -525,14 +525,7 @@ function Registrations() {
                                   View Details
                                 </button>
                               ) : null}
-                              {canEdit ? (
-                                <button
-                                  onClick={() => handleEdit(reg)}
-                                  className="px-3 py-1 text-xs font-medium text-white bg-[#00486D] rounded-md hover:bg-[#003855] transition-colors"
-                                >
-                                  Edit Registration
-                                </button>
-                              ) : null}
+                              {/* Edit Registration button removed for users; only allow viewing details here */}
                             </div>
                           </td>
                         </tr>

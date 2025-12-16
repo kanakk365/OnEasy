@@ -32,6 +32,20 @@ function PrivateLimitedForm({
   
   // Restore scroll on component mount (fix for Razorpay modal scroll issue)
   useEffect(() => {
+    console.log('🚀 PrivateLimitedForm component mounted');
+    console.log('📋 Initial props:', {
+      ticketId,
+      clientId,
+      isAdminFilling,
+      hasPackageDetails: !!propPackageDetails,
+      hasInitialData: !!initialData
+    });
+    console.log('📋 Initial state:', {
+      oneasyTeamFill,
+      isAdminOrSuperadmin,
+      step
+    });
+    
     // Restore scroll immediately when form loads
     document.body.style.overflow = '';
     document.body.classList.remove('rzp-modal-open');
@@ -66,7 +80,20 @@ function PrivateLimitedForm({
     if (onStepChange) onStepChange(step);
     
     console.log('👤 User role:', userRole, '| Is Admin/Superadmin:', isAdmin);
+    console.log('👤 User data:', { id: userData.id, name: userData.name, email: userData.email });
   }, []);
+
+  // Log ticketId changes
+  useEffect(() => {
+    console.log('🎫 PrivateLimitedForm ticketId changed:', ticketId);
+    console.log('🎫 Form props:', {
+      ticketId,
+      clientId,
+      isAdminFilling,
+      oneasyTeamFill,
+      isAdminOrSuperadmin
+    });
+  }, [ticketId, clientId, isAdminFilling, oneasyTeamFill, isAdminOrSuperadmin]);
 
   // Load package details and existing registration data if editing
   useEffect(() => {
@@ -223,6 +250,12 @@ function PrivateLimitedForm({
             });
             
             console.log('✅ Registration data loaded for editing');
+            console.log('🎫 Registration ticket_id:', reg.ticket_id || 'N/A');
+            if (reg.ticket_id) {
+              console.log('✅ Ticket ID available for team fill request:', reg.ticket_id);
+            } else {
+              console.warn('⚠️ No ticket_id found in registration data');
+            }
       }
     };
 
@@ -483,20 +516,49 @@ function PrivateLimitedForm({
         <button
           type="button"
           onClick={async () => {
+            console.log('🔘 Oneasy Team Fill button clicked');
+            console.log('📋 Current state:', {
+              oneasyTeamFill,
+              ticketId,
+              isAdminOrSuperadmin,
+              user: JSON.parse(localStorage.getItem('user') || '{}')
+            });
+            
             const newState = !oneasyTeamFill;
+            console.log('🔄 Setting team fill state to:', newState);
             setOneasyTeamFill(newState);
             
             // Store team fill state in localStorage
             if (newState) {
               localStorage.setItem('oneasyTeamFill', 'true');
+              console.log('💾 Stored oneasyTeamFill=true in localStorage');
               
               // Save to team fill requests table
-              const result = await requestTeamFill('private-limited', ticketId || null);
-              if (result.success) {
-                console.log('✅ Team fill request saved');
+              console.log('📤 Calling requestTeamFill API with:', {
+                registrationType: 'private-limited',
+                ticketId: ticketId || null
+              });
+              
+              try {
+                const result = await requestTeamFill('private-limited', ticketId || null);
+                console.log('📥 requestTeamFill API response:', result);
+                
+                if (result.success) {
+                  console.log('✅ Team fill request saved successfully');
+                  console.log('📊 Response data:', result.data);
+                } else {
+                  console.error('❌ Team fill request failed:', result.message);
+                }
+              } catch (error) {
+                console.error('❌ Error calling requestTeamFill:', error);
+                console.error('❌ Error details:', {
+                  message: error.message,
+                  stack: error.stack
+                });
               }
             } else {
               localStorage.removeItem('oneasyTeamFill');
+              console.log('🗑️ Removed oneasyTeamFill from localStorage');
             }
           }}
           className={`fixed bottom-8 right-8 px-6 py-4 rounded-full shadow-2xl font-medium text-white transition-all duration-300 hover:scale-105 z-40 ${

@@ -507,6 +507,47 @@ function AdminNewRegistration() {
     setStep(4); // Go to payment link generation step
   };
 
+  const handlePayLater = async (plan) => {
+    if (!selectedUser || !selectedType || !plan) {
+      alert('Please ensure user and service are selected');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      const response = await apiClient.post('/admin/registrations/create-pay-later', {
+        userId: selectedUser.id,
+        registrationType: selectedType.id,
+        packagePlan: {
+          name: plan.name,
+          price: plan.price,
+          priceValue: plan.price,
+          originalPrice: plan.originalPrice || plan.price,
+          discountAmount: 0,
+          discountPercentage: 0,
+          couponCode: null
+        }
+      });
+
+      if (response.success) {
+        alert(`✅ Registration created successfully! Payment can be collected later via Custom Payment.`);
+        // Reset form
+        setStep(1);
+        setSelectedUser(null);
+        setSelectedType(null);
+        setSelectedPlan(null);
+      } else {
+        alert(response.message || 'Failed to create registration');
+      }
+    } catch (error) {
+      console.error('Error creating pay later registration:', error);
+      alert(error.response?.data?.message || error.message || 'Failed to create registration. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePaymentLinkGenerated = () => {
     // Payment link generated successfully
   };
@@ -703,15 +744,26 @@ function AdminNewRegistration() {
             {plans.map((plan) => (
               <div
                 key={plan.id}
-                onClick={() => handlePlanSelect(plan)}
-                className="bg-white rounded-xl p-8 border-2 border-gray-200 cursor-pointer hover:border-[#01334C] hover:shadow-lg transition-all"
+                className="bg-white rounded-xl p-8 border-2 border-gray-200 hover:border-[#01334C] hover:shadow-lg transition-all"
               >
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{plan.name}</h3>
                 <p className="text-3xl font-bold text-[#01334C] mb-1">₹{plan.price.toLocaleString('en-IN')}</p>
                 <p className="text-sm text-gray-600 mb-6">{plan.description}</p>
-                <button className="w-full px-4 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium">
-                  Select Plan
-                </button>
+                <div className="flex flex-col gap-2">
+                  <button 
+                    onClick={() => handlePlanSelect(plan)}
+                    className="w-full px-4 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium"
+                  >
+                    Select Plan
+                  </button>
+                  <button 
+                    onClick={() => handlePayLater(plan)}
+                    disabled={loading}
+                    className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Creating...' : 'Pay Later'}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
