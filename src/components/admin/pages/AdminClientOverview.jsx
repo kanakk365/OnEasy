@@ -889,14 +889,53 @@ function AdminClientOverview() {
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-IN', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    try {
+      let date;
+      
+      // Handle different date string formats
+      if (typeof dateString === 'string') {
+        // If it's a space-separated date-time without timezone (e.g., "2025-12-09 10:56:00")
+        // PostgreSQL/Supabase stores timestamps in UTC, but when returned as string without timezone,
+        // we need to parse it correctly
+        if (dateString.includes(' ') && !dateString.includes('Z') && !dateString.includes('+') && !dateString.match(/[+-]\d{2}:\d{2}$/)) {
+          // Replace space with T for ISO format, then add Z to treat as UTC
+          const isoString = dateString.replace(' ', 'T');
+          // Parse as UTC (since database stores in UTC)
+          date = new Date(isoString + 'Z');
+        } else if (dateString.includes('T') && !dateString.includes('Z') && !dateString.includes('+') && !dateString.match(/[+-]\d{2}:\d{2}$/)) {
+          // ISO format without timezone, treat as UTC
+          date = new Date(dateString + 'Z');
+        } else {
+          // Has timezone info, parse normally
+          date = new Date(dateString);
+        }
+      } else {
+        date = new Date(dateString);
+      }
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) return 'N/A';
+      
+      // Format in IST (Asia/Kolkata timezone)
+      const datePart = date.toLocaleDateString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        timeZone: 'Asia/Kolkata'
+      });
+      
+      const timePart = date.toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Kolkata'
+      });
+      
+      return `${datePart}, ${timePart}`;
+    } catch (error) {
+      console.error('Error formatting date:', dateString, error);
+      return 'N/A';
+    }
   };
 
   const _getStatusBadge = (client) => {
@@ -1444,7 +1483,7 @@ function AdminClientOverview() {
                                                 <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                 </svg>
-                                                {org.incorporation_date ? new Date(org.incorporation_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                                                {org.incorporation_date ? new Date(org.incorporation_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : 'N/A'}
                                               </div>
                                             )}
                                           </div>
@@ -1822,7 +1861,7 @@ function AdminClientOverview() {
                                 onClick={() => setExpandedAdminTaskId(expandedAdminTaskId === idx ? null : idx)}
                                 className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
                               >
-                                <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</td>
+                                <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : 'N/A'}</td>
                                 <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.title || 'N/A'}</td>
                                 <td className="px-2 py-2 text-gray-600 text-xs">
                                   {task.type ? (
@@ -1841,7 +1880,7 @@ function AdminClientOverview() {
                                 <tr className="bg-gray-50">
                                   <td colSpan="4" className="px-3 py-3">
                                     <div className="space-y-2 text-xs">
-                                      <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</span></div>
+                                      <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : 'N/A'}</span></div>
                                       <div><span className="font-medium text-gray-700">Title:</span> <span className="text-gray-600">{task.title || 'N/A'}</span></div>
                                       <div><span className="font-medium text-gray-700">Type:</span> <span className="text-gray-600">{task.type ? task.type.charAt(0).toUpperCase() + task.type.slice(1) : 'N/A'}</span></div>
                                       <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1 whitespace-pre-wrap">{task.description || 'No description'}</p></div>
@@ -1883,7 +1922,7 @@ function AdminClientOverview() {
                                 onClick={() => setExpandedUserTaskId(expandedUserTaskId === idx ? null : idx)}
                                 className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
                               >
-                                <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</td>
+                                <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : 'N/A'}</td>
                                 <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.title || 'N/A'}</td>
                                 <td className="px-2 py-2 text-gray-600 text-xs">
                                   {task.type ? (
@@ -1902,7 +1941,7 @@ function AdminClientOverview() {
                                 <tr className="bg-gray-50">
                                   <td colSpan="4" className="px-3 py-3">
                                     <div className="space-y-2 text-xs">
-                                      <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</span></div>
+                                      <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : 'N/A'}</span></div>
                                       <div><span className="font-medium text-gray-700">Title:</span> <span className="text-gray-600">{task.title || 'N/A'}</span></div>
                                       <div><span className="font-medium text-gray-700">Type:</span> <span className="text-gray-600">{task.type ? task.type.charAt(0).toUpperCase() + task.type.slice(1) : 'N/A'}</span></div>
                                       <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1 whitespace-pre-wrap">{task.description || 'No description'}</p></div>
@@ -2715,7 +2754,7 @@ function AdminClientOverview() {
                               className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
                             >
                               <td className="px-2 py-2 text-gray-600 text-xs">
-                                {entry.date ? new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+                                {entry.date ? new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : 'N/A'}
                               </td>
                               <td className="px-2 py-2 text-gray-600 truncate text-xs">{entry.description || 'N/A'}</td>
                               <td className="px-2 py-2 text-gray-600 text-xs">
@@ -2734,7 +2773,7 @@ function AdminClientOverview() {
                               <tr className="bg-gray-50">
                                 <td colSpan="3" className="px-3 py-3">
                                   <div className="space-y-2 text-xs">
-                                    <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{entry.date ? new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</span></div>
+                                    <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{entry.date ? new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : 'N/A'}</span></div>
                                     <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1 whitespace-pre-wrap">{entry.description || 'No description'}</p></div>
                                   </div>
                                 </td>
