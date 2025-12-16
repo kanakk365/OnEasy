@@ -20,6 +20,8 @@ function PaymentSuccess() {
   const navigate = useNavigate();
   const [status, setStatus] = useState('processing'); // processing, success, error
   const [message, setMessage] = useState('Processing your payment...');
+  const [logs, setLogs] = useState([]);
+  const [showLogs, setShowLogs] = useState(false);
 
   useEffect(() => {
     // Restore body scroll on mount (in case Razorpay left overflow:hidden)
@@ -36,7 +38,15 @@ function PaymentSuccess() {
         const ticket_id = searchParams.get('ticket_id');
         const registration_type = searchParams.get('registration_type');
 
-        console.log('💳 Payment success page loaded:', { payment_id, order_id, paymentStatus });
+        console.log('💳 Payment success page loaded:', { 
+          payment_id, 
+          razorpay_payment_id: searchParams.get('razorpay_payment_id'),
+          order_id, 
+          paymentStatus,
+          ticket_id,
+          registration_type,
+          allParams: Object.fromEntries(searchParams.entries())
+        });
 
         // If payment_id is not in URL (template variables not replaced), we'll let webhook handle it
         // The webhook can find the payment by order_id
@@ -50,21 +60,30 @@ function PaymentSuccess() {
         }
 
         // Try to update payment status using the new endpoint (for payment links)
-        // This endpoint works with payment_id directly
+        // Send razorpay_payment_id explicitly (backend expects this for GST and other services)
         if (payment_id) {
           try {
-            console.log('📞 Calling update-payment-status with payment_id:', payment_id, 'order_id:', order_id);
-            
-            const updateResponse = await apiClient.post('/payment/update-payment-status', {
-              payment_id: payment_id,
+            const requestPayload = {
+              razorpay_payment_id: payment_id, // Send as razorpay_payment_id for consistency
+              payment_id: payment_id, // Also send as payment_id for backward compatibility
               order_id: order_id,
+              status: paymentStatus || 'paid',
               ...(ticket_id && { ticket_id }),
               ...(registration_type && { registration_type })
-            }, {
+            };
+            
+            console.log('📞 Calling update-payment-status with payload:', JSON.stringify(requestPayload, null, 2));
+            
+            const updateResponse = await apiClient.post('/payment/update-payment-status', requestPayload, {
               includeAuth: false // Public endpoint
             });
 
             logApiResponse('Update payment status response', updateResponse);
+
+            // Store logs from response if available
+            if (updateResponse.logs) {
+              setLogs(updateResponse.logs);
+            }
 
             if (updateResponse.success) {
               setStatus('success');
@@ -88,19 +107,27 @@ function PaymentSuccess() {
 
         // Fallback: call public update-payment-status (POST) instead of GET /payment/webhook (which doesn't exist)
         try {
-          console.log('📞 Calling update-payment-status (fallback) with:', { payment_id, order_id, paymentStatus });
-
-          const response = await apiClient.post('/payment/update-payment-status', {
-            ...(payment_id && { payment_id }),
+          const fallbackPayload = {
+            razorpay_payment_id: payment_id, // Send as razorpay_payment_id for consistency
+            payment_id: payment_id, // Also send as payment_id for backward compatibility
             order_id,
             ...(paymentStatus && { status: paymentStatus }),
             ...(ticket_id && { ticket_id }),
             ...(registration_type && { registration_type })
-          }, {
+          };
+          
+          console.log('📞 Calling update-payment-status (fallback) with payload:', JSON.stringify(fallbackPayload, null, 2));
+
+          const response = await apiClient.post('/payment/update-payment-status', fallbackPayload, {
             includeAuth: false // Public endpoint
           });
 
           logApiResponse('Fallback update-payment-status response', response);
+
+          // Store logs from response if available
+          if (response.logs) {
+            setLogs(response.logs);
+          }
 
           if (response.success) {
             setStatus('success');
@@ -180,9 +207,17 @@ function PaymentSuccess() {
             </div>
             <h2 className="text-2xl font-semibold text-gray-900 mb-2">Payment Successful!</h2>
             <p className="text-gray-600 mb-6">{message}</p>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 mb-4">
               Redirecting to login page...
             </div>
+            {logs.length > 0 && (
+              <button
+                onClick={() => setShowLogs(!showLogs)}
+                className="text-sm text-blue-600 hover:text-blue-800 underline"
+              >
+                {showLogs ? 'Hide' : 'Show'} Backend Logs ({logs.length})
+              </button>
+            )}
           </>
         )}
 
@@ -205,6 +240,14 @@ function PaymentSuccess() {
             </div>
             <h2 className="text-2xl font-semibold text-gray-900 mb-2">Payment Error</h2>
             <p className="text-gray-600 mb-6">{message}</p>
+            {logs.length > 0 && (
+              <button
+                onClick={() => setShowLogs(!showLogs)}
+                className="text-sm text-blue-600 hover:text-blue-800 underline mb-4"
+              >
+                {showLogs ? 'Hide' : 'Show'} Backend Logs ({logs.length})
+              </button>
+            )}
             <button
               onClick={() => navigate('/login')}
               className="px-6 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#003855] transition-colors"
@@ -213,10 +256,38 @@ function PaymentSuccess() {
             </button>
           </>
         )}
+
+        {/* Backend Logs Display */}
+        {showLogs && logs.length > 0 && (
+          <div className="mt-6 p-4 bg-gray-100 rounded-lg max-h-96 overflow-y-auto text-left">
+            <h3 className="text-lg font-semibold mb-3 text-gray-900">Backend Logs</h3>
+            <div className="space-y-2">
+              {logs.map((log, index) => (
+                <div key={log.id || index} className="p-2 bg-white rounded border border-gray-200">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-semibold text-gray-700">
+                      {log.type || 'log'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : ''}
+                    </span>
+                  </div>
+                  {log.message && (
+                    <div className="text-sm text-gray-800 mb-1">{log.message}</div>
+                  )}
+                  {log.data && (
+                    <pre className="text-xs bg-gray-50 p-2 rounded overflow-x-auto">
+                      {JSON.stringify(log.data, null, 2)}
+                    </pre>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 export default PaymentSuccess;
-
