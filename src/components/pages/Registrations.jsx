@@ -337,15 +337,6 @@ function Registrations() {
     return text.includes(search.toLowerCase());
   });
 
-  const handleEdit = (reg) => {
-    const type = deriveType(reg).toLowerCase();
-    if (type.includes("private")) return navigate("/private-limited-form");
-    if (type.includes("proprietorship")) return navigate("/proprietorship-form");
-    if (type.includes("startup")) return navigate("/startup-india-form");
-    if (type === "gst") return navigate("/gst-form");
-    // non-form services: no edit
-  };
-
   return (
     <div className="min-h-screen bg-[#f3f5f7]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -484,9 +475,6 @@ function Registrations() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filtered.map((reg, idx) => {
                       const type = deriveType(reg);
-                      const canEdit = ["private limited", "proprietorship", "startup india", "gst"].some((t) =>
-                        type.toLowerCase().includes(t)
-                      );
                       const slug = getTypeSlug(type);
                       const ticketId = getTicketId(reg);
                       const detailRoute = getDetailRoute(type, slug);

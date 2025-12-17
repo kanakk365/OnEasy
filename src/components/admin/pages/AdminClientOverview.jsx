@@ -59,6 +59,19 @@ function AdminClientOverview() {
   const [websites, setWebsites] = useState([]);
   const [savingOrg, setSavingOrg] = useState(false);
   const [_savingWebsites, setSavingWebsites] = useState(false);
+  // Personal details editing state
+  const [isEditingPersonalDetails, setIsEditingPersonalDetails] = useState(false);
+  const [savingPersonalDetails, setSavingPersonalDetails] = useState(false);
+  const [personalDetailsForm, setPersonalDetailsForm] = useState({
+    name: '',
+    email: '',
+    whatsapp: '',
+    dob: '',
+    address_line1: '',
+    business_address: '',
+    category: '',
+    sub_category: ''
+  });
 
   useEffect(() => {
     fetchClientDetails();
@@ -616,8 +629,12 @@ function AdminClientOverview() {
   };
 
   const removeOrganization = (id) => {
-    if (organisations.length > 1) {
-      setOrganisations(organisations.filter(o => o.id !== id));
+    const updatedOrgs = organisations.filter(o => o.id !== id);
+    setOrganisations(updatedOrgs);
+    
+    // If no organizations left, exit edit mode
+    if (updatedOrgs.length === 0) {
+      setIsEditingOrganisations(false);
     }
   };
 
@@ -736,6 +753,67 @@ function AdminClientOverview() {
     }
   };
 
+  // Delete organization handler
+  const handleDeleteOrganization = async (orgIndex) => {
+    if (!confirm('Are you sure you want to delete this organization? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setSavingOrg(true);
+      
+      // Get current organizations and remove the one at the specified index
+      const currentOrgs = clientProfile.user?.organisations || [];
+      const updatedOrgs = currentOrgs.filter((_, idx) => idx !== orgIndex);
+      
+      // Map to the expected format for the backend
+      const payload = {
+        organisations: updatedOrgs.map(org => {
+          // Parse websites if needed
+          let websites = [];
+          if (org.websites) {
+            try {
+              websites = typeof org.websites === 'string' ? JSON.parse(org.websites) : org.websites;
+            } catch {
+              websites = [];
+            }
+          }
+          
+          return {
+            organisationType: org.organisation_type || '',
+            legalName: org.legal_name || '',
+            tradeName: org.trade_name || '',
+            gstin: org.gstin || '',
+            incorporationDate: org.incorporation_date || '',
+            panFile: org.pan_file || null,
+            tan: org.tan || '',
+            cin: org.cin || '',
+            registeredAddress: org.registered_address || '',
+            websites: (websites || []).map(w => ({
+              type: w.type || '',
+              url: w.url || '',
+              login: w.login || '',
+              password: w.password || ''
+            }))
+          };
+        })
+      };
+      
+      const response = await updateUserDataByUserId(userId, payload);
+      
+      if (response.success) {
+        alert('✅ Organization deleted successfully!');
+        setExpandedOrgId(null);
+        await fetchClientProfile();
+      }
+    } catch (error) {
+      console.error('❌ Error deleting organization:', error);
+      alert(`❌ Failed to delete: ${error.message}`);
+    } finally {
+      setSavingOrg(false);
+    }
+  };
+
   // Website handlers
   const _addWebsite = () => {
     setWebsites([...websites, { 
@@ -791,6 +869,55 @@ function AdminClientOverview() {
       alert(`❌ Failed to save: ${error.message}`);
     } finally {
       setSavingWebsites(false);
+    }
+  };
+
+  // Personal details handlers
+  const handleEditPersonalDetails = () => {
+    // Initialize form with current values
+    setPersonalDetailsForm({
+      name: clientProfile?.user?.name || '',
+      email: clientProfile?.user?.email || '',
+      whatsapp: clientProfile?.user?.whatsapp || '',
+      dob: clientProfile?.user?.dob || '',
+      address_line1: clientProfile?.user?.address_line1 || '',
+      business_address: clientProfile?.user?.business_address || '',
+      category: clientProfile?.user?.category || '',
+      sub_category: clientProfile?.user?.sub_category || ''
+    });
+    setIsEditingPersonalDetails(true);
+  };
+
+  const handleSavePersonalDetails = async () => {
+    try {
+      setSavingPersonalDetails(true);
+      
+      // Backend expects data in clientProfile format
+      const payload = {
+        clientProfile: {
+          name: personalDetailsForm.name,
+          email: personalDetailsForm.email,
+          whatsapp: personalDetailsForm.whatsapp,
+          dob: personalDetailsForm.dob,
+          address: personalDetailsForm.address_line1,
+          businessAddress: personalDetailsForm.business_address,
+          category: personalDetailsForm.category,
+          subCategory: personalDetailsForm.sub_category
+        }
+      };
+      
+      const response = await updateUserDataByUserId(userId, payload);
+      
+      if (response.success) {
+        alert('✅ Personal details saved successfully!');
+        setIsEditingPersonalDetails(false);
+        await fetchClientProfile();
+      }
+    } catch (error) {
+      console.error('❌ Error saving personal details:', error);
+      alert(`❌ Failed to save: ${error.message}`);
+    } finally {
+      setSavingPersonalDetails(false);
     }
   };
 
@@ -1081,16 +1208,133 @@ function AdminClientOverview() {
             </button>
             {expandedSection === 'personal' && (
               <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-6">
-                  <div><span className="font-medium text-gray-700">Name:</span> <span className="text-gray-600">{clientProfile.user?.name || 'N/A'}</span></div>
-                  <div><span className="font-medium text-gray-700">WhatsApp:</span> <span className="text-gray-600">{clientProfile.user?.whatsapp || 'N/A'}</span></div>
-                  <div><span className="font-medium text-gray-700">Email:</span> <span className="text-gray-600">{clientProfile.user?.email || 'N/A'}</span></div>
-                  <div><span className="font-medium text-gray-700">DOB:</span> <span className="text-gray-600">{clientProfile.user?.dob || 'N/A'}</span></div>
-                  <div className="col-span-2"><span className="font-medium text-gray-700">Address:</span> <span className="text-gray-600">{clientProfile.user?.address_line1 || 'N/A'}</span></div>
-                  <div className="col-span-2"><span className="font-medium text-gray-700">Business Address:</span> <span className="text-gray-600">{clientProfile.user?.business_address || 'N/A'}</span></div>
-                  <div><span className="font-medium text-gray-700">Category:</span> <span className="text-gray-600">{clientProfile.user?.category || 'N/A'}</span></div>
-                  <div><span className="font-medium text-gray-700">Sub Category:</span> <span className="text-gray-600">{clientProfile.user?.sub_category || 'N/A'}</span></div>
-                </div>
+                {/* Edit Button */}
+                {!isEditingPersonalDetails && (
+                  <div className="flex justify-end mb-4">
+                    <button
+                      onClick={handleEditPersonalDetails}
+                      className="px-4 py-2 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                )}
+
+                {isEditingPersonalDetails ? (
+                  /* Edit Mode */
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <input
+                          type="text"
+                          value={personalDetailsForm.name}
+                          onChange={(e) => setPersonalDetailsForm({ ...personalDetailsForm, name: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          placeholder="Enter name"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+                        <input
+                          type="text"
+                          value={personalDetailsForm.whatsapp}
+                          onChange={(e) => setPersonalDetailsForm({ ...personalDetailsForm, whatsapp: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          placeholder="Enter WhatsApp number"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input
+                          type="email"
+                          value={personalDetailsForm.email}
+                          onChange={(e) => setPersonalDetailsForm({ ...personalDetailsForm, email: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          placeholder="Enter email"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                        <input
+                          type="date"
+                          value={personalDetailsForm.dob}
+                          onChange={(e) => setPersonalDetailsForm({ ...personalDetailsForm, dob: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                        <textarea
+                          value={personalDetailsForm.address_line1}
+                          onChange={(e) => setPersonalDetailsForm({ ...personalDetailsForm, address_line1: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          rows="2"
+                          placeholder="Enter address"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Business Address</label>
+                        <textarea
+                          value={personalDetailsForm.business_address}
+                          onChange={(e) => setPersonalDetailsForm({ ...personalDetailsForm, business_address: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          rows="2"
+                          placeholder="Enter business address"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                        <input
+                          type="text"
+                          value={personalDetailsForm.category}
+                          onChange={(e) => setPersonalDetailsForm({ ...personalDetailsForm, category: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          placeholder="Enter category"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Sub Category</label>
+                        <input
+                          type="text"
+                          value={personalDetailsForm.sub_category}
+                          onChange={(e) => setPersonalDetailsForm({ ...personalDetailsForm, sub_category: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          placeholder="Enter sub category"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Save/Cancel Buttons */}
+                    <div className="flex justify-end gap-2 pt-4">
+                      <button
+                        onClick={() => setIsEditingPersonalDetails(false)}
+                        className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSavePersonalDetails}
+                        disabled={savingPersonalDetails}
+                        className="px-4 py-2 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm disabled:opacity-50"
+                      >
+                        {savingPersonalDetails ? 'Saving...' : 'Save Changes'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* View Mode */
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-6">
+                    <div><span className="font-medium text-gray-700">Name:</span> <span className="text-gray-600">{clientProfile.user?.name || 'N/A'}</span></div>
+                    <div><span className="font-medium text-gray-700">WhatsApp:</span> <span className="text-gray-600">{clientProfile.user?.whatsapp || 'N/A'}</span></div>
+                    <div><span className="font-medium text-gray-700">Email:</span> <span className="text-gray-600">{clientProfile.user?.email || 'N/A'}</span></div>
+                    <div><span className="font-medium text-gray-700">DOB:</span> <span className="text-gray-600">{clientProfile.user?.dob || 'N/A'}</span></div>
+                    <div className="col-span-2"><span className="font-medium text-gray-700">Address:</span> <span className="text-gray-600">{clientProfile.user?.address_line1 || 'N/A'}</span></div>
+                    <div className="col-span-2"><span className="font-medium text-gray-700">Business Address:</span> <span className="text-gray-600">{clientProfile.user?.business_address || 'N/A'}</span></div>
+                    <div><span className="font-medium text-gray-700">Category:</span> <span className="text-gray-600">{clientProfile.user?.category || 'N/A'}</span></div>
+                    <div><span className="font-medium text-gray-700">Sub Category:</span> <span className="text-gray-600">{clientProfile.user?.sub_category || 'N/A'}</span></div>
+                  </div>
+                )}
 
                 {/* Documents Section */}
                 <div className="border-t border-gray-300 pt-4 mt-4">
@@ -1181,14 +1425,12 @@ function AdminClientOverview() {
                       <div key={org.id} className="bg-white rounded-lg border border-gray-200 p-6">
                         <div className="flex justify-between items-center mb-4">
                           <h4 className="text-lg font-semibold text-gray-900">Organization {idx + 1}</h4>
-                          {organisations.length > 1 && (
-                            <button
-                              onClick={() => removeOrganization(org.id)}
-                              className="text-red-600 hover:text-red-800 text-sm"
-                            >
-                              Remove
-                            </button>
-                          )}
+                          <button
+                            onClick={() => removeOrganization(org.id)}
+                            className="text-red-600 hover:text-red-800 text-sm"
+                          >
+                            Remove
+                          </button>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
@@ -1271,6 +1513,112 @@ function AdminClientOverview() {
                             />
                           </div>
                         </div>
+
+                        {/* Website Details Section */}
+                        <div className="mt-6 pt-4 border-t border-gray-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-md font-semibold text-gray-900">Website Details</h5>
+                            <button
+                              onClick={() => addWebsiteToOrg(org.id)}
+                              className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                            >
+                              <AiOutlinePlus className="w-4 h-4" />
+                              Add Website
+                            </button>
+                          </div>
+
+                          {org.websites && org.websites.length > 0 ? (
+                            <div className="overflow-x-auto">
+                              <table className="w-full border-collapse bg-white text-sm">
+                                <thead>
+                                  <tr className="bg-gray-100 border-b border-gray-300">
+                                    <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">Type</th>
+                                    <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">URL</th>
+                                    <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">Login</th>
+                                    <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">Password</th>
+                                    <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">Actions</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {org.websites.map((website) => (
+                                    <tr key={website.id} className="bg-white border-b border-gray-200">
+                                      <td className="px-3 py-2 border border-gray-300">
+                                        <select
+                                          value={website.type}
+                                          onChange={(e) => updateWebsiteInOrg(org.id, website.id, 'type', e.target.value)}
+                                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                        >
+                                          <option value="">Select Type</option>
+                                          <option value="Income Tax">Income Tax</option>
+                                          <option value="GST">GST</option>
+                                          <option value="Income Tax – TAN Based">Income Tax – TAN Based</option>
+                                          <option value="Professional Tax">Professional Tax</option>
+                                          <option value="Provident Fund">Provident Fund</option>
+                                          <option value="ESIC">ESIC</option>
+                                          <option value="MCA">MCA</option>
+                                          <option value="Labour license">Labour license</option>
+                                          <option value="TRACES">TRACES</option>
+                                          <option value="ICEGATE">ICEGATE</option>
+                                          <option value="Service Tax">Service Tax</option>
+                                          <option value="VAT">VAT</option>
+                                          <option value="Others 1">Others 1</option>
+                                          <option value="Others 2">Others 2</option>
+                                          <option value="Others 3">Others 3</option>
+                                        </select>
+                                      </td>
+                                      <td className="px-3 py-2 border border-gray-300">
+                                        <input
+                                          type="text"
+                                          value={website.url}
+                                          onChange={(e) => updateWebsiteInOrg(org.id, website.id, 'url', e.target.value)}
+                                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                          placeholder="Website URL"
+                                        />
+                                      </td>
+                                      <td className="px-3 py-2 border border-gray-300">
+                                        <input
+                                          type="text"
+                                          value={website.login}
+                                          onChange={(e) => updateWebsiteInOrg(org.id, website.id, 'login', e.target.value)}
+                                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                          placeholder="Login ID"
+                                        />
+                                      </td>
+                                      <td className="px-3 py-2 border border-gray-300">
+                                        <div className="relative">
+                                          <input
+                                            type={website.showPassword ? 'text' : 'password'}
+                                            value={website.password}
+                                            onChange={(e) => updateWebsiteInOrg(org.id, website.id, 'password', e.target.value)}
+                                            className="w-full px-2 py-1 pr-8 border border-gray-300 rounded text-sm"
+                                            placeholder="Password"
+                                          />
+                                          <button
+                                            type="button"
+                                            onClick={() => togglePasswordVisibilityInOrg(org.id, website.id)}
+                                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                          >
+                                            {website.showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
+                                          </button>
+                                        </div>
+                                      </td>
+                                      <td className="px-3 py-2 border border-gray-300">
+                                        <button
+                                          onClick={() => removeWebsiteFromOrg(org.id, website.id)}
+                                          className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                                        >
+                                          Remove
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          ) : (
+                            <p className="text-gray-500 text-sm">No websites added yet. Click "Add Website" to add one.</p>
+                          )}
+                        </div>
                       </div>
                     ))}
                     <button
@@ -1280,20 +1628,41 @@ function AdminClientOverview() {
                       <AiOutlinePlus className="w-5 h-5" />
                       Add Another Organization
                     </button>
+                    
+                    {/* Save/Cancel Buttons */}
+                    <div className="flex justify-end gap-2 pt-4">
+                      <button
+                        onClick={() => {
+                          setIsEditingOrganisations(false);
+                          fetchClientProfile(); // Reset to original data
+                        }}
+                        className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSaveOrganisations}
+                        disabled={savingOrg}
+                        className="px-4 py-2 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm disabled:opacity-50"
+                      >
+                        {savingOrg ? 'Saving...' : 'Save Organizations'}
+                      </button>
+                    </div>
                   </div>
                 ) : clientProfile.user?.organisations && clientProfile.user.organisations.length > 0 ? (
                   <div className="space-y-4">
                     <div className="overflow-x-auto -mx-4 md:mx-0 table-responsive">
                       <div className="inline-block min-w-full align-middle px-4 md:px-0">
-                        <table className="w-full text-sm table-fixed min-w-[600px]">
+                        <table className="w-full text-sm table-fixed min-w-[700px]">
                           <colgroup>
                             <col className="w-12" />
-                            <col className="w-28" />
+                            <col className="w-24" />
                             <col className="w-auto" />
                             <col className="w-auto" />
                             <col className="w-32" />
-                            <col className="w-28" />
-                            <col className="w-28" />
+                            <col className="w-24" />
+                            <col className="w-24" />
+                            <col className="w-20" />
                           </colgroup>
                       <thead className="bg-gray-100">
                         <tr>
@@ -1304,6 +1673,7 @@ function AdminClientOverview() {
                           <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">GSTIN</th>
                           <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">TAN</th>
                           <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">CIN</th>
+                          <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1320,6 +1690,18 @@ function AdminClientOverview() {
                               <td className="px-2 py-2 text-gray-600 text-xs truncate" title={org.gstin}>{org.gstin || 'N/A'}</td>
                               <td className="px-2 py-2 text-gray-600 text-xs truncate" title={org.tan}>{org.tan || 'N/A'}</td>
                               <td className="px-2 py-2 text-gray-600 text-xs truncate" title={org.cin}>{org.cin || 'N/A'}</td>
+                              <td className="px-2 py-2 text-xs">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteOrganization(idx);
+                                  }}
+                                  disabled={savingOrg}
+                                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs disabled:opacity-50"
+                                >
+                                  Delete
+                                </button>
+                              </td>
                             </tr>
                             {expandedOrgId === idx && (() => {
                               const isEditingThisOrg = editingOrgId === idx;
@@ -1735,7 +2117,32 @@ function AdminClientOverview() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-gray-600">No organisation details available</p>
+                  <div className="text-center py-8">
+                    <p className="text-gray-600 mb-4">No organisation details available</p>
+                    <button
+                      onClick={() => {
+                        // Initialize with one empty organization
+                        setOrganisations([{
+                          id: Date.now(),
+                          organisationType: '',
+                          legalName: '',
+                          tradeName: '',
+                          gstin: '',
+                          incorporationDate: '',
+                          panFile: null,
+                          tan: '',
+                          cin: '',
+                          registeredAddress: '',
+                          websites: []
+                        }]);
+                        setIsEditingOrganisations(true);
+                      }}
+                      className="px-4 py-2 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors inline-flex items-center gap-2"
+                    >
+                      <AiOutlinePlus className="w-4 h-4" />
+                      Add Organization
+                    </button>
+                  </div>
                 )}
               </div>
             )}
