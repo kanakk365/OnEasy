@@ -96,48 +96,38 @@ function AdminServices() {
   }, []);
 
   const getProgressLabel = useCallback((svc) => {
-    // Check service_status first (admin-managed status) - this is the source of truth
+    // Step 1: Check payment status first - if payment is pending, return "Open"
+    const paymentStatus = (svc.payment_status || '').toLowerCase().trim();
+    if (paymentStatus === 'pending' || paymentStatus === 'unpaid') {
+      return 'Open';
+    }
+    
+    // Step 2: Check if service_status is "Completed" (case-insensitive) - return "Resolved"
     if (svc.service_status && svc.service_status.trim() !== '') {
-      const status = svc.service_status.toLowerCase().trim();
-      
-      // Completed statuses
-      if (status === 'completed') {
-        return 'Completed';
+      const serviceStatus = svc.service_status.toLowerCase().trim();
+      if (serviceStatus === 'completed') {
+        return 'Resolved';
       }
-      
-      // In Progress statuses
-      if (status === 'wip' || 
-          status === 'data received' || 
-          status === 'awaiting confirmation from the govt' || 
-          status === 'awaiting confirmation from the government' ||
-          status === 'data pending from client') {
-        return 'In Progress';
-      }
-      
-      // Ongoing statuses
-      if (status === 'technical issue' || 
-          status === 'payment pending' ||
-          status === 'payment_pending') {
+    }
+    
+    // Step 3: If payment is completed and service_status exists (and is not completed), return "Ongoing"
+    const isPaymentCompleted = svc.payment_completed || 
+                               paymentStatus === 'paid' || 
+                               paymentStatus === 'payment_completed' ||
+                               svc.razorpay_payment_id ||
+                               svc.payment_id;
+    
+    if (isPaymentCompleted) {
+      // If service_status exists (regardless of value, except completed which is handled above), it's Ongoing
+      if (svc.service_status && svc.service_status.trim() !== '' && svc.service_status.toLowerCase().trim() !== 'completed') {
         return 'Ongoing';
       }
-      
-      // If service_status exists but doesn't match known values, default based on status
-      // This handles edge cases
-      if (status === 'submitted' || status === 'registered') {
-        return 'In Progress';
-      }
-    }
-    
-    // Fallback to other status indicators only if service_status is not set
-    if (svc.registration_submitted || svc.status === 'submitted' || svc.status === 'registered') {
-      return 'In Progress';
-    }
-    
-    if (svc.payment_completed || svc.payment_status === 'paid') {
+      // Payment completed but no service_status set yet - still Ongoing
       return 'Ongoing';
     }
     
-    return 'Ongoing'; // Default for new services
+    // Default for services without payment (shouldn't happen in normal flow, but fallback)
+    return 'Open';
   }, []);
 
   const deriveServiceFromTicket = useCallback((ticketId) => {
@@ -332,20 +322,41 @@ function AdminServices() {
   }, []);
 
   const getServiceName = useCallback((svc) => {
+    // First, get the service type from ticket ID (most reliable)
+    const ticketDerivedService = svc.ticket_id ? deriveServiceFromTicket(svc.ticket_id) : null;
+    const normalizedTicketService = ticketDerivedService ? normalizeService(ticketDerivedService) : null;
+    
+    // Check for mismatch: if package_name is incorrectly set to "Private Limited Registration" 
+    // but ticket ID indicates a different service (Startup India, GST, or Proprietorship)
+    const packageNameNormalized = svc.package_name ? normalizeService(svc.package_name) : null;
+    const packageNameLower = (svc.package_name || '').toLowerCase();
+    const isPackageMismatch = (packageNameLower.includes('private limited registration') || packageNameNormalized === 'Private Limited Company') && 
+                              ticketDerivedService && 
+                              (ticketDerivedService.includes('Startup India') || ticketDerivedService.includes('GST') || ticketDerivedService.includes('Proprietorship'));
+    
+    // Build inference chain, prioritizing ticket-derived service
     const inferred =
       normalizeService(svc.service_name) ||
       normalizeService(svc.registration_type) ||
       normalizeService(svc.service_type) ||
-      normalizeService(deriveServiceFromTicket(svc.ticket_id)) ||
-      normalizeService(svc.business_name) ||
-      normalizeService(svc.package_name);
-
+      normalizedTicketService ||
+      normalizeService(svc.business_name);
+    
     // If package_name is just a tier (Starter/Growth/Pro/Basic), ignore it
-    if (isTier(svc.package_name)) return inferred || 'Other';
+    if (isTier(svc.package_name)) {
+      return inferred || normalizedTicketService || 'Other';
+    }
+    
+    // If there's a mismatch (package_name says Private Limited but ticket says something else), ignore package_name
+    if (isPackageMismatch) {
+      return normalizedTicketService || inferred || 'Other';
+    }
 
+    // Otherwise, include package_name in the chain
     return (
       inferred ||
-      normalizeService(svc.package_name) ||
+      packageNameNormalized ||
+      normalizedTicketService ||
       'Other'
     );
   }, [deriveServiceFromTicket, isTier, normalizeService]);
@@ -364,7 +375,9 @@ function AdminServices() {
 
   const servicesList = useMemo(() => {
     const hasOther = services.some((s) => getServiceLabel(s) === 'Other');
-    return hasOther ? [...CANONICAL_SERVICES, 'Other'] : [...CANONICAL_SERVICES];
+    const allServices = hasOther ? [...CANONICAL_SERVICES, 'Other'] : [...CANONICAL_SERVICES];
+    // Remove duplicates while preserving order
+    return [...new Set(allServices)];
   }, [services, getServiceLabel, CANONICAL_SERVICES]);
 
   const statusList = ['New', 'Payment Done', 'Registered', 'Team Fill Requested'];
@@ -418,6 +431,47 @@ function AdminServices() {
     }
   };
 
+  const handleDeleteService = async (svc) => {
+    if (!svc.ticket_id) {
+      alert('Cannot delete service: Ticket ID is missing');
+      return;
+    }
+
+    const serviceName = getServiceLabel(svc);
+    const confirmMessage = `Are you sure you want to permanently delete this service?\n\nService: ${serviceName}\nTicket ID: ${svc.ticket_id}\n\nThis action cannot be undone.`;
+
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      console.log('🗑️ Deleting service:', svc.ticket_id);
+      const response = await apiClient.delete('/admin/delete-service', {
+        body: JSON.stringify({ ticketId: svc.ticket_id })
+      });
+      console.log('🗑️ Delete service response:', response);
+
+      if (response.success) {
+        // Remove from local state immediately
+        setServices((prev) => prev.filter((item) => item.ticket_id !== svc.ticket_id));
+        
+        // Show success message
+        alert('Service deleted successfully');
+        
+        // Refresh the list after a short delay
+        setTimeout(async () => {
+          await fetchServices();
+        }, 300);
+      } else {
+        throw new Error(response.message || 'Failed to delete service');
+      }
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      const errorMessage = error.message || error.response?.data?.message || 'Unknown error';
+      alert('Failed to delete service: ' + errorMessage);
+    }
+  };
+
   const handleProgressUpdate = async (svc, newProgress) => {
     try {
       if (!svc.ticket_id) {
@@ -442,20 +496,20 @@ function AdminServices() {
       // Map progress to service_status, but preserve detailed status if it exists
       let statusToSet = '';
       
-      if (newProgress === 'Completed') {
-        // For Completed, always set to Completed (even if detailed status exists)
+      if (newProgress === 'Resolved') {
+        // For Resolved, always set to Completed (even if detailed status exists)
         statusToSet = 'Completed';
-      } else if (newProgress === 'In Progress') {
+      } else if (newProgress === 'Ongoing') {
         // If current status is detailed, preserve it
-        // Otherwise set to WIP
+        // Otherwise set to WIP (for ongoing work)
         if (isDetailedStatus) {
           statusToSet = currentStatus; // Preserve detailed status
         } else {
           statusToSet = 'WIP';
         }
-      } else if (newProgress === 'Ongoing') {
+      } else if (newProgress === 'Open') {
         // If current status is detailed, preserve it
-        // Otherwise set to Payment pending
+        // Otherwise set to Payment pending (for open/pending payment)
         if (isDetailedStatus) {
           statusToSet = currentStatus; // Preserve detailed status
         } else {
@@ -573,8 +627,8 @@ function AdminServices() {
             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
           >
             <option value="">All</option>
-            {servicesList.map((s) => (
-              <option key={s} value={s}>
+            {servicesList.map((s, index) => (
+              <option key={`${s}-${index}`} value={s}>
                 {s}
               </option>
             ))}
@@ -636,7 +690,7 @@ function AdminServices() {
                   <td className="px-3 py-3 text-sm text-gray-900 whitespace-normal">
                     {svc.ticket_id ? (
                       <select
-                        value={svc.service_status || getStatusLabel(svc)}
+                        value={svc.service_status || 'Payment pending'}
                         onChange={(e) => handleStatusUpdate(svc, e.target.value)}
                         className="w-full max-w-[200px] px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
                         style={{ fontSize: '11px' }}
@@ -659,9 +713,9 @@ function AdminServices() {
                         className="w-full max-w-[150px] px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
                         style={{ fontSize: '11px' }}
                       >
+                        <option value="Open">Open</option>
                         <option value="Ongoing">Ongoing</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Completed">Completed</option>
+                        <option value="Resolved">Resolved</option>
                       </select>
                     ) : (
                       <span className="text-xs text-gray-400">N/A</span>
@@ -671,14 +725,28 @@ function AdminServices() {
                     {formatDateTime(svc.updated_at || svc.confirmed_at || svc.created_at)}
                   </td>
                   <td className="px-3 py-3 text-sm text-gray-900 whitespace-normal">
-                    <button
-                      onClick={() =>
-                        navigate(`/admin/client-overview/${svc.user_id || svc.id}?tab=services${svc.ticket_id ? `&ticketId=${svc.ticket_id}` : ''}`)
-                      }
-                      className="px-3 py-1 text-xs bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors whitespace-nowrap"
-                    >
-                      View
-                    </button>
+                    <div className="flex gap-2 items-center">
+                      <button
+                        onClick={() =>
+                          navigate(`/admin/client-overview/${svc.user_id || svc.id}?tab=services${svc.ticket_id ? `&ticketId=${svc.ticket_id}` : ''}`)
+                        }
+                        className="px-3 py-1 text-xs bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors whitespace-nowrap"
+                      >
+                        View
+                      </button>
+                      {svc.ticket_id && (
+                        <button
+                          onClick={() => handleDeleteService(svc)}
+                          className="px-3 py-1 text-xs bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors whitespace-nowrap flex items-center gap-1"
+                          title="Delete service permanently"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          Delete
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

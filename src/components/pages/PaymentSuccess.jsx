@@ -18,8 +18,35 @@ function PaymentSuccess() {
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [status, setStatus] = useState('processing'); // processing, success, error
-  const [message, setMessage] = useState('Processing your payment...');
+  // Start in "success" state so the user immediately sees a success message
+  // Backend verification and redirects still run in the background.
+  const [status, setStatus] = useState('success'); // processing, success, error
+  const [message, setMessage] = useState('Payment successful! Finalizing your registration...');
+
+  // Determine where to send the user after a successful payment
+  const getRedirectPath = (registrationType, ticketId) => {
+    if (!registrationType) return '/login';
+
+    const slug = registrationType.toLowerCase();
+    const hasTicket = !!ticketId;
+
+    // Core services with dedicated forms & view pages
+    const servicesWithForms = ['private-limited', 'proprietorship', 'startup-india', 'gst'];
+
+    // If we know the ticket and it's a core registration service, send to the view-details page
+    if (servicesWithForms.includes(slug) && hasTicket) {
+      return `/${slug}/view/${ticketId}`;
+    }
+
+    // For other services (no dedicated form), send to the registration details page
+    // e.g. /registrations/gst-returns, /registrations/business-itr, etc.
+    if (slug) {
+      return `/registrations/${slug}`;
+    }
+
+    // Fallback
+    return '/login';
+  };
 
   useEffect(() => {
     // Restore body scroll on mount (in case Razorpay left overflow:hidden)
@@ -80,16 +107,22 @@ function PaymentSuccess() {
 
             if (updateResponse.success) {
               setStatus('success');
-              setMessage('Payment successful! Redirecting to login...');
-              
-              setTimeout(() => {
+
+              // If we know which registration this payment is for, send user directly there
+              if (ticket_id && registration_type) {
+                const targetPath = getRedirectPath(registration_type, ticket_id);
+                setMessage('Payment successful! Redirecting to your registration...');
+                navigate(targetPath); // Redirect immediately
+              } else {
+                // Fallback: original behaviour – send to login
+                setMessage('Payment successful! Redirecting to login...');
                 navigate('/login', {
                   state: {
                     message: 'Payment successful! Please login to view your registration.',
                     paymentSuccess: true
                   }
                 });
-              }, 3000);
+              }
               return;
             }
           } catch (updateError) {
@@ -110,7 +143,7 @@ function PaymentSuccess() {
           };
           
           console.log('📞 Calling update-payment-status (fallback) with payload:', JSON.stringify(fallbackPayload, null, 2));
-
+          
           const response = await apiClient.post('/payment/update-payment-status', fallbackPayload, {
             includeAuth: false // Public endpoint
           });
@@ -119,17 +152,21 @@ function PaymentSuccess() {
 
           if (response.success) {
             setStatus('success');
-            setMessage('Payment successful! Redirecting to login...');
-            
-            // Redirect to login after 3 seconds
-            setTimeout(() => {
+
+            if (ticket_id && registration_type) {
+              const targetPath = getRedirectPath(registration_type, ticket_id);
+              setMessage('Payment successful! Redirecting to your registration...');
+              navigate(targetPath); // Redirect immediately
+            } else {
+              setMessage('Payment successful! Redirecting to login...');
+              // Redirect to login immediately
               navigate('/login', {
                 state: {
                   message: 'Payment successful! Please login to view your registration.',
                   paymentSuccess: true
                 }
               });
-            }, 3000);
+            }
           } else {
             setStatus('error');
             setMessage(response.message || 'Payment verification failed. Please contact support.');
@@ -140,17 +177,22 @@ function PaymentSuccess() {
         } catch (webhookError) {
           logApiError('Fallback update-payment-status error', webhookError);
           // Even if webhook fails, payment might be successful
-          // Show success message and redirect to login
+          // Show success message and redirect to appropriate page
           setStatus('success');
-          setMessage('Payment successful! Redirecting to login...');
-          setTimeout(() => {
+
+          if (ticket_id && registration_type) {
+            const targetPath = getRedirectPath(registration_type, ticket_id);
+            setMessage('Payment successful! Redirecting to your registration...');
+            navigate(targetPath); // Redirect immediately
+          } else {
+            setMessage('Payment successful! Redirecting to login...');
             navigate('/login', {
               state: {
                 message: 'Payment successful! Please login to view your registration.',
                 paymentSuccess: true
               }
             });
-          }, 3000);
+          }
         }
       } catch (error) {
         console.error('Payment processing error:', error);

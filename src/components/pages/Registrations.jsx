@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { IoSearchOutline } from "react-icons/io5";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
+import { initPaymentWithOrderId } from "../../utils/payment";
 
 function Registrations() {
   const navigate = useNavigate();
@@ -34,12 +35,22 @@ function Registrations() {
         ]);
         const norm = (resp) =>
           resp.success ? (Array.isArray(resp.data) ? resp.data : resp.data?.data || []) : [];
-        // Filter allServices to only include paid registrations (with payment_id)
-        const paidAllServices = norm(allServices).filter(reg => 
-          (reg.razorpay_payment_id && reg.razorpay_payment_id.trim() !== '') ||
-          (reg.payment_id && reg.payment_id.trim() !== '') ||
-          (reg.payment_status && reg.payment_status.toLowerCase() === 'paid')
-        );
+        // Include both paid and pending payment registrations
+        // Show services that are either paid OR have pending payment status (created by admin)
+        const paidAllServices = norm(allServices).filter(reg => {
+          const isPaid = 
+            (reg.razorpay_payment_id && reg.razorpay_payment_id.trim() !== '') ||
+            (reg.payment_id && reg.payment_id.trim() !== '') ||
+            (reg.payment_status && reg.payment_status.toLowerCase() === 'paid');
+          
+          const isPendingPayment = 
+            reg.ticket_id && 
+            reg.payment_status && 
+            (reg.payment_status.toLowerCase() === 'pending' || reg.payment_status.toLowerCase() === 'unpaid') &&
+            (reg.service_status === 'Payment pending' || !reg.service_status);
+          
+          return isPaid || isPendingPayment;
+        });
         const combined = [...norm(pl), ...norm(prop), ...norm(si), ...norm(gst), ...paidAllServices];
         
         // Deduplicate based on ticket_id or payment_id
@@ -79,13 +90,6 @@ function Registrations() {
       day: "numeric",
       timeZone: "Asia/Kolkata",
     });
-  };
-
-  const statusLabel = (reg) => {
-    if (reg.service_status) return reg.service_status;
-    if (reg.status) return reg.status;
-    if (reg.payment_status) return reg.payment_status;
-    return "Open";
   };
 
   const badge = (status) => {
@@ -154,9 +158,10 @@ function Registrations() {
     if (tid.startsWith("SALARY-HP-CAPITAL-GAINS_") || tid.includes("SALARY-HP-CAPITAL-GAINS")) return "Income From Salary, HP and Capital gains";
     if (tid.startsWith("PARTNERSHIP-FIRM-ITR_") || tid.includes("PARTNERSHIP-FIRM-ITR")) return "Partnership Firm";
     if (tid.startsWith("COMPANY-ITR_") || tid.includes("COMPANY-ITR")) return "Company - ITR";
-    // Fallback to business_name or service_type
-    if (reg.business_name) {
-      const name = reg.business_name.toLowerCase();
+    // Fallback to business_name, package_name, service_name, or service_type
+    const fallbackName = (reg.business_name || reg.package_name || reg.service_name || "").toLowerCase();
+    if (fallbackName) {
+      const name = fallbackName;
       if (name.includes('gst returns')) return "GST Returns";
       if (name.includes('gst annual return')) return "GST Annual Return";
       if (name.includes('gst amendment')) return "GST Amendment";
@@ -185,9 +190,9 @@ function Registrations() {
       if (name.includes('pf return filing')) return "PF Return Filing";
       if (name.includes('esi return filing')) return "ESI Return Filing";
       if (name.includes('professional tax return')) return "Professional Tax Return";
-      if (name.includes('partnership compliance')) return "Partnership Compliance";
-      if (name.includes('proprietorship compliance')) return "Proprietorship Compliance";
-      if (name.includes('company compliance')) return "Company Compliance";
+      if (name.includes('partnership compliance') || name.includes('partnership-compliance')) return "Partnership Compliance";
+      if (name.includes('proprietorship compliance') || name.includes('proprietorship-compliance')) return "Proprietorship Compliance";
+      if (name.includes('company compliance') || name.includes('company-compliance')) return "Company Compliance";
       if (name.includes('trademark')) return "Trademark";
       if (name.includes('salary itr') || name.includes('income tax return salary')) return "Income Tax Return - Salary";
       if (name.includes('business itr') || name.includes('business income tax')) return "Business - Income Tax Return";
@@ -201,17 +206,69 @@ function Registrations() {
       if (name.includes('section 8') || name.includes('section-8')) return "Section 8";
       if (name.includes('labour license') || name.includes('labour-license')) return "Labour License";
       if (name.includes('dsc') || name.includes('digital signature')) return "DSC";
+      // Company registration types
+      if (name.includes('opc') || name.includes('one person company')) return "OPC";
+      if (name.includes('llp') || name.includes('limited liability partnership')) return "LLP";
+      if (name.includes('partnership') && !name.includes('compliance') && !name.includes('firm itr')) return "Partnership";
+      if (name.includes('public limited')) return "Public Limited";
+      if (name.includes('mca name') || name.includes('mca-name')) return "MCA Name Approval";
+      if (name.includes('indian subsidiary')) return "Indian Subsidiary";
     }
-    return reg.registration_type || reg.service_type || reg.business_name || "Service";
+    return reg.registration_type || reg.service_type || reg.business_name || reg.package_name || reg.service_name || "Service";
   };
 
   const formatName = (reg) => {
-    const raw = reg.business_name || reg.package_name || "Service";
-    return raw.replace(/[-–]\s*Payment\s*Completed/i, "").trim();
+    // Prioritize package_name first since that's what should show in "Service Name" column
+    // (package names like "Starter", "Pro", etc.)
+    const raw = reg.package_name || reg.business_name || reg.service_name || "Service";
+    const cleaned = raw.replace(/[-–]\s*Payment\s*Completed/i, "").trim();
+
+    // If the package name is incorrectly set to "Private Limited Registration" but the service type
+    // is different (determined by ticket ID), replace it with the correct service name
+    const type = deriveType(reg);
+    if (cleaned === "Private Limited Registration" && type !== "Private Limited") {
+      // For services that already have descriptive names (Returns, Amendment, Compliance, etc.), use type as-is
+      // For others, append "Registration" if not already present
+      const typeLower = type.toLowerCase();
+      const hasDescriptiveSuffix = 
+        typeLower.includes('return') || 
+        typeLower.includes('amendment') || 
+        typeLower.includes('compliance') ||
+        typeLower.includes('notice') ||
+        typeLower.includes('addition') ||
+        typeLower.includes('removal') ||
+        typeLower.includes('change') ||
+        typeLower.includes('creation') ||
+        typeLower.includes('transfer') ||
+        typeLower.includes('deactivation') ||
+        typeLower.includes('reactivation') ||
+        typeLower.includes('application') ||
+        typeLower.includes('winding up') ||
+        typeLower.includes('plan') ||
+        typeLower.includes('payroll') ||
+        typeLower.includes('itr') ||
+        typeLower.includes('tax') ||
+        typeLower.includes('license') ||
+        typeLower.includes('trademark');
+      
+      if (hasDescriptiveSuffix) {
+        return type; // Use type as-is for descriptive names
+      } else {
+        return `${type} Registration`; // Append "Registration" for basic service types
+      }
+    }
+
+    return cleaned;
   };
 
   const getTypeSlug = (type) => {
     const t = type.toLowerCase();
+    // Handle exact slug matches first (for cases where package_name is the slug itself)
+    if (t === "company-compliance") return "company-compliance";
+    if (t === "partnership-compliance") return "partnership-compliance";
+    if (t === "proprietorship-compliance") return "proprietorship-compliance";
+    if (t === "opc") return "opc";
+    if (t === "llp") return "llp";
     if (t.includes("private")) return "private-limited";
     if (t.includes("proprietorship")) return "proprietorship";
     if (t.includes("startup")) return "startup-india";
@@ -251,9 +308,9 @@ function Registrations() {
     if (t.includes("pf return filing")) return "pf-return-filing";
     if (t.includes("esi return filing")) return "esi-return-filing";
     if (t.includes("professional tax return")) return "professional-tax-return";
-    if (t.includes("partnership compliance")) return "partnership-compliance";
-    if (t.includes("proprietorship compliance")) return "proprietorship-compliance";
-    if (t.includes("company compliance")) return "company-compliance";
+    if (t.includes("partnership compliance") || t.includes("partnership-compliance")) return "partnership-compliance";
+    if (t.includes("proprietorship compliance") || t.includes("proprietorship-compliance")) return "proprietorship-compliance";
+    if (t.includes("company compliance") || t.includes("company-compliance") || t === "company-compliance") return "company-compliance";
     if (t.includes("trademark")) return "trademark";
     if (t.includes("salary itr") || t.includes("income tax return salary")) return "salary-itr";
     if (t.includes("business itr") || t.includes("business income tax")) return "business-itr";
@@ -274,6 +331,15 @@ function Registrations() {
     }
     
     // All other services use registration pages (ServiceRegistrations component)
+    // Company Registration Services
+    if (slug === "opc") return "/registrations/opc";
+    if (slug === "llp") return "/registrations/llp";
+    if (slug === "partnership") return "/registrations/partnership";
+    if (slug === "section-8") return "/registrations/section-8";
+    if (slug === "public-limited") return "/registrations/public-limited";
+    if (slug === "mca-name-approval" || slug === "mca") return "/registrations/mca-name-approval";
+    if (slug === "indian-subsidiary") return "/registrations/indian-subsidiary";
+    
     // GST Services
     if (slug === "gst-returns") return "/registrations/gst-returns";
     if (slug === "gst-annual-return") return "/registrations/gst-annual-return";
@@ -462,7 +528,7 @@ function Registrations() {
                         Service Name
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Status
+                        Service Status
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Date
@@ -480,6 +546,8 @@ function Registrations() {
                       const detailRoute = getDetailRoute(type, slug);
                       // Services with forms - use view route with ticket ID
                       const hasFormRoute = ["private-limited", "proprietorship", "startup-india", "gst"].includes(slug) && ticketId;
+                      // For formless services, show View Details if route exists (ticketId not required)
+                      const hasDetailRoute = detailRoute !== null && detailRoute !== undefined;
                       return (
                         <tr key={reg.ticket_id || reg.id || idx} className="hover:bg-gray-50 transition-colors">
                           <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -489,15 +557,41 @@ function Registrations() {
                             {formatName(reg)}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className={`${badge(statusLabel(reg))} px-2 py-1 rounded-full text-xs font-medium`}>
-                              {statusLabel(reg)}
-                            </span>
+                            {reg.service_status ? (
+                              <span className={`${badge(reg.service_status)} px-2 py-1 rounded-full text-xs font-medium`}>
+                                {reg.service_status}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-400">N/A</span>
+                            )}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                             {formatDate(reg.updated_at || reg.created_at || reg.createdAt)}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm">
                             <div className="flex items-center gap-2">
+                              {/* Pay button for pending payments */}
+                              {reg.service_status === 'Payment pending' && (reg.razorpay_order_id || reg.order_id) ? (
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      const orderId = reg.razorpay_order_id || reg.order_id;
+                                      const amount = reg.package_price || reg.amount || 0;
+                                      await initPaymentWithOrderId(orderId, amount, {
+                                        ticket_id: ticketId,
+                                        registration_type: slug,
+                                        package_name: reg.package_name || formatName(reg)
+                                      });
+                                    } catch (error) {
+                                      console.error('Payment error:', error);
+                                      alert(error.message || 'Failed to initiate payment. Please try again.');
+                                    }
+                                  }}
+                                  className="px-3 py-1 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors"
+                                >
+                                  Pay
+                                </button>
+                              ) : null}
                               {hasFormRoute ? (
                                 <button
                                   onClick={() => navigate(`/${slug}/view/${ticketId}`)}
@@ -505,7 +599,7 @@ function Registrations() {
                                 >
                                   View Details
                                 </button>
-                              ) : detailRoute ? (
+                              ) : hasDetailRoute ? (
                                 <button
                                   onClick={() => navigate(detailRoute)}
                                   className="px-3 py-1 text-xs font-medium text-[#00486D] border border-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"

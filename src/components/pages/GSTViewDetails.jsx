@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getGSTByTicketId, getSignedUrl } from '../../utils/gstApi';
 
 function GSTViewDetails() {
   const { ticketId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [registration, setRegistration] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [signedUrls, setSignedUrls] = useState({});
+
+  // Check if this is an admin/superadmin view
+  const isSuperAdminView = location.pathname.startsWith('/superadmin/client-details');
+  const isAdminView = location.pathname.startsWith('/admin/client-details') || isSuperAdminView;
+  
+  // Determine the back route based on whether it's an admin view
+  const getBackRoute = () => {
+    if (isSuperAdminView) return '/superadmin/clients';
+    if (isAdminView) return '/admin/clients';
+    return '/gst-dashboard';
+  };
 
   useEffect(() => {
     fetchRegistration();
@@ -141,7 +153,7 @@ function GSTViewDetails() {
             {error || 'The registration you are looking for does not exist or you do not have permission to view it.'}
           </p>
           <button
-            onClick={() => navigate('/gst-dashboard')}
+            onClick={() => navigate(getBackRoute())}
             className="px-6 py-3 bg-[#00486D] text-white rounded-md hover:bg-[#003855] transition-colors"
           >
             Back to Dashboard
@@ -164,9 +176,44 @@ function GSTViewDetails() {
               Ticket ID: <span className="font-medium text-[#00486D]">{ticketId}</span>
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
+            {/* Edit button - only for GST registrations (GST_ tickets) */}
+            {ticketId?.startsWith('GST_') && (
+              <button
+                onClick={() => {
+                  // Navigate to appropriate form page based on user role
+                  if (isSuperAdminView) {
+                    // SuperAdmin: Navigate to fill-form page within superadmin layout
+                    navigate(`/superadmin/fill-form/${ticketId}`);
+                  } else if (isAdminView) {
+                    // Admin: Navigate to fill-form page within admin layout
+                    navigate(`/admin/fill-form/${ticketId}`);
+                  } else {
+                    // Regular user: Navigate to regular form page
+                    localStorage.setItem('editingTicketId', ticketId);
+                    localStorage.setItem('selectedPackage', JSON.stringify({
+                      name: registration.package_name,
+                      price: registration.package_price,
+                      priceValue: registration.package_price
+                    }));
+                    localStorage.setItem('paymentDetails', JSON.stringify({
+                      orderId: registration.order_id || registration.razorpay_order_id,
+                      paymentId: registration.razorpay_payment_id || registration.payment_id,
+                      timestamp: registration.created_at
+                    }));
+                    navigate('/gst-form');
+                  }
+                }}
+                className="px-4 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit Registration
+              </button>
+            )}
             <button
-              onClick={() => navigate('/gst-dashboard')}
+              onClick={() => navigate(getBackRoute())}
               className="px-4 py-2 border border-[#00486D] text-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
             >
               Back to Dashboard

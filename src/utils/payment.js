@@ -372,6 +372,135 @@ export const testPayment = async (packageData) => {
   };
 };
 
+// Initialize payment with existing order ID (for pending payments)
+export const initPaymentWithOrderId = async (orderId, amount, registrationData = {}) => {
+  return new Promise((resolve, reject) => {
+    // Load Razorpay script
+    loadRazorpayScript().then(isScriptLoaded => {
+      if (!isScriptLoaded) {
+        reject(new Error('Failed to load Razorpay SDK'));
+        return;
+      }
+
+      // Get user data
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!userData.phone && !userData.email) {
+        reject(new Error('User information not found. Please login again.'));
+        return;
+      }
+
+      // Get Razorpay key from backend
+      apiClient.get('/payment/key').then(keyResponse => {
+        if (!keyResponse.success) {
+          reject(new Error(keyResponse.message || 'Failed to get Razorpay key'));
+          return;
+        }
+
+        const { keyId } = keyResponse.data;
+
+        // Store original body overflow to restore later
+        const originalBodyOverflow = document.body.style.overflow;
+        
+        // Restore scroll helper function
+        const restoreScroll = () => {
+          document.body.style.overflow = originalBodyOverflow || '';
+          document.body.classList.remove('rzp-modal-open');
+          document.documentElement.classList.remove('rzp-modal-open');
+        };
+
+        const serviceDescription = registrationData.package_name 
+          ? `Payment for ${registrationData.package_name}`
+          : 'Payment for service';
+
+        // Configure Razorpay options
+        const options = {
+          key: keyId,
+          amount: amount * 100, // Convert to paise
+          currency: 'INR',
+          name: 'OnEasy',
+          description: serviceDescription,
+          order_id: orderId,
+          callback_url: 'https://businessportal.oneasy.ai/payment-success',
+          prefill: {
+            name: userData.name || '',
+            email: userData.email || '',
+            contact: userData.phone || ''
+          },
+          theme: {
+            color: '#01334C'
+          },
+          handler: function (response) {
+            console.log('Payment successful:', response);
+            restoreScroll();
+            
+            // Verify payment
+            const verifyPayload = {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              ...(registrationData.ticket_id && { ticket_id: registrationData.ticket_id }),
+              ...(registrationData.registration_type && { registration_type: registrationData.registration_type })
+            };
+
+            apiClient.post('/payment/verify', verifyPayload).then(verifyResponse => {
+              if (verifyResponse.success) {
+                resolve({
+                  success: true,
+                  orderId: response.razorpay_order_id,
+                  paymentId: response.razorpay_payment_id
+                });
+                // Redirect to payment success page with additional context so we know where to send user next
+                const params = new URLSearchParams({
+                  order_id: response.razorpay_order_id,
+                  payment_id: response.razorpay_payment_id
+                });
+                if (registrationData.ticket_id) {
+                  params.set('ticket_id', registrationData.ticket_id);
+                }
+                if (registrationData.registration_type) {
+                  params.set('registration_type', registrationData.registration_type);
+                }
+                window.location.href = `/payment-success?${params.toString()}`;
+              } else {
+                reject(new Error('Payment verification failed'));
+              }
+            }).catch(error => {
+              console.error('Payment verification error:', error);
+              reject(error);
+            });
+          },
+          modal: {
+            ondismiss: function() {
+              restoreScroll();
+              console.log('Payment cancelled by user');
+              reject(new Error('Payment cancelled'));
+            }
+          }
+        };
+
+        // Open Razorpay checkout
+        const razorpay = new window.Razorpay(options);
+        
+        razorpay.on('payment.failed', function (response) {
+          restoreScroll();
+          console.error('Payment failed:', response.error);
+          reject(new Error(response.error.description || 'Payment failed'));
+        });
+
+        razorpay.open();
+
+      }).catch(error => {
+        console.error('Error getting Razorpay key:', error);
+        reject(error);
+      });
+
+    }).catch(error => {
+      console.error('Script loading error:', error);
+      reject(error);
+    });
+  });
+};
+
 
 
 

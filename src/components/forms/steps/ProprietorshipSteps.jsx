@@ -68,10 +68,11 @@ const OCCUPATION_TYPES = [
 ];
 
 // Step 1: Basic Business Details
-export function BasicBusinessDetailsContent({ formData, setFormData }) {
+export function BasicBusinessDetailsContent({ formData, setFormData, disabled = false }) {
   const step1 = formData.step1 || {};
 
   const updateStep1 = (field, value) => {
+    if (disabled) return;
     setFormData({
       ...formData,
       step1: {
@@ -82,14 +83,13 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
   };
 
   const handleFileUpload = async (field, file) => {
-    if (file) {
-      try {
-        const base64 = await fileToBase64(file);
-        updateStep1(field, base64);
-      } catch (error) {
-        console.error('Error converting file:', error);
-        alert('Failed to upload file. Please try again.');
-      }
+    if (disabled || !file) return;
+    try {
+      const base64 = await fileToBase64(file);
+      updateStep1(field, base64);
+    } catch (error) {
+      console.error('Error converting file:', error);
+      alert('Failed to upload file. Please try again.');
     }
   };
 
@@ -99,7 +99,8 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Field label="Name of the Business">
           <input
-            className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+            disabled={disabled}
+            className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Enter business name"
             value={step1.businessName || ''}
             onChange={(e) => updateStep1('businessName', e.target.value)}
@@ -109,7 +110,8 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
         <Field label="Business Email">
           <input
             type="email"
-            className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+            disabled={disabled}
+            className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Enter business email"
             value={step1.businessEmail || ''}
             onChange={(e) => updateStep1('businessEmail', e.target.value)}
@@ -121,7 +123,8 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
       <Field label="Nature of the Business">
         <textarea
           rows={4}
-          className="w-full px-4 py-3 rounded-lg bg-white outline-none resize-none"
+          disabled={disabled}
+          className={`w-full px-4 py-3 rounded-lg bg-white outline-none resize-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Describe the main line of activity briefly"
           value={step1.natureOfBusiness || ''}
           onChange={(e) => updateStep1('natureOfBusiness', e.target.value)}
@@ -140,7 +143,8 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
             />
             <input
               type="tel"
-              className="flex-1 px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`flex-1 px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter contact number"
               value={step1.contactNumber || ''}
               onChange={(e) => updateStep1('contactNumber', e.target.value)}
@@ -153,7 +157,8 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
           <div className="grid grid-cols-2 gap-3">
             <input
               type="number"
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Male"
               value={step1.maleEmployees || ''}
               onChange={(e) => updateStep1('maleEmployees', e.target.value)}
@@ -161,7 +166,8 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
             />
             <input
               type="number"
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Female"
               value={step1.femaleEmployees || ''}
               onChange={(e) => updateStep1('femaleEmployees', e.target.value)}
@@ -180,7 +186,8 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Field label="Address Line 1">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Building, Street"
               value={step1.addressLine1 || ''}
               onChange={(e) => updateStep1('addressLine1', e.target.value)}
@@ -189,7 +196,8 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
 
           <Field label="Address Line 2">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Area, Landmark"
               value={step1.addressLine2 || ''}
               onChange={(e) => updateStep1('addressLine2', e.target.value)}
@@ -198,7 +206,8 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
 
           <Field label="City">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter city"
               value={step1.city || ''}
               onChange={(e) => updateStep1('city', e.target.value)}
@@ -211,6 +220,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
               value={step1.state || ''}
               onChange={(value) => updateStep1('state', value)}
               placeholder="Select State"
+              disabled={disabled}
             />
           </Field>
 
@@ -225,7 +235,8 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
           <Field label="Pin Code">
             <input
               type="text"
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter pin code"
               value={step1.pincode || ''}
               onChange={(e) => updateStep1('pincode', e.target.value)}
@@ -243,6 +254,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
           placeholder="Upload Doc in PDF"
           onChange={(file) => handleFileUpload('utilityBill', file)}
           value={step1.utilityBill}
+          disabled={disabled}
         />
 
         <FileUploadField
@@ -251,6 +263,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
           placeholder="Upload Doc in PDF"
           onChange={(file) => handleFileUpload('rentalAgreement', file)}
           value={step1.rentalAgreement}
+          disabled={disabled}
         />
       </div>
 
@@ -262,6 +275,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
             value={step1.businessType || ''}
             onChange={(value) => updateStep1('businessType', value)}
             placeholder="Select Business Type"
+            disabled={disabled}
           />
         </Field>
 
@@ -271,6 +285,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
             value={step1.socialCategory || ''}
             onChange={(value) => updateStep1('socialCategory', value)}
             placeholder="Select Category"
+            disabled={disabled}
           />
         </Field>
       </div>
@@ -284,7 +299,8 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Field label="Bank Name">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter bank name"
               value={step1.bankName || ''}
               onChange={(e) => updateStep1('bankName', e.target.value)}
@@ -293,7 +309,8 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
 
           <Field label="Bank Account Number">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter account number"
               value={step1.bankAccountNumber || ''}
               onChange={(e) => updateStep1('bankAccountNumber', e.target.value)}
@@ -302,7 +319,8 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
 
           <Field label="IFSC Code">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter IFSC code"
               value={step1.ifscCode || ''}
               onChange={(e) => updateStep1('ifscCode', e.target.value)}
@@ -315,13 +333,15 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
               value={step1.hasGSTIN ? 'Yes' : 'No'}
               onChange={(value) => updateStep1('hasGSTIN', value === 'Yes')}
               placeholder="Select Yes or No"
+              disabled={disabled}
             />
           </Field>
 
           {step1.hasGSTIN && (
             <Field label="GSTIN Number">
               <input
-                className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                disabled={disabled}
+                className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 placeholder="Enter GSTIN number"
                 value={step1.gstinNumber || ''}
                 onChange={(e) => updateStep1('gstinNumber', e.target.value)}
@@ -341,7 +361,8 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
           <Field label="Date of Incorporation/Registration">
             <input
               type="date"
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               value={step1.dateOfIncorporation || ''}
               onChange={(e) => updateStep1('dateOfIncorporation', e.target.value)}
             />
@@ -353,6 +374,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
               value={step1.businessCommenced ? 'Yes' : 'No'}
               onChange={(value) => updateStep1('businessCommenced', value === 'Yes')}
               placeholder="Select Yes or No"
+              disabled={disabled}
             />
           </Field>
 
@@ -360,7 +382,8 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
             <Field label="Date of Commencement of Business">
               <input
                 type="date"
-                className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+                disabled={disabled}
+                className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 value={step1.dateOfCommencement || ''}
                 onChange={(e) => updateStep1('dateOfCommencement', e.target.value)}
               />
@@ -373,6 +396,7 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
               value={step1.filedITR ? 'Yes' : 'No'}
               onChange={(value) => updateStep1('filedITR', value === 'Yes')}
               placeholder="Select Yes or No"
+              disabled={disabled}
             />
           </Field>
         </div>
@@ -382,10 +406,11 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
 }
 
 // Step 2: Basic Proprietor Details
-export function BasicProprietorDetailsContent({ formData, setFormData }) {
+export function BasicProprietorDetailsContent({ formData, setFormData, disabled = false }) {
   const step2 = formData.step2 || {};
 
   const updateStep2 = (field, value) => {
+    if (disabled) return;
     setFormData({
       ...formData,
       step2: {
@@ -396,14 +421,13 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
   };
 
   const handleFileUpload = async (field, file) => {
-    if (file) {
-      try {
-        const base64 = await fileToBase64(file);
-        updateStep2(field, base64);
-      } catch (error) {
-        console.error('Error converting file:', error);
-        alert('Failed to upload file. Please try again.');
-      }
+    if (disabled || !file) return;
+    try {
+      const base64 = await fileToBase64(file);
+      updateStep2(field, base64);
+    } catch (error) {
+      console.error('Error converting file:', error);
+      alert('Failed to upload file. Please try again.');
     }
   };
 
@@ -413,7 +437,8 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Field label="Name of Proprietor">
           <input
-            className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+            disabled={disabled}
+            className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Enter name as per PAN card"
             value={step2.proprietorName || ''}
             onChange={(e) => updateStep2('proprietorName', e.target.value)}
@@ -423,7 +448,8 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
         <Field label="Date of Birth">
           <input
             type="date"
-            className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+            disabled={disabled}
+            className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             value={step2.dateOfBirth || ''}
             onChange={(e) => updateStep2('dateOfBirth', e.target.value)}
           />
@@ -435,13 +461,15 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
             value={step2.occupationType || ''}
             onChange={(value) => updateStep2('occupationType', value)}
             placeholder="Select occupation type"
+            disabled={disabled}
           />
         </Field>
 
         <Field label="Email ID of the Proprietor">
           <input
             type="email"
-            className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+            disabled={disabled}
+            className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Enter email address"
             value={step2.proprietorEmail || ''}
             onChange={(e) => updateStep2('proprietorEmail', e.target.value)}
@@ -461,7 +489,8 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
             />
             <input
               type="tel"
-              className="flex-1 px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`flex-1 px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter contact number"
               value={step2.proprietorContact || ''}
               onChange={(e) => updateStep2('proprietorContact', e.target.value)}
@@ -480,7 +509,8 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Field label="Address Line 1">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Building, Street"
               value={step2.permanentAddressLine1 || ''}
               onChange={(e) => updateStep2('permanentAddressLine1', e.target.value)}
@@ -489,7 +519,8 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
 
           <Field label="Address Line 2">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Area, Landmark (optional)"
               value={step2.permanentAddressLine2 || ''}
               onChange={(e) => updateStep2('permanentAddressLine2', e.target.value)}
@@ -498,7 +529,8 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
 
           <Field label="City">
             <input
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter city"
               value={step2.permanentCity || ''}
               onChange={(e) => updateStep2('permanentCity', e.target.value)}
@@ -511,6 +543,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
               value={step2.permanentState || ''}
               onChange={(value) => updateStep2('permanentState', value)}
               placeholder="Select State"
+              disabled={disabled}
             />
           </Field>
 
@@ -525,7 +558,8 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
           <Field label="Pin Code">
             <input
               type="text"
-              className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter pin code"
               value={step2.permanentPincode || ''}
               onChange={(e) => updateStep2('permanentPincode', e.target.value)}
@@ -543,6 +577,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
           placeholder="Upload Doc in PDF"
           onChange={(file) => handleFileUpload('aadhaarCard', file)}
           value={step2.aadhaarCard}
+          disabled={disabled}
         />
 
         <FileUploadField
@@ -551,6 +586,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
           placeholder="Upload Photo in JPG, JPEG"
           onChange={(file) => handleFileUpload('passportPhoto', file)}
           value={step2.passportPhoto}
+          disabled={disabled}
         />
 
         <FileUploadField
@@ -559,6 +595,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
           placeholder="Upload Doc in PDF"
           onChange={(file) => handleFileUpload('panCard', file)}
           value={step2.panCard}
+          disabled={disabled}
         />
 
         <FileUploadField
@@ -567,6 +604,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
           placeholder="Upload Doc in PDF"
           onChange={(file) => handleFileUpload('bankStatement', file)}
           value={step2.bankStatement}
+          disabled={disabled}
         />
 
         <FileUploadField
@@ -575,6 +613,7 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
           placeholder="Upload Photo in JPG, JPEG"
           onChange={(file) => handleFileUpload('nameBoard', file)}
           value={step2.nameBoard}
+          disabled={disabled}
         />
       </div>
     </div>

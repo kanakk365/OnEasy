@@ -163,17 +163,17 @@ function AdminClients() {
       {/* Filter Tabs */}
       <div className="bg-white rounded-xl p-5 mb-6 transition-all duration-300 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
         <div className="flex gap-4 flex-wrap">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === 'all'
-                ? 'bg-[#01334C] text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            All ({clients.length})
-          </button>
-          <button
+            <button
+              onClick={() => setFilter('all')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                filter === 'all'
+                  ? 'bg-[#01334C] text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              All ({clients.length})
+            </button>
+            <button
             onClick={() => setFilter('signups')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               filter === 'signups'
@@ -226,28 +226,28 @@ function AdminClients() {
           </button>
           <button
             onClick={() => setFilter('oneasy-form-fill')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               filter === 'oneasy-form-fill'
-                ? 'bg-[#01334C] text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
+                  ? 'bg-[#01334C] text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
             Oneasy Form Fill ({clients.filter(c => c.team_fill_requested).length})
-          </button>
-          <button
+            </button>
+            <button
             onClick={() => setFilter('support-requests')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               filter === 'support-requests'
-                ? 'bg-[#01334C] text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
+                  ? 'bg-[#01334C] text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
             Support Requests ({
               clients.filter(c => c.has_support_request).length
             })
-          </button>
+            </button>
+          </div>
         </div>
-      </div>
 
       {/* Clients Table/List */}
       {filteredClients.length === 0 ? (
@@ -273,8 +273,9 @@ function AdminClients() {
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Support Request</th>
                 )}
                 {filter !== 'support-requests' && (
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
                 )}
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -310,8 +311,53 @@ function AdminClients() {
                     </td>
                   )}
                   {filter !== 'support-requests' && (
-                    <td className="px-6 py-4">{getStatusBadge(client)}</td>
+                  <td className="px-6 py-4">{getStatusBadge(client)}</td>
                   )}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/admin/client-overview/${client.user_id}`);
+                        }}
+                        className="px-3 py-1 text-xs bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors whitespace-nowrap"
+                      >
+                        View
+                      </button>
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const confirmMessage = `Are you sure you want to permanently delete this client?\\n\\nName: ${client.name || 'Unknown'}\\nEmail: ${client.email || 'N/A'}\\nPhone: ${client.phone || 'N/A'}\\n\\nThis will also delete their services and related records.`;
+                          if (!window.confirm(confirmMessage)) return;
+
+                          try {
+                            console.log('🗑️ Deleting client:', client.user_id);
+                            const response = await apiClient.delete('/admin/clients/delete', {
+                              body: JSON.stringify({ userId: client.user_id })
+                            });
+                            console.log('🗑️ Delete client response:', response);
+
+                            if (response.success) {
+                              setClients((prev) => prev.filter((c) => c.user_id !== client.user_id));
+                              alert('Client deleted successfully');
+                            } else {
+                              throw new Error(response.message || 'Failed to delete client');
+                            }
+                          } catch (error) {
+                            console.error('Error deleting client:', error);
+                            const errorMessage = error.message || error.response?.data?.message || 'Unknown error';
+                            alert('Failed to delete client: ' + errorMessage);
+                          }
+                        }}
+                        className="px-3 py-1 text-xs bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors whitespace-nowrap flex items-center gap-1"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>

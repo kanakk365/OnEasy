@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getProprietorshipByTicketId, getSignedUrl } from '../../utils/proprietorshipApi';
 
 function ProprietorshipViewDetails() {
   const { ticketId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [registration, setRegistration] = useState(null);
   const [signedUrls, setSignedUrls] = useState({});
+
+  // Check if this is an admin/superadmin view
+  const isSuperAdminView = location.pathname.startsWith('/superadmin/client-details');
+  const isAdminView = location.pathname.startsWith('/admin/client-details') || isSuperAdminView;
+  
+  // Determine the back route based on whether it's an admin view
+  const getBackRoute = () => {
+    if (isSuperAdminView) return '/superadmin/clients';
+    if (isAdminView) return '/admin/clients';
+    return '/proprietorship-dashboard';
+  };
 
   useEffect(() => {
     fetchRegistrationDetails();
@@ -131,7 +143,7 @@ function ProprietorshipViewDetails() {
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Registration Not Found</h3>
           <p className="text-gray-600 mb-4">The registration you're looking for doesn't exist.</p>
           <button
-            onClick={() => navigate('/proprietorship-dashboard')}
+            onClick={() => navigate(getBackRoute())}
             className="px-6 py-2 text-white rounded-md"
             style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
           >
@@ -158,12 +170,49 @@ function ProprietorshipViewDetails() {
             </div>
             <p className="text-gray-600">Proprietorship Registration Details</p>
           </div>
-          <button
-            onClick={() => navigate('/proprietorship-dashboard')}
-            className="px-4 py-2 border border-[#00486D] text-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
-          >
-            Back to Dashboard
-          </button>
+          <div className="flex gap-3">
+            {/* Edit button - only for Proprietorship registrations (PROP_ tickets) */}
+            {ticketId?.startsWith('PROP_') && (
+              <button
+                onClick={() => {
+                  // Navigate to appropriate form page based on user role
+                  if (isSuperAdminView) {
+                    // SuperAdmin: Navigate to fill-form page within superadmin layout
+                    navigate(`/superadmin/fill-form/${ticketId}`);
+                  } else if (isAdminView) {
+                    // Admin: Navigate to fill-form page within admin layout
+                    navigate(`/admin/fill-form/${ticketId}`);
+                  } else {
+                    // Regular user: Navigate to regular form page
+                    localStorage.setItem('editingTicketId', ticketId);
+                    localStorage.setItem('selectedPackage', JSON.stringify({
+                      name: registration.package_name,
+                      price: registration.package_price,
+                      priceValue: registration.package_price
+                    }));
+                    localStorage.setItem('paymentDetails', JSON.stringify({
+                      orderId: registration.razorpay_order_id,
+                      paymentId: registration.razorpay_payment_id,
+                      timestamp: registration.created_at
+                    }));
+                    navigate('/proprietorship-form');
+                  }
+                }}
+                className="px-4 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit Registration
+              </button>
+            )}
+            <button
+              onClick={() => navigate(getBackRoute())}
+              className="px-4 py-2 border border-[#00486D] text-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
+            >
+              Back to Dashboard
+            </button>
+          </div>
         </div>
 
         {/* Registration Info */}

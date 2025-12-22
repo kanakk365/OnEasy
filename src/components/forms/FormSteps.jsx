@@ -14,7 +14,7 @@ const fileToBase64 = (file) => {
   });
 };
 
-function DirectorForm({ directorNumber }) {
+function DirectorForm({ directorNumber, disabled = false }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="text-sm font-medium text-[#28303F]">
@@ -23,13 +23,15 @@ function DirectorForm({ directorNumber }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Field label="Name (as per PAN)" required>
           <input
-            className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+            disabled={disabled}
+            className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Enter your Name (as per PAN)"
           />
         </Field>
         <Field label="Email address" required>
           <input
-            className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+            disabled={disabled}
+            className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Select your Email address"
           />
         </Field>
@@ -43,7 +45,8 @@ function DirectorForm({ directorNumber }) {
               className="w-16 px-3 py-3 rounded-lg bg-white text-[#5A5A5A] disabled:opacity-100"
             />
             <input
-              className="flex-1 px-4 py-3 rounded-lg bg-white outline-none"
+              disabled={disabled}
+              className={`flex-1 px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter your Contact Number"
             />
           </div>
@@ -52,6 +55,7 @@ function DirectorForm({ directorNumber }) {
           label="Upload Aadhaar Card"
           buttonLabel="Upload Doc in PDF"
           accept="application/pdf"
+          disabled={disabled}
         />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -59,11 +63,13 @@ function DirectorForm({ directorNumber }) {
           label="PAN Upload"
           buttonLabel="Upload Doc in PDF"
           accept="application/pdf"
+          disabled={disabled}
         />
         <Field label="Are you an Authorised Representative" required>
           <CustomDropdown
             options={["Yes", "No"]}
             placeholder="Select Yes or No"
+            disabled={disabled}
           />
         </Field>
       </div>
@@ -71,10 +77,11 @@ function DirectorForm({ directorNumber }) {
   );
 }
 
-export function Step1Content({ formData, setFormData }) {
+export function Step1Content({ formData, setFormData, disabled = false }) {
   const step1 = formData?.step1 || {};
   
   const updateStep1 = (field, value) => {
+    if (disabled) return;
     setFormData({
       ...formData,
       step1: {
@@ -88,7 +95,8 @@ export function Step1Content({ formData, setFormData }) {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Field label="Business Name">
         <input
-          className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+          disabled={disabled}
+          className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Enter your Business Name"
           value={step1.businessName || ''}
           onChange={(e) => updateStep1('businessName', e.target.value)}
@@ -99,6 +107,7 @@ export function Step1Content({ formData, setFormData }) {
         <CustomDropdown
           options={["Private Limited", "Public Limited", "LLP", "Partnership", "Sole Proprietorship"]}
           placeholder="Select your Business Type"
+          disabled={disabled}
         />
       </Field>
 
@@ -106,7 +115,8 @@ export function Step1Content({ formData, setFormData }) {
         <Field label="Nature of Business">
           <textarea
             rows="5"
-            className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+            disabled={disabled}
+            className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Write minimum 400 characters"
           />
         </Field>
@@ -114,7 +124,8 @@ export function Step1Content({ formData, setFormData }) {
 
       <Field label="Business Email">
         <input
-          className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+          disabled={disabled}
+          className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Enter your Business Email"
         />
       </Field>
@@ -127,7 +138,8 @@ export function Step1Content({ formData, setFormData }) {
             className="w-16 px-3 py-3 rounded-lg bg-white text-[#5A5A5A]"
           />
           <input
-            className="flex-1 px-4 py-3 rounded-lg bg-white outline-none"
+            disabled={disabled}
+            className={`flex-1 px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Enter your Business Contact Number"
           />
         </div>
@@ -135,28 +147,32 @@ export function Step1Content({ formData, setFormData }) {
 
       <Field label="Number of Directors/Partners">
         <input
-          className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+          disabled={disabled}
+          className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Enter Number of Directors/Partners"
         />
       </Field>
 
       <Field label="Mobile App link">
         <input
-          className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+          disabled={disabled}
+          className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Enter Mobile App link"
         />
       </Field>
 
       <Field label="Website link">
         <input
-          className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+          disabled={disabled}
+          className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Enter Website link"
         />
       </Field>
 
       <Field label="Number of Employees">
         <input
-          className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+          disabled={disabled}
+          className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Enter Number of Employees"
         />
       </Field>
@@ -165,30 +181,35 @@ export function Step1Content({ formData, setFormData }) {
         label="Upload Logo"
         buttonLabel="Upload Logo in Jpg, Jpeg"
         accept="image/jpeg,image/jpg"
+        disabled={disabled}
       />
 
       <FileUploadField
         label="Udyam Registration"
         buttonLabel="Upload Doc in PDF"
         accept="application/pdf"
+        disabled={disabled}
       />
 
       <FileUploadField
         label="Certificate of Incorporation / Partnership Deed"
         buttonLabel="Upload Doc in PDF"
         accept="application/pdf"
+        disabled={disabled}
       />
 
       <FileUploadField
         label="PAN(Entity)"
         buttonLabel="Upload Doc in PDF"
         accept="application/pdf"
+        disabled={disabled}
       />
 
       <FileUploadField
         label="TAN(Entity)"
         buttonLabel="Upload Doc in PDF"
         accept="application/pdf"
+        disabled={disabled}
       />
 
       <Field
@@ -197,20 +218,37 @@ export function Step1Content({ formData, setFormData }) {
         <CustomDropdown
           options={["Yes", "No"]}
           placeholder="Select Yes or No"
+          disabled={disabled}
         />
       </Field>
     </div>
   );
 }
 
-export function Step2Content() {
+export function Step2Content({ formData, setFormData, disabled = false }) {
+  const step2 = formData?.step2 || {};
+  
+  const updateStep2 = (field, value) => {
+    if (disabled) return;
+    setFormData({
+      ...formData,
+      step2: {
+        ...step2,
+        [field]: value
+      }
+    });
+  };
+
   return (
     <div className="grid grid-cols-1 gap-6">
       <Field label="What problem your startup is solving">
         <textarea
           rows="5"
-          className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+          disabled={disabled}
+          className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Write minimum 100–400 characters"
+          value={step2.problemSolving || ''}
+          onChange={(e) => updateStep2('problemSolving', e.target.value)}
         />
       </Field>
 
@@ -219,24 +257,33 @@ export function Step2Content() {
       >
         <textarea
           rows="5"
-          className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+          disabled={disabled}
+          className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Write minimum 100–400 characters"
+          value={step2.solutionProposal || ''}
+          onChange={(e) => updateStep2('solutionProposal', e.target.value)}
         />
       </Field>
 
       <Field label="What is the uniqueness of the solution">
         <textarea
           rows="5"
-          className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+          disabled={disabled}
+          className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Write minimum 100–400 characters"
+          value={step2.uniquenessOfSolution || ''}
+          onChange={(e) => updateStep2('uniquenessOfSolution', e.target.value)}
         />
       </Field>
 
       <Field label="How your startup earns revenue">
         <textarea
           rows="5"
-          className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+          disabled={disabled}
+          className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Write minimum 100–400 characters"
+          value={step2.revenueModel || ''}
+          onChange={(e) => updateStep2('revenueModel', e.target.value)}
         />
       </Field>
 
@@ -245,8 +292,11 @@ export function Step2Content() {
       >
         <textarea
           rows="5"
-          className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+          disabled={disabled}
+          className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Write minimum 100–400 characters"
+          value={step2.innovationNote || ''}
+          onChange={(e) => updateStep2('innovationNote', e.target.value)}
         />
       </Field>
 
@@ -255,6 +305,9 @@ export function Step2Content() {
           <CustomDropdown
             options={["Yes", "No"]}
             placeholder="Select Yes or No"
+            disabled={disabled}
+            value={step2.hasIpr ? 'Yes' : 'No'}
+            onChange={(value) => updateStep2('hasIpr', value === 'Yes')}
           />
         </Field>
 
@@ -262,6 +315,7 @@ export function Step2Content() {
           label="Upload Doc"
           buttonLabel="Doc PDF"
           accept="application/pdf"
+          disabled={disabled}
         />
       </div>
 
@@ -270,6 +324,7 @@ export function Step2Content() {
           <CustomDropdown
             options={["Yes", "No"]}
             placeholder="Select Yes or No"
+            disabled={disabled}
           />
         </Field>
 
@@ -277,6 +332,7 @@ export function Step2Content() {
           <CustomDropdown
             options={["Investors", "Mentors", "Partners", "Clients", "Suppliers"]}
             placeholder="Select the business you want to connect"
+            disabled={disabled}
           />
         </Field>
       </div>
@@ -284,22 +340,41 @@ export function Step2Content() {
   );
 }
 
-export function Step3Content() {
+export function Step3Content({ formData, setFormData, disabled = false }) {
+  const step3 = formData?.step3 || {};
+  
+  const updateStep3 = (field, value) => {
+    if (disabled) return;
+    setFormData({
+      ...formData,
+      step3: {
+        ...step3,
+        [field]: value
+      }
+    });
+  };
+
   return (
     <div className="grid grid-cols-1 gap-6">
       <Field label="Address 1" required>
         <textarea
           rows="4"
-          className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+          disabled={disabled}
+          className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Type your address here"
+          value={step3.address1 || ''}
+          onChange={(e) => updateStep3('address1', e.target.value)}
         />
       </Field>
 
       <Field label="Address 2" required>
         <textarea
           rows="4"
-          className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+          disabled={disabled}
+          className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Type your address here"
+          value={step3.address2 || ''}
+          onChange={(e) => updateStep3('address2', e.target.value)}
         />
       </Field>
 
@@ -308,13 +383,19 @@ export function Step3Content() {
           <CustomDropdown
             options={["Maharashtra", "Karnataka", "Delhi", "Tamil Nadu", "Gujarat", "West Bengal", "Rajasthan", "Others"]}
             placeholder="Select your State"
+            disabled={disabled}
+            value={step3.state || ''}
+            onChange={(value) => updateStep3('state', value)}
           />
         </Field>
 
         <Field label="City" required>
           <input
-            className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+            disabled={disabled}
+            className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Enter City Name"
+            value={step3.city || ''}
+            onChange={(e) => updateStep3('city', e.target.value)}
           />
         </Field>
       </div>
@@ -322,6 +403,7 @@ export function Step3Content() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Field label="Country" required>
           <input
+            disabled
             defaultValue="India"
             className="w-full px-4 py-3 rounded-lg bg-white outline-none"
           />
@@ -329,8 +411,11 @@ export function Step3Content() {
 
         <Field label="Pincode" required>
           <input
-            className="w-full px-4 py-3 rounded-lg bg-white outline-none"
+            disabled={disabled}
+            className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Enter Pincode"
+            value={step3.pincode || ''}
+            onChange={(e) => updateStep3('pincode', e.target.value)}
           />
         </Field>
       </div>
@@ -338,17 +423,17 @@ export function Step3Content() {
   );
 }
 
-export function Step4Content() {
+export function Step4Content({ disabled = false }) {
   return (
     <div className="grid grid-cols-1 gap-8">
-      <DirectorForm directorNumber={1} />
-      <DirectorForm directorNumber={2} />
-      <DirectorForm directorNumber={3} />
+      <DirectorForm directorNumber={1} disabled={disabled} />
+      <DirectorForm directorNumber={2} disabled={disabled} />
+      <DirectorForm directorNumber={3} disabled={disabled} />
     </div>
   );
 }
 
-export function Step5Content({ formData, setFormData }) {
+export function Step5Content({ formData, setFormData, disabled = false }) {
   const fileInputRef = useRef(null);
   const [fileName, setFileName] = useState("");
   const [isDragging, setIsDragging] = useState(false);
@@ -356,6 +441,7 @@ export function Step5Content({ formData, setFormData }) {
 
   // Update step5 data
   const updateStep5 = (field, value) => {
+    if (disabled) return;
     setFormData({
       ...formData,
       step5: {
@@ -367,7 +453,7 @@ export function Step5Content({ formData, setFormData }) {
 
   // Handle file selection
   const handleFileSelect = async (file) => {
-    if (!file) return;
+    if (disabled || !file) return;
 
     // Validate file type
     if (file.type !== 'application/pdf') {
@@ -401,6 +487,7 @@ export function Step5Content({ formData, setFormData }) {
 
   // Handle browse button click
   const handleBrowseClick = () => {
+    if (disabled) return;
     fileInputRef.current?.click();
   };
 
@@ -598,19 +685,22 @@ startxref
         accept="application/pdf"
         onChange={handleFileChange}
         className="hidden"
+        disabled={disabled}
       />
 
       {/* Dropzone */}
       <div
-        className={`border-2 border-dashed flex flex-col items-center justify-center rounded-xl p-8 text-center text-[#5A5A5A] bg-white cursor-pointer transition-colors ${
-          isDragging 
-            ? 'border-[#00486D] bg-[#F0F7FA]' 
-            : 'border-[#AFC3D2]'
+        className={`border-2 border-dashed flex flex-col items-center justify-center rounded-xl p-8 text-center text-[#5A5A5A] bg-white transition-colors ${
+          disabled 
+            ? 'border-gray-300 bg-gray-50 cursor-not-allowed' 
+            : isDragging 
+              ? 'border-[#00486D] bg-[#F0F7FA] cursor-pointer' 
+              : 'border-[#AFC3D2] cursor-pointer'
         }`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={handleBrowseClick}
+        onDragOver={disabled ? undefined : handleDragOver}
+        onDragLeave={disabled ? undefined : handleDragLeave}
+        onDrop={disabled ? undefined : handleDrop}
+        onClick={disabled ? undefined : handleBrowseClick}
       >
         <CloudUpload
           size={24}
@@ -641,9 +731,11 @@ startxref
       <div className="flex justify-center">
         <button
           type="button"
-          className="px-6 py-3 rounded-md text-white text-sm"
-          style={{ background: 'linear-gradient(90deg, #01334C 0%, #00486D 100%)' }}
+          disabled={disabled}
+          className={`px-6 py-3 rounded-md text-white text-sm ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          style={disabled ? {} : { background: 'linear-gradient(90deg, #01334C 0%, #00486D 100%)' }}
           onClick={() => {
+            if (disabled) return;
             if (fileName) {
               alert('Authorization letter uploaded successfully!');
             } else {

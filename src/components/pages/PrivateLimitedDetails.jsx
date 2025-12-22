@@ -207,39 +207,41 @@ function PrivateLimitedDetails() {
             <p className="text-gray-600">Registration Details</p>
           </div>
           <div className="flex gap-3">
-            {/* Edit button - for both admin and user */}
-            <button
-              onClick={() => {
-                // Navigate to appropriate form page based on user role
-                if (isSuperAdminView) {
-                  // SuperAdmin: Navigate to fill-form page within superadmin layout
-                  navigate(`/superadmin/fill-form/${ticketId}`);
-                } else if (isAdminView) {
-                  // Admin: Navigate to fill-form page within admin layout
-                  navigate(`/admin/fill-form/${ticketId}`);
-                } else {
-                  // Regular user: Navigate to regular form page
-                  localStorage.setItem('editingTicketId', ticketId);
-                  localStorage.setItem('selectedPackage', JSON.stringify({
-                    name: registration.package_name,
-                    price: registration.package_price,
-                    priceValue: registration.package_price
-                  }));
-                  localStorage.setItem('paymentDetails', JSON.stringify({
-                    orderId: registration.razorpay_order_id,
-                    paymentId: registration.razorpay_payment_id,
-                    timestamp: registration.created_at
-                  }));
-                  navigate('/private-limited-form');
-                }
-              }}
-              className="px-4 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-              Edit Registration
-            </button>
+            {/* Edit button - only for true Private Limited registrations (PVT_ tickets) */}
+            {ticketId?.startsWith('PVT_') && (
+              <button
+                onClick={() => {
+                  // Navigate to appropriate form page based on user role
+                  if (isSuperAdminView) {
+                    // SuperAdmin: Navigate to fill-form page within superadmin layout
+                    navigate(`/superadmin/fill-form/${ticketId}`);
+                  } else if (isAdminView) {
+                    // Admin: Navigate to fill-form page within admin layout
+                    navigate(`/admin/fill-form/${ticketId}`);
+                  } else {
+                    // Regular user: Navigate to regular form page
+                    localStorage.setItem('editingTicketId', ticketId);
+                    localStorage.setItem('selectedPackage', JSON.stringify({
+                      name: registration.package_name,
+                      price: registration.package_price,
+                      priceValue: registration.package_price
+                    }));
+                    localStorage.setItem('paymentDetails', JSON.stringify({
+                      orderId: registration.razorpay_order_id,
+                      paymentId: registration.razorpay_payment_id,
+                      timestamp: registration.created_at
+                    }));
+                    navigate('/private-limited-form');
+                  }
+                }}
+                className="px-4 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit Registration
+              </button>
+            )}
             <button
               onClick={() => navigate(getBackRoute())}
               className="px-4 py-2 border border-[#00486D] text-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
@@ -463,7 +465,8 @@ function PrivateLimitedDetails() {
           </div>
         )}
 
-        {/* Step 1: Name Application */}
+        {/* Step 1: Name Application (only for true Private Limited registrations) */}
+        {ticketId?.startsWith('PVT_') && (
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Step 1: Name Application</h2>
           
@@ -557,8 +560,10 @@ function PrivateLimitedDetails() {
             </div>
           </div>
         </div>
-
-        {/* Step 2: Basic Company Details */}
+        )}
+        
+        {/* Step 2: Basic Company Details (only for true Private Limited registrations) */}
+        {ticketId?.startsWith('PVT_') && (
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Step 2: Basic Company Details</h2>
           
@@ -728,6 +733,7 @@ function PrivateLimitedDetails() {
             </div>
           </div>
         </div>
+        )}
 
         {/* Step 3: Directors Information */}
         {directors.length > 0 && (

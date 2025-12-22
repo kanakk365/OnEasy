@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import StepIndicator from './StepIndicator';
 import { NameApplicationContent, StartupInformationContent, OfficeAddressContent, DirectorDetailsContent, AuthorizationLetterContent } from './steps/PrivateLimitedSteps';
 import { submitPrivateLimitedRegistration } from '../../utils/privateLimitedApi';
-import { requestTeamFill } from '../../utils/teamFillApi';
+import { requestTeamFill, checkTeamFillStatus, requestClientFill, checkClientFillStatus, cancelClientFillRequest } from '../../utils/teamFillApi';
 
 function PrivateLimitedForm({ 
   packageDetails: propPackageDetails, 
@@ -22,6 +22,7 @@ function PrivateLimitedForm({
   const [showStep1CompleteModal, setShowStep1CompleteModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [oneasyTeamFill, setOneasyTeamFill] = useState(false);
+  const [clientFillRequest, setClientFillRequest] = useState(false);
   const [isAdminOrSuperadmin, setIsAdminOrSuperadmin] = useState(false);
   const [isFillingOnBehalf, setIsFillingOnBehalf] = useState(isAdminFilling);
   const [nameApplicationStatus, setNameApplicationStatus] = useState('pending');
@@ -67,7 +68,7 @@ function PrivateLimitedForm({
     };
   }, []);
 
-  // Check if user is admin or superadmin
+  // Check if user is admin or superadmin and restore team fill state
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
     const userRole = userData.role || userData.role_id;
@@ -75,6 +76,14 @@ function PrivateLimitedForm({
     // Check if user is admin (role: 'admin' or role_id: 1 or 2)
     const isAdmin = userRole === 'admin' || userRole === 1 || userRole === 'superadmin' || userRole === 2;
     setIsAdminOrSuperadmin(isAdmin);
+    
+    // Restore team fill state from localStorage if it was previously set
+    // Check both global and ticket-specific (will check ticket-specific after ticketId is loaded)
+    const teamFillStatus = localStorage.getItem('oneasyTeamFill');
+    if (teamFillStatus === 'true') {
+      setOneasyTeamFill(true);
+      console.log('✅ Restored team fill state from localStorage (global)');
+    }
     
     // Notify initial step
     if (onStepChange) onStepChange(step);
@@ -253,6 +262,42 @@ function PrivateLimitedForm({
             console.log('🎫 Registration ticket_id:', reg.ticket_id || 'N/A');
             if (reg.ticket_id) {
               console.log('✅ Ticket ID available for team fill request:', reg.ticket_id);
+              
+              // Check if team fill was already requested for this ticket from database
+              try {
+                const teamFillCheck = await checkTeamFillStatus('private-limited', reg.ticket_id);
+                if (teamFillCheck.exists) {
+                  setOneasyTeamFill(true);
+                  console.log('✅ Team fill request found in database for ticket:', reg.ticket_id);
+                } else {
+                  // Fallback to localStorage check
+                  const globalTeamFillStatus = localStorage.getItem('oneasyTeamFill');
+                  const ticketTeamFillStatus = localStorage.getItem(`oneasyTeamFill_${reg.ticket_id}`);
+                  if (globalTeamFillStatus === 'true' || ticketTeamFillStatus === 'true') {
+                    setOneasyTeamFill(true);
+                    console.log('✅ Team fill state restored from localStorage for ticket:', reg.ticket_id);
+                  }
+                }
+              } catch (error) {
+                console.error('❌ Error checking team fill status:', error);
+                // Fallback to localStorage check on error
+                const globalTeamFillStatus = localStorage.getItem('oneasyTeamFill');
+                const ticketTeamFillStatus = localStorage.getItem(`oneasyTeamFill_${reg.ticket_id}`);
+                if (globalTeamFillStatus === 'true' || ticketTeamFillStatus === 'true') {
+                  setOneasyTeamFill(true);
+                }
+              }
+
+              // Check if client fill request exists for this ticket
+              try {
+                const clientFillCheck = await checkClientFillStatus('private-limited', reg.ticket_id);
+                if (clientFillCheck.exists) {
+                  setClientFillRequest(true);
+                  console.log('✅ Client fill request found in database for ticket:', reg.ticket_id);
+                }
+              } catch (error) {
+                console.error('❌ Error checking client fill status from DB:', error);
+              }
             } else {
               console.warn('⚠️ No ticket_id found in registration data');
             }
@@ -416,9 +461,14 @@ function PrivateLimitedForm({
   };
 
   const renderStepContent = () => {
-    // Admin/Superadmin should be able to fill the form, regular users should see it disabled
-    // When admin is filling on behalf, fields should always be enabled
-    const isDisabled = (oneasyTeamFill && !isAdminOrSuperadmin) && !isFillingOnBehalf;
+    // Fields should be disabled when:
+    // 1. Team fill is requested AND user is not admin AND not admin filling on behalf
+    // 2. Client fill is requested AND user is admin (admin can't fill, client should fill - regardless of filling on behalf)
+    // Fields should be enabled when:
+    // 1. Client fill is requested AND user is the client (client should fill)
+    // 2. Admin is filling on behalf AND client fill is NOT requested
+    const isDisabled = ((oneasyTeamFill && !isAdminOrSuperadmin) && !isFillingOnBehalf) || 
+                       (clientFillRequest && isAdminOrSuperadmin);
     
     switch (step) {
       case 1:
@@ -476,6 +526,49 @@ function PrivateLimitedForm({
             </div>
           )}
 
+          {/* Client Fill Request Banner (for admin - fields disabled) */}
+          {clientFillRequest && isAdminOrSuperadmin && (
+            <div className="bg-orange-50 border-2 border-orange-500 rounded-lg p-4 mb-6 mt-6 flex items-center gap-3">
+              <svg className="w-6 h-6 text-orange-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div className="flex-1">
+                <p className="font-semibold text-orange-900">Client Fill Requested</p>
+                <p className="text-sm text-orange-700">All fields are disabled. The client has been requested to fill this form. Fields will be enabled once the client completes the form.</p>
+              </div>
+              <button
+                onClick={async () => {
+                  const currentTicketId = ticketId || localStorage.getItem('editingTicketId') || localStorage.getItem('fillingOnBehalfTicketId');
+                  if (currentTicketId) {
+                    const result = await cancelClientFillRequest('private-limited', currentTicketId);
+                    if (result.success) {
+                      setClientFillRequest(false);
+                      alert('Client fill request cancelled. Fields are now enabled.');
+                    } else {
+                      alert('Failed to cancel client fill request. Please try again.');
+                    }
+                  }
+                }}
+                className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors text-sm"
+              >
+                Cancel Request
+              </button>
+            </div>
+          )}
+
+          {/* Client Fill Request Banner (for client - fields enabled) */}
+          {clientFillRequest && !isAdminOrSuperadmin && (
+            <div className="bg-blue-50 border-2 border-blue-500 rounded-lg p-4 mb-6 mt-6 flex items-center gap-3">
+              <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              <div>
+                <p className="font-semibold text-blue-900">Please Fill This Form</p>
+                <p className="text-sm text-blue-700">Admin has requested you to complete this form. All fields are enabled for you to fill.</p>
+              </div>
+            </div>
+          )}
+
           <div className="rounded-lg p-6">
             {renderStepContent()}
 
@@ -483,8 +576,8 @@ function PrivateLimitedForm({
             <button
               type="button"
               onClick={goBack}
-              disabled={isSubmitting || (oneasyTeamFill && !isAdminOrSuperadmin)}
-              className={`px-6 py-1.5 rounded-md border border-[#00486D] text-[#00486D] ${(isSubmitting || (oneasyTeamFill && !isAdminOrSuperadmin)) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              disabled={isSubmitting || (oneasyTeamFill && !isAdminOrSuperadmin) || (clientFillRequest && isAdminOrSuperadmin)}
+              className={`px-6 py-1.5 rounded-md border border-[#00486D] text-[#00486D] ${(isSubmitting || (oneasyTeamFill && !isAdminOrSuperadmin) || (clientFillRequest && isAdminOrSuperadmin && !isFillingOnBehalf)) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
               Back
             </button>
@@ -492,8 +585,14 @@ function PrivateLimitedForm({
               type="button"
               onClick={(oneasyTeamFill && !isAdminOrSuperadmin) ? async () => {
                 // Regular user: Save team fill request and go to dashboard
+                // Get ticketId from props, localStorage, or URL params
+                const editingTicketId = localStorage.getItem('editingTicketId') || localStorage.getItem('fillingOnBehalfTicketId');
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlTicketId = urlParams.get('ticketId');
+                const currentTicketId = ticketId || editingTicketId || urlTicketId;
+                
                 setIsSubmitting(true);
-                const result = await requestTeamFill('private-limited', ticketId || null);
+                const result = await requestTeamFill('private-limited', currentTicketId || null);
                 if (result.success) {
                   console.log('✅ Team fill request saved');
                 }
@@ -511,15 +610,84 @@ function PrivateLimitedForm({
         </div>
       </div>
 
+      {/* Floating Button - Ask Client to Fill (For Admins Only) */}
+      {isAdminOrSuperadmin && isFillingOnBehalf && !clientFillRequest && (
+        <button
+          type="button"
+          onClick={async () => {
+            const currentTicketId = ticketId || localStorage.getItem('editingTicketId') || localStorage.getItem('fillingOnBehalfTicketId');
+            const currentClientId = clientId || localStorage.getItem('fillingOnBehalfClientId');
+            
+            if (!currentTicketId || !currentClientId) {
+              alert('Missing ticket ID or client ID. Please try again.');
+              return;
+            }
+
+            const result = await requestClientFill('private-limited', currentTicketId, currentClientId);
+            if (result.success) {
+              setClientFillRequest(true);
+              alert('Client has been requested to fill the form. Fields are now disabled for you.');
+            } else {
+              alert(result.message || 'Failed to request client fill. Please try again.');
+            }
+          }}
+          className="fixed bottom-8 right-8 px-6 py-4 rounded-full shadow-2xl font-medium text-white transition-all duration-300 hover:scale-105 z-40 bg-orange-600 hover:bg-orange-700"
+        >
+          <span className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            Ask Client to Fill
+          </span>
+        </button>
+      )}
+
+      {/* Floating Button - Client Fill Requested (For Admins - to cancel) */}
+      {isAdminOrSuperadmin && isFillingOnBehalf && clientFillRequest && (
+        <button
+          type="button"
+          onClick={async () => {
+            const currentTicketId = ticketId || localStorage.getItem('editingTicketId') || localStorage.getItem('fillingOnBehalfTicketId');
+            if (currentTicketId) {
+              const result = await cancelClientFillRequest('private-limited', currentTicketId);
+              if (result.success) {
+                setClientFillRequest(false);
+                alert('Client fill request cancelled. Fields are now enabled.');
+              } else {
+                alert(result.message || 'Failed to cancel client fill request. Please try again.');
+              }
+            }
+          }}
+          className="fixed bottom-8 right-8 px-6 py-4 rounded-full shadow-2xl font-medium text-white transition-all duration-300 hover:scale-105 z-40 bg-green-600 hover:bg-green-700"
+        >
+          <span className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            Client Fill Requested (Click to Cancel)
+          </span>
+        </button>
+      )}
+
       {/* Floating Button - Oneasy Team Fill (For Users Only) */}
       {!isAdminOrSuperadmin && (
         <button
           type="button"
           onClick={async () => {
             console.log('🔘 Oneasy Team Fill button clicked');
+            
+            // Get ticketId from props, localStorage, or URL params
+            const editingTicketId = localStorage.getItem('editingTicketId') || localStorage.getItem('fillingOnBehalfTicketId');
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlTicketId = urlParams.get('ticketId');
+            const currentTicketId = ticketId || editingTicketId || urlTicketId;
+            
             console.log('📋 Current state:', {
               oneasyTeamFill,
               ticketId,
+              editingTicketId,
+              urlTicketId,
+              currentTicketId,
               isAdminOrSuperadmin,
               user: JSON.parse(localStorage.getItem('user') || '{}')
             });
@@ -528,19 +696,22 @@ function PrivateLimitedForm({
             console.log('🔄 Setting team fill state to:', newState);
             setOneasyTeamFill(newState);
             
-            // Store team fill state in localStorage
+            // Store team fill state in localStorage (both globally and per ticketId)
             if (newState) {
               localStorage.setItem('oneasyTeamFill', 'true');
-              console.log('💾 Stored oneasyTeamFill=true in localStorage');
+              if (currentTicketId) {
+                localStorage.setItem(`oneasyTeamFill_${currentTicketId}`, 'true');
+              }
+              console.log('💾 Stored oneasyTeamFill=true in localStorage', currentTicketId ? `for ticket ${currentTicketId}` : '');
               
               // Save to team fill requests table
               console.log('📤 Calling requestTeamFill API with:', {
                 registrationType: 'private-limited',
-                ticketId: ticketId || null
+                ticketId: currentTicketId || null
               });
               
               try {
-                const result = await requestTeamFill('private-limited', ticketId || null);
+                const result = await requestTeamFill('private-limited', currentTicketId || null);
                 console.log('📥 requestTeamFill API response:', result);
                 
                 if (result.success) {
@@ -558,7 +729,10 @@ function PrivateLimitedForm({
               }
             } else {
               localStorage.removeItem('oneasyTeamFill');
-              console.log('🗑️ Removed oneasyTeamFill from localStorage');
+              if (currentTicketId) {
+                localStorage.removeItem(`oneasyTeamFill_${currentTicketId}`);
+              }
+              console.log('🗑️ Removed oneasyTeamFill from localStorage', currentTicketId ? `for ticket ${currentTicketId}` : '');
             }
           }}
           className={`fixed bottom-8 right-8 px-6 py-4 rounded-full shadow-2xl font-medium text-white transition-all duration-300 hover:scale-105 z-40 ${

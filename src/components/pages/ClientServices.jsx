@@ -45,7 +45,22 @@ function ClientServices() {
           return;
         }
 
-        const sorted = combined.sort(
+        // Deduplicate services by ticket_id to avoid showing the same service multiple times
+        const uniqueServices = [];
+        const seenTicketIds = new Set();
+        
+        combined.forEach(service => {
+          const ticketId = service.ticket_id || service.id;
+          if (ticketId && !seenTicketIds.has(ticketId)) {
+            seenTicketIds.add(ticketId);
+            uniqueServices.push(service);
+          } else if (!ticketId) {
+            // Services without ticket_id - include them (shouldn't happen, but handle gracefully)
+            uniqueServices.push(service);
+          }
+        });
+
+        const sorted = uniqueServices.sort(
           (a, b) =>
             new Date(b.updated_at || b.created_at || b.createdAt || 0) - new Date(a.updated_at || a.created_at || a.createdAt || 0)
         );
@@ -89,34 +104,38 @@ function ClientServices() {
   };
 
   const getServiceTab = React.useCallback((reg) => {
-    const status = getStatusLabel(reg);
-    if (!status) return 'Open';
-    
-    const statusLower = status.toLowerCase();
-    
-    // Completed statuses go to Resolved
-    if (statusLower === 'completed' || statusLower === 'payment completed') {
-      return 'Resolved';
+    // Step 1: Check payment status first - if payment is pending/unpaid, return "Open"
+    const paymentStatus = (reg.payment_status || '').toLowerCase().trim();
+    if (paymentStatus === 'pending' || paymentStatus === 'unpaid') {
+      return 'Open';
     }
     
-    // In Progress statuses
-    if (statusLower === 'wip' || 
-        statusLower === 'data received' || 
-        statusLower === 'awaiting confirmation from the govt' ||
-        statusLower === 'awaiting confirmation from the government' ||
-        statusLower === 'data pending from client' ||
-        statusLower === 'in progress' ||
-        statusLower === 'submitted' ||
-        statusLower === 'registered') {
-      return 'In progress';
+    // Step 2: Check if service_status is "completed" (case-insensitive) - return "Resolved"
+    if (reg.service_status && reg.service_status.trim() !== '') {
+      const serviceStatus = reg.service_status.toLowerCase().trim();
+      if (serviceStatus === 'completed') {
+        return 'Resolved';
+      }
     }
     
-    // Technical issues and payment pending are still in progress
-    if (statusLower === 'technical issue' || statusLower === 'payment pending') {
-      return 'In progress';
+    // Step 3: If payment is completed and service_status exists (and is not completed), return "In progress"
+    const isPaymentCompleted = reg.payment_completed || 
+                               paymentStatus === 'paid' || 
+                               paymentStatus === 'payment_completed' ||
+                               reg.razorpay_payment_id ||
+                               reg.payment_id;
+    
+    if (isPaymentCompleted) {
+      // Payment completed - if service_status exists (and is not completed), it's In progress
+      if (reg.service_status && reg.service_status.trim() !== '') {
+        // Already checked for 'completed' above, so any other status means In progress
+        return 'In progress';
+      }
+      // Payment completed but no service_status set yet - should be in "Open" (payment pending admin action)
+      return 'Open';
     }
     
-    // Default to Open
+    // Default for services without payment (shouldn't happen in normal flow, but fallback)
     return 'Open';
   }, []);
 
@@ -162,8 +181,46 @@ function ClientServices() {
   };
 
   const formatServiceName = (reg) => {
-    const raw = reg.business_name || reg.package_name || "Service";
-    return raw.replace(/[-–]\s*Payment\s*Completed/i, "").trim();
+    // Prioritize package_name first since that's what should show in "Service Name" column
+    // (package names like "Starter", "Pro", etc.)
+    const raw = reg.package_name || reg.business_name || reg.service_name || "Service";
+    const cleaned = raw.replace(/[-–]\s*Payment\s*Completed/i, "").trim();
+
+    // If the package name is incorrectly set to "Private Limited Registration" but the service type
+    // is different (determined by ticket ID), replace it with the correct service name
+    const type = deriveType(reg);
+    if (cleaned === "Private Limited Registration" && type !== "Private Limited") {
+      // Check if the type is one of the descriptive services that don't need "Registration" suffix
+      const typeLower = type.toLowerCase();
+      const hasDescriptiveSuffix = 
+        typeLower.includes('return') || 
+        typeLower.includes('amendment') || 
+        typeLower.includes('compliance') ||
+        typeLower.includes('notice') ||
+        typeLower.includes('addition') ||
+        typeLower.includes('removal') ||
+        typeLower.includes('change') ||
+        typeLower.includes('creation') ||
+        typeLower.includes('transfer') ||
+        typeLower.includes('deactivation') ||
+        typeLower.includes('reactivation') ||
+        typeLower.includes('application') ||
+        typeLower.includes('winding up') ||
+        typeLower.includes('plan') ||
+        typeLower.includes('payroll') ||
+        typeLower.includes('itr') ||
+        typeLower.includes('tax') ||
+        typeLower.includes('license') ||
+        typeLower.includes('trademark');
+      
+      if (hasDescriptiveSuffix) {
+        return type; // Use type as-is for descriptive names
+      } else {
+        return `${type} Registration`; // Append "Registration" for basic service types
+      }
+    }
+
+    return cleaned;
   };
 
   const deriveType = (reg) => {
@@ -177,6 +234,32 @@ function ClientServices() {
     if (tid.startsWith("SI_")) return "Startup India";
     if (tid.startsWith("GST_")) return "GST";
     return reg.registration_type || reg.service_type || "Service";
+  };
+
+  const getTypeSlug = (type) => {
+    const t = type.toLowerCase();
+    if (t.includes("private")) return "private-limited";
+    if (t.includes("proprietorship")) return "proprietorship";
+    if (t.includes("startup")) return "startup-india";
+    if (t === "gst" || t.includes("gst registration")) return "gst";
+    return null;
+  };
+
+  const getTicketId = (reg) => reg.ticket_id || reg.id || "";
+
+  const handleServiceClick = (service) => {
+    const type = deriveType(service);
+    const slug = getTypeSlug(type);
+    const ticketId = getTicketId(service);
+    
+    // Services with forms - use view route with ticket ID
+    const hasFormRoute = ["private-limited", "proprietorship", "startup-india", "gst"].includes(slug) && ticketId;
+    
+    if (hasFormRoute) {
+      navigate(`/${slug}/view/${ticketId}`);
+    } else {
+      console.warn('No route defined for service type:', type, 'ticketId:', ticketId);
+    }
   };
 
   return (
@@ -256,7 +339,11 @@ function ClientServices() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredServices.map((service, index) => (
-                      <tr key={service.ticket_id || service.id || index} className="hover:bg-gray-50 transition-colors">
+                      <tr 
+                        key={service.ticket_id || service.id || index} 
+                        onClick={() => handleServiceClick(service)}
+                        className="hover:bg-gray-50 transition-colors cursor-pointer"
+                      >
                         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                           {deriveType(service)}
                         </td>

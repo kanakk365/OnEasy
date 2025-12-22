@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import StepIndicator from "../forms/StepIndicator";
 import { Step1Content, Step2Content, Step3Content, Step4Content, Step5Content } from "../forms/FormSteps";
 import { submitStartupIndiaRegistration, getStartupIndiaByTicketId } from "../../utils/startupIndiaApi";
-import { requestTeamFill } from "../../utils/teamFillApi";
+import { requestTeamFill, checkTeamFillStatus, requestClientFill, checkClientFillStatus, cancelClientFillRequest } from "../../utils/teamFillApi";
 
 function StartupIndiaForm() {
   const navigate = useNavigate();
@@ -21,6 +21,7 @@ function StartupIndiaForm() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [oneasyTeamFill, setOneasyTeamFill] = useState(false);
+  const [clientFillRequest, setClientFillRequest] = useState(false);
   const [isAdminOrSuperadmin, setIsAdminOrSuperadmin] = useState(false);
   const [isAdminFilling, setIsAdminFilling] = useState(false);
   
@@ -126,6 +127,31 @@ function StartupIndiaForm() {
                 payment_status: draftData.payment_status || 'paid'
               }
             });
+
+            // Check if team fill request exists for this ticket
+            try {
+              const teamFillCheck = await checkTeamFillStatus('startup-india', ticketId);
+              if (teamFillCheck.exists) {
+                setOneasyTeamFill(true);
+                // Store in localStorage as well
+                localStorage.setItem('oneasyTeamFill', 'true');
+                localStorage.setItem(`oneasyTeamFill_${ticketId}`, 'true');
+                console.log('✅ Team fill request found in database for ticket:', ticketId);
+              }
+            } catch (error) {
+              console.error('❌ Error checking team fill status from DB:', error);
+            }
+
+            // Check if client fill request exists for this ticket
+            try {
+              const clientFillCheck = await checkClientFillStatus('startup-india', ticketId);
+              if (clientFillCheck.exists) {
+                setClientFillRequest(true);
+                console.log('✅ Client fill request found in database for ticket:', ticketId);
+              }
+            } catch (error) {
+              console.error('❌ Error checking client fill status from DB:', error);
+            }
           }
         } catch (error) {
           console.error('❌ Error loading draft:', error);
@@ -280,17 +306,32 @@ function StartupIndiaForm() {
   ];
 
   const renderStepContent = () => {
+    // Fields should be disabled when:
+    // 1. Team fill is requested AND user is not admin AND not admin filling on behalf
+    // 2. Client fill is requested AND user is admin (admin can't fill, client should fill - regardless of filling on behalf)
+    // Fields should be enabled when:
+    // 1. Client fill is requested AND user is the client (client should fill)
+    // 2. Admin is filling on behalf AND client fill is NOT requested
+    // Fields should be disabled when:
+    // 1. Team fill is requested AND user is not admin AND not admin filling on behalf
+    // 2. Client fill is requested AND user is admin (admin can't fill, client should fill)
+    // Fields should be enabled when:
+    // 1. Client fill is requested AND user is the client (client should fill)
+    // 2. Admin is filling on behalf AND client fill is NOT requested
+    const isDisabled = ((oneasyTeamFill && !isAdminOrSuperadmin) && !isAdminFilling) || 
+                       (clientFillRequest && isAdminOrSuperadmin);
+
     switch (step) {
       case 1:
-        return <Step1Content formData={formData} setFormData={setFormData} />;
+        return <Step1Content formData={formData} setFormData={setFormData} disabled={isDisabled} />;
       case 2:
-        return <Step2Content formData={formData} setFormData={setFormData} />;
+        return <Step2Content formData={formData} setFormData={setFormData} disabled={isDisabled} />;
       case 3:
-        return <Step3Content formData={formData} setFormData={setFormData} />;
+        return <Step3Content formData={formData} setFormData={setFormData} disabled={isDisabled} />;
       case 4:
-        return <Step4Content formData={formData} setFormData={setFormData} />;
+        return <Step4Content formData={formData} setFormData={setFormData} disabled={isDisabled} />;
       case 5:
-        return <Step5Content formData={formData} setFormData={setFormData} />;
+        return <Step5Content formData={formData} setFormData={setFormData} disabled={isDisabled} />;
       default:
         return null;
     }
@@ -332,6 +373,48 @@ function StartupIndiaForm() {
           </div>
         )}
 
+        {/* Client Fill Request Banner (for admin - fields disabled) */}
+        {clientFillRequest && isAdminOrSuperadmin && (
+          <div className="bg-orange-50 border-2 border-orange-500 rounded-lg p-4 mb-6 mt-6 flex items-center gap-3">
+            <svg className="w-6 h-6 text-orange-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div className="flex-1">
+              <p className="font-semibold text-orange-900">Client Fill Requested</p>
+              <p className="text-sm text-orange-700">All fields are disabled. The client has been requested to fill this form. Fields will be enabled once the client completes the form.</p>
+            </div>
+            <button
+              onClick={async () => {
+                if (ticketId) {
+                  const result = await cancelClientFillRequest('startup-india', ticketId);
+                  if (result.success) {
+                    setClientFillRequest(false);
+                    alert('Client fill request cancelled. Fields are now enabled.');
+                  } else {
+                    alert('Failed to cancel client fill request. Please try again.');
+                  }
+                }
+              }}
+              className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors text-sm"
+            >
+              Cancel Request
+            </button>
+          </div>
+        )}
+
+        {/* Client Fill Request Banner (for client - fields enabled) */}
+        {clientFillRequest && !isAdminOrSuperadmin && (
+          <div className="bg-blue-50 border-2 border-blue-500 rounded-lg p-4 mb-6 mt-6 flex items-center gap-3">
+            <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            <div>
+              <p className="font-semibold text-blue-900">Please Fill This Form</p>
+              <p className="text-sm text-blue-700">Admin has requested you to complete this form. All fields are enabled for you to fill.</p>
+            </div>
+          </div>
+        )}
+
         <div className="rounded-lg p-6">
           {renderStepContent()}
 
@@ -340,7 +423,7 @@ function StartupIndiaForm() {
               type="button"
               onClick={goBack}
               className="px-6 py-1.5 rounded-md border border-[#CFE6F0] text-[#00486D] cursor-pointer disabled:opacity-50"
-              disabled={isSubmitting || (oneasyTeamFill && !isAdminOrSuperadmin)}
+              disabled={isSubmitting || (oneasyTeamFill && !isAdminOrSuperadmin) || (clientFillRequest && isAdminOrSuperadmin)}
             >
               Back
             </button>
@@ -348,8 +431,12 @@ function StartupIndiaForm() {
               type="button"
               onClick={(oneasyTeamFill && !isAdminOrSuperadmin) ? async () => {
                 // Regular user: Save team fill request and go to dashboard
+                // Get ticketId from URL params, localStorage, or props
+                const editingTicketId = localStorage.getItem('editingTicketId') || localStorage.getItem('fillingOnBehalfTicketId');
+                const currentTicketId = ticketId || editingTicketId;
+                
                 setIsSubmitting(true);
-                const result = await requestTeamFill('startup-india', ticketId || null);
+                const result = await requestTeamFill('startup-india', currentTicketId || null);
                 if (result.success) {
                   console.log('✅ Team fill request saved');
                 }
@@ -388,11 +475,73 @@ function StartupIndiaForm() {
         </div>
       )}
 
+      {/* Floating Button - Ask Client to Fill (For Admins Only) */}
+      {isAdminOrSuperadmin && isAdminFilling && !clientFillRequest && (
+        <button
+          type="button"
+          onClick={async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const clientIdParam = urlParams.get('clientId');
+            
+            if (!ticketId || !clientIdParam) {
+              alert('Missing ticket ID or client ID. Please try again.');
+              return;
+            }
+
+            const result = await requestClientFill('startup-india', ticketId, clientIdParam);
+            if (result.success) {
+              setClientFillRequest(true);
+              alert('Client has been requested to fill the form. Fields are now disabled for you.');
+            } else {
+              alert(result.message || 'Failed to request client fill. Please try again.');
+            }
+          }}
+          className="fixed bottom-8 right-8 px-6 py-4 rounded-full shadow-2xl font-medium text-white transition-all duration-300 hover:scale-105 z-40 bg-orange-600 hover:bg-orange-700"
+        >
+          <span className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            Ask Client to Fill
+          </span>
+        </button>
+      )}
+
+      {/* Floating Button - Client Fill Requested (For Admins - to cancel) */}
+      {isAdminOrSuperadmin && isAdminFilling && clientFillRequest && (
+        <button
+          type="button"
+          onClick={async () => {
+            if (ticketId) {
+              const result = await cancelClientFillRequest('startup-india', ticketId);
+              if (result.success) {
+                setClientFillRequest(false);
+                alert('Client fill request cancelled. Fields are now enabled.');
+              } else {
+                alert(result.message || 'Failed to cancel client fill request. Please try again.');
+              }
+            }
+          }}
+          className="fixed bottom-8 right-8 px-6 py-4 rounded-full shadow-2xl font-medium text-white transition-all duration-300 hover:scale-105 z-40 bg-green-600 hover:bg-green-700"
+        >
+          <span className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            Client Fill Requested (Click to Cancel)
+          </span>
+        </button>
+      )}
+
       {/* Floating Button - Oneasy Team Fill (For Users Only) */}
       {!isAdminOrSuperadmin && (
         <button
           type="button"
           onClick={async () => {
+            // Get ticketId from URL params, localStorage, or props
+            const editingTicketId = localStorage.getItem('editingTicketId') || localStorage.getItem('fillingOnBehalfTicketId');
+            const currentTicketId = ticketId || editingTicketId;
+            
             const newState = !oneasyTeamFill;
             setOneasyTeamFill(newState);
             
@@ -401,7 +550,7 @@ function StartupIndiaForm() {
               localStorage.setItem('oneasyTeamFill', 'true');
               
               // Save to team fill requests table
-              const result = await requestTeamFill('startup-india', ticketId || null);
+              const result = await requestTeamFill('startup-india', currentTicketId || null);
               if (result.success) {
                 console.log('✅ Team fill request saved');
               }

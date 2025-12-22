@@ -308,12 +308,13 @@ function AdminClientOverview() {
     try {
       console.log('🔍 Fetching all registrations for user ID:', userId);
       
-      // Fetch private limited, proprietorship, startup india, and GST registrations
-      const [privateLimitedResponse, proprietorshipResponse, startupIndiaResponse, gstResponse] = await Promise.all([
+      // Fetch private limited, proprietorship, startup india, GST, and all other services from registration_details
+      const [privateLimitedResponse, proprietorshipResponse, startupIndiaResponse, gstResponse, allServicesResponse] = await Promise.all([
         apiClient.get(`/private-limited/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
         apiClient.get(`/proprietorship/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
         apiClient.get(`/startup-india/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
-        apiClient.get(`/gst/user-registrations/${userId}`).catch(() => ({ success: false, data: [] }))
+        apiClient.get(`/gst/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
+        apiClient.get(`/admin/user-services/${userId}`).catch(() => ({ success: false, data: [] }))
       ]);
 
       // Handle response structure - check if data is nested
@@ -329,23 +330,102 @@ function AdminClientOverview() {
       const gst = gstResponse.success 
         ? (Array.isArray(gstResponse.data) ? gstResponse.data : (gstResponse.data?.data || []))
         : [];
+      const allServices = allServicesResponse.success 
+        ? (Array.isArray(allServicesResponse.data) ? allServicesResponse.data : (allServicesResponse.data?.data || []))
+        : [];
 
-      console.log('📊 Private Limited:', privateLimited.length, 'registrations');
-      console.log('📊 Proprietorship:', proprietorship.length, 'registrations');
-      console.log('📊 Startup India:', startupIndia.length, 'registrations');
-      console.log('📊 GST:', gst.length, 'registrations');
+      console.log('📊 Private Limited:', privateLimited.length, 'registrations', privateLimited);
+      console.log('📊 Proprietorship:', proprietorship.length, 'registrations', proprietorship);
+      console.log('📊 Startup India:', startupIndia.length, 'registrations', startupIndia);
+      console.log('📊 GST:', gst.length, 'registrations', gst);
+      console.log('📊 Generic Services:', allServices.length, 'registrations', allServices);
 
-      // Keep only paid items (has payment id or payment_status = paid)
-      const isPaid = (r) =>
-        (r.razorpay_payment_id && String(r.razorpay_payment_id).trim() !== '') ||
-        (r.payment_status && String(r.payment_status).toLowerCase() === 'paid');
+      // Include both paid and pending payment registrations
+      // Show services that are either paid OR have pending payment status (created by admin with payment link)
+      const filterServices = (r) => {
+        // Paid services (has payment_id)
+        const isPaid = 
+          (r.razorpay_payment_id && String(r.razorpay_payment_id).trim() !== '') ||
+          (r.payment_id && String(r.payment_id).trim() !== '') ||
+          (r.payment_status && String(r.payment_status).toLowerCase() === 'paid');
+        
+        // Pending payment services (created by admin with payment link)
+        // More lenient: show if payment_status is pending/unpaid and has ticket_id (admin created it)
+        const isPendingPayment = 
+          r.ticket_id && 
+          r.payment_status && 
+          (String(r.payment_status).toLowerCase() === 'pending' || String(r.payment_status).toLowerCase() === 'unpaid');
+        
+        const result = isPaid || isPendingPayment;
+        
+        // Debug logging for pending payments
+        if (isPendingPayment && !isPaid) {
+          console.log('🔍 Found pending payment service:', {
+            ticket_id: r.ticket_id,
+            payment_status: r.payment_status,
+            service_status: r.service_status,
+            user_id: r.user_id,
+            package_name: r.package_name
+          });
+        }
+        
+        return result;
+      };
 
-      // Combine, filter paid, and sort by created_at
-      const combined = [...privateLimited, ...proprietorship, ...startupIndia, ...gst]
-        .filter(isPaid)
-        .sort((a, b) => 
-          new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0)
-        );
+      // Filter generic services - also filter by userId to ensure we only get this client's services
+      const filteredAllServices = allServices.filter(r => {
+        // First check if it belongs to this user
+        const belongsToUser = r.user_id === userId || r.user_id === String(userId);
+        if (!belongsToUser) return false;
+        // Then apply the payment filter
+        return filterServices(r);
+      });
+
+      // Combine, filter by userId, and sort by created_at
+      // Also deduplicate by ticket_id to avoid showing the same service multiple times
+      const allCombined = [...privateLimited, ...proprietorship, ...startupIndia, ...gst, ...filteredAllServices];
+      
+      // Filter by userId and payment status, then deduplicate
+      const filtered = allCombined.filter(r => {
+        // Ensure it belongs to this user
+        const belongsToUser = r.user_id === userId || r.user_id === String(userId);
+        if (!belongsToUser) {
+          // Debug: log if service doesn't belong to user
+          if (r.ticket_id && (r.payment_status === 'pending' || r.payment_status === 'unpaid')) {
+            console.log('⚠️ Service filtered out (wrong user):', {
+              ticket_id: r.ticket_id,
+              service_user_id: r.user_id,
+              target_user_id: userId,
+              payment_status: r.payment_status
+            });
+          }
+          return false;
+        }
+        const passesFilter = filterServices(r);
+        if (!passesFilter && (r.payment_status === 'pending' || r.payment_status === 'unpaid')) {
+          console.log('⚠️ Service filtered out (filter failed):', {
+            ticket_id: r.ticket_id,
+            payment_status: r.payment_status,
+            service_status: r.service_status,
+            has_payment_id: !!(r.razorpay_payment_id || r.payment_id),
+            has_ticket_id: !!r.ticket_id
+          });
+        }
+        return passesFilter;
+      });
+      
+      // Deduplicate by ticket_id
+      const seen = new Set();
+      const unique = filtered.filter(r => {
+        const key = r.ticket_id || r.id;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      
+      const combined = unique.sort((a, b) => 
+        new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0)
+      );
 
       setAllRegistrations(combined);
       console.log('📊 Total registrations for this user:', combined.length);
@@ -974,17 +1054,8 @@ function AdminClientOverview() {
         return;
       }
 
-      // Map progress values to service_status
-      let statusToSet = '';
-      if (newStatus === 'Completed') {
-        statusToSet = 'Completed';
-      } else if (newStatus === 'In Progress') {
-        statusToSet = 'WIP';
-      } else if (newStatus === 'Ongoing') {
-        statusToSet = 'Payment pending';
-      } else {
-        statusToSet = newStatus;
-      }
+      // Use the status directly (no mapping needed)
+      const statusToSet = newStatus;
 
       const response = await apiClient.post('/admin/update-service-status', {
         ticketId,
@@ -2783,10 +2854,10 @@ function AdminClientOverview() {
                    registration.ticket_id?.startsWith('GST_') ? 'G' : 'R'}
                 </div>
                 
-                {/* Name */}
+                {/* Service & business name */}
                 <div className="flex-1">
-                  <h2 className="text-xl font-semibold text-gray-900">{registration.business_name || 'Pending'}</h2>
-                  <p className="text-xs text-gray-500 mt-1">
+                  {/* Primary: Service name (e.g. Private Limited, Proprietorship) */}
+                  <h2 className="text-xl font-semibold text-gray-900">
                     {(() => {
                       // Determine registration type by ticket_id prefix first
                       const tid = registration.ticket_id || '';
@@ -2808,102 +2879,86 @@ function AdminClientOverview() {
                       if (packageName.includes('proprietorship') || businessName.includes('proprietorship')) return 'Proprietorship';
                       if (packageName.includes('private limited') || businessName.includes('private limited')) return 'Private Limited';
                       
-                      return 'Registration';
+                      return registration.package_name || 'Registration';
                     })()}
+                  </h2>
+                  {/* Secondary: Business name (if any) */}
+                  <p className="text-xs text-gray-500 mt-1">
+                    {registration.business_name || (registration.ticket_id ? `Ticket: ${registration.ticket_id}` : 'No business name')}
                   </p>
                 </div>
 
-                {/* Package */}
-                <div className="text-sm text-gray-600">
-                  {registration.package_name || 'N/A'}
-                </div>
-
-                {/* Status */}
-                <div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    registration.status === 'completed' ? 'bg-green-100 text-green-800' :
-                    registration.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
-                    {registration.status || 'Pending'}
-                  </span>
-                </div>
-
-                {/* Status Badge with Dropdown */}
+                {/* Service Status Dropdown */}
                 <div className="relative">
                   {(() => {
-                    // Determine progress from service_status
-                    const getProgressFromStatus = (status) => {
-                      if (!status) return 'Ongoing';
-                      const statusLower = status.toLowerCase();
-                      if (statusLower === 'completed') return 'Completed';
-                      if (statusLower === 'wip' || statusLower === 'data received' || statusLower === 'awaiting confirmation from the govt' || statusLower === 'data pending from client') return 'In Progress';
-                      if (statusLower === 'payment pending' || statusLower === 'technical issue') return 'Ongoing';
-                      return 'Ongoing';
+                    const serviceStatusOptions = [
+                      'Payment pending',
+                      'Payment completed',
+                      'Data received',
+                      'WIP',
+                      'Awaiting confirmation from the Govt',
+                      'Data Pending from Client',
+                      'Completed',
+                      'Technical Issue'
+                    ];
+                    
+                    const currentStatus = registration.service_status || 'Payment pending';
+                    
+                    const getStatusBadgeColor = (status) => {
+                      const statusLower = (status || '').toLowerCase();
+                      if (statusLower === 'completed' || statusLower === 'payment completed') return 'bg-green-100 text-green-800';
+                      if (statusLower === 'wip' || statusLower === 'data received' || statusLower === 'awaiting confirmation from the govt' || statusLower === 'data pending from client') return 'bg-blue-100 text-blue-800';
+                      if (statusLower === 'payment pending' || statusLower === 'technical issue') return 'bg-yellow-100 text-yellow-800';
+                      return 'bg-gray-100 text-gray-800';
                     };
                     
-                    const currentProgress = getProgressFromStatus(registration.service_status);
-                    
                     return (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsStatusDropdownOpen(isStatusDropdownOpen === index ? null : index);
-                        }}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
-                          currentProgress === 'Completed'
-                            ? 'bg-green-100 text-green-800' 
-                            : currentProgress === 'In Progress'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}
-                      >
-                        <span>{currentProgress}</span>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
+                      <>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsStatusDropdownOpen(isStatusDropdownOpen === index ? null : index);
+                          }}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${getStatusBadgeColor(currentStatus)}`}
+                        >
+                          <span>{currentStatus}</span>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        {isStatusDropdownOpen === index && (
+                          <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-64 overflow-y-auto">
+                            {serviceStatusOptions.map((option, optIndex) => (
+                              <button
+                                key={option}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUpdateServiceStatus(option, registration.ticket_id);
+                                  setIsStatusDropdownOpen(null);
+                                }}
+                                className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 ${
+                                  optIndex === 0 ? 'rounded-t-lg' : ''
+                                } ${
+                                  optIndex === serviceStatusOptions.length - 1 ? 'rounded-b-lg' : ''
+                                } ${
+                                  currentStatus === option ? 'bg-blue-50 font-semibold' : ''
+                                }`}
+                              >
+                                <span className={`w-2 h-2 rounded-full ${
+                                  option === 'Completed' || option === 'Payment completed' ? 'bg-green-600' :
+                                  option === 'WIP' || option === 'Data received' || option === 'Awaiting confirmation from the Govt' || option === 'Data Pending from Client' ? 'bg-blue-600' :
+                                  'bg-yellow-600'
+                                }`}></span>
+                                {option}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </>
                     );
                   })()}
-
-                  {/* Dropdown Menu */}
-                  {isStatusDropdownOpen === index && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleUpdateServiceStatus('Ongoing', registration.ticket_id);
-                          setIsStatusDropdownOpen(null);
-                        }}
-                        className="w-full px-4 py-2 text-left text-sm hover:bg-yellow-50 flex items-center gap-2 text-yellow-800 rounded-t-lg"
-                      >
-                        <span className="w-2 h-2 rounded-full bg-yellow-600"></span>
-                        Ongoing
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleUpdateServiceStatus('In Progress', registration.ticket_id);
-                          setIsStatusDropdownOpen(null);
-                        }}
-                        className="w-full px-4 py-2 text-left text-sm hover:bg-blue-50 flex items-center gap-2 text-blue-800"
-                      >
-                        <span className="w-2 h-2 rounded-full bg-blue-600"></span>
-                        In Progress
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleUpdateServiceStatus('Completed', registration.ticket_id);
-                          setIsStatusDropdownOpen(null);
-                        }}
-                        className="w-full px-4 py-2 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-green-800 rounded-b-lg"
-                      >
-                        <span className="w-2 h-2 rounded-full bg-green-600"></span>
-                        Completed
-                      </button>
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -3028,9 +3083,71 @@ function AdminClientOverview() {
 
       {/* Subscriptions Tab */}
       {activeTab === 'subscriptions' && (
-        <div className="bg-white rounded-xl p-8 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
+        <div className="bg-white rounded-xl p-8 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012] space-y-4">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Subscriptions</h2>
-          <p className="text-gray-600">Subscription details will be displayed here.</p>
+          {(() => {
+            // Paid services only
+            const paidServices = allRegistrations.filter((r) => {
+              const status = (r.payment_status || '').toLowerCase();
+              const serviceStatus = (r.service_status || '').toLowerCase();
+              const hasPaymentId =
+                (r.razorpay_payment_id && String(r.razorpay_payment_id).trim() !== '') ||
+                (r.payment_id && String(r.payment_id).trim() !== '');
+              return status === 'paid' || serviceStatus === 'payment completed' || hasPaymentId;
+            });
+
+            const getServiceName = (registration) => {
+              const tid = registration.ticket_id || '';
+              if (tid.startsWith('GST_')) return 'GST Registration';
+              if (tid.startsWith('SI_')) return 'Startup India';
+              if (tid.startsWith('PROP_')) return 'Proprietorship';
+              if (tid.startsWith('PVT_')) return 'Private Limited';
+              if (tid.startsWith('OPC_')) return 'OPC Registration';
+              if (tid.startsWith('LLP_')) return 'LLP Registration';
+
+              const packageName = (registration.package_name || '').toLowerCase();
+              const businessName = (registration.business_name || '').toLowerCase();
+
+              if (packageName.includes('opc') || businessName.includes('opc')) return 'OPC Registration';
+              if (packageName.includes('llp') || businessName.includes('llp')) return 'LLP Registration';
+              if (packageName.includes('gst') || businessName.includes('gst')) return 'GST Registration';
+              if (packageName.includes('startup') || businessName.includes('startup')) return 'Startup India';
+              if (packageName.includes('proprietorship') || businessName.includes('proprietorship')) return 'Proprietorship';
+              if (packageName.includes('private limited') || businessName.includes('private limited')) return 'Private Limited';
+
+              return registration.package_name || 'Registration';
+            };
+
+            if (paidServices.length === 0) {
+              return <p className="text-gray-600">No paid services found for this client.</p>;
+            }
+
+            return (
+              <div className="space-y-3">
+                {paidServices.map((registration) => (
+                  <div key={registration.ticket_id || registration.id} className="border border-gray-200 rounded-lg p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-500">{registration.business_name || `Ticket: ${registration.ticket_id}`}</p>
+                      <h3 className="text-lg font-semibold text-gray-900">{getServiceName(registration)}</h3>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {registration.updated_at || registration.created_at
+                          ? new Date(registration.updated_at || registration.created_at || registration.createdAt || '').toLocaleDateString('en-IN', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                              timeZone: 'Asia/Kolkata'
+                            })
+                          : 'Date not available'}
+                      </p>
+                    </div>
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      {registration.service_status || 'Payment completed'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       )}
 
