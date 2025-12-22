@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { getUsersPageData, updateUsersPageData } from '../../utils/usersPageApi';
+import apiClient from '../../utils/api';
 import { BsCalendar3 } from 'react-icons/bs';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { AiOutlinePlus } from 'react-icons/ai';
 import logo from '../../assets/logo.png';
 
 function Organization() {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [organizations, setOrganizations] = useState([]);
   const [selectedOrg, setSelectedOrg] = useState(null);
@@ -39,17 +38,62 @@ function Organization() {
               }
             }
             
+            // Parse directors/partners details
+            let directorsPartners = [];
+            if (org.directors_partners_details) {
+              try {
+                directorsPartners = typeof org.directors_partners_details === 'string' 
+                  ? JSON.parse(org.directors_partners_details) 
+                  : org.directors_partners_details;
+                if (!Array.isArray(directorsPartners)) directorsPartners = [];
+              } catch {
+                directorsPartners = [];
+              }
+            }
+            
+            // Parse digital signature details
+            let digitalSignatures = [];
+            if (org.digital_signature_details) {
+              try {
+                digitalSignatures = typeof org.digital_signature_details === 'string' 
+                  ? JSON.parse(org.digital_signature_details) 
+                  : org.digital_signature_details;
+                if (!Array.isArray(digitalSignatures)) digitalSignatures = [];
+              } catch {
+                digitalSignatures = [];
+              }
+            }
+            
             return {
               id: org.id,
               organisationType: org.organisation_type || 'N/A',
               legalName: org.legal_name || 'N/A',
               tradeName: org.trade_name || 'N/A',
+              category: org.category || 'N/A',
               gstin: org.gstin || 'N/A',
               incorporationDate: org.incorporation_date || 'N/A',
               tan: org.tan || 'N/A',
               cin: org.cin || 'N/A',
               registeredAddress: org.registered_address || 'N/A',
               panFile: org.pan_file || null,
+              directorsPartners: directorsPartners.map((dp, idx) => ({
+                id: dp.id || `dp-${Date.now()}-${idx}`,
+                name: dp.name || '',
+                dinNumber: dp.din_number || '',
+                contact: dp.contact || '',
+                email: dp.email || '',
+                dateOfAddition: dp.date_of_addition || '',
+                status: dp.status || 'Active'
+              })),
+              digitalSignatures: digitalSignatures.map((ds, idx) => ({
+                id: ds.id || `ds-${Date.now()}-${idx}`,
+                name: ds.name || '',
+                dscNumber: ds.dsc_number || '',
+                expiryDate: ds.expiry_date || '',
+                status: ds.status || 'Active'
+              })),
+              optionalAttachment1: org.optional_attachment_1 || null,
+              optionalAttachment2: org.optional_attachment_2 || null,
               websites: websites.map((w, index) => {
                 // Ensure unique IDs - use existing id or generate one with index offset
                 const baseId = Date.now();
@@ -78,6 +122,82 @@ function Organization() {
       month: 'short', 
       day: 'numeric' 
     });
+  };
+
+  const handleViewFile = async (fileData) => {
+    if (!fileData) return;
+    
+    try {
+      // If it's base64 data (starts with data:), create a blob and open it
+      if (typeof fileData === 'string' && fileData.startsWith('data:')) {
+        const base64Data = fileData.split(',')[1];
+        const mimeType = fileData.split(',')[0].split(':')[1].split(';')[0];
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: mimeType });
+        const blobUrl = URL.createObjectURL(blob);
+        const newWindow = window.open(blobUrl, '_blank');
+        // Clean up the blob URL after the window has loaded (use longer delay to ensure file loads)
+        if (newWindow) {
+          newWindow.addEventListener('load', () => {
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+          });
+        } else {
+          // Fallback: revoke after longer delay if popup blocked
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+        }
+      } else if (typeof fileData === 'string' && (fileData.startsWith('http://') || fileData.startsWith('https://'))) {
+        // Check if it's an S3 URL
+        if (fileData.includes('.s3.') && fileData.includes('.amazonaws.com')) {
+          // Get signed URL for S3 file
+          try {
+            const response = await apiClient.post('/admin/get-signed-url', { s3Url: fileData });
+            if (response.success && response.signedUrl) {
+              window.open(response.signedUrl, '_blank', 'noopener,noreferrer');
+            } else {
+              window.open(fileData, '_blank', 'noopener,noreferrer');
+            }
+          } catch (error) {
+            console.error('Error getting signed URL:', error);
+            window.open(fileData, '_blank', 'noopener,noreferrer');
+          }
+        } else {
+          // Regular HTTP/HTTPS URL
+          window.open(fileData, '_blank', 'noopener,noreferrer');
+        }
+      } else {
+        // Try to handle as base64 without data: prefix
+        try {
+          const base64Data = atob(fileData);
+          const byteNumbers = new Array(base64Data.length);
+          for (let i = 0; i < base64Data.length; i++) {
+            byteNumbers[i] = base64Data.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'application/pdf' });
+          const blobUrl = URL.createObjectURL(blob);
+          const newWindow = window.open(blobUrl, '_blank');
+          // Clean up the blob URL after the window has loaded
+          if (newWindow) {
+            newWindow.addEventListener('load', () => {
+              setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+            });
+          } else {
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+          }
+        } catch (error) {
+          console.error('Error processing file:', error);
+          alert('Unable to open file. The file may be inaccessible or in an unsupported format.');
+        }
+      }
+    } catch (error) {
+      console.error('Error opening file:', error);
+      alert('Unable to open file. Please try downloading it instead.');
+    }
   };
 
   // Website management functions
@@ -113,6 +233,80 @@ function Organization() {
     const updatedOrg = {
       ...editingOrg,
       websites: (editingOrg.websites || []).filter(w => w.id !== websiteId)
+    };
+    setEditingOrg(updatedOrg);
+  };
+
+  // Director/Partner management functions
+  const addDirectorPartner = () => {
+    if (!editingOrg) return;
+    const updatedOrg = {
+      ...editingOrg,
+      directorsPartners: [...(editingOrg.directorsPartners || []), {
+        id: Date.now(),
+        name: '',
+        dinNumber: '',
+        contact: '',
+        email: '',
+        dateOfAddition: '',
+        status: 'Active'
+      }]
+    };
+    setEditingOrg(updatedOrg);
+  };
+
+  const removeDirectorPartner = (id) => {
+    if (!editingOrg) return;
+    const updatedOrg = {
+      ...editingOrg,
+      directorsPartners: (editingOrg.directorsPartners || []).filter(dp => dp.id !== id)
+    };
+    setEditingOrg(updatedOrg);
+  };
+
+  const updateDirectorPartner = (id, field, value) => {
+    if (!editingOrg) return;
+    const updatedOrg = {
+      ...editingOrg,
+      directorsPartners: (editingOrg.directorsPartners || []).map(dp =>
+        dp.id === id ? { ...dp, [field]: value } : dp
+      )
+    };
+    setEditingOrg(updatedOrg);
+  };
+
+  // Digital Signature management functions
+  const addDigitalSignature = () => {
+    if (!editingOrg) return;
+    const updatedOrg = {
+      ...editingOrg,
+      digitalSignatures: [...(editingOrg.digitalSignatures || []), {
+        id: Date.now(),
+        name: '',
+        dscNumber: '',
+        expiryDate: '',
+        status: 'Active'
+      }]
+    };
+    setEditingOrg(updatedOrg);
+  };
+
+  const removeDigitalSignature = (id) => {
+    if (!editingOrg) return;
+    const updatedOrg = {
+      ...editingOrg,
+      digitalSignatures: (editingOrg.digitalSignatures || []).filter(ds => ds.id !== id)
+    };
+    setEditingOrg(updatedOrg);
+  };
+
+  const updateDigitalSignature = (id, field, value) => {
+    if (!editingOrg) return;
+    const updatedOrg = {
+      ...editingOrg,
+      digitalSignatures: (editingOrg.digitalSignatures || []).map(ds =>
+        ds.id === id ? { ...ds, [field]: value } : ds
+      )
     };
     setEditingOrg(updatedOrg);
   };
@@ -164,6 +358,10 @@ function Organization() {
     let idCounter = Date.now();
     const orgToEdit = {
       ...selectedOrg,
+      directorsPartners: selectedOrg.directorsPartners || [],
+      digitalSignatures: selectedOrg.digitalSignatures || [],
+      optionalAttachment1: selectedOrg.optionalAttachment1 || null,
+      optionalAttachment2: selectedOrg.optionalAttachment2 || null,
       websites: websites.map((w) => ({
         ...w, // Spread to create a new object
         id: w.id || (idCounter++), // Ensure unique IDs with counter
@@ -224,12 +422,17 @@ function Organization() {
           organisationType: org.organisationType !== 'N/A' ? org.organisationType : '',
           legalName: org.legalName !== 'N/A' ? org.legalName : '',
           tradeName: org.tradeName !== 'N/A' ? org.tradeName : '',
+          category: org.category !== 'N/A' ? org.category : '',
           gstin: org.gstin !== 'N/A' ? org.gstin : '',
           incorporationDate: org.incorporationDate !== 'N/A' ? org.incorporationDate : '',
           panFile: org.panFile,
           tan: org.tan !== 'N/A' ? org.tan : '',
           cin: org.cin !== 'N/A' ? org.cin : '',
           registeredAddress: org.registeredAddress !== 'N/A' ? org.registeredAddress : '',
+          directorsPartners: (org.directorsPartners || []).filter(dp => dp.name || dp.dinNumber || dp.contact || dp.email),
+          digitalSignatures: (org.digitalSignatures || []).filter(ds => ds.name || ds.dscNumber),
+          optionalAttachment1: org.optionalAttachment1 || null,
+          optionalAttachment2: org.optionalAttachment2 || null,
           websites: (org.websites || []).filter(w => w.url && w.url.trim() !== '').map(w => ({
             type: w.type,
             url: w.url,
@@ -282,12 +485,17 @@ function Organization() {
       organisationType: '',
       legalName: '',
       tradeName: '',
+      category: '',
       gstin: '',
       incorporationDate: '',
       panFile: null,
       tan: '',
       cin: '',
       registeredAddress: '',
+      directorsPartners: [],
+      digitalSignatures: [],
+      optionalAttachment1: null,
+      optionalAttachment2: null,
       websites: []
     };
     setOrganizations([...organizations, newOrg]);
@@ -412,6 +620,41 @@ function Organization() {
                 </div>
               </div>
 
+              {/* Row 1.5: Category */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category
+                  </label>
+                  {editingOrg ? (
+                    <select
+                      value={editingOrg.category !== 'N/A' ? editingOrg.category : ''}
+                      onChange={(e) => updateOrganizationField('category', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+                    >
+                      <option value="">Select Category</option>
+                      <option value="Individual">Individual</option>
+                      <option value="Hindu undivided family">Hindu undivided family</option>
+                      <option value="Partnership Firm">Partnership Firm</option>
+                      <option value="Limited Liability Partnership">Limited Liability Partnership</option>
+                      <option value="Private Limited Company">Private Limited Company</option>
+                      <option value="One Person Company">One Person Company</option>
+                      <option value="Section 8 Company">Section 8 Company</option>
+                      <option value="Society">Society</option>
+                      <option value="Charitable Trust">Charitable Trust</option>
+                      <option value="Government">Government</option>
+                      <option value="Association of Persons">Association of Persons</option>
+                      <option value="Body of Individuals">Body of Individuals</option>
+                      <option value="Artificial Judicial Person">Artificial Judicial Person</option>
+                    </select>
+                  ) : (
+                    <div className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg">
+                      <p className="text-gray-900">{selectedOrg.category}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Row 2: GSTIN, Incorporation Date, PAN File */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
@@ -489,12 +732,16 @@ function Organization() {
                     <div className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg">
                       <p className="text-gray-900">
                         {selectedOrg.panFile ? (
-                          <span className="text-green-600 flex items-center">
+                          <button
+                            onClick={() => handleViewFile(selectedOrg.panFile)}
+                            className="text-blue-600 hover:text-blue-800 hover:underline flex items-center"
+                          >
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
-                            Uploaded
-                          </span>
+                            View File
+                          </button>
                         ) : (
                           'Not uploaded'
                         )}
@@ -563,6 +810,413 @@ function Organization() {
                   )}
                 </div>
               </div>
+
+              {/* Director/Partners Details Section */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Director/Partners Details</h3>
+                  {editingOrg && (
+                    <button
+                      onClick={addDirectorPartner}
+                      className="px-4 py-2 text-sm bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium inline-flex items-center"
+                    >
+                      <AiOutlinePlus className="w-4 h-4 mr-2" />
+                      Add Director/Partner
+                    </button>
+                  )}
+                </div>
+
+                {/* Directors/Partners Table */}
+                {((editingOrg || selectedOrg)?.directorsPartners || []).length > 0 && (
+                  <div className="overflow-x-auto mb-4">
+                    <table className="w-full border-collapse bg-white min-w-[800px]">
+                      <thead>
+                        <tr className="bg-gray-100 border-b border-gray-300">
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Name</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">DIN/Number</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Contact</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Email</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Date of Addition</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Status</th>
+                          {editingOrg && <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Actions</th>}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(editingOrg || selectedOrg)?.directorsPartners?.map((dp) => (
+                          <tr key={dp.id} className="border-b border-gray-200">
+                            <td className="px-4 py-3 border border-gray-300">
+                              {editingOrg ? (
+                                <input
+                                  type="text"
+                                  value={dp.name || ''}
+                                  onChange={(e) => updateDirectorPartner(dp.id, 'name', e.target.value)}
+                                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                  placeholder="Name"
+                                />
+                              ) : (
+                                <span className="text-sm text-gray-700">{dp.name || 'N/A'}</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 border border-gray-300">
+                              {editingOrg ? (
+                                <input
+                                  type="text"
+                                  value={dp.dinNumber || ''}
+                                  onChange={(e) => updateDirectorPartner(dp.id, 'dinNumber', e.target.value)}
+                                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                  placeholder="DIN/Number"
+                                />
+                              ) : (
+                                <span className="text-sm text-gray-700">{dp.dinNumber || 'N/A'}</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 border border-gray-300">
+                              {editingOrg ? (
+                                <input
+                                  type="text"
+                                  value={dp.contact || ''}
+                                  onChange={(e) => updateDirectorPartner(dp.id, 'contact', e.target.value)}
+                                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                  placeholder="Contact"
+                                />
+                              ) : (
+                                <span className="text-sm text-gray-700">{dp.contact || 'N/A'}</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 border border-gray-300">
+                              {editingOrg ? (
+                                <input
+                                  type="email"
+                                  value={dp.email || ''}
+                                  onChange={(e) => updateDirectorPartner(dp.id, 'email', e.target.value)}
+                                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                  placeholder="Email"
+                                />
+                              ) : (
+                                <span className="text-sm text-gray-700">{dp.email || 'N/A'}</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 border border-gray-300">
+                              {editingOrg ? (
+                                <input
+                                  type="date"
+                                  value={dp.dateOfAddition || ''}
+                                  onChange={(e) => updateDirectorPartner(dp.id, 'dateOfAddition', e.target.value)}
+                                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                />
+                              ) : (
+                                <span className="text-sm text-gray-700">{dp.dateOfAddition ? formatDate(dp.dateOfAddition) : 'N/A'}</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 border border-gray-300">
+                              {editingOrg ? (
+                                <select
+                                  value={dp.status || 'Active'}
+                                  onChange={(e) => updateDirectorPartner(dp.id, 'status', e.target.value)}
+                                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                >
+                                  <option value="Active">Active</option>
+                                  <option value="Inactive">Inactive</option>
+                                </select>
+                              ) : (
+                                <span className="text-sm text-gray-700">{dp.status || 'Active'}</span>
+                              )}
+                            </td>
+                            {editingOrg && (
+                              <td className="px-4 py-3 border border-gray-300">
+                                <button
+                                  onClick={() => removeDirectorPartner(dp.id)}
+                                  className="text-red-600 hover:text-red-800 text-sm font-medium"
+                                >
+                                  Remove
+                                </button>
+                              </td>
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Empty State */}
+                {(!editingOrg && (!selectedOrg?.directorsPartners || selectedOrg.directorsPartners.length === 0)) && (
+                  <div className="text-center py-4 text-gray-500 text-sm">
+                    No directors/partners added yet.
+                  </div>
+                )}
+              </div>
+
+              {/* Digital Signature Details Section */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Digital Signature Details</h3>
+                  {editingOrg && (
+                    <button
+                      onClick={addDigitalSignature}
+                      className="px-4 py-2 text-sm bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium inline-flex items-center"
+                    >
+                      <AiOutlinePlus className="w-4 h-4 mr-2" />
+                      Add Digital Signature
+                    </button>
+                  )}
+                </div>
+
+                {/* Digital Signatures Table */}
+                {((editingOrg || selectedOrg)?.digitalSignatures || []).length > 0 && (
+                  <div className="overflow-x-auto mb-4">
+                    <table className="w-full border-collapse bg-white min-w-[600px]">
+                      <thead>
+                        <tr className="bg-gray-100 border-b border-gray-300">
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Name</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">DSC Number</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Expiry Date</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Status</th>
+                          {editingOrg && <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Actions</th>}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(editingOrg || selectedOrg)?.digitalSignatures?.map((ds) => (
+                          <tr key={ds.id} className="border-b border-gray-200">
+                            <td className="px-4 py-3 border border-gray-300">
+                              {editingOrg ? (
+                                <input
+                                  type="text"
+                                  value={ds.name || ''}
+                                  onChange={(e) => updateDigitalSignature(ds.id, 'name', e.target.value)}
+                                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                  placeholder="Name"
+                                />
+                              ) : (
+                                <span className="text-sm text-gray-700">{ds.name || 'N/A'}</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 border border-gray-300">
+                              {editingOrg ? (
+                                <input
+                                  type="text"
+                                  value={ds.dscNumber || ''}
+                                  onChange={(e) => updateDigitalSignature(ds.id, 'dscNumber', e.target.value)}
+                                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                  placeholder="DSC Number"
+                                />
+                              ) : (
+                                <span className="text-sm text-gray-700">{ds.dscNumber || 'N/A'}</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 border border-gray-300">
+                              {editingOrg ? (
+                                <input
+                                  type="date"
+                                  value={ds.expiryDate || ''}
+                                  onChange={(e) => updateDigitalSignature(ds.id, 'expiryDate', e.target.value)}
+                                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                />
+                              ) : (
+                                <span className="text-sm text-gray-700">{ds.expiryDate ? formatDate(ds.expiryDate) : 'N/A'}</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 border border-gray-300">
+                              {editingOrg ? (
+                                <select
+                                  value={ds.status || 'Active'}
+                                  onChange={(e) => updateDigitalSignature(ds.id, 'status', e.target.value)}
+                                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                >
+                                  <option value="Active">Active</option>
+                                  <option value="In-active">In-active</option>
+                                </select>
+                              ) : (
+                                <span className="text-sm text-gray-700">{ds.status || 'Active'}</span>
+                              )}
+                            </td>
+                            {editingOrg && (
+                              <td className="px-4 py-3 border border-gray-300">
+                                <button
+                                  onClick={() => removeDigitalSignature(ds.id)}
+                                  className="text-red-600 hover:text-red-800 text-sm font-medium"
+                                >
+                                  Remove
+                                </button>
+                              </td>
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Empty State */}
+                {(!editingOrg && (!selectedOrg?.digitalSignatures || selectedOrg.digitalSignatures.length === 0)) && (
+                  <div className="text-center py-4 text-gray-500 text-sm">
+                    No digital signatures added yet.
+                  </div>
+                )}
+              </div>
+
+              {/* Attachments Section */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Attachments</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Optional Attachment 1 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Optional Attachment 1
+                    </label>
+                    {editingOrg ? (
+                      <div>
+                        <input
+                          type="file"
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                const base64 = reader.result;
+                                updateOrganizationField('optionalAttachment1', base64);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          className="hidden"
+                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                          id="optional-attachment-1"
+                        />
+                        <label
+                          htmlFor="optional-attachment-1"
+                          className="cursor-pointer inline-block"
+                        >
+                          {editingOrg.optionalAttachment1 ? (
+                            <div className="px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg">
+                              <p className="text-sm text-gray-700">File uploaded</p>
+                              <div className="flex gap-2 mt-1">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleViewFile(editingOrg.optionalAttachment1);
+                                  }}
+                                  className="text-xs text-blue-600 hover:text-blue-800"
+                                >
+                                  View File
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    updateOrganizationField('optionalAttachment1', null);
+                                  }}
+                                  className="text-xs text-red-600 hover:text-red-800"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="px-4 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-sm">
+                              Upload File
+                            </span>
+                          )}
+                        </label>
+                      </div>
+                    ) : (
+                      <div className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg">
+                        {selectedOrg?.optionalAttachment1 ? (
+                          <button
+                            onClick={() => handleViewFile(selectedOrg.optionalAttachment1)}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          >
+                            View File
+                          </button>
+                        ) : (
+                          <p className="text-gray-500 text-sm">No file uploaded</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Optional Attachment 2 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Optional Attachment 2
+                    </label>
+                    {editingOrg ? (
+                      <div>
+                        <input
+                          type="file"
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                const base64 = reader.result;
+                                updateOrganizationField('optionalAttachment2', base64);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          className="hidden"
+                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                          id="optional-attachment-2"
+                        />
+                        <label
+                          htmlFor="optional-attachment-2"
+                          className="cursor-pointer inline-block"
+                        >
+                          {editingOrg.optionalAttachment2 ? (
+                            <div className="px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg">
+                              <p className="text-sm text-gray-700">File uploaded</p>
+                              <div className="flex gap-2 mt-1">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleViewFile(editingOrg.optionalAttachment2);
+                                  }}
+                                  className="text-xs text-blue-600 hover:text-blue-800"
+                                >
+                                  View File
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    updateOrganizationField('optionalAttachment2', null);
+                                  }}
+                                  className="text-xs text-red-600 hover:text-red-800"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="px-4 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-sm">
+                              Upload File
+                            </span>
+                          )}
+                        </label>
+                      </div>
+                    ) : (
+                      <div className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg">
+                        {selectedOrg?.optionalAttachment2 ? (
+                          <button
+                            onClick={() => handleViewFile(selectedOrg.optionalAttachment2)}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          >
+                            View File
+                          </button>
+                        ) : (
+                          <p className="text-gray-500 text-sm">No file uploaded</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+
 
                 {/* Website Details Section */}
               <div className="mt-6 pt-6 border-t border-gray-200">
@@ -807,12 +1461,7 @@ function Organization() {
             Your registered organizations
           </p>
         </div>
-        <button 
-          onClick={() => navigate('/settings')}
-          className="px-5 py-2 text-sm text-[#01334C] hover:text-[#00486D] font-medium hover:underline"
-        >
-          View all
-        </button>
+       
       </div>
 
       {/* Table and Add Button */}

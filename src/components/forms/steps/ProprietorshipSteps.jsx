@@ -84,12 +84,12 @@ export function BasicBusinessDetailsContent({ formData, setFormData, disabled = 
 
   const handleFileUpload = async (field, file) => {
     if (disabled || !file) return;
-    try {
-      const base64 = await fileToBase64(file);
-      updateStep1(field, base64);
-    } catch (error) {
-      console.error('Error converting file:', error);
-      alert('Failed to upload file. Please try again.');
+      try {
+        const base64 = await fileToBase64(file);
+        updateStep1(field, base64);
+      } catch (error) {
+        console.error('Error converting file:', error);
+        alert('Failed to upload file. Please try again.');
     }
   };
 
@@ -422,12 +422,12 @@ export function BasicProprietorDetailsContent({ formData, setFormData, disabled 
 
   const handleFileUpload = async (field, file) => {
     if (disabled || !file) return;
-    try {
-      const base64 = await fileToBase64(file);
-      updateStep2(field, base64);
-    } catch (error) {
-      console.error('Error converting file:', error);
-      alert('Failed to upload file. Please try again.');
+      try {
+        const base64 = await fileToBase64(file);
+        updateStep2(field, base64);
+      } catch (error) {
+        console.error('Error converting file:', error);
+        alert('Failed to upload file. Please try again.');
     }
   };
 

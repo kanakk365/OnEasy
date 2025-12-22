@@ -10,8 +10,9 @@ function Client() {
   const navigate = useNavigate();
   const [allServices, setAllServices] = React.useState([]);
   const [loadingService, setLoadingService] = React.useState(true);
-  const [notice, setNotice] = React.useState(null);
+  const [allNotices, setAllNotices] = React.useState([]);
   const [loadingNotice, setLoadingNotice] = React.useState(true);
+  const [activeNoticeTab, setActiveNoticeTab] = React.useState('All Notices'); // 'All Notices' or 'My Notices'
   const [activeServiceTab, setActiveServiceTab] = React.useState('Open');
   const [organizations, setOrganizations] = React.useState([]);
   const [loadingOrganizations, setLoadingOrganizations] = React.useState(true);
@@ -91,15 +92,27 @@ function Client() {
     loadLatestService();
     const loadNotice = async () => {
       try {
-        const res = await apiClient.get('/admin/notices');
-        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-          setNotice(res.data[0]);
+        // Get current user ID to fetch user-specific notices
+        const storedUser = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}");
+        const userId = storedUser.id;
+        
+        // Pass userId as query parameter to get global notices + user-specific notices
+        const url = userId ? `/admin/notices?userId=${userId}` : '/admin/notices';
+        const res = await apiClient.get(url);
+        if (res.success && Array.isArray(res.data)) {
+          // Sort by created_at descending (newest first)
+          const sortedNotices = res.data.sort((a, b) => {
+            const dateA = new Date(a.created_at || 0);
+            const dateB = new Date(b.created_at || 0);
+            return dateB - dateA;
+          });
+          setAllNotices(sortedNotices);
         } else {
-          setNotice(null);
+          setAllNotices([]);
         }
       } catch (e) {
         console.error('Failed to fetch notice:', e);
-        setNotice(null);
+        setAllNotices([]);
       } finally {
         setLoadingNotice(false);
       }
@@ -147,6 +160,25 @@ function Client() {
     if (reg.payment_status) return reg.payment_status;
     return "Open";
   };
+
+  // Filter notices based on active tab
+  const filteredNotices = React.useMemo(() => {
+    const storedUser = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}");
+    const userId = storedUser.id;
+
+    if (activeNoticeTab === 'All Notices') {
+      // Show only global notices (user_id is null)
+      return allNotices.filter(notice => !notice.user_id);
+    } else {
+      // Show only user-specific notices (user_id matches current user)
+      return allNotices.filter(notice => notice.user_id && String(notice.user_id) === String(userId));
+    }
+  }, [allNotices, activeNoticeTab]);
+
+  // Get the latest notice from filtered notices
+  const notice = React.useMemo(() => {
+    return filteredNotices.length > 0 ? filteredNotices[0] : null;
+  }, [filteredNotices]);
 
   const getServiceTab = React.useCallback((reg) => {
     const status = getStatusLabel(reg);
@@ -264,12 +296,41 @@ function Client() {
                 Notice Board
               </h2>
               <a
-                href="#"
+                href="/notice-board"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/notice-board');
+                }}
                 className="text-[#01334C] hover:text-[#00486D] transition-colors duration-200 text-sm font-medium hover:underline"
               >
                 View all
               </a>
             </div>
+            
+            {/* Tabs */}
+            <div className="flex border-b border-gray-100 mb-4 overflow-x-auto">
+              <button 
+                onClick={() => setActiveNoticeTab('All Notices')}
+                className={`pb-2 mr-4 text-xs font-medium whitespace-nowrap transition-colors ${
+                  activeNoticeTab === 'All Notices' 
+                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                All Notices
+              </button>
+              <button 
+                onClick={() => setActiveNoticeTab('My Notices')}
+                className={`pb-2 text-xs font-medium whitespace-nowrap transition-colors ${
+                  activeNoticeTab === 'My Notices' 
+                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                My Notices
+              </button>
+            </div>
+
             <div className="bg-amber-50 p-4 rounded-lg flex items-start space-x-3">
               <div className="flex-shrink-0">
                 <div className="w-10 h-10 bg-amber-400 rounded-full flex items-center justify-center">
@@ -302,7 +363,11 @@ function Client() {
                     </p>
                   </div>
                 ) : (
-                  <p className="text-gray-600 text-sm">No notices available.</p>
+                  <p className="text-gray-600 text-sm">
+                    {activeNoticeTab === 'All Notices' 
+                      ? 'No global notices available.' 
+                      : 'No notices assigned to you.'}
+                  </p>
                 )}
               </div>
             </div>

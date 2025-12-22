@@ -5,6 +5,7 @@ import OTPVerification from "../pages/OTPVerification";
 import ReferralCode from "../pages/ReferralCode";
 import Client from "../pages/Client";
 import ClientServices from "../pages/ClientServices";
+import NoticeBoard from "../pages/NoticeBoard";
 import Admin from "../pages/Admin";
 import Partner from "../pages/Partner";
 import Registrations from "../pages/Registrations";
@@ -108,6 +109,7 @@ import AdminFillFormNew from "../admin/pages/AdminFillFormNew";
 import RegistrationDetailsRouter from "../admin/pages/RegistrationDetailsRouter";
 import AdminServices from "../admin/pages/AdminServices";
 import AdminNoticeBoard from "../admin/pages/AdminNoticeBoard";
+import AdminNoticeManagement from "../admin/pages/AdminNoticeManagement";
 import AdminCMSPackage from "../admin/pages/AdminCMSPackage";
 import AdminCustomPayment from "../admin/pages/AdminCustomPayment";
 import SuperAdminLayout from "../superadmin/layout/SuperAdminLayout";
@@ -135,6 +137,11 @@ function Routers() {
       <Route path="/client-services" element={
         <ProtectedRoute allowedRoles={['user', 5]}>
           <ClientServices />
+        </ProtectedRoute>
+      } />
+      <Route path="/notice-board" element={
+        <ProtectedRoute allowedRoles={['user', 5]}>
+          <NoticeBoard />
         </ProtectedRoute>
       } />
       <Route path="/partner" element={
@@ -642,6 +649,7 @@ function Routers() {
         <Route path="fill-form-new" element={<AdminFillFormNew />} />
         <Route path="services" element={<AdminServices />} />
         <Route path="notice-board" element={<AdminNoticeBoard />} />
+        <Route path="notice-management" element={<AdminNoticeManagement />} />
         <Route path="coupon-generator" element={<CouponCodeGenerator />} />
         <Route path="cms-package" element={<AdminCMSPackage />} />
         <Route path="profile" element={<AdminProfile />} />

@@ -206,12 +206,12 @@ function ProprietorshipViewDetails() {
                 Edit Registration
               </button>
             )}
-            <button
+          <button
               onClick={() => navigate(getBackRoute())}
-              className="px-4 py-2 border border-[#00486D] text-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
-            >
-              Back to Dashboard
-            </button>
+            className="px-4 py-2 border border-[#00486D] text-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
+          >
+            Back to Dashboard
+          </button>
           </div>
         </div>
 

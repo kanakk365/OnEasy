@@ -61,33 +61,6 @@ function AdminClients() {
     });
   };
 
-  const getStatusBadge = (client) => {
-    if (client.team_fill_requested) {
-      return (
-        <span className="px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-          Team Fill Requested
-        </span>
-      );
-    } else if (client.registration_submitted) {
-      return (
-        <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-          Registered
-        </span>
-      );
-    } else if (client.payment_completed) {
-      return (
-        <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-          Payment Done
-        </span>
-      );
-    } else {
-      return (
-        <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-          New
-        </span>
-      );
-    }
-  };
 
   const filteredClients = clients.filter(client => {
     // Debug: log how many clients have team_fill_requested flag
@@ -272,9 +245,6 @@ function AdminClients() {
                 {filter === 'support-requests' && (
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Support Request</th>
                 )}
-                {filter !== 'support-requests' && (
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
-                )}
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Actions</th>
               </tr>
             </thead>
@@ -309,9 +279,6 @@ function AdminClients() {
                         <span className="text-gray-500">No support requests</span>
                       )}
                     </td>
-                  )}
-                  {filter !== 'support-requests' && (
-                  <td className="px-6 py-4">{getStatusBadge(client)}</td>
                   )}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">

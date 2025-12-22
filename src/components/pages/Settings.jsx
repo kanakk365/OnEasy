@@ -4,6 +4,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 import { BsCalendar3 } from 'react-icons/bs';
 import { AiOutlinePlus } from 'react-icons/ai';
 import { getUsersPageData, updateUsersPageData } from '../../utils/usersPageApi';
+import apiClient from '../../utils/api';
 
 function Settings() {
   const [expandedSection, setExpandedSection] = useState('client-profile');
@@ -16,8 +17,6 @@ function Settings() {
     dob: '',
     address: '',
     businessAddress: '',
-    category: '',
-    subCategory: '',
     aadharCard: null,
     panCard: null,
     signature: null
@@ -34,6 +33,10 @@ function Settings() {
       tan: '',
       cin: '',
       registeredAddress: '',
+      directorsPartners: [],
+      digitalSignatures: [],
+      optionalAttachment1: null,
+      optionalAttachment2: null,
       websites: []
     }
   ]);
@@ -56,6 +59,9 @@ function Settings() {
   const [expandedUserNoteId, setExpandedUserNoteId] = useState(null);
   const [isAddingUserNote, setIsAddingUserNote] = useState(false);
   const [currentUserNote, setCurrentUserNote] = useState({ date: '', description: '', attachments: [] });
+  const [userId, setUserId] = useState('');
+  const [customClientId, setCustomClientId] = useState('');
+  const [clientStatus, setClientStatus] = useState('');
   
   // Load data on mount
   useEffect(() => {
@@ -75,6 +81,11 @@ function Settings() {
       if (response.success && response.data) {
         const { user, websites: userWebsites } = response.data;
         
+        // Store user ID, custom client ID, and client status
+        setUserId(user.id || '');
+        setCustomClientId(user.custom_client_id || '');
+        setClientStatus(user.client_status || 'Active');
+        
         // Populate Client Profile data
         setFormData({
           name: user.name || '',
@@ -83,8 +94,6 @@ function Settings() {
           dob: user.dob || '',
           address: user.address_line1 || '',
           businessAddress: user.business_address || '',
-          category: user.category || '',
-          subCategory: user.sub_category || '',
           aadharCard: user.aadhar_card || null,
           panCard: user.pan_card || null,
           signature: user.signature || null
@@ -114,12 +123,57 @@ function Settings() {
               showPassword: false
             }));
             
+            // Parse directors/partners details
+            let directorsPartners = [];
+            if (org.directors_partners_details) {
+              try {
+                directorsPartners = typeof org.directors_partners_details === 'string' 
+                  ? JSON.parse(org.directors_partners_details) 
+                  : org.directors_partners_details;
+                if (!Array.isArray(directorsPartners)) directorsPartners = [];
+              } catch {
+                directorsPartners = [];
+              }
+            }
+            
+            // Parse digital signature details
+            let digitalSignatures = [];
+            if (org.digital_signature_details) {
+              try {
+                digitalSignatures = typeof org.digital_signature_details === 'string' 
+                  ? JSON.parse(org.digital_signature_details) 
+                  : org.digital_signature_details;
+                if (!Array.isArray(digitalSignatures)) digitalSignatures = [];
+              } catch {
+                digitalSignatures = [];
+              }
+            }
+            
             return {
               id: org.id || idx + 1,
               organisationType: org.organisation_type || '',
               legalName: org.legal_name || '',
               tradeName: org.trade_name || '',
+              category: org.category || '',
               gstin: org.gstin || '',
+              directorsPartners: directorsPartners.map((dp, index) => ({
+                id: dp.id || `dp-${Date.now()}-${index}`,
+                name: dp.name || '',
+                dinNumber: dp.din_number || '',
+                contact: dp.contact || '',
+                email: dp.email || '',
+                dateOfAddition: dp.date_of_addition || '',
+                status: dp.status || 'Active'
+              })),
+              digitalSignatures: digitalSignatures.map((ds, index) => ({
+                id: ds.id || `ds-${Date.now()}-${index}`,
+                name: ds.name || '',
+                dscNumber: ds.dsc_number || '',
+                expiryDate: ds.expiry_date || '',
+                status: ds.status || 'Active'
+              })),
+              optionalAttachment1: org.optional_attachment_1 || null,
+              optionalAttachment2: org.optional_attachment_2 || null,
               incorporationDate: org.incorporation_date || '',
               panFile: org.pan_file || null,
               tan: org.tan || '',
@@ -148,6 +202,7 @@ function Settings() {
             organisationType: user.organisation_type || '',
             legalName: user.legal_name || '',
             tradeName: user.trade_name || '',
+            category: user.category || '',
             gstin: user.gstin || '',
             incorporationDate: user.incorporation_date || '',
             panFile: user.pan_file || null,
@@ -246,8 +301,6 @@ function Settings() {
           dob: formData.dob,
           address: formData.address,
           businessAddress: formData.businessAddress,
-          category: formData.category,
-          subCategory: formData.subCategory,
           aadharCard: formData.aadharCard,
           panCard: formData.panCard,
           signature: formData.signature
@@ -278,12 +331,17 @@ function Settings() {
           organisationType: org.organisationType,
           legalName: org.legalName,
           tradeName: org.tradeName,
+          category: org.category || '',
           gstin: org.gstin,
           incorporationDate: org.incorporationDate,
           panFile: org.panFile,
           tan: org.tan,
           cin: org.cin,
           registeredAddress: org.registeredAddress,
+          directorsPartners: (org.directorsPartners || []).filter(dp => dp.name || dp.dinNumber || dp.contact || dp.email),
+          digitalSignatures: (org.digitalSignatures || []).filter(ds => ds.name || ds.dscNumber),
+          optionalAttachment1: org.optionalAttachment1 || null,
+          optionalAttachment2: org.optionalAttachment2 || null,
           websites: (org.websites || []).filter(w => w.url && w.url.trim() !== '').map(w => ({
             type: w.type,
             url: w.url,
@@ -403,6 +461,82 @@ function Settings() {
     setExpandedSection(expandedSection === section ? null : section);
   };
 
+  const handleViewFile = async (fileData) => {
+    if (!fileData) return;
+    
+    try {
+      // If it's base64 data (starts with data:), create a blob and open it
+      if (typeof fileData === 'string' && fileData.startsWith('data:')) {
+        const base64Data = fileData.split(',')[1];
+        const mimeType = fileData.split(',')[0].split(':')[1].split(';')[0];
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: mimeType });
+        const blobUrl = URL.createObjectURL(blob);
+        const newWindow = window.open(blobUrl, '_blank');
+        // Clean up the blob URL after the window has loaded (use longer delay to ensure file loads)
+        if (newWindow) {
+          newWindow.addEventListener('load', () => {
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+          });
+        } else {
+          // Fallback: revoke after longer delay if popup blocked
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+        }
+      } else if (typeof fileData === 'string' && (fileData.startsWith('http://') || fileData.startsWith('https://'))) {
+        // Check if it's an S3 URL
+        if (fileData.includes('.s3.') && fileData.includes('.amazonaws.com')) {
+          // Get signed URL for S3 file
+          try {
+            const response = await apiClient.post('/admin/get-signed-url', { s3Url: fileData });
+            if (response.success && response.signedUrl) {
+              window.open(response.signedUrl, '_blank', 'noopener,noreferrer');
+            } else {
+              window.open(fileData, '_blank', 'noopener,noreferrer');
+            }
+          } catch (error) {
+            console.error('Error getting signed URL:', error);
+            window.open(fileData, '_blank', 'noopener,noreferrer');
+          }
+        } else {
+          // Regular HTTP/HTTPS URL
+          window.open(fileData, '_blank', 'noopener,noreferrer');
+        }
+      } else {
+        // Try to handle as base64 without data: prefix
+        try {
+          const base64Data = atob(fileData);
+          const byteNumbers = new Array(base64Data.length);
+          for (let i = 0; i < base64Data.length; i++) {
+            byteNumbers[i] = base64Data.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'application/pdf' });
+          const blobUrl = URL.createObjectURL(blob);
+          const newWindow = window.open(blobUrl, '_blank');
+          // Clean up the blob URL after the window has loaded
+          if (newWindow) {
+            newWindow.addEventListener('load', () => {
+              setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+            });
+          } else {
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+          }
+        } catch (error) {
+          console.error('Error processing file:', error);
+          alert('Unable to open file. The file may be inaccessible or in an unsupported format.');
+        }
+      }
+    } catch (error) {
+      console.error('Error opening file:', error);
+      alert('Unable to open file. Please try downloading it instead.');
+    }
+  };
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -419,17 +553,102 @@ function Settings() {
       organisationType: '',
       legalName: '',
       tradeName: '',
+      category: '',
       gstin: '',
       incorporationDate: '',
       panFile: null,
       tan: '',
       cin: '',
       registeredAddress: '',
+      directorsPartners: [],
+      digitalSignatures: [],
+      optionalAttachment1: null,
+      optionalAttachment2: null,
       websites: []
     };
     setOrganizations([...organizations, newOrg]);
     setSelectedOrgId(newOrg.id);
     setIsAddingNewOrg(true);
+  };
+
+  // Director/Partner management functions
+  const addDirectorPartner = (orgId) => {
+    setOrganizations(organizations.map(org => 
+      org.id === orgId 
+        ? { 
+            ...org, 
+            directorsPartners: [...(org.directorsPartners || []), {
+              id: Date.now(),
+              name: '',
+              dinNumber: '',
+              contact: '',
+              email: '',
+              dateOfAddition: '',
+              status: 'Active'
+            }]
+          }
+        : org
+    ));
+  };
+
+  const removeDirectorPartner = (orgId, id) => {
+    setOrganizations(organizations.map(org => 
+      org.id === orgId 
+        ? { ...org, directorsPartners: (org.directorsPartners || []).filter(dp => dp.id !== id) }
+        : org
+    ));
+  };
+
+  const updateDirectorPartner = (orgId, id, field, value) => {
+    setOrganizations(organizations.map(org => 
+      org.id === orgId 
+        ? {
+            ...org,
+            directorsPartners: (org.directorsPartners || []).map(dp =>
+              dp.id === id ? { ...dp, [field]: value } : dp
+            )
+          }
+        : org
+    ));
+  };
+
+  // Digital Signature management functions
+  const addDigitalSignature = (orgId) => {
+    setOrganizations(organizations.map(org => 
+      org.id === orgId 
+        ? { 
+            ...org, 
+            digitalSignatures: [...(org.digitalSignatures || []), {
+              id: Date.now(),
+              name: '',
+              dscNumber: '',
+              expiryDate: '',
+              status: 'Active'
+            }]
+          }
+        : org
+    ));
+  };
+
+  const removeDigitalSignature = (orgId, id) => {
+    setOrganizations(organizations.map(org => 
+      org.id === orgId 
+        ? { ...org, digitalSignatures: (org.digitalSignatures || []).filter(ds => ds.id !== id) }
+        : org
+    ));
+  };
+
+  const updateDigitalSignature = (orgId, id, field, value) => {
+    setOrganizations(organizations.map(org => 
+      org.id === orgId 
+        ? {
+            ...org,
+            digitalSignatures: (org.digitalSignatures || []).map(ds =>
+              ds.id === id ? { ...ds, [field]: value } : ds
+            )
+          }
+        : org
+    ));
   };
 
   const _removeOrganization = (id) => {
@@ -1133,8 +1352,13 @@ function Settings() {
 
 
   const OrganisationDetailsContent = () => {
-    // Filter out empty organizations for table display
-    const savedOrganizations = organizations.filter(org => org.legalName && org.legalName.trim() !== '');
+    // Filter out empty organizations for table display - check if organization has any meaningful data
+    const savedOrganizations = organizations.filter(org => 
+      (org.organisationType && org.organisationType.trim() !== '') ||
+      (org.legalName && org.legalName.trim() !== '') ||
+      (org.tradeName && org.tradeName.trim() !== '') ||
+      (org.gstin && org.gstin.trim() !== '')
+    );
     const hasNoOrganizations = savedOrganizations.length === 0 && !selectedOrgId;
 
     return (
@@ -1242,10 +1466,19 @@ function Settings() {
                                     <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.tradeName || 'N/A'}</div>
                                   </div>
                                   <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.category || 'N/A'}</div>
+                                  </div>
+                                  <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">PAN File</label>
                                     <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
                                       {org.panFile ? (
-                                        <a href={org.panFile} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View File</a>
+                                        <button
+                                          onClick={() => handleViewFile(org.panFile)}
+                                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                                        >
+                                          View File
+                                        </button>
                                       ) : (
                                         'Not uploaded'
                                       )}
@@ -1355,6 +1588,33 @@ function Settings() {
                       </div>
                     </div>
 
+                    {/* Row 1.5: Category */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                        <select
+                          value={org.category || ''}
+                          onChange={(e) => updateOrganization(org.id, 'category', e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+                        >
+                          <option value="">Select Category</option>
+                          <option value="Individual">Individual</option>
+                          <option value="Hindu undivided family">Hindu undivided family</option>
+                          <option value="Partnership Firm">Partnership Firm</option>
+                          <option value="Limited Liability Partnership">Limited Liability Partnership</option>
+                          <option value="Private Limited Company">Private Limited Company</option>
+                          <option value="One Person Company">One Person Company</option>
+                          <option value="Section 8 Company">Section 8 Company</option>
+                          <option value="Society">Society</option>
+                          <option value="Charitable Trust">Charitable Trust</option>
+                          <option value="Government">Government</option>
+                          <option value="Association of Persons">Association of Persons</option>
+                          <option value="Body of Individuals">Body of Individuals</option>
+                          <option value="Artificial Judicial Person">Artificial Judicial Person</option>
+                        </select>
+                      </div>
+                    </div>
+
                     {/* Row 2: GSTIN, Incorporation Date, PAN File */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
@@ -1445,6 +1705,341 @@ function Settings() {
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
                           placeholder="Enter registered address"
                         />
+                      </div>
+                    </div>
+
+                    {/* Director/Partners Details Section */}
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-md font-semibold text-gray-900">Director/Partners Details</h4>
+                        <button
+                          type="button"
+                          onClick={() => addDirectorPartner(org.id)}
+                          className="flex items-center gap-2 px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors text-sm"
+                        >
+                          <AiOutlinePlus className="w-4 h-4" />
+                          Add Director/Partner
+                        </button>
+                      </div>
+
+                      {/* Directors/Partners Table */}
+                      {org.directorsPartners && org.directorsPartners.length > 0 && (
+                        <div className="overflow-x-auto mb-4">
+                          <table className="w-full border-collapse bg-white min-w-[800px]">
+                            <thead>
+                              <tr className="bg-gray-100 border-b border-gray-300">
+                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">Name</th>
+                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">DIN/Number</th>
+                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">Contact</th>
+                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">Email</th>
+                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">Date of Addition</th>
+                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">Status</th>
+                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {org.directorsPartners.map((dp) => (
+                                <tr key={dp.id} className="border-b border-gray-200">
+                                  <td className="px-3 py-2 border border-gray-300">
+                                    <input
+                                      type="text"
+                                      value={dp.name || ''}
+                                      onChange={(e) => updateDirectorPartner(org.id, dp.id, 'name', e.target.value)}
+                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                      placeholder="Name"
+                                    />
+                                  </td>
+                                  <td className="px-3 py-2 border border-gray-300">
+                                    <input
+                                      type="text"
+                                      value={dp.dinNumber || ''}
+                                      onChange={(e) => updateDirectorPartner(org.id, dp.id, 'dinNumber', e.target.value)}
+                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                      placeholder="DIN/Number"
+                                    />
+                                  </td>
+                                  <td className="px-3 py-2 border border-gray-300">
+                                    <input
+                                      type="text"
+                                      value={dp.contact || ''}
+                                      onChange={(e) => updateDirectorPartner(org.id, dp.id, 'contact', e.target.value)}
+                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                      placeholder="Contact"
+                                    />
+                                  </td>
+                                  <td className="px-3 py-2 border border-gray-300">
+                                    <input
+                                      type="email"
+                                      value={dp.email || ''}
+                                      onChange={(e) => updateDirectorPartner(org.id, dp.id, 'email', e.target.value)}
+                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                      placeholder="Email"
+                                    />
+                                  </td>
+                                  <td className="px-3 py-2 border border-gray-300">
+                                    <input
+                                      type="date"
+                                      value={dp.dateOfAddition || ''}
+                                      onChange={(e) => updateDirectorPartner(org.id, dp.id, 'dateOfAddition', e.target.value)}
+                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                    />
+                                  </td>
+                                  <td className="px-3 py-2 border border-gray-300">
+                                    <select
+                                      value={dp.status || 'Active'}
+                                      onChange={(e) => updateDirectorPartner(org.id, dp.id, 'status', e.target.value)}
+                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                    >
+                                      <option value="Active">Active</option>
+                                      <option value="Inactive">Inactive</option>
+                                    </select>
+                                  </td>
+                                  <td className="px-3 py-2 border border-gray-300">
+                                    <button
+                                      onClick={() => removeDirectorPartner(org.id, dp.id)}
+                                      className="text-red-600 hover:text-red-800 text-xs font-medium"
+                                    >
+                                      Remove
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+
+                      {/* Empty State */}
+                      {(!org.directorsPartners || org.directorsPartners.length === 0) && (
+                        <div className="text-center py-4 text-gray-500 text-xs">
+                          No directors/partners added yet.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Digital Signature Details Section */}
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-md font-semibold text-gray-900">Digital Signature Details</h4>
+                        <button
+                          type="button"
+                          onClick={() => addDigitalSignature(org.id)}
+                          className="flex items-center gap-2 px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors text-sm"
+                        >
+                          <AiOutlinePlus className="w-4 h-4" />
+                          Add Digital Signature
+                        </button>
+                      </div>
+
+                      {/* Digital Signatures Table */}
+                      {org.digitalSignatures && org.digitalSignatures.length > 0 && (
+                        <div className="overflow-x-auto mb-4">
+                          <table className="w-full border-collapse bg-white min-w-[600px]">
+                            <thead>
+                              <tr className="bg-gray-100 border-b border-gray-300">
+                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">Name</th>
+                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">DSC Number</th>
+                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">Expiry Date</th>
+                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">Status</th>
+                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {org.digitalSignatures.map((ds) => (
+                                <tr key={ds.id} className="border-b border-gray-200">
+                                  <td className="px-3 py-2 border border-gray-300">
+                                    <input
+                                      type="text"
+                                      value={ds.name || ''}
+                                      onChange={(e) => updateDigitalSignature(org.id, ds.id, 'name', e.target.value)}
+                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                      placeholder="Name"
+                                    />
+                                  </td>
+                                  <td className="px-3 py-2 border border-gray-300">
+                                    <input
+                                      type="text"
+                                      value={ds.dscNumber || ''}
+                                      onChange={(e) => updateDigitalSignature(org.id, ds.id, 'dscNumber', e.target.value)}
+                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                      placeholder="DSC Number"
+                                    />
+                                  </td>
+                                  <td className="px-3 py-2 border border-gray-300">
+                                    <input
+                                      type="date"
+                                      value={ds.expiryDate || ''}
+                                      onChange={(e) => updateDigitalSignature(org.id, ds.id, 'expiryDate', e.target.value)}
+                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                    />
+                                  </td>
+                                  <td className="px-3 py-2 border border-gray-300">
+                                    <select
+                                      value={ds.status || 'Active'}
+                                      onChange={(e) => updateDigitalSignature(org.id, ds.id, 'status', e.target.value)}
+                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                    >
+                                      <option value="Active">Active</option>
+                                      <option value="In-active">In-active</option>
+                                    </select>
+                                  </td>
+                                  <td className="px-3 py-2 border border-gray-300">
+                                    <button
+                                      onClick={() => removeDigitalSignature(org.id, ds.id)}
+                                      className="text-red-600 hover:text-red-800 text-xs font-medium"
+                                    >
+                                      Remove
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+
+                      {/* Empty State */}
+                      {(!org.digitalSignatures || org.digitalSignatures.length === 0) && (
+                        <div className="text-center py-4 text-gray-500 text-xs">
+                          No digital signatures added yet.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Attachments Section */}
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <h4 className="text-md font-semibold text-gray-900 mb-4">Attachments</h4>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Optional Attachment 1 */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Optional Attachment 1</label>
+                          <div>
+                            <input
+                              type="file"
+                              onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    const base64 = reader.result;
+                                    updateOrganization(org.id, 'optionalAttachment1', base64);
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                              className="hidden"
+                              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                              id={`optional-attachment-1-${org.id}`}
+                            />
+                            <label
+                              htmlFor={`optional-attachment-1-${org.id}`}
+                              className="cursor-pointer inline-block"
+                            >
+                              {org.optionalAttachment1 ? (
+                                <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg">
+                                  <p className="text-xs text-gray-700">File uploaded</p>
+                                  <div className="flex gap-2 mt-1">
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        const url = org.optionalAttachment1;
+                                        if (url.startsWith('data:') || url.startsWith('blob:')) {
+                                          window.open(url, '_blank', 'noopener,noreferrer');
+                                        } else {
+                                          window.open(url, '_blank', 'noopener,noreferrer');
+                                        }
+                                      }}
+                                      className="text-xs text-blue-600 hover:text-blue-800"
+                                    >
+                                      View File
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        updateOrganization(org.id, 'optionalAttachment1', null);
+                                      }}
+                                      className="text-xs text-red-600 hover:text-red-800"
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-xs">
+                                  Upload File
+                                </span>
+                              )}
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* Optional Attachment 2 */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Optional Attachment 2</label>
+                          <div>
+                            <input
+                              type="file"
+                              onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    const base64 = reader.result;
+                                    updateOrganization(org.id, 'optionalAttachment2', base64);
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                              className="hidden"
+                              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                              id={`optional-attachment-2-${org.id}`}
+                            />
+                            <label
+                              htmlFor={`optional-attachment-2-${org.id}`}
+                              className="cursor-pointer inline-block"
+                            >
+                              {org.optionalAttachment2 ? (
+                                <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg">
+                                  <p className="text-xs text-gray-700">File uploaded</p>
+                                  <div className="flex gap-2 mt-1">
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        const url = org.optionalAttachment2;
+                                        if (url.startsWith('data:') || url.startsWith('blob:')) {
+                                          window.open(url, '_blank', 'noopener,noreferrer');
+                                        } else {
+                                          window.open(url, '_blank', 'noopener,noreferrer');
+                                        }
+                                      }}
+                                      className="text-xs text-blue-600 hover:text-blue-800"
+                                    >
+                                      View File
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        updateOrganization(org.id, 'optionalAttachment2', null);
+                                      }}
+                                      className="text-xs text-red-600 hover:text-red-800"
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-xs">
+                                  Upload File
+                                </span>
+                              )}
+                            </label>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -1663,6 +2258,49 @@ function Settings() {
   const ClientProfileContent = () => (
     <div className="px-6 pb-6 pt-6">
       <div className="space-y-6">
+        {/* System Client ID, Custom Client ID, and Client Status in single row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+          {/* System Client ID - Read-only */}
+          {userId && (
+            <div>
+              <label className="block text-sm text-gray-600 mb-2">System Client ID</label>
+              <input
+                type="text"
+                value={userId}
+                disabled
+                readOnly
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 font-medium cursor-not-allowed"
+              />
+            </div>
+          )}
+          
+          {/* Custom Client ID - Read-only for clients */}
+          {customClientId && (
+            <div>
+              <label className="block text-sm text-gray-600 mb-2">Custom Client ID</label>
+              <input
+                type="text"
+                value={customClientId}
+                disabled
+                readOnly
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 font-medium cursor-not-allowed"
+              />
+            </div>
+          )}
+          
+          {/* Client Status - Read-only for clients */}
+          <div>
+            <label className="block text-sm text-gray-600 mb-2">Client Status</label>
+            <input
+              type="text"
+              value={clientStatus || 'Active'}
+              disabled
+              readOnly
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 font-medium cursor-not-allowed"
+            />
+          </div>
+        </div>
+        
         {/* Row 1: Name, WhatsApp, Email */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
@@ -1740,38 +2378,7 @@ function Settings() {
           </div>
         </div>
 
-        {/* Row 3: Category, Sub-Category */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm text-gray-600 mb-2">Category</label>
-            <select
-              value={formData.category}
-              onChange={(e) => handleInputChange('category', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
-            >
-              <option value="">Select Category</option>
-              <option value="category1">Category 1</option>
-              <option value="category2">Category 2</option>
-              <option value="category3">Category 3</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm text-gray-600 mb-2">Sub-Category</label>
-            <select
-              value={formData.subCategory}
-              onChange={(e) => handleInputChange('subCategory', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
-            >
-              <option value="">Select Sub-Category</option>
-              <option value="sub1">Sub-Category 1</option>
-              <option value="sub2">Sub-Category 2</option>
-              <option value="sub3">Sub-Category 3</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Row 4: Document Uploads */}
+        {/* Row 3: Document Uploads */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="block text-sm text-gray-600 mb-2">Aadhar Card</label>

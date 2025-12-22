@@ -108,8 +108,8 @@ function AdminServices() {
       if (serviceStatus === 'completed') {
         return 'Resolved';
       }
-    }
-    
+      }
+      
     // Step 3: If payment is completed and service_status exists (and is not completed), return "Ongoing"
     const isPaymentCompleted = svc.payment_completed || 
                                paymentStatus === 'paid' || 
@@ -121,7 +121,7 @@ function AdminServices() {
       // If service_status exists (regardless of value, except completed which is handled above), it's Ongoing
       if (svc.service_status && svc.service_status.trim() !== '' && svc.service_status.toLowerCase().trim() !== 'completed') {
         return 'Ongoing';
-      }
+    }
       // Payment completed but no service_status set yet - still Ongoing
       return 'Ongoing';
     }
@@ -341,7 +341,7 @@ function AdminServices() {
       normalizeService(svc.service_type) ||
       normalizedTicketService ||
       normalizeService(svc.business_name);
-    
+
     // If package_name is just a tier (Starter/Growth/Pro/Basic), ignore it
     if (isTier(svc.package_name)) {
       return inferred || normalizedTicketService || 'Other';
@@ -726,14 +726,14 @@ function AdminServices() {
                   </td>
                   <td className="px-3 py-3 text-sm text-gray-900 whitespace-normal">
                     <div className="flex gap-2 items-center">
-                      <button
-                        onClick={() =>
-                          navigate(`/admin/client-overview/${svc.user_id || svc.id}?tab=services${svc.ticket_id ? `&ticketId=${svc.ticket_id}` : ''}`)
-                        }
-                        className="px-3 py-1 text-xs bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors whitespace-nowrap"
-                      >
-                        View
-                      </button>
+                    <button
+                      onClick={() =>
+                        navigate(`/admin/client-overview/${svc.user_id || svc.id}?tab=services${svc.ticket_id ? `&ticketId=${svc.ticket_id}` : ''}`)
+                      }
+                      className="px-3 py-1 text-xs bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors whitespace-nowrap"
+                    >
+                      View
+                    </button>
                       {svc.ticket_id && (
                         <button
                           onClick={() => handleDeleteService(svc)}
