@@ -160,16 +160,16 @@ function AdminNoticeBoard() {
           <div className="p-4 text-sm text-gray-500">No notices found.</div>
         ) : (
           <>
-            <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100">
               {notices.slice(0, 5).map((n) => {
                 const client = clients.find(c => c.user_id === n.user_id);
                 const isGlobal = !n.user_id;
                 return (
-                  <div key={n.id} className="px-4 py-3">
-                    <div className="flex items-start justify-between gap-3">
+              <div key={n.id} className="px-4 py-3">
+                <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-sm font-semibold text-gray-900">{n.title}</h3>
+                    <h3 className="text-sm font-semibold text-gray-900">{n.title}</h3>
                           {isGlobal ? (
                             <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">
                               Global
@@ -180,27 +180,27 @@ function AdminNoticeBoard() {
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-700 mt-1">{n.description}</p>
-                        {n.link && (
-                          <a
-                            href={n.link}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-xs text-[#01334C] hover:underline mt-1 inline-block"
-                          >
-                            {n.link}
-                          </a>
-                        )}
-                      </div>
-                      <div className="text-xs text-gray-500 whitespace-nowrap">
-                        {new Date(n.created_at).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </div>
-                    </div>
+                    <p className="text-sm text-gray-700 mt-1">{n.description}</p>
+                    {n.link && (
+                      <a
+                        href={n.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-[#01334C] hover:underline mt-1 inline-block"
+                      >
+                        {n.link}
+                      </a>
+                    )}
                   </div>
+                  <div className="text-xs text-gray-500 whitespace-nowrap">
+                    {new Date(n.created_at).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </div>
+                </div>
+              </div>
                 );
               })}
             </div>
@@ -215,7 +215,7 @@ function AdminNoticeBoard() {
                     View all
                   </button>
                 </p>
-              </div>
+          </div>
             )}
           </>
         )}

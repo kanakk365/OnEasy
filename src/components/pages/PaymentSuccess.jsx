@@ -62,6 +62,7 @@ function PaymentSuccess() {
         let paymentStatus = searchParams.get('status') || searchParams.get('razorpay_payment_link_status');
         const ticket_id = searchParams.get('ticket_id');
         const registration_type = searchParams.get('registration_type');
+        const source = searchParams.get('source') || 'link'; // 'portal' for in-app payments, 'link' for email/copied links
 
         console.log('💳 Payment success page loaded:', { 
           payment_id, 
@@ -86,7 +87,7 @@ function PaymentSuccess() {
 
         // Try to update payment status using the new endpoint (for payment links)
         // Send razorpay_payment_id explicitly (backend expects this for GST and other services)
-        if (payment_id) {
+          if (payment_id) {
           try {
             const requestPayload = {
               razorpay_payment_id: payment_id, // Send as razorpay_payment_id for consistency
@@ -108,8 +109,9 @@ function PaymentSuccess() {
             if (updateResponse.success) {
               setStatus('success');
 
-              // If we know which registration this payment is for, send user directly there
-              if (ticket_id && registration_type) {
+              // For portal-initiated payments, send user to details/registration page.
+              // For email/copied payment links, always send to login.
+              if (source === 'portal' && ticket_id && registration_type) {
                 const targetPath = getRedirectPath(registration_type, ticket_id);
                 setMessage('Payment successful! Redirecting to your registration...');
                 navigate(targetPath); // Redirect immediately
@@ -153,7 +155,7 @@ function PaymentSuccess() {
           if (response.success) {
             setStatus('success');
 
-            if (ticket_id && registration_type) {
+            if (source === 'portal' && ticket_id && registration_type) {
               const targetPath = getRedirectPath(registration_type, ticket_id);
               setMessage('Payment successful! Redirecting to your registration...');
               navigate(targetPath); // Redirect immediately
@@ -180,7 +182,7 @@ function PaymentSuccess() {
           // Show success message and redirect to appropriate page
           setStatus('success');
 
-          if (ticket_id && registration_type) {
+          if (source === 'portal' && ticket_id && registration_type) {
             const targetPath = getRedirectPath(registration_type, ticket_id);
             setMessage('Payment successful! Redirecting to your registration...');
             navigate(targetPath); // Redirect immediately

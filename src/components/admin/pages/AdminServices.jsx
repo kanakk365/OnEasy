@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../../utils/api';
+import { initPaymentWithOrderId } from '../../../utils/payment';
 
 function AdminServices() {
   const navigate = useNavigate();
@@ -555,6 +556,73 @@ function AdminServices() {
     }
   };
 
+  // Helper function to get registration type slug from ticket ID
+  const getRegistrationTypeSlug = useCallback((ticketId) => {
+    if (!ticketId) return null;
+    const tid = ticketId.toString().toUpperCase();
+    if (tid.startsWith('PVT_')) return 'private-limited';
+    if (tid.startsWith('PROP_')) return 'proprietorship';
+    if (tid.startsWith('SI_') || tid.startsWith('STARTUP_')) return 'startup-india';
+    if (tid.startsWith('GST_')) return 'gst';
+    // For other services, try to infer from service name or return null
+    return null;
+  }, []);
+
+  // Handle Pay button click - admin pays on behalf of user
+  const handlePayClick = async (svc) => {
+    try {
+      const orderId = svc.razorpay_order_id || svc.order_id;
+      if (!orderId) {
+        alert('Order ID not found. Cannot initiate payment.');
+        return;
+      }
+
+      const amount = svc.package_price || svc.amount || 0;
+      const registrationType = getRegistrationTypeSlug(svc.ticket_id);
+      const ticketId = svc.ticket_id || '';
+
+      await initPaymentWithOrderId(orderId, amount, {
+        ticket_id: ticketId,
+        registration_type: registrationType,
+        package_name: svc.package_name || getServiceLabel(svc)
+      });
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert(error.message || 'Failed to initiate payment. Please try again.');
+    }
+  };
+
+  // Handle Copy Link button click - copy payment link to clipboard
+  const handleCopyLinkClick = async (svc) => {
+    try {
+      // Prefer stored Razorpay payment link (short URL) if available
+      if (!svc.payment_link && !svc.razorpay_order_id && !svc.order_id) {
+        alert('No payment link available. Please generate a payment link first.');
+        return;
+      }
+
+      const paymentUrl =
+        svc.payment_link ||
+        (() => {
+          const frontendUrl = window.location.origin;
+          const orderId = svc.razorpay_order_id || svc.order_id;
+          const registrationType = getRegistrationTypeSlug(svc.ticket_id);
+          const ticketId = svc.ticket_id || '';
+          const userId = svc.user_id || '';
+          return `${frontendUrl}/payment?orderId=${orderId}&ticketId=${ticketId}&userId=${userId}&type=${
+            registrationType || 'service'
+          }&autoOpen=true`;
+        })();
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(paymentUrl);
+      alert('Payment link copied to clipboard! You can now share it via WhatsApp or any other platform.');
+    } catch (error) {
+      console.error('Error copying link:', error);
+      alert('Failed to copy link. Please try again.');
+    }
+  };
+
   const filteredServices = useMemo(() => {
     return services.filter((svc) => {
       const status = getStatusLabel(svc);
@@ -676,6 +744,7 @@ function AdminServices() {
                 <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px]">Progress</th>
                 <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[140px]">Updated</th>
                 <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[100px]">Action</th>
+                <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[160px]">Payment</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
@@ -726,14 +795,19 @@ function AdminServices() {
                   </td>
                   <td className="px-3 py-3 text-sm text-gray-900 whitespace-normal">
                     <div className="flex gap-2 items-center">
-                    <button
-                      onClick={() =>
-                        navigate(`/admin/client-overview/${svc.user_id || svc.id}?tab=services${svc.ticket_id ? `&ticketId=${svc.ticket_id}` : ''}`)
-                      }
-                      className="px-3 py-1 text-xs bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors whitespace-nowrap"
-                    >
-                      View
-                    </button>
+                      <button
+                        onClick={() =>
+                          navigate(
+                            `/admin/client-overview/${svc.user_id || svc.id}?tab=services${
+                              svc.ticket_id ? `&ticketId=${svc.ticket_id}` : ''
+                            }`
+                          )
+                        }
+                        className="px-3 py-1 text-xs bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors whitespace-nowrap"
+                      >
+                        View
+                      </button>
+
                       {svc.ticket_id && (
                         <button
                           onClick={() => handleDeleteService(svc)}
@@ -741,11 +815,39 @@ function AdminServices() {
                           title="Delete service permanently"
                         >
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1 1v3M4 7h16"
+                            />
                           </svg>
                           Delete
                         </button>
                       )}
+                    </div>
+                  </td>
+                  <td className="px-3 py-3 text-sm text-gray-900 whitespace-normal break-words">
+                    <div className="flex gap-2 items-center">
+                      {/* Pay & Copy Link buttons for pending payments - mirror user Registrations logic */}
+                      {svc.service_status &&
+                        svc.service_status.toLowerCase().trim() === 'payment pending' &&
+                        (svc.razorpay_order_id || svc.order_id) && (
+                          <>
+                            <button
+                              onClick={() => handlePayClick(svc)}
+                              className="px-3 py-1 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors whitespace-nowrap"
+                            >
+                              Pay
+                            </button>
+                            <button
+                              onClick={() => handleCopyLinkClick(svc)}
+                              className="px-3 py-1 text-xs font-medium text-[#01334C] border border-[#01334C] rounded-md hover:bg-[#01334C] hover:text-white transition-colors whitespace-nowrap"
+                            >
+                              Copy Link
+                            </button>
+                          </>
+                        )}
                     </div>
                   </td>
                 </tr>

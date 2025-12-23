@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
+import { initPaymentWithOrderId } from "../../utils/payment";
 
 function ClientServices() {
   const [allServices, setAllServices] = React.useState([]);
@@ -335,6 +336,9 @@ function ClientServices() {
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Date
                       </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Action
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -368,6 +372,38 @@ function ClientServices() {
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                           {formatDate(service.updated_at || service.created_at || service.createdAt)}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm">
+                          <div className="flex items-center gap-2">
+                            {/* Pay button for pending payments, same logic as Registrations */}
+                            {service.service_status === 'Payment pending' &&
+                              (service.razorpay_order_id || service.order_id) && (
+                                <button
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      const orderId = service.razorpay_order_id || service.order_id;
+                                      const amount = service.package_price || service.amount || 0;
+                                      const type = deriveType(service);
+                                      const slug = getTypeSlug(type);
+                                      const ticketId = getTicketId(service);
+
+                                      await initPaymentWithOrderId(orderId, amount, {
+                                        ticket_id: ticketId,
+                                        registration_type: slug,
+                                        package_name: service.package_name || formatServiceName(service)
+                                      });
+                                    } catch (error) {
+                                      console.error('Payment error:', error);
+                                      alert(error.message || 'Failed to initiate payment. Please try again.');
+                                    }
+                                  }}
+                                  className="px-3 py-1 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors"
+                                >
+                                  Pay
+                                </button>
+                              )}
+                          </div>
                         </td>
                       </tr>
                     ))}

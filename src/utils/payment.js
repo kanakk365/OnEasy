@@ -452,7 +452,8 @@ export const initPaymentWithOrderId = async (orderId, amount, registrationData =
                 // Redirect to payment success page with additional context so we know where to send user next
                 const params = new URLSearchParams({
                   order_id: response.razorpay_order_id,
-                  payment_id: response.razorpay_payment_id
+                  payment_id: response.razorpay_payment_id,
+                  source: 'portal'
                 });
                 if (registrationData.ticket_id) {
                   params.set('ticket_id', registrationData.ticket_id);
