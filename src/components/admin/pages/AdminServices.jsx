@@ -604,11 +604,11 @@ function AdminServices() {
       const paymentUrl =
         svc.payment_link ||
         (() => {
-          const frontendUrl = window.location.origin;
-          const orderId = svc.razorpay_order_id || svc.order_id;
-          const registrationType = getRegistrationTypeSlug(svc.ticket_id);
-          const ticketId = svc.ticket_id || '';
-          const userId = svc.user_id || '';
+      const frontendUrl = window.location.origin;
+      const orderId = svc.razorpay_order_id || svc.order_id;
+      const registrationType = getRegistrationTypeSlug(svc.ticket_id);
+      const ticketId = svc.ticket_id || '';
+      const userId = svc.user_id || '';
           return `${frontendUrl}/payment?orderId=${orderId}&ticketId=${ticketId}&userId=${userId}&type=${
             registrationType || 'service'
           }&autoOpen=true`;
@@ -795,18 +795,18 @@ function AdminServices() {
                   </td>
                   <td className="px-3 py-3 text-sm text-gray-900 whitespace-normal">
                     <div className="flex gap-2 items-center">
-                      <button
-                        onClick={() =>
+                    <button
+                      onClick={() =>
                           navigate(
                             `/admin/client-overview/${svc.user_id || svc.id}?tab=services${
                               svc.ticket_id ? `&ticketId=${svc.ticket_id}` : ''
                             }`
                           )
-                        }
-                        className="px-3 py-1 text-xs bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors whitespace-nowrap"
-                      >
-                        View
-                      </button>
+                      }
+                      className="px-3 py-1 text-xs bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors whitespace-nowrap"
+                    >
+                      View
+                    </button>
 
                       {svc.ticket_id && (
                         <button
@@ -847,7 +847,7 @@ function AdminServices() {
                               Copy Link
                             </button>
                           </>
-                        )}
+                      )}
                     </div>
                   </td>
                 </tr>

@@ -32,6 +32,17 @@ import StartupIndiaViewDetails from "../pages/StartupIndiaViewDetails";
 import StartupIndiaDashboard from "../pages/StartupIndiaDashboard";
 import Settings from "../pages/Settings";
 import Organization from "../pages/Organization";
+import Documents from "../pages/Documents";
+import BusinessDocuments from "../pages/BusinessDocuments";
+import BusinessDirectorsKYC from "../pages/BusinessDirectorsKYC";
+import BusinessDirectorsDocumentDetail from "../pages/BusinessDirectorsDocumentDetail";
+import OrganizationBusinessDocuments from "../pages/OrganizationBusinessDocuments";
+import CompanyMasterData from "../pages/CompanyMasterData";
+import ClientData from "../pages/ClientData";
+import OrganizationsList from "../pages/OrganizationsList";
+import CompanyDocuments from "../pages/CompanyDocuments";
+import KYC from "../pages/KYC";
+import KYCDocumentDetail from "../pages/KYCDocumentDetail";
 import CouponCodeGenerator from "../pages/CouponCodeGenerator";
 import PrivateLimitedForm from "../forms/PrivateLimitedForm";
 import PrivateLimitedDashboard from "../pages/PrivateLimitedDashboard";
@@ -112,6 +123,14 @@ import AdminNoticeBoard from "../admin/pages/AdminNoticeBoard";
 import AdminNoticeManagement from "../admin/pages/AdminNoticeManagement";
 import AdminCMSPackage from "../admin/pages/AdminCMSPackage";
 import AdminCustomPayment from "../admin/pages/AdminCustomPayment";
+import AdminDocumentsVault from "../admin/pages/AdminDocumentsVault";
+import AdminClientDocuments from "../admin/pages/AdminClientDocuments";
+import AdminClientKYC from "../admin/pages/AdminClientKYC";
+import AdminClientKYCDetail from "../admin/pages/AdminClientKYCDetail";
+import AdminClientDirectorsKYC from "../admin/pages/AdminClientDirectorsKYC";
+import AdminClientDirectorsDetail from "../admin/pages/AdminClientDirectorsDetail";
+import AdminClientOrganizations from "../admin/pages/AdminClientOrganizations";
+import AdminClientCompanyDocuments from "../admin/pages/AdminClientCompanyDocuments";
 import SuperAdminLayout from "../superadmin/layout/SuperAdminLayout";
 import SuperAdminClients from "../superadmin/pages/SuperAdminClients";
 import SuperAdminProfile from "../superadmin/pages/SuperAdminProfile";
@@ -634,6 +653,71 @@ function Routers() {
           <Organization />
         </ProtectedRoute>
       } />
+      <Route path="/documents" element={
+        <ProtectedRoute>
+          <Documents />
+        </ProtectedRoute>
+      } />
+      <Route path="/business-documents" element={
+        <ProtectedRoute>
+          <BusinessDocuments />
+        </ProtectedRoute>
+      } />
+      <Route path="/business-directors" element={
+        <ProtectedRoute>
+          <BusinessDirectorsKYC />
+        </ProtectedRoute>
+      } />
+      <Route path="/business-directors/:documentType" element={
+        <ProtectedRoute>
+          <BusinessDirectorsDocumentDetail />
+        </ProtectedRoute>
+      } />
+      <Route path="/organizations-list" element={
+        <ProtectedRoute>
+          <OrganizationsList />
+        </ProtectedRoute>
+      } />
+      <Route path="/company-documents/:orgId" element={
+        <ProtectedRoute>
+          <CompanyDocuments />
+        </ProtectedRoute>
+      } />
+      <Route path="/company-documents/:orgId/directors" element={
+        <ProtectedRoute>
+          <BusinessDirectorsKYC />
+        </ProtectedRoute>
+      } />
+      <Route path="/company-documents/:orgId/directors/:documentType" element={
+        <ProtectedRoute>
+          <BusinessDirectorsDocumentDetail />
+        </ProtectedRoute>
+      } />
+      <Route path="/company-documents/:orgId/business" element={
+        <ProtectedRoute>
+          <OrganizationBusinessDocuments />
+        </ProtectedRoute>
+      } />
+      <Route path="/company-documents/:orgId/business/company-master-data" element={
+        <ProtectedRoute>
+          <CompanyMasterData />
+        </ProtectedRoute>
+      } />
+      <Route path="/company-documents/:orgId/business/company-master-data/client-data" element={
+        <ProtectedRoute>
+          <ClientData />
+        </ProtectedRoute>
+      } />
+      <Route path="/kyc" element={
+        <ProtectedRoute>
+          <KYC />
+        </ProtectedRoute>
+      } />
+      <Route path="/kyc/:documentType" element={
+        <ProtectedRoute>
+          <KYCDocumentDetail />
+        </ProtectedRoute>
+      } />
       
       {/* Admin Routes - Protected */}
       <Route path="/admin" element={
@@ -648,6 +732,14 @@ function Routers() {
         <Route path="custom-payment" element={<AdminCustomPayment />} />
         <Route path="fill-form-new" element={<AdminFillFormNew />} />
         <Route path="services" element={<AdminServices />} />
+        <Route path="documents-vault" element={<AdminDocumentsVault />} />
+        <Route path="client-documents/:userId" element={<AdminClientDocuments />} />
+        <Route path="client-kyc/:userId" element={<AdminClientKYC />} />
+        <Route path="client-kyc/:userId/:documentType" element={<AdminClientKYCDetail />} />
+        <Route path="client-organizations/:userId" element={<AdminClientOrganizations />} />
+        <Route path="client-company-documents/:userId/:orgId" element={<AdminClientCompanyDocuments />} />
+        <Route path="client-directors/:userId/:orgId" element={<AdminClientDirectorsKYC />} />
+        <Route path="client-directors/:userId/:orgId/:documentType" element={<AdminClientDirectorsDetail />} />
         <Route path="notice-board" element={<AdminNoticeBoard />} />
         <Route path="notice-management" element={<AdminNoticeManagement />} />
         <Route path="coupon-generator" element={<CouponCodeGenerator />} />

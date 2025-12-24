@@ -57,6 +57,7 @@ function AdminSidebar() {
     { icon: <RiUserAddLine />, text: "New Registration", path: "/admin/new-registration" },
     { icon: <RiMoneyDollarCircleLine />, text: "Custom Payment", path: "/admin/custom-payment" },
     { icon: <RiSettings3Line />, text: "Services", path: "/admin/services" },
+    { icon: <RiFolderSettingsLine />, text: "Documents Vault", path: "/admin/documents-vault", subPaths: ['/admin/client-documents', '/admin/client-kyc', '/admin/client-directors'] },
     { icon: <RiAlertLine />, text: "Notice Board", path: "/admin/notice-board" },
     { icon: <RiTicketLine />, text: "Coupon Code Generator", path: "/admin/coupon-generator" },
     { icon: <RiFolderSettingsLine />, text: "CMS for Package", path: "/admin/cms-package" },

@@ -87,7 +87,7 @@ function PaymentSuccess() {
 
         // Try to update payment status using the new endpoint (for payment links)
         // Send razorpay_payment_id explicitly (backend expects this for GST and other services)
-          if (payment_id) {
+        if (payment_id) {
           try {
             const requestPayload = {
               razorpay_payment_id: payment_id, // Send as razorpay_payment_id for consistency
