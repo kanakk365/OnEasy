@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../../utils/api";
+import { uploadFileDirect } from "../../../utils/s3Upload";
 
 function AdminClientDirectorsDetail() {
   const navigate = useNavigate();
@@ -125,24 +126,28 @@ function AdminClientDirectorsDetail() {
     handleUpload(file);
   };
 
-  const convertFileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
   const handleUpload = async (file) => {
     setUploading(true);
     try {
-      const base64Data = await convertFileToBase64(file);
+      if (!orgId) {
+        showStatus("error", "Organization ID is required");
+        return;
+      }
 
+      // Upload directly to S3
+      const folder = `user-profiles/${userId}/organizations/${orgId}/directors-partners`;
+      const { s3Url } = await uploadFileDirect(
+        file,
+        folder,
+        file.name
+      );
+
+      // Save S3 URL to database
       const response = await apiClient.post(`/users-page/upload-directors-partners-document/${userId}`, {
         documentType: documentType,
-        fileData: base64Data,
+        fileUrl: s3Url, // Use fileUrl instead of fileData
         fileName: file.name,
+        organizationId: orgId,
       });
 
       if (response.success) {

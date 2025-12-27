@@ -4,14 +4,24 @@ import Field from "./Field";
 import CustomDropdown from "./CustomDropdown";
 import FileUploadField from "./FileUploadField";
 
-// Helper to convert file to base64
-const fileToBase64 = (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = (error) => reject(error);
-  });
+import { uploadFileDirect } from '../../utils/s3Upload';
+import { AUTH_CONFIG } from '../../config/auth';
+
+// Helper to get user ID and ticket ID for S3 folder path
+const getUploadFolder = (ticketId = null) => {
+  const storedUser = JSON.parse(
+    localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+  );
+  const userId = storedUser.id;
+  
+  const currentTicketId = ticketId || 
+    localStorage.getItem('editingTicketId') || 
+    localStorage.getItem('fillingOnBehalfTicketId') ||
+    new URLSearchParams(window.location.search).get('ticketId') ||
+    'temp';
+  
+  // Determine folder based on form type - default to general uploads
+  return `uploads/${userId}/${currentTicketId}`;
 };
 
 function DirectorForm({ directorNumber, disabled = false }) {
@@ -468,9 +478,11 @@ export function Step5Content({ formData, setFormData, disabled = false }) {
     }
 
     try {
-      const base64 = await fileToBase64(file);
+      const folder = getUploadFolder();
+      const fileName = file.name || 'authorization-letter.pdf';
+      const { s3Url } = await uploadFileDirect(file, folder, fileName);
       setFileName(file.name);
-      updateStep5('authorizationLetter', base64);
+      updateStep5('authorizationLetter', s3Url);
     } catch (error) {
       console.error('Error converting file:', error);
       alert('Failed to upload file. Please try again.');

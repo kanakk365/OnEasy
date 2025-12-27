@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { getUsersPageData } from "../../utils/usersPageApi";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
+import { uploadFileDirect } from "../../utils/s3Upload";
 
 function ClientData() {
   const navigate = useNavigate();
@@ -129,15 +130,6 @@ function ClientData() {
     setFormData(prev => ({ ...prev, file }));
   };
 
-  const convertFileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
   const handleUpload = async () => {
     if (!formData.bankName.trim()) {
       showStatus("error", "Bank name is required");
@@ -161,7 +153,6 @@ function ClientData() {
 
     setUploading(true);
     try {
-      const base64Data = await convertFileToBase64(formData.file);
       const storedUser = JSON.parse(
         localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
       );
@@ -172,9 +163,18 @@ function ClientData() {
         return;
       }
 
+      // Upload directly to S3
+      const folder = `user-profiles/${userId}/organizations/${orgId}/business/client-data`;
+      const { s3Url } = await uploadFileDirect(
+        formData.file,
+        folder,
+        formData.file.name
+      );
+
+      // Save S3 URL to database
       const response = await apiClient.post("/users-page/upload-client-data-document", {
         documentType: uploadType,
-        fileData: base64Data,
+        fileUrl: s3Url, // Use fileUrl instead of fileData
         fileName: formData.file.name,
         organizationId: orgId,
         bankName: formData.bankName.trim(),

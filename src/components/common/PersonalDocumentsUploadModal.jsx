@@ -1,5 +1,7 @@
 import React, { useState, useRef } from "react";
 import apiClient from "../../utils/api";
+import { uploadFileDirect } from "../../utils/s3Upload";
+import { AUTH_CONFIG } from "../../config/auth";
 
 function PersonalDocumentsUploadModal({ isOpen, onClose, onUploadSuccess }) {
   const [uploading, setUploading] = useState(false);
@@ -40,15 +42,6 @@ function PersonalDocumentsUploadModal({ isOpen, onClose, onUploadSuccess }) {
     }
   };
 
-  const convertFileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
   const handleUpload = async () => {
     if (!selectedDocType || !selectedFile) {
       alert("Please select a document type and file");
@@ -57,13 +50,28 @@ function PersonalDocumentsUploadModal({ isOpen, onClose, onUploadSuccess }) {
 
     setUploading(true);
     try {
-      // Convert file to base64
-      const base64Data = await convertFileToBase64(selectedFile);
+      // Get user ID
+      const storedUser = JSON.parse(
+        localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+      );
+      const userId = storedUser.id;
 
-      // Upload to backend
+      if (!userId) {
+        throw new Error("User ID not found");
+      }
+
+      // Upload directly to S3
+      const folder = `user-profiles/${userId}/personal`;
+      const { s3Url } = await uploadFileDirect(
+        selectedFile,
+        folder,
+        selectedFile.name
+      );
+
+      // Save S3 URL to database
       const response = await apiClient.post("/users-page/upload-personal-document", {
         documentType: selectedDocType,
-        fileData: base64Data,
+        fileUrl: s3Url, // Use fileUrl instead of fileData
         fileName: selectedFile.name,
       });
 

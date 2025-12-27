@@ -2,15 +2,24 @@ import React from 'react';
 import Field from '../Field';
 import CustomDropdown from '../CustomDropdown';
 import FileUploadField from '../FileUploadField';
+import { uploadFileDirect } from '../../../utils/s3Upload';
+import { AUTH_CONFIG } from '../../../config/auth';
 
-// Helper to convert file to base64
-const fileToBase64 = (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = (error) => reject(error);
-  });
+// Helper to get user ID and ticket ID for S3 folder path
+const getUploadFolder = (ticketId = null) => {
+  const storedUser = JSON.parse(
+    localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+  );
+  const userId = storedUser.id;
+  
+  // Try to get ticketId from various sources
+  const currentTicketId = ticketId || 
+    localStorage.getItem('editingTicketId') || 
+    localStorage.getItem('fillingOnBehalfTicketId') ||
+    new URLSearchParams(window.location.search).get('ticketId') ||
+    'temp';
+  
+  return `private-limited/${userId}/${currentTicketId}`;
 };
 
 // Step 1: Name Application (Business Details)
@@ -408,8 +417,14 @@ export function StartupInformationContent({ formData, setFormData, disabled = fa
               accept=".pdf"
               buttonLabel="Upload Name Approval Letter (PDF)"
               onFileSelect={async (file) => {
-                const base64 = await fileToBase64(file);
-                updateStep2('nameApprovalLetter', base64);
+                try {
+                  const folder = getUploadFolder();
+                  const { s3Url } = await uploadFileDirect(file, folder, 'name-approval-letter.pdf');
+                  updateStep2('nameApprovalLetter', s3Url);
+                } catch (error) {
+                  console.error('Upload error:', error);
+                  alert('Failed to upload file. Please try again.');
+                }
               }}
             />
             <p className="text-xs text-blue-600 mt-1">
@@ -465,8 +480,14 @@ export function StartupInformationContent({ formData, setFormData, disabled = fa
           accept=".pdf,.jpg,.jpeg,.png"
           buttonLabel="Upload Utility Bill (PDF, JPG, PNG)"
           onFileSelect={async (file) => {
-            const base64 = await fileToBase64(file);
-            updateStep2('utilityBill', base64);
+            try {
+              const folder = getUploadFolder();
+              const { s3Url } = await uploadFileDirect(file, folder, file.name);
+              updateStep2('utilityBill', s3Url);
+            } catch (error) {
+              console.error('Upload error:', error);
+              alert('Failed to upload file. Please try again.');
+            }
           }}
           disabled={disabled}
         />
@@ -948,8 +969,14 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
                 accept=".pdf,.jpg,.jpeg,.png"
                 buttonLabel="Upload Signature"
                 onFileSelect={async (file) => {
-                  const base64 = await fileToBase64(file);
-                  updateDirector(index, 'specimenSignature', base64);
+                  try {
+                    const folder = getUploadFolder();
+                    const { s3Url } = await uploadFileDirect(file, folder, `director-${index + 1}-signature.pdf`);
+                    updateDirector(index, 'specimenSignature', s3Url);
+                  } catch (error) {
+                    console.error('Upload error:', error);
+                    alert('Failed to upload file. Please try again.');
+                  }
                 }}
                 disabled={disabled}
               />
@@ -1042,8 +1069,14 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
               accept=".pdf,.jpg,.jpeg,.png"
               buttonLabel="Upload Aadhaar Card"
               onFileSelect={async (file) => {
-                const base64 = await fileToBase64(file);
-                updateDirector(index, 'aadhaarCard', base64);
+                try {
+                  const folder = getUploadFolder();
+                  const { s3Url } = await uploadFileDirect(file, folder, `director-${index + 1}-aadhaar.pdf`);
+                  updateDirector(index, 'aadhaarCard', s3Url);
+                } catch (error) {
+                  console.error('Upload error:', error);
+                  alert('Failed to upload file. Please try again.');
+                }
               }}
               disabled={disabled}
             />
@@ -1053,8 +1086,14 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
               accept=".jpg,.jpeg,.png"
               buttonLabel="Upload Photo"
               onFileSelect={async (file) => {
-                const base64 = await fileToBase64(file);
-                updateDirector(index, 'passportPhoto', base64);
+                try {
+                  const folder = getUploadFolder();
+                  const { s3Url } = await uploadFileDirect(file, folder, `director-${index + 1}-photo.jpg`);
+                  updateDirector(index, 'passportPhoto', s3Url);
+                } catch (error) {
+                  console.error('Upload error:', error);
+                  alert('Failed to upload file. Please try again.');
+                }
               }}
               disabled={disabled}
             />
@@ -1064,8 +1103,14 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
               accept=".pdf,.jpg,.jpeg,.png"
               buttonLabel="Upload PAN Card"
               onFileSelect={async (file) => {
-                const base64 = await fileToBase64(file);
-                updateDirector(index, 'panCard', base64);
+                try {
+                  const folder = getUploadFolder();
+                  const { s3Url } = await uploadFileDirect(file, folder, `director-${index + 1}-pan.pdf`);
+                  updateDirector(index, 'panCard', s3Url);
+                } catch (error) {
+                  console.error('Upload error:', error);
+                  alert('Failed to upload file. Please try again.');
+                }
               }}
               disabled={disabled}
             />
@@ -1076,8 +1121,14 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
                 accept=".pdf,.jpg,.jpeg,.png"
                 buttonLabel="Upload Document"
                 onFileSelect={async (file) => {
-                  const base64 = await fileToBase64(file);
-                  updateDirector(index, 'bankStatementOrUtilityBill', base64);
+                  try {
+                    const folder = getUploadFolder();
+                    const { s3Url } = await uploadFileDirect(file, folder, `director-${index + 1}-bank-statement.pdf`);
+                    updateDirector(index, 'bankStatementOrUtilityBill', s3Url);
+                  } catch (error) {
+                    console.error('Upload error:', error);
+                    alert('Failed to upload file. Please try again.');
+                  }
                 }}
                 disabled={disabled}
               />

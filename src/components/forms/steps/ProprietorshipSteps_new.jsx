@@ -3,14 +3,18 @@ import Field from '../Field';
 import CustomDropdown from '../CustomDropdown';
 import FileUploadField from '../FileUploadField';
 
-// Helper to convert file to base64
-const fileToBase64 = (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = (error) => reject(error);
-  });
+import { uploadFileDirect } from '../../../utils/s3Upload';
+import { AUTH_CONFIG } from '../../../config/auth';
+
+// Helper to get user ID and ticket ID for S3 folder path
+const getUploadFolder = (ticketId = null) => {
+  const currentTicketId = ticketId || 
+    localStorage.getItem('editingTicketId') || 
+    localStorage.getItem('fillingOnBehalfTicketId') ||
+    new URLSearchParams(window.location.search).get('ticketId') ||
+    'temp';
+  
+  return `proprietorship/${currentTicketId}`;
 };
 
 // Indian States List
@@ -60,10 +64,12 @@ export function BasicBusinessDetailsContent({ formData, setFormData }) {
   const handleFileUpload = async (field, file) => {
     if (file) {
       try {
-        const base64 = await fileToBase64(file);
-        updateStep1(field, base64);
+        const folder = getUploadFolder();
+        const fileName = file.name || `${field}.pdf`;
+        const { s3Url } = await uploadFileDirect(file, folder, fileName);
+        updateStep1(field, s3Url);
       } catch (error) {
-        console.error('Error converting file:', error);
+        console.error('Upload error:', error);
         alert('Failed to upload file. Please try again.');
       }
     }
@@ -376,10 +382,12 @@ export function BasicProprietorDetailsContent({ formData, setFormData }) {
   const handleFileUpload = async (field, file) => {
     if (file) {
       try {
-        const base64 = await fileToBase64(file);
-        updateStep2(field, base64);
+        const folder = getUploadFolder();
+        const fileName = file.name || `${field}.pdf`;
+        const { s3Url } = await uploadFileDirect(file, folder, fileName);
+        updateStep2(field, s3Url);
       } catch (error) {
-        console.error('Error converting file:', error);
+        console.error('Upload error:', error);
         alert('Failed to upload file. Please try again.');
       }
     }

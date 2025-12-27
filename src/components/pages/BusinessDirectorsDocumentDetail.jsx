@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
+import { uploadFileDirect } from "../../utils/s3Upload";
 
 function BusinessDirectorsDocumentDetail() {
   const navigate = useNavigate();
@@ -98,28 +99,32 @@ function BusinessDirectorsDocumentDetail() {
     handleUpload(file);
   };
 
-  const convertFileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
   const handleUpload = async (file) => {
     setUploading(true);
     try {
-      const base64Data = await convertFileToBase64(file);
+      // Get user ID
+      const storedUser = JSON.parse(
+        localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+      );
+      const currentUserId = storedUser.id;
 
-      if (!orgId) {
-        showStatus("error", "Organization ID is required");
+      if (!currentUserId || !orgId) {
+        showStatus("error", "User ID or Organization ID not found");
         return;
       }
 
+      // Upload directly to S3
+      const folder = `user-profiles/${currentUserId}/organizations/${orgId}/directors-partners`;
+      const { s3Url } = await uploadFileDirect(
+        file,
+        folder,
+        file.name
+      );
+
+      // Save S3 URL to database
       const response = await apiClient.post("/users-page/upload-directors-partners-document", {
         documentType: documentType,
-        fileData: base64Data,
+        fileUrl: s3Url, // Use fileUrl instead of fileData
         fileName: file.name,
         organizationId: orgId,
       });

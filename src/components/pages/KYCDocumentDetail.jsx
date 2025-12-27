@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
+import { uploadFileDirect } from "../../utils/s3Upload";
 
 function KYCDocumentDetail() {
   const navigate = useNavigate();
@@ -92,23 +93,35 @@ function KYCDocumentDetail() {
     handleUpload(file);
   };
 
-  const convertFileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
   const handleUpload = async (file) => {
     setUploading(true);
     try {
-      const base64Data = await convertFileToBase64(file);
+      // Get user ID
+      const storedUser = JSON.parse(
+        localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+      );
+      const userId = storedUser.id;
 
+      if (!userId) {
+        throw new Error("User ID not found");
+      }
+
+      // Upload directly to S3
+      const folder = `user-profiles/${userId}/personal`;
+      const { s3Url } = await uploadFileDirect(
+        file,
+        folder,
+        file.name,
+        (progress) => {
+          // Progress tracking can be added here if needed
+          console.log(`Upload progress: ${progress}%`);
+        }
+      );
+
+      // Save S3 URL to database
       const response = await apiClient.post("/users-page/upload-personal-document", {
         documentType: documentType,
-        fileData: base64Data,
+        fileUrl: s3Url, // Use fileUrl instead of fileData
         fileName: file.name,
       });
 
