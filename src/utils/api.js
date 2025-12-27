@@ -62,7 +62,17 @@ class APIClient {
       const response = await fetch(url, config);
       return await this.handleResponse(response);
     } catch (error) {
-      console.error('API Request Error:', error);
+      // Don't log connection errors for get-signed-url endpoint (it's a fallback scenario)
+      const isSignedUrlEndpoint = endpoint.includes('/get-signed-url');
+      const isConnectionError = error.message && (
+        error.message.includes('Failed to fetch') || 
+        error.message.includes('ERR_CONNECTION_REFUSED') ||
+        error.message.includes('NetworkError')
+      );
+      
+      if (!isSignedUrlEndpoint || !isConnectionError) {
+        console.error('API Request Error:', error);
+      }
       
       // Check if it's a network error (Failed to fetch) for email-related endpoints
       const emailEndpoints = [

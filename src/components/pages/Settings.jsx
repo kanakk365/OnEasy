@@ -4,7 +4,8 @@ import { FaWhatsapp } from 'react-icons/fa';
 import { BsCalendar3 } from 'react-icons/bs';
 import { AiOutlinePlus } from 'react-icons/ai';
 import { getUsersPageData, updateUsersPageData } from '../../utils/usersPageApi';
-import apiClient from '../../utils/api';
+import { uploadFileDirect, viewFile } from '../../utils/s3Upload';
+import { AUTH_CONFIG } from '../../config/auth';
 
 function Settings() {
   const [expandedSection, setExpandedSection] = useState('client-profile');
@@ -87,6 +88,17 @@ function Settings() {
         setClientStatus(user.client_status || 'Active');
         
         // Populate Client Profile data
+        // Helper function to validate file URLs
+        const validateFileUrl = (url) => {
+          if (!url) return null;
+          if (typeof url !== 'string') return null;
+          const trimmed = url.trim();
+          if (trimmed === '' || trimmed === 'null' || trimmed === 'undefined' || trimmed === '{}' || trimmed === '[]') {
+            return null;
+          }
+          return trimmed;
+        };
+        
         setFormData({
           name: user.name || '',
           whatsapp: user.whatsapp || '',
@@ -94,9 +106,9 @@ function Settings() {
           dob: user.dob || '',
           address: user.address_line1 || '',
           businessAddress: user.business_address || '',
-          aadharCard: user.aadhar_card || null,
-          panCard: user.pan_card || null,
-          signature: user.signature || null
+          aadharCard: validateFileUrl(user.aadhar_card),
+          panCard: validateFileUrl(user.pan_card),
+          signature: validateFileUrl(user.signature)
         });
         
         // Populate Organisation Details - now supports multiple organizations with websites
@@ -293,17 +305,42 @@ function Settings() {
       console.log('💾 Saving Client Profile...');
       setSaving(true);
       
+      // Get user ID
+      const userData = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || '{}');
+      const currentUserId = userData.id || userId;
+      
+      // Upload any files that are File objects (not yet uploaded)
+      const documentFields = ['aadharCard', 'panCard', 'signature'];
+      const updatedFormData = { ...formData };
+      
+      for (const field of documentFields) {
+        const fileValue = formData[field];
+        // If it's a File object, upload it first
+        if (fileValue instanceof File) {
+          try {
+            const folder = `user-profiles/${currentUserId}/personal`;
+            const { s3Url } = await uploadFileDirect(fileValue, folder, fileValue.name);
+            updatedFormData[field] = s3Url;
+            console.log(`✅ Uploaded ${field} to S3: ${s3Url}`);
+          } catch (error) {
+            console.error(`Error uploading ${field}:`, error);
+            // Keep original value on error
+          }
+        }
+        // If it's already an S3 URL or base64, keep it as is
+      }
+      
       const payload = {
         clientProfile: {
-          name: formData.name,
-          whatsapp: formData.whatsapp,
-          email: formData.email,
-          dob: formData.dob,
-          address: formData.address,
-          businessAddress: formData.businessAddress,
-          aadharCard: formData.aadharCard,
-          panCard: formData.panCard,
-          signature: formData.signature
+          name: updatedFormData.name,
+          whatsapp: updatedFormData.whatsapp,
+          email: updatedFormData.email,
+          dob: updatedFormData.dob,
+          address: updatedFormData.address,
+          businessAddress: updatedFormData.businessAddress,
+          aadharCard: updatedFormData.aadharCard,
+          panCard: updatedFormData.panCard,
+          signature: updatedFormData.signature
         }
       };
       
@@ -462,88 +499,67 @@ function Settings() {
   };
 
   const handleViewFile = async (fileData) => {
-    if (!fileData) return;
-    
-    try {
-      // If it's base64 data (starts with data:), create a blob and open it
-      if (typeof fileData === 'string' && fileData.startsWith('data:')) {
-        const base64Data = fileData.split(',')[1];
-        const mimeType = fileData.split(',')[0].split(':')[1].split(';')[0];
-        const byteCharacters = atob(base64Data);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: mimeType });
-        const blobUrl = URL.createObjectURL(blob);
-        const newWindow = window.open(blobUrl, '_blank');
-        // Clean up the blob URL after the window has loaded (use longer delay to ensure file loads)
-        if (newWindow) {
-          newWindow.addEventListener('load', () => {
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-          });
-        } else {
-          // Fallback: revoke after longer delay if popup blocked
-          setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-        }
-      } else if (typeof fileData === 'string' && (fileData.startsWith('http://') || fileData.startsWith('https://'))) {
-        // Check if it's an S3 URL
-        if (fileData.includes('.s3.') && fileData.includes('.amazonaws.com')) {
-          // Get signed URL for S3 file
-          try {
-            const response = await apiClient.post('/admin/get-signed-url', { s3Url: fileData });
-            if (response.success && response.signedUrl) {
-              window.open(response.signedUrl, '_blank', 'noopener,noreferrer');
-            } else {
-              window.open(fileData, '_blank', 'noopener,noreferrer');
-            }
-          } catch (error) {
-            console.error('Error getting signed URL:', error);
-            window.open(fileData, '_blank', 'noopener,noreferrer');
-          }
-        } else {
-          // Regular HTTP/HTTPS URL
-          window.open(fileData, '_blank', 'noopener,noreferrer');
-        }
-      } else {
-        // Try to handle as base64 without data: prefix
-        try {
-          const base64Data = atob(fileData);
-          const byteNumbers = new Array(base64Data.length);
-          for (let i = 0; i < base64Data.length; i++) {
-            byteNumbers[i] = base64Data.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          const blob = new Blob([byteArray], { type: 'application/pdf' });
-          const blobUrl = URL.createObjectURL(blob);
-          const newWindow = window.open(blobUrl, '_blank');
-          // Clean up the blob URL after the window has loaded
-          if (newWindow) {
-            newWindow.addEventListener('load', () => {
-              setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-            });
-          } else {
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-          }
-        } catch (error) {
-          console.error('Error processing file:', error);
-          alert('Unable to open file. The file may be inaccessible or in an unsupported format.');
-        }
-      }
-    } catch (error) {
-      console.error('Error opening file:', error);
-      alert('Unable to open file. Please try downloading it instead.');
+    if (!fileData) {
+      alert('No file available to view.');
+      return;
     }
+    
+    // If it's null, undefined, or empty string, show error
+    if (fileData === null || fileData === undefined || fileData === '') {
+      alert('No file available to view.');
+      return;
+    }
+    
+    // Convert to string if it's not already (handles edge cases)
+    const fileDataString = typeof fileData === 'string' ? fileData : String(fileData);
+    
+    // Check if it's a valid string (not 'null', 'undefined', '{}', etc.)
+    if (fileDataString === 'null' || fileDataString === 'undefined' || fileDataString === '{}' || fileDataString === '[]' || fileDataString.trim() === '') {
+      alert('Invalid file URL. The document may not be properly uploaded.');
+      return;
+    }
+    
+    await viewFile(fileDataString);
   };
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleFileChange = (field, file) => {
-    if (file) {
-      setFormData(prev => ({ ...prev, [field]: file }));
+  const handleFileChange = async (field, file) => {
+    if (!file) return;
+    
+    try {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+      
+      // Get user ID
+      const userData = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || '{}');
+      const currentUserId = userData.id || userId;
+      
+      if (!currentUserId) {
+        alert('User ID not found. Please refresh the page.');
+        return;
+      }
+      
+      // Upload directly to S3
+      const folder = `user-profiles/${currentUserId}/personal`;
+      const { s3Url } = await uploadFileDirect(
+        file,
+        folder,
+        file.name
+      );
+      
+      // Store S3 URL instead of file object
+      setFormData(prev => ({ ...prev, [field]: s3Url }));
+      
+      alert('File uploaded successfully!');
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('Failed to upload file. Please try again.');
     }
   };
 
@@ -704,16 +720,6 @@ function Settings() {
           ) }
         : org
     ));
-  };
-  
-  // Helper function to convert file to base64
-  const fileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
   };
 
   const addUserTask = async () => {
@@ -1657,8 +1663,40 @@ function Settings() {
                               onChange={async (e) => {
                                 const file = e.target.files[0];
                                 if (file) {
-                                  const base64 = await fileToBase64(file);
-                                  updateOrganization(org.id, 'panFile', base64);
+                                  try {
+                                    // Validate file size (max 5MB)
+                                    if (file.size > 5 * 1024 * 1024) {
+                                      alert('File size must be less than 5MB');
+                                      e.target.value = '';
+                                      return;
+                                    }
+                                    
+                                    // Get user ID
+                                    const userData = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || '{}');
+                                    const currentUserId = userData.id || userId;
+                                    
+                                    if (!currentUserId) {
+                                      alert('User ID not found. Please refresh the page.');
+                                      e.target.value = '';
+                                      return;
+                                    }
+                                    
+                                    // Upload directly to S3
+                                    const folder = `user-profiles/${currentUserId}/organizations/org-${org.id || 'new'}`;
+                                    const { s3Url } = await uploadFileDirect(
+                                      file,
+                                      folder,
+                                      'pan-file'
+                                    );
+                                    
+                                    // Store S3 URL instead of base64
+                                    updateOrganization(org.id, 'panFile', s3Url);
+                                    alert('File uploaded successfully!');
+                                  } catch (error) {
+                                    console.error('Error uploading PAN file:', error);
+                                    alert('Failed to upload file. Please try again.');
+                                    e.target.value = '';
+                                  }
                                 }
                               }}
                               className="hidden"
@@ -1917,15 +1955,44 @@ function Settings() {
                           <div>
                             <input
                               type="file"
-                              onChange={(e) => {
+                              onChange={async (e) => {
                                 const file = e.target.files[0];
                                 if (file) {
-                                  const reader = new FileReader();
-                                  reader.onloadend = () => {
-                                    const base64 = reader.result;
-                                    updateOrganization(org.id, 'optionalAttachment1', base64);
-                                  };
-                                  reader.readAsDataURL(file);
+                                  try {
+                                    // Validate file size (max 5MB)
+                                    if (file.size > 5 * 1024 * 1024) {
+                                      alert('File size must be less than 5MB');
+                                      e.target.value = '';
+                                      return;
+                                    }
+                                    
+                                    // Get user ID
+                                    const userData = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || '{}');
+                                    const currentUserId = userData.id || userId;
+                                    
+                                    if (!currentUserId) {
+                                      alert('User ID not found. Please refresh the page.');
+                                      e.target.value = '';
+                                      return;
+                                    }
+                                    
+                                    // Upload directly to S3
+                                    // Use organizations folder structure to match backend
+                                    const folder = `organizations/${currentUserId}/org-${org.id || 'new'}`;
+                                    const { s3Url } = await uploadFileDirect(
+                                      file,
+                                      folder,
+                                      'optional-attachment-1'
+                                    );
+                                    
+                                    // Store S3 URL instead of base64
+                                    updateOrganization(org.id, 'optionalAttachment1', s3Url);
+                                    alert('File uploaded successfully!');
+                                  } catch (error) {
+                                    console.error('Error uploading file:', error);
+                                    alert('Failed to upload file. Please try again.');
+                                    e.target.value = '';
+                                  }
                                 }
                               }}
                               className="hidden"
@@ -1942,14 +2009,10 @@ function Settings() {
                                   <div className="flex gap-2 mt-1">
                                     <button
                                       type="button"
-                                      onClick={(e) => {
+                                      onClick={async (e) => {
                                         e.preventDefault();
-                                        const url = org.optionalAttachment1;
-                                        if (url.startsWith('data:') || url.startsWith('blob:')) {
-                                          window.open(url, '_blank', 'noopener,noreferrer');
-                                        } else {
-                                          window.open(url, '_blank', 'noopener,noreferrer');
-                                        }
+                                        e.stopPropagation();
+                                        await handleViewFile(org.optionalAttachment1);
                                       }}
                                       className="text-xs text-blue-600 hover:text-blue-800"
                                     >
@@ -1982,15 +2045,44 @@ function Settings() {
                           <div>
                             <input
                               type="file"
-                              onChange={(e) => {
+                              onChange={async (e) => {
                                 const file = e.target.files[0];
                                 if (file) {
-                                  const reader = new FileReader();
-                                  reader.onloadend = () => {
-                                    const base64 = reader.result;
-                                    updateOrganization(org.id, 'optionalAttachment2', base64);
-                                  };
-                                  reader.readAsDataURL(file);
+                                  try {
+                                    // Validate file size (max 5MB)
+                                    if (file.size > 5 * 1024 * 1024) {
+                                      alert('File size must be less than 5MB');
+                                      e.target.value = '';
+                                      return;
+                                    }
+                                    
+                                    // Get user ID
+                                    const userData = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || '{}');
+                                    const currentUserId = userData.id || userId;
+                                    
+                                    if (!currentUserId) {
+                                      alert('User ID not found. Please refresh the page.');
+                                      e.target.value = '';
+                                      return;
+                                    }
+                                    
+                                    // Upload directly to S3
+                                    // Use organizations folder structure to match backend
+                                    const folder = `organizations/${currentUserId}/org-${org.id || 'new'}`;
+                                    const { s3Url } = await uploadFileDirect(
+                                      file,
+                                      folder,
+                                      'optional-attachment-2'
+                                    );
+                                    
+                                    // Store S3 URL instead of base64
+                                    updateOrganization(org.id, 'optionalAttachment2', s3Url);
+                                    alert('File uploaded successfully!');
+                                  } catch (error) {
+                                    console.error('Error uploading file:', error);
+                                    alert('Failed to upload file. Please try again.');
+                                    e.target.value = '';
+                                  }
                                 }
                               }}
                               className="hidden"
@@ -2007,14 +2099,10 @@ function Settings() {
                                   <div className="flex gap-2 mt-1">
                                     <button
                                       type="button"
-                                      onClick={(e) => {
+                                      onClick={async (e) => {
                                         e.preventDefault();
-                                        const url = org.optionalAttachment2;
-                                        if (url.startsWith('data:') || url.startsWith('blob:')) {
-                                          window.open(url, '_blank', 'noopener,noreferrer');
-                                        } else {
-                                          window.open(url, '_blank', 'noopener,noreferrer');
-                                        }
+                                        e.stopPropagation();
+                                        await handleViewFile(org.optionalAttachment2);
                                       }}
                                       className="text-xs text-blue-600 hover:text-blue-800"
                                     >
@@ -2382,22 +2470,31 @@ function Settings() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="block text-sm text-gray-600 mb-2">Aadhar Card</label>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <input
                 type="text"
                 readOnly
-                value={formData.aadharCard ? formData.aadharCard.name : 'No file chosen'}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                value={formData.aadharCard && typeof formData.aadharCard === 'string' && formData.aadharCard.trim() !== '' ? 'File uploaded' : 'No file chosen'}
+                className="flex-1 min-w-0 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
               />
-              <label className="cursor-pointer">
+              {formData.aadharCard && typeof formData.aadharCard === 'string' && formData.aadharCard.trim() !== '' && (
+                <button
+                  type="button"
+                  onClick={() => handleViewFile(formData.aadharCard)}
+                  className="px-3 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors whitespace-nowrap flex-shrink-0"
+                >
+                  View
+                </button>
+              )}
+              <label className="cursor-pointer flex-shrink-0">
                 <input
                   type="file"
                   onChange={(e) => handleFileChange('aadharCard', e.target.files[0])}
                   className="hidden"
                   accept=".pdf,.jpg,.jpeg,.png"
                 />
-                <span className="px-4 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block">
-                  edit
+                <span className="px-4 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block whitespace-nowrap">
+                  {formData.aadharCard && typeof formData.aadharCard === 'string' && formData.aadharCard.trim() !== '' ? 'Change' : 'Upload'}
                 </span>
               </label>
             </div>
@@ -2405,22 +2502,31 @@ function Settings() {
           
           <div>
             <label className="block text-sm text-gray-600 mb-2">Pan Card</label>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <input
                 type="text"
                 readOnly
-                value={formData.panCard ? formData.panCard.name : 'No file chosen'}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                value={formData.panCard && typeof formData.panCard === 'string' && formData.panCard.trim() !== '' ? 'File uploaded' : 'No file chosen'}
+                className="flex-1 min-w-0 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
               />
-              <label className="cursor-pointer">
+              {formData.panCard && typeof formData.panCard === 'string' && formData.panCard.trim() !== '' && (
+                <button
+                  type="button"
+                  onClick={() => handleViewFile(formData.panCard)}
+                  className="px-3 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors whitespace-nowrap flex-shrink-0"
+                >
+                  View
+                </button>
+              )}
+              <label className="cursor-pointer flex-shrink-0">
                 <input
                   type="file"
                   onChange={(e) => handleFileChange('panCard', e.target.files[0])}
                   className="hidden"
                   accept=".pdf,.jpg,.jpeg,.png"
                 />
-                <span className="px-4 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block">
-                  edit
+                <span className="px-4 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block whitespace-nowrap">
+                  {formData.panCard && typeof formData.panCard === 'string' && formData.panCard.trim() !== '' ? 'Change' : 'Upload'}
                 </span>
               </label>
             </div>
@@ -2428,22 +2534,31 @@ function Settings() {
           
           <div>
             <label className="block text-sm text-gray-600 mb-2">Signature</label>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <input
                 type="text"
                 readOnly
-                value={formData.signature ? formData.signature.name : 'No file chosen'}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                value={formData.signature && typeof formData.signature === 'string' && formData.signature.trim() !== '' ? 'File uploaded' : 'No file chosen'}
+                className="flex-1 min-w-0 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
               />
-              <label className="cursor-pointer">
+              {formData.signature && typeof formData.signature === 'string' && formData.signature.trim() !== '' && (
+                <button
+                  type="button"
+                  onClick={() => handleViewFile(formData.signature)}
+                  className="px-3 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors whitespace-nowrap flex-shrink-0"
+                >
+                  View
+                </button>
+              )}
+              <label className="cursor-pointer flex-shrink-0">
                 <input
                   type="file"
                   onChange={(e) => handleFileChange('signature', e.target.files[0])}
                   className="hidden"
                   accept=".pdf,.jpg,.jpeg,.png"
                 />
-                <span className="px-4 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block">
-                  edit
+                <span className="px-4 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block whitespace-nowrap">
+                  {formData.signature && typeof formData.signature === 'string' && formData.signature.trim() !== '' ? 'Change' : 'Upload'}
                 </span>
               </label>
             </div>

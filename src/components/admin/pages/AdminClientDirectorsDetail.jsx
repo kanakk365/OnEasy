@@ -52,6 +52,7 @@ function AdminClientDirectorsDetail() {
     if (userId && orgId && documentType) {
       loadClientAndDocuments();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, orgId, documentType]);
 
   const loadClientAndDocuments = async () => {

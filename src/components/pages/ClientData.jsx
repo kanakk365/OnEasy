@@ -31,6 +31,7 @@ function ClientData() {
       loadOrganization();
       loadDocuments();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orgId]);
 
   const loadOrganization = async () => {

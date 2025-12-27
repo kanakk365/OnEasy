@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import apiClient from '../../../utils/api';
 import { updateUserDataByUserId } from '../../../utils/usersPageApi';
+import { viewFile, uploadFileDirect } from '../../../utils/s3Upload';
 import { AiOutlinePlus } from 'react-icons/ai';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
@@ -72,6 +73,9 @@ function AdminClientOverview() {
     customClientId: '',
     clientStatus: '',
   });
+  // Document upload state
+  const [uploadingDocument, setUploadingDocument] = useState(false);
+  const [uploadDocumentType, setUploadDocumentType] = useState(null);
 
   useEffect(() => {
     fetchClientDetails();
@@ -104,76 +108,71 @@ function AdminClientOverview() {
   }, [isStatusDropdownOpen]);
 
   const handleViewFile = async (fileData) => {
-    if (!fileData) return;
-    
+    await viewFile(fileData);
+  };
+
+  const handleUploadDocument = async (documentType, file) => {
+    if (!file || !userId) {
+      alert('Please select a file');
+      return;
+    }
+
+    setUploadingDocument(true);
+    setUploadDocumentType(documentType);
     try {
-      // If it's base64 data (starts with data:), create a blob and open it
-      if (typeof fileData === 'string' && fileData.startsWith('data:')) {
-        const base64Data = fileData.split(',')[1];
-        const mimeType = fileData.split(',')[0].split(':')[1].split(';')[0];
-        const byteCharacters = atob(base64Data);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: mimeType });
-        const blobUrl = URL.createObjectURL(blob);
-        const newWindow = window.open(blobUrl, '_blank');
-        if (newWindow) {
-          newWindow.addEventListener('load', () => {
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-          });
-        } else {
-          setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-        }
-      } else if (typeof fileData === 'string' && (fileData.startsWith('http://') || fileData.startsWith('https://'))) {
-        // Check if it's an S3 URL
-        if (fileData.includes('.s3.') && fileData.includes('.amazonaws.com')) {
-          // Get signed URL for S3 file
-          try {
-            const response = await apiClient.post('/admin/get-signed-url', { s3Url: fileData });
-            if (response.success && response.signedUrl) {
-              window.open(response.signedUrl, '_blank', 'noopener,noreferrer');
-            } else {
-              window.open(fileData, '_blank', 'noopener,noreferrer');
-            }
-          } catch (error) {
-            console.error('Error getting signed URL:', error);
-            window.open(fileData, '_blank', 'noopener,noreferrer');
-          }
-        } else {
-          // Regular HTTP/HTTPS URL
-          window.open(fileData, '_blank', 'noopener,noreferrer');
-        }
+      // Upload directly to S3
+      const folder = `user-profiles/${userId}/personal`;
+      const { s3Url } = await uploadFileDirect(
+        file,
+        folder,
+        file.name
+      );
+
+      // Save S3 URL to database using admin endpoint
+      const response = await apiClient.post(`/users-page/upload-personal-document/${userId}`, {
+        documentType: documentType,
+        fileUrl: s3Url,
+        fileName: file.name,
+      });
+
+      if (response.success) {
+        alert('Document uploaded successfully!');
+        // Refresh client profile to show new document (this will also refresh document URLs)
+        await fetchClientProfile();
       } else {
-        // Try to handle as base64 without data: prefix
-        try {
-          const base64Data = atob(fileData);
-          const byteNumbers = new Array(base64Data.length);
-          for (let i = 0; i < base64Data.length; i++) {
-            byteNumbers[i] = base64Data.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          const blob = new Blob([byteArray], { type: 'application/pdf' });
-          const blobUrl = URL.createObjectURL(blob);
-          const newWindow = window.open(blobUrl, '_blank');
-          if (newWindow) {
-            newWindow.addEventListener('load', () => {
-              setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-            });
-          } else {
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-          }
-        } catch (error) {
-          console.error('Error processing file:', error);
-          alert('Failed to open file');
-        }
+        throw new Error(response.message || 'Upload failed');
       }
     } catch (error) {
-      console.error('Error viewing file:', error);
-      alert('Failed to open file');
+      console.error('Upload error:', error);
+      alert(error.message || 'Failed to upload document. Please try again.');
+    } finally {
+      setUploadingDocument(false);
+      setUploadDocumentType(null);
     }
+  };
+
+  const handleFileInputChange = (documentType, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB');
+      e.target.value = '';
+      return;
+    }
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf'];
+    if (!validTypes.includes(file.type)) {
+      alert('Invalid file type. Please upload an image (JPG, PNG, GIF) or PDF');
+      e.target.value = '';
+      return;
+    }
+
+    handleUploadDocument(documentType, file);
+    // Reset input
+    e.target.value = '';
   };
 
   const fetchClientDetails = async () => {
@@ -561,32 +560,60 @@ function AdminClientOverview() {
   const fetchDocumentSignedUrls = async (user) => {
     if (!user) return;
     
-    const urls = {};
-    const documents = {
-      aadhar_card: user.aadhar_card,
-      pan_card: user.pan_card,
-      signature: user.signature
-    };
-
-    for (const [key, url] of Object.entries(documents)) {
-      if (url && url.includes('s3.') && url.includes('.amazonaws.com')) {
-        try {
-          const response = await apiClient.post('/private-limited/get-signed-url', { s3Url: url });
-          if (response.signedUrl) {
-            urls[key] = response.signedUrl;
-          } else {
-            urls[key] = url;
+    try {
+      // Fetch personal documents from the API (more reliable than user table fields)
+      const personalDocsResponse = await apiClient.get(`/users-page/personal-documents/${userId}`).catch(() => ({ 
+        success: false, 
+        data: {}
+      }));
+      
+      const urls = {};
+      
+      // Get URLs from personal documents API (preferred)
+      if (personalDocsResponse.success && personalDocsResponse.data) {
+        Object.keys(personalDocsResponse.data).forEach(docType => {
+          const docs = personalDocsResponse.data[docType];
+          if (Array.isArray(docs) && docs.length > 0 && docs[0].url) {
+            urls[docType] = docs[0].url;
           }
-        } catch (error) {
-          console.error(`Error fetching signed URL for ${key}:`, error);
+        });
+      }
+      
+      // Fallback to user table fields if personal documents API doesn't have them
+      const userTableDocs = {
+        aadhar_card: user.aadhar_card,
+        pan_card: user.pan_card,
+        signature: user.signature
+      };
+      
+      for (const [key, url] of Object.entries(userTableDocs)) {
+        // Only use user table field if we don't already have a URL from personal documents
+        if (!urls[key] && url && typeof url === 'string' && url.trim().length > 0) {
           urls[key] = url;
         }
-      } else {
-        urls[key] = url;
       }
-    }
 
-    setDocumentUrls(urls);
+      // Process URLs to get signed URLs for S3 files
+      for (const [key, url] of Object.entries(urls)) {
+        if (url && typeof url === 'string' && url.includes('s3.') && url.includes('.amazonaws.com')) {
+          try {
+            const response = await apiClient.post('/admin/get-signed-url', { s3Url: url }).catch(() => ({ success: false }));
+            if (response.success && response.signedUrl) {
+              urls[key] = response.signedUrl;
+            }
+            // If signed URL fails, keep original URL
+          } catch {
+            // Silently fail - keep original URL
+            console.warn(`Could not get signed URL for ${key}, using original URL`);
+          }
+        }
+      }
+
+      setDocumentUrls(urls);
+    } catch (error) {
+      console.error('Error fetching document URLs:', error);
+      setDocumentUrls({});
+    }
   };
 
   const handleNoteFileUpload = (e) => {
@@ -986,16 +1013,6 @@ function AdminClientOverview() {
           }
         : org
     ));
-  };
-
-  // Helper function to convert file to base64
-  const fileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
   };
 
   const handleSaveOrganisations = async () => {
@@ -1707,63 +1724,113 @@ function AdminClientOverview() {
                 <div className="border-t border-gray-300 pt-4 mt-4">
                   <h5 className="text-sm font-semibold text-gray-900 mb-3">Documents</h5>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div>
+                    <div className="flex items-center gap-2">
                       <span className="font-medium text-gray-700">Aadhar Card:</span>
-                      {documentUrls.aadhar_card || clientProfile.user?.aadhar_card ? (
+                      {(documentUrls.aadhar_card && typeof documentUrls.aadhar_card === 'string') || 
+                       (clientProfile.user?.aadhar_card && typeof clientProfile.user.aadhar_card === 'string') ? (
                         <button
                           type="button"
                           onClick={async (e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            const url = documentUrls.aadhar_card || clientProfile.user.aadhar_card;
-                            await handleViewFile(url);
+                            const url = documentUrls.aadhar_card || clientProfile.user?.aadhar_card;
+                            if (url && typeof url === 'string' && url.trim().length > 0) {
+                              await handleViewFile(url);
+                            } else {
+                              alert('Invalid document URL');
+                            }
                           }}
-                          className="ml-2 text-blue-600 hover:underline cursor-pointer bg-transparent border-none p-0"
+                          className="text-blue-600 hover:underline cursor-pointer bg-transparent border-none p-0"
                         >
                           View
                         </button>
                       ) : (
-                        <span className="ml-2 text-gray-600">N/A</span>
+                        <span className="text-gray-600">N/A</span>
                       )}
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*,.pdf"
+                          onChange={(e) => handleFileInputChange('aadhar_card', e)}
+                          disabled={uploadingDocument}
+                          className="hidden"
+                        />
+                        <span className="text-xs text-blue-600 hover:text-blue-800 cursor-pointer">
+                          {uploadingDocument && uploadDocumentType === 'aadhar_card' ? 'Uploading...' : 'Upload'}
+                        </span>
+                      </label>
                     </div>
-                    <div>
+                    <div className="flex items-center gap-2">
                       <span className="font-medium text-gray-700">PAN Card:</span>
-                      {documentUrls.pan_card || clientProfile.user?.pan_card ? (
+                      {(documentUrls.pan_card && typeof documentUrls.pan_card === 'string') || 
+                       (clientProfile.user?.pan_card && typeof clientProfile.user.pan_card === 'string') ? (
                         <button
                           type="button"
                           onClick={async (e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            const url = documentUrls.pan_card || clientProfile.user.pan_card;
-                            await handleViewFile(url);
+                            const url = documentUrls.pan_card || clientProfile.user?.pan_card;
+                            if (url && typeof url === 'string' && url.trim().length > 0) {
+                              await handleViewFile(url);
+                            } else {
+                              alert('Invalid document URL');
+                            }
                           }}
-                          className="ml-2 text-blue-600 hover:underline cursor-pointer bg-transparent border-none p-0"
+                          className="text-blue-600 hover:underline cursor-pointer bg-transparent border-none p-0"
                         >
                           View
                         </button>
                       ) : (
-                        <span className="ml-2 text-gray-600">N/A</span>
+                        <span className="text-gray-600">N/A</span>
                       )}
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*,.pdf"
+                          onChange={(e) => handleFileInputChange('pan_card', e)}
+                          disabled={uploadingDocument}
+                          className="hidden"
+                        />
+                        <span className="text-xs text-blue-600 hover:text-blue-800 cursor-pointer">
+                          {uploadingDocument && uploadDocumentType === 'pan_card' ? 'Uploading...' : 'Upload'}
+                        </span>
+                      </label>
                     </div>
-                    <div>
+                    <div className="flex items-center gap-2">
                       <span className="font-medium text-gray-700">Signature:</span>
-                      {documentUrls.signature || clientProfile.user?.signature ? (
+                      {(documentUrls.signature && typeof documentUrls.signature === 'string') || 
+                       (clientProfile.user?.signature && typeof clientProfile.user.signature === 'string') ? (
                         <button
                           type="button"
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            const url = documentUrls.signature || clientProfile.user.signature;
-                            console.log('Opening Signature:', url);
-                            window.open(url, '_blank', 'noopener,noreferrer');
+                            const url = documentUrls.signature || clientProfile.user?.signature;
+                            if (url && typeof url === 'string' && url.trim().length > 0) {
+                              await handleViewFile(url);
+                            } else {
+                              alert('Invalid document URL');
+                            }
                           }}
-                          className="ml-2 text-blue-600 hover:underline cursor-pointer bg-transparent border-none p-0"
+                          className="text-blue-600 hover:underline cursor-pointer bg-transparent border-none p-0"
                         >
                           View
                         </button>
                       ) : (
-                        <span className="ml-2 text-gray-600">N/A</span>
+                        <span className="text-gray-600">N/A</span>
                       )}
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*,.pdf"
+                          onChange={(e) => handleFileInputChange('signature', e)}
+                          disabled={uploadingDocument}
+                          className="hidden"
+                        />
+                        <span className="text-xs text-blue-600 hover:text-blue-800 cursor-pointer">
+                          {uploadingDocument && uploadDocumentType === 'signature' ? 'Uploading...' : 'Upload'}
+                        </span>
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -2773,8 +2840,29 @@ function AdminClientOverview() {
                                                     onChange={async (e) => {
                                                       const file = e.target.files[0];
                                                       if (file) {
-                                                        const base64 = await fileToBase64(file);
-                                                        updateOrganization(orgInState.id, 'panFile', base64);
+                                                        try {
+                                                          // Validate file size (max 5MB)
+                                                          if (file.size > 5 * 1024 * 1024) {
+                                                            alert('File size must be less than 5MB');
+                                                            e.target.value = '';
+                                                            return;
+                                                          }
+                                                          
+                                                          // Upload directly to S3
+                                                          const folder = `user-profiles/${userId}/organizations/org-${orgInState.id || 'new'}`;
+                                                          const { s3Url } = await uploadFileDirect(
+                                                            file,
+                                                            folder,
+                                                            'pan-file'
+                                                          );
+                                                          
+                                                          // Store S3 URL instead of base64
+                                                          updateOrganization(orgInState.id, 'panFile', s3Url);
+                                                        } catch (error) {
+                                                          console.error('Error uploading PAN file:', error);
+                                                          alert('Failed to upload file. Please try again.');
+                                                          e.target.value = '';
+                                                        }
                                                       }
                                                     }}
                                                     className="hidden"
