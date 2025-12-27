@@ -373,22 +373,43 @@ function PrivateLimitedForm({
     try {
       setIsSubmitting(true);
       
+      // Prepare form data - copy permanent address to present address if checkbox is not checked
+      const preparedFormData = { ...formData };
+      if (preparedFormData.directors && Array.isArray(preparedFormData.directors)) {
+        preparedFormData.directors = preparedFormData.directors.map(director => {
+          // If checkbox is NOT checked (isDifferentPresentAddress is false/undefined),
+          // copy permanent address to present address
+          if (!director.isDifferentPresentAddress) {
+            return {
+              ...director,
+              presentAddressLine1: director.permanentAddressLine1 || '',
+              presentAddressLine2: director.permanentAddressLine2 || '',
+              presentCity: director.permanentCity || '',
+              presentState: director.permanentState || '',
+              presentCountry: director.permanentCountry || 'India',
+              presentPincode: director.permanentPincode || ''
+            };
+          }
+          return director;
+        });
+      }
+      
       // If onFormSubmit callback is provided (new registration flow), use it instead
       if (onFormSubmit && isAdminFilling && !ticketId) {
         console.log('📝 New registration flow - calling onFormSubmit callback');
         console.log('📋 Form data being sent:', {
-          hasStep1: !!formData.step1,
-          hasStep2: !!formData.step2,
-          hasStep3: !!formData.step3,
-          directorsCount: formData.directors?.length || 0,
-          formDataKeys: Object.keys(formData)
+          hasStep1: !!preparedFormData.step1,
+          hasStep2: !!preparedFormData.step2,
+          hasStep3: !!preparedFormData.step3,
+          directorsCount: preparedFormData.directors?.length || 0,
+          formDataKeys: Object.keys(preparedFormData)
         });
         localStorage.setItem(submissionKey, 'true');
         await onFormSubmit({
-          step1: formData.step1 || {},
-          step2: formData.step2 || {},
-          step3: formData.step3 || {},
-          directors: formData.directors || []
+          step1: preparedFormData.step1 || {},
+          step2: preparedFormData.step2 || {},
+          step3: preparedFormData.step3 || {},
+          directors: preparedFormData.directors || []
         });
         localStorage.removeItem(submissionKey);
         setIsSubmitting(false);
@@ -397,11 +418,11 @@ function PrivateLimitedForm({
       
       localStorage.setItem(submissionKey, 'true');
       console.log('📝 Submitting Private Limited registration...');
-      console.log('Form Data:', formData);
+      console.log('Form Data:', preparedFormData);
       console.log('🔍 Submitting for clientId:', clientId, '| isAdminFilling:', isAdminFilling, '| ticketId:', ticketId);
       
       // Call API to submit registration (pass clientId if admin filling, pass ticketId if editing)
-      const result = await submitPrivateLimitedRegistration(formData, isAdminFilling ? clientId : null, ticketId);
+      const result = await submitPrivateLimitedRegistration(preparedFormData, isAdminFilling ? clientId : null, ticketId);
       
       if (result.success) {
         console.log('✅ Registration submitted successfully:', result.data);
