@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
-import { uploadFileDirect } from "../../utils/s3Upload";
+import { uploadFileDirect, viewFile } from "../../utils/s3Upload";
 
 function KYCDocumentDetail() {
   const navigate = useNavigate();
@@ -150,18 +150,32 @@ function KYCDocumentDetail() {
     }
 
     try {
-      // If we have docId, get signed URL for viewing
-      if (docId) {
-        const response = await apiClient.get(`/users-page/personal-documents/${docId}/view-url`);
-        if (response.success && response.data && response.data.signedUrl) {
-          window.open(response.data.signedUrl, "_blank", "noopener,noreferrer");
-          return;
+      // If we have a URL, use it directly (prefer this over docId to avoid 404s)
+      if (url && typeof url === 'string' && url.trim().length > 0) {
+        // Use viewFile utility which handles S3 URLs, base64, and regular URLs
+        await viewFile(url);
+        return;
+      }
+      
+      // Only try to get signed URL if we have a valid docId (numeric ID, not userId)
+      if (docId && typeof docId === 'number' && docId > 0) {
+        try {
+          const response = await apiClient.get(`/users-page/personal-documents/${docId}/view-url`);
+          if (response.success && response.data && response.data.signedUrl) {
+            window.open(response.data.signedUrl, "_blank", "noopener,noreferrer");
+            return;
+          }
+        } catch (apiError) {
+          // If API call fails, fall back to direct URL if available
+          console.warn('Failed to get signed URL, docId might be invalid:', docId);
         }
       }
       
-      // Fallback to direct URL if available
-      if (url) {
+      // Fallback: if we still have a URL, try to open it directly
+      if (url && typeof url === 'string' && url.trim().length > 0) {
         window.open(url, "_blank", "noopener,noreferrer");
+      } else {
+        showStatus("error", "Document URL not available");
       }
     } catch (error) {
       console.error("View error:", error);
