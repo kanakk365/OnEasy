@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../../utils/api";
-import { uploadFileDirect, viewFile } from "../../../utils/s3Upload";
+import { uploadFileDirect, viewFile, downloadFile } from "../../../utils/s3Upload";
 
 function AdminClientKYCDetail() {
   const navigate = useNavigate();
@@ -177,52 +177,86 @@ function AdminClientKYCDetail() {
     }
   };
 
-  const handleDownloadDocument = async (docId, fileName) => {
-    if (!docId) {
-      showStatus("error", "Document ID not available");
+  const handleDownloadDocument = async (docId, fileName, url) => {
+    if (!docId && !url) {
+      showStatus("error", "Document not available");
       return;
     }
 
     try {
-      const apiBaseUrl = apiClient.baseURL || '';
-      const token = apiClient.getToken();
-      
-      const response = await fetch(`${apiBaseUrl}/users-page/personal-documents/${docId}/download`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to download file");
+      // If we have a URL, use it directly (prefer this over docId to avoid 404s)
+      if (url && typeof url === 'string' && url.trim().length > 0) {
+        // Use downloadFile utility which handles S3 URLs and regular URLs
+        await downloadFile(url, fileName);
+        return;
       }
-
-      const contentDisposition = response.headers.get('Content-Disposition');
-      let downloadFileName = fileName || "document";
       
-      if (contentDisposition) {
-        const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-        if (fileNameMatch && fileNameMatch[1]) {
-          downloadFileName = fileNameMatch[1].replace(/['"]/g, '');
-          try {
-            downloadFileName = decodeURIComponent(downloadFileName);
-          } catch {
-            // Keep original if decode fails
+      // Only try to use API endpoint if we have a valid docId (numeric ID, not userId)
+      if (docId && typeof docId === 'number' && docId > 0) {
+        try {
+          const apiBaseUrl = apiClient.baseURL || '';
+          const token = apiClient.getToken();
+          
+          const response = await fetch(`${apiBaseUrl}/users-page/personal-documents/${docId}/download`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || "Failed to download file");
+          }
+
+          const contentDisposition = response.headers.get('Content-Disposition');
+          let downloadFileName = fileName || "document";
+          
+          if (contentDisposition) {
+            const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+            if (fileNameMatch && fileNameMatch[1]) {
+              downloadFileName = fileNameMatch[1].replace(/['"]/g, '');
+              try {
+                downloadFileName = decodeURIComponent(downloadFileName);
+              } catch {
+                // Keep original if decode fails
+              }
+            }
+          }
+
+          // Get blob from response
+          const blob = await response.blob();
+          
+          // Create a temporary URL for the blob
+          const blobUrl = window.URL.createObjectURL(blob);
+          
+          // Create a temporary anchor element and trigger download
+          const link = document.createElement("a");
+          link.href = blobUrl;
+          link.download = downloadFileName;
+          document.body.appendChild(link);
+          link.click();
+          
+          // Clean up
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(blobUrl);
+        } catch (apiError) {
+          // If API call fails, fall back to direct URL if available
+          console.warn('Failed to download via API, docId might be invalid:', docId);
+          if (url && typeof url === 'string' && url.trim().length > 0) {
+            await downloadFile(url, fileName);
+          } else {
+            throw apiError;
           }
         }
+      } else {
+        // No valid docId, try URL if available
+        if (url && typeof url === 'string' && url.trim().length > 0) {
+          await downloadFile(url, fileName);
+        } else {
+          showStatus("error", "Document URL not available");
+        }
       }
-
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = downloadFileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error("Download error:", error);
       showStatus("error", error.message || "Failed to download document. Please try again.");
@@ -455,7 +489,7 @@ function AdminClientKYCDetail() {
                         </svg>
                       </button>
                       <button
-                        onClick={() => handleDownloadDocument(doc.id, doc.name || doc.document_name || "document")}
+                        onClick={() => handleDownloadDocument(doc.id, doc.name || doc.document_name || "document", doc.url || doc.document_url)}
                         className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                         title="Download Document"
                       >
