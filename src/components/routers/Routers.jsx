@@ -39,6 +39,12 @@ import BusinessDirectorsDocumentDetail from "../pages/BusinessDirectorsDocumentD
 import OrganizationBusinessDocuments from "../pages/OrganizationBusinessDocuments";
 import CompanyMasterData from "../pages/CompanyMasterData";
 import ClientData from "../pages/ClientData";
+import Accounting from "../pages/Accounting";
+import Compliance from "../pages/Compliance";
+import AnnualCompliance from "../pages/AnnualCompliance";
+import RegistrationsLicenses from "../pages/RegistrationsLicenses";
+import Secretarial from "../pages/Secretarial";
+import Correspondence from "../pages/Correspondence";
 import OrganizationsList from "../pages/OrganizationsList";
 import CompanyDocuments from "../pages/CompanyDocuments";
 import KYC from "../pages/KYC";
@@ -708,6 +714,36 @@ function Routers() {
           <ClientData />
         </ProtectedRoute>
       } />
+      <Route path="/company-documents/:orgId/business/company-master-data/accounting" element={
+        <ProtectedRoute>
+          <Accounting />
+        </ProtectedRoute>
+      } />
+      <Route path="/company-documents/:orgId/business/company-master-data/compliance" element={
+        <ProtectedRoute>
+          <Compliance />
+        </ProtectedRoute>
+      } />
+      <Route path="/company-documents/:orgId/business/company-master-data/annual-compliance" element={
+        <ProtectedRoute>
+          <AnnualCompliance />
+        </ProtectedRoute>
+      } />
+      <Route path="/company-documents/:orgId/business/registration-licenses" element={
+        <ProtectedRoute>
+          <RegistrationsLicenses />
+        </ProtectedRoute>
+      } />
+      <Route path="/company-documents/:orgId/business/secretarial" element={
+        <ProtectedRoute>
+          <Secretarial />
+        </ProtectedRoute>
+      } />
+      <Route path="/company-documents/:orgId/business/correspondence" element={
+        <ProtectedRoute>
+          <Correspondence />
+        </ProtectedRoute>
+      } />
       <Route path="/kyc" element={
         <ProtectedRoute>
           <KYC />
@@ -738,6 +774,15 @@ function Routers() {
         <Route path="client-kyc/:userId/:documentType" element={<AdminClientKYCDetail />} />
         <Route path="client-organizations/:userId" element={<AdminClientOrganizations />} />
         <Route path="client-company-documents/:userId/:orgId" element={<AdminClientCompanyDocuments />} />
+        <Route path="client-company-documents/:userId/:orgId/business" element={<OrganizationBusinessDocuments />} />
+        <Route path="client-company-documents/:userId/:orgId/business/company-master-data" element={<CompanyMasterData />} />
+        <Route path="client-company-documents/:userId/:orgId/business/company-master-data/client-data" element={<ClientData />} />
+        <Route path="client-company-documents/:userId/:orgId/business/company-master-data/accounting" element={<Accounting />} />
+        <Route path="client-company-documents/:userId/:orgId/business/company-master-data/compliance" element={<Compliance />} />
+        <Route path="client-company-documents/:userId/:orgId/business/company-master-data/annual-compliance" element={<AnnualCompliance />} />
+        <Route path="client-company-documents/:userId/:orgId/business/registration-licenses" element={<RegistrationsLicenses />} />
+        <Route path="client-company-documents/:userId/:orgId/business/secretarial" element={<Secretarial />} />
+        <Route path="client-company-documents/:userId/:orgId/business/correspondence" element={<Correspondence />} />
         <Route path="client-directors/:userId/:orgId" element={<AdminClientDirectorsKYC />} />
         <Route path="client-directors/:userId/:orgId/:documentType" element={<AdminClientDirectorsDetail />} />
         <Route path="notice-board" element={<AdminNoticeBoard />} />

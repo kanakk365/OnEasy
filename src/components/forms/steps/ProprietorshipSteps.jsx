@@ -88,14 +88,14 @@ export function BasicBusinessDetailsContent({ formData, setFormData, disabled = 
 
   const handleFileUpload = async (field, file) => {
     if (disabled || !file) return;
-    try {
+      try {
       const folder = getUploadFolder();
       const fileName = file.name || `${field}.pdf`;
       const { s3Url } = await uploadFileDirect(file, folder, fileName);
       updateStep1(field, s3Url);
-    } catch (error) {
+      } catch (error) {
       console.error('Upload error:', error);
-      alert('Failed to upload file. Please try again.');
+        alert('Failed to upload file. Please try again.');
     }
   };
 
@@ -428,14 +428,14 @@ export function BasicProprietorDetailsContent({ formData, setFormData, disabled 
 
   const handleFileUpload = async (field, file) => {
     if (disabled || !file) return;
-    try {
+      try {
       const folder = getUploadFolder();
       const fileName = file.name || `${field}.pdf`;
       const { s3Url } = await uploadFileDirect(file, folder, fileName);
       updateStep2(field, s3Url);
-    } catch (error) {
+      } catch (error) {
       console.error('Upload error:', error);
-      alert('Failed to upload file. Please try again.');
+        alert('Failed to upload file. Please try again.');
     }
   };
 

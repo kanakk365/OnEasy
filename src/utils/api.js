@@ -71,7 +71,7 @@ class APIClient {
       );
       
       if (!isSignedUrlEndpoint || !isConnectionError) {
-        console.error('API Request Error:', error);
+      console.error('API Request Error:', error);
       }
       
       // Check if it's a network error (Failed to fetch) for email-related endpoints

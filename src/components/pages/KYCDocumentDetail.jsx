@@ -160,12 +160,12 @@ function KYCDocumentDetail() {
       // Only try to get signed URL if we have a valid docId (numeric ID, not userId)
       if (docId && typeof docId === 'number' && docId > 0) {
         try {
-          const response = await apiClient.get(`/users-page/personal-documents/${docId}/view-url`);
-          if (response.success && response.data && response.data.signedUrl) {
-            window.open(response.data.signedUrl, "_blank", "noopener,noreferrer");
-            return;
+        const response = await apiClient.get(`/users-page/personal-documents/${docId}/view-url`);
+        if (response.success && response.data && response.data.signedUrl) {
+          window.open(response.data.signedUrl, "_blank", "noopener,noreferrer");
+          return;
           }
-        } catch (apiError) {
+        } catch {
           // If API call fails, fall back to direct URL if available
           console.warn('Failed to get signed URL, docId might be invalid:', docId);
         }
@@ -199,56 +199,56 @@ function KYCDocumentDetail() {
       
       // Only try to use API endpoint if we have a valid docId (numeric ID, not userId)
       if (docId && typeof docId === 'number' && docId > 0) {
-        try {
-          // Use backend endpoint that streams the file directly (avoids CORS)
-          const apiBaseUrl = apiClient.baseURL || '';
-          const token = apiClient.getToken();
-          
-          const response = await fetch(`${apiBaseUrl}/users-page/personal-documents/${docId}/download`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          });
+    try {
+      // Use backend endpoint that streams the file directly (avoids CORS)
+      const apiBaseUrl = apiClient.baseURL || '';
+      const token = apiClient.getToken();
+      
+      const response = await fetch(`${apiBaseUrl}/users-page/personal-documents/${docId}/download`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
 
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || "Failed to download file");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to download file");
+      }
+
+      // Get filename from Content-Disposition header or use provided name
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let downloadFileName = fileName || "document";
+      
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (fileNameMatch && fileNameMatch[1]) {
+          downloadFileName = fileNameMatch[1].replace(/['"]/g, '');
+          // Decode URI component if needed
+          try {
+            downloadFileName = decodeURIComponent(downloadFileName);
+          } catch {
+            // Keep original if decode fails
           }
+        }
+      }
 
-          // Get filename from Content-Disposition header or use provided name
-          const contentDisposition = response.headers.get('Content-Disposition');
-          let downloadFileName = fileName || "document";
-          
-          if (contentDisposition) {
-            const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-            if (fileNameMatch && fileNameMatch[1]) {
-              downloadFileName = fileNameMatch[1].replace(/['"]/g, '');
-              // Decode URI component if needed
-              try {
-                downloadFileName = decodeURIComponent(downloadFileName);
-              } catch {
-                // Keep original if decode fails
-              }
-            }
-          }
-
-          // Get blob from response
-          const blob = await response.blob();
-          
-          // Create a temporary URL for the blob
-          const blobUrl = window.URL.createObjectURL(blob);
-          
-          // Create a temporary anchor element and trigger download
-          const link = document.createElement("a");
-          link.href = blobUrl;
-          link.download = downloadFileName;
-          document.body.appendChild(link);
-          link.click();
-          
-          // Clean up
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(blobUrl);
+      // Get blob from response
+      const blob = await response.blob();
+      
+      // Create a temporary URL for the blob
+      const blobUrl = window.URL.createObjectURL(blob);
+      
+      // Create a temporary anchor element and trigger download
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = downloadFileName;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
         } catch (apiError) {
           // If API call fails, fall back to direct URL if available
           console.warn('Failed to download via API, docId might be invalid:', docId);

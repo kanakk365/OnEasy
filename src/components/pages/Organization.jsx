@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { getUsersPageData, updateUsersPageData } from '../../utils/usersPageApi';
-import apiClient from '../../utils/api';
 import { BsCalendar3 } from 'react-icons/bs';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { AiOutlinePlus } from 'react-icons/ai';
 import logo from '../../assets/logo.png';
+import { uploadFileDirect, viewFile } from '../../utils/s3Upload';
+import { AUTH_CONFIG } from '../../config/auth';
 
 function Organization() {
   const [loading, setLoading] = useState(true);
@@ -127,77 +128,8 @@ function Organization() {
   const handleViewFile = async (fileData) => {
     if (!fileData) return;
     
-    try {
-      // If it's base64 data (starts with data:), create a blob and open it
-      if (typeof fileData === 'string' && fileData.startsWith('data:')) {
-        const base64Data = fileData.split(',')[1];
-        const mimeType = fileData.split(',')[0].split(':')[1].split(';')[0];
-        const byteCharacters = atob(base64Data);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: mimeType });
-        const blobUrl = URL.createObjectURL(blob);
-        const newWindow = window.open(blobUrl, '_blank');
-        // Clean up the blob URL after the window has loaded (use longer delay to ensure file loads)
-        if (newWindow) {
-          newWindow.addEventListener('load', () => {
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-          });
-        } else {
-          // Fallback: revoke after longer delay if popup blocked
-          setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-        }
-      } else if (typeof fileData === 'string' && (fileData.startsWith('http://') || fileData.startsWith('https://'))) {
-        // Check if it's an S3 URL
-        if (fileData.includes('.s3.') && fileData.includes('.amazonaws.com')) {
-          // Get signed URL for S3 file
-          try {
-            const response = await apiClient.post('/admin/get-signed-url', { s3Url: fileData });
-            if (response.success && response.signedUrl) {
-              window.open(response.signedUrl, '_blank', 'noopener,noreferrer');
-            } else {
-              window.open(fileData, '_blank', 'noopener,noreferrer');
-            }
-          } catch (error) {
-            console.error('Error getting signed URL:', error);
-            window.open(fileData, '_blank', 'noopener,noreferrer');
-          }
-        } else {
-          // Regular HTTP/HTTPS URL
-          window.open(fileData, '_blank', 'noopener,noreferrer');
-        }
-      } else {
-        // Try to handle as base64 without data: prefix
-        try {
-          const base64Data = atob(fileData);
-          const byteNumbers = new Array(base64Data.length);
-          for (let i = 0; i < base64Data.length; i++) {
-            byteNumbers[i] = base64Data.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          const blob = new Blob([byteArray], { type: 'application/pdf' });
-          const blobUrl = URL.createObjectURL(blob);
-          const newWindow = window.open(blobUrl, '_blank');
-          // Clean up the blob URL after the window has loaded
-          if (newWindow) {
-            newWindow.addEventListener('load', () => {
-              setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-            });
-          } else {
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-          }
-        } catch (error) {
-          console.error('Error processing file:', error);
-          alert('Unable to open file. The file may be inaccessible or in an unsupported format.');
-        }
-      }
-    } catch (error) {
-      console.error('Error opening file:', error);
-      alert('Unable to open file. Please try downloading it instead.');
-    }
+    // Use the viewFile utility which handles base64, S3 URLs, and regular URLs
+    await viewFile(fileData);
   };
 
   // Website management functions
@@ -339,14 +271,17 @@ function Organization() {
   };
 
 
-  // Helper function to convert file to base64
-  const fileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
+  // Get current user ID for S3 uploads
+  const getCurrentUserId = () => {
+    try {
+      const storedUser = JSON.parse(
+        localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+      );
+      return storedUser.id;
+    } catch (error) {
+      console.error('Error getting user ID:', error);
+      return null;
+    }
   };
 
   const handleEditOrganization = () => {
@@ -715,9 +650,36 @@ function Organization() {
                           type="file"
                           onChange={async (e) => {
                             const file = e.target.files[0];
-                            if (file) {
-                              const base64 = await fileToBase64(file);
-                              updateOrganizationField('panFile', base64);
+                            if (!file) return;
+
+                            if (file.size > 10 * 1024 * 1024) {
+                              alert('File size must be less than 10MB');
+                              e.target.value = '';
+                              return;
+                            }
+
+                            try {
+                              const currentUserId = getCurrentUserId();
+                              if (!currentUserId) {
+                                alert('User ID not found. Please refresh the page.');
+                                e.target.value = '';
+                                return;
+                              }
+
+                              // Upload directly to S3
+                              const folder = `organizations/${currentUserId}/org-${editingOrg.id || 'new'}`;
+                              const { s3Url } = await uploadFileDirect(
+                                file,
+                                folder,
+                                'pan-file'
+                              );
+
+                              // Store S3 URL instead of base64
+                              updateOrganizationField('panFile', s3Url);
+                            } catch (error) {
+                              console.error('Error uploading PAN file:', error);
+                              alert('Failed to upload file. Please try again.');
+                              e.target.value = '';
                             }
                           }}
                           className="hidden"
@@ -1069,15 +1031,38 @@ function Organization() {
                       <div>
                         <input
                           type="file"
-                          onChange={(e) => {
+                          onChange={async (e) => {
                             const file = e.target.files[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                const base64 = reader.result;
-                                updateOrganizationField('optionalAttachment1', base64);
-                              };
-                              reader.readAsDataURL(file);
+                            if (!file) return;
+
+                            if (file.size > 10 * 1024 * 1024) {
+                              alert('File size must be less than 10MB');
+                              e.target.value = '';
+                              return;
+                            }
+
+                            try {
+                              const currentUserId = getCurrentUserId();
+                              if (!currentUserId) {
+                                alert('User ID not found. Please refresh the page.');
+                                e.target.value = '';
+                                return;
+                              }
+
+                              // Upload directly to S3
+                              const folder = `organizations/${currentUserId}/org-${editingOrg.id || 'new'}`;
+                              const { s3Url } = await uploadFileDirect(
+                                file,
+                                folder,
+                                'optional-attachment-1'
+                              );
+
+                              // Store S3 URL instead of base64
+                              updateOrganizationField('optionalAttachment1', s3Url);
+                            } catch (error) {
+                              console.error('Error uploading file:', error);
+                              alert('Failed to upload file. Please try again.');
+                              e.target.value = '';
                             }
                           }}
                           className="hidden"
@@ -1146,15 +1131,38 @@ function Organization() {
                       <div>
                         <input
                           type="file"
-                          onChange={(e) => {
+                          onChange={async (e) => {
                             const file = e.target.files[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                const base64 = reader.result;
-                                updateOrganizationField('optionalAttachment2', base64);
-                              };
-                              reader.readAsDataURL(file);
+                            if (!file) return;
+
+                            if (file.size > 10 * 1024 * 1024) {
+                              alert('File size must be less than 10MB');
+                              e.target.value = '';
+                              return;
+                            }
+
+                            try {
+                              const currentUserId = getCurrentUserId();
+                              if (!currentUserId) {
+                                alert('User ID not found. Please refresh the page.');
+                                e.target.value = '';
+                                return;
+                              }
+
+                              // Upload directly to S3
+                              const folder = `organizations/${currentUserId}/org-${editingOrg.id || 'new'}`;
+                              const { s3Url } = await uploadFileDirect(
+                                file,
+                                folder,
+                                'optional-attachment-2'
+                              );
+
+                              // Store S3 URL instead of base64
+                              updateOrganizationField('optionalAttachment2', s3Url);
+                            } catch (error) {
+                              console.error('Error uploading file:', error);
+                              alert('Failed to upload file. Please try again.');
+                              e.target.value = '';
                             }
                           }}
                           className="hidden"

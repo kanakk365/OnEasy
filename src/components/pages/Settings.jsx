@@ -508,7 +508,7 @@ function Settings() {
     if (fileData === null || fileData === undefined || fileData === '') {
       alert('No file available to view.');
       return;
-    }
+        }
     
     // Convert to string if it's not already (handles edge cases)
     const fileDataString = typeof fileData === 'string' ? fileData : String(fileData);

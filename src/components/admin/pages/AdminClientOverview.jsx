@@ -139,16 +139,16 @@ function AdminClientOverview() {
         alert('Document uploaded successfully!');
         // Refresh client profile to show new document (this will also refresh document URLs)
         await fetchClientProfile();
-      } else {
+          } else {
         throw new Error(response.message || 'Upload failed');
-      }
-    } catch (error) {
+          }
+        } catch (error) {
       console.error('Upload error:', error);
       alert(error.message || 'Failed to upload document. Please try again.');
     } finally {
       setUploadingDocument(false);
       setUploadDocumentType(null);
-    }
+      }
   };
 
   const handleFileInputChange = (documentType, e) => {
@@ -566,8 +566,8 @@ function AdminClientOverview() {
         success: false, 
         data: {}
       }));
-      
-      const urls = {};
+    
+    const urls = {};
       
       // Get URLs from personal documents API (preferred)
       if (personalDocsResponse.success && personalDocsResponse.data) {
@@ -581,11 +581,11 @@ function AdminClientOverview() {
       
       // Fallback to user table fields if personal documents API doesn't have them
       const userTableDocs = {
-        aadhar_card: user.aadhar_card,
-        pan_card: user.pan_card,
-        signature: user.signature
-      };
-      
+      aadhar_card: user.aadhar_card,
+      pan_card: user.pan_card,
+      signature: user.signature
+    };
+
       for (const [key, url] of Object.entries(userTableDocs)) {
         // Only use user table field if we don't already have a URL from personal documents
         if (!urls[key] && url && typeof url === 'string' && url.trim().length > 0) {
@@ -596,20 +596,20 @@ function AdminClientOverview() {
       // Process URLs to get signed URLs for S3 files
       for (const [key, url] of Object.entries(urls)) {
         if (url && typeof url === 'string' && url.includes('s3.') && url.includes('.amazonaws.com')) {
-          try {
+        try {
             const response = await apiClient.post('/admin/get-signed-url', { s3Url: url }).catch(() => ({ success: false }));
             if (response.success && response.signedUrl) {
-              urls[key] = response.signedUrl;
+            urls[key] = response.signedUrl;
             }
             // If signed URL fails, keep original URL
           } catch {
             // Silently fail - keep original URL
             console.warn(`Could not get signed URL for ${key}, using original URL`);
           }
-        }
       }
+    }
 
-      setDocumentUrls(urls);
+    setDocumentUrls(urls);
     } catch (error) {
       console.error('Error fetching document URLs:', error);
       setDocumentUrls({});
@@ -1735,7 +1735,7 @@ function AdminClientOverview() {
                             e.stopPropagation();
                             const url = documentUrls.aadhar_card || clientProfile.user?.aadhar_card;
                             if (url && typeof url === 'string' && url.trim().length > 0) {
-                              await handleViewFile(url);
+                            await handleViewFile(url);
                             } else {
                               alert('Invalid document URL');
                             }
@@ -1771,7 +1771,7 @@ function AdminClientOverview() {
                             e.stopPropagation();
                             const url = documentUrls.pan_card || clientProfile.user?.pan_card;
                             if (url && typeof url === 'string' && url.trim().length > 0) {
-                              await handleViewFile(url);
+                            await handleViewFile(url);
                             } else {
                               alert('Invalid document URL');
                             }

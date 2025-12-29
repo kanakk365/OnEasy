@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../../utils/api";
-import { uploadFileDirect } from "../../../utils/s3Upload";
+import { uploadFileDirect, viewFile, downloadFile } from "../../../utils/s3Upload";
 
 function AdminClientDirectorsDetail() {
   const navigate = useNavigate();
@@ -175,20 +175,36 @@ function AdminClientDirectorsDetail() {
     }
 
     try {
-      if (docId) {
-        if (!orgId) {
-          showStatus("error", "Organization ID is required to view document.");
-          return;
-        }
-        const response = await apiClient.get(`/users-page/directors-partners-documents/${docId}/view-url?organizationId=${orgId}`);
-        if (response.success && response.data && response.data.signedUrl) {
-          window.open(response.data.signedUrl, "_blank", "noopener,noreferrer");
-          return;
+      // If we have a URL, use it directly (prefer this over docId to avoid 404s)
+      if (url && typeof url === 'string' && url.trim().length > 0) {
+        // Use viewFile utility which handles S3 URLs, base64, and regular URLs
+        await viewFile(url);
+        return;
+      }
+      
+      // Only try to get signed URL if we have a valid docId (numeric ID, not userId)
+      if (docId && typeof docId === 'number' && docId > 0) {
+        try {
+          if (!orgId) {
+            showStatus("error", "Organization ID is required to view document.");
+            return;
+          }
+          const response = await apiClient.get(`/users-page/directors-partners-documents/${docId}/view-url?organizationId=${orgId}`);
+          if (response.success && response.data && response.data.signedUrl) {
+            window.open(response.data.signedUrl, "_blank", "noopener,noreferrer");
+            return;
+          }
+        } catch {
+          // If API call fails, fall back to direct URL if available
+          console.warn('Failed to get signed URL, docId might be invalid:', docId);
         }
       }
       
-      if (url) {
+      // Fallback: if we still have a URL, try to open it directly
+      if (url && typeof url === 'string' && url.trim().length > 0) {
         window.open(url, "_blank", "noopener,noreferrer");
+      } else {
+        showStatus("error", "Document URL not available");
       }
     } catch (error) {
       console.error("View error:", error);
@@ -196,57 +212,84 @@ function AdminClientDirectorsDetail() {
     }
   };
 
-  const handleDownloadDocument = async (docId, fileName) => {
-    if (!docId) {
-      showStatus("error", "Document ID not available");
+  const handleDownloadDocument = async (docId, fileName, url) => {
+    if (!docId && !url) {
+      showStatus("error", "Document not available");
       return;
     }
 
     try {
-      const apiBaseUrl = apiClient.baseURL || '';
-      const token = apiClient.getToken();
-      
-      if (!orgId) {
-        showStatus("error", "Organization ID is required to download document.");
+      // If we have a URL, use it directly (prefer this over docId to avoid 404s)
+      if (url && typeof url === 'string' && url.trim().length > 0) {
+        // Use downloadFile utility which handles S3 URLs and regular URLs
+        await downloadFile(url, fileName);
         return;
       }
-
-      const response = await fetch(`${apiBaseUrl}/users-page/directors-partners-documents/${docId}/download?organizationId=${orgId}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to download file");
-      }
-
-      const contentDisposition = response.headers.get('Content-Disposition');
-      let downloadFileName = fileName || "document";
       
-      if (contentDisposition) {
-        const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-        if (fileNameMatch && fileNameMatch[1]) {
-          downloadFileName = fileNameMatch[1].replace(/['"]/g, '');
-          try {
-            downloadFileName = decodeURIComponent(downloadFileName);
-          } catch {
-            // Keep original if decode fails
+      // Only try to use API endpoint if we have a valid docId (numeric ID, not userId)
+      if (docId && typeof docId === 'number' && docId > 0) {
+        try {
+          const apiBaseUrl = apiClient.baseURL || '';
+          const token = apiClient.getToken();
+          
+          if (!orgId) {
+            showStatus("error", "Organization ID is required to download document.");
+            return;
+          }
+
+          const response = await fetch(`${apiBaseUrl}/users-page/directors-partners-documents/${docId}/download?organizationId=${orgId}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || "Failed to download file");
+          }
+
+          const contentDisposition = response.headers.get('Content-Disposition');
+          let downloadFileName = fileName || "document";
+          
+          if (contentDisposition) {
+            const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+            if (fileNameMatch && fileNameMatch[1]) {
+              downloadFileName = fileNameMatch[1].replace(/['"]/g, '');
+              try {
+                downloadFileName = decodeURIComponent(downloadFileName);
+              } catch {
+                // Keep original if decode fails
+              }
+            }
+          }
+
+          const blob = await response.blob();
+          const blobUrl = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = blobUrl;
+          link.download = downloadFileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(blobUrl);
+        } catch (apiError) {
+          // If API call fails, fall back to direct URL if available
+          console.warn('Failed to download via API, docId might be invalid:', docId);
+          if (url && typeof url === 'string' && url.trim().length > 0) {
+            await downloadFile(url, fileName);
+          } else {
+            throw apiError;
           }
         }
+      } else {
+        // No valid docId, try URL if available
+        if (url && typeof url === 'string' && url.trim().length > 0) {
+          await downloadFile(url, fileName);
+        } else {
+          showStatus("error", "Document URL not available");
+        }
       }
-
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = downloadFileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error("Download error:", error);
       showStatus("error", error.message || "Failed to download document. Please try again.");
@@ -483,7 +526,7 @@ function AdminClientDirectorsDetail() {
                         </svg>
                       </button>
                       <button
-                        onClick={() => handleDownloadDocument(doc.id, doc.name || doc.document_name || "document")}
+                        onClick={() => handleDownloadDocument(doc.id, doc.name || doc.document_name || "document", doc.url || doc.document_url)}
                         className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                         title="Download Document"
                       >

@@ -1,26 +1,43 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { getUsersPageData } from "../../utils/usersPageApi";
+import apiClient from "../../utils/api";
 
 function CompanyMasterData() {
   const navigate = useNavigate();
-  const { orgId } = useParams();
+  const { orgId, userId } = useParams(); // userId for admin, orgId for both
   const location = useLocation();
   const [organization, setOrganization] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Determine if this is admin view
+  const isAdmin = !!userId;
+  const currentOrgId = orgId;
+
   useEffect(() => {
-    if (orgId) {
+    if (currentOrgId) {
       loadOrganization();
     }
-  }, [orgId]);
+  }, [currentOrgId, userId]);
 
   const loadOrganization = async () => {
     try {
       setLoading(true);
-      const orgResponse = await getUsersPageData();
+      let orgResponse;
+      
+      if (isAdmin) {
+        // Admin view - fetch organization by userId and orgId
+        orgResponse = await apiClient.get(`/users-page/user-data/${userId}`).catch(() => ({
+          success: false,
+          data: { organisations: [] }
+        }));
+      } else {
+        // User view
+        orgResponse = await getUsersPageData();
+      }
+
       if (orgResponse.success && orgResponse.data && orgResponse.data.organisations) {
-        const org = orgResponse.data.organisations.find(o => o.id === parseInt(orgId));
+        const org = orgResponse.data.organisations.find(o => o.id === parseInt(currentOrgId));
         if (org) {
           setOrganization({
             id: org.id,
@@ -129,11 +146,15 @@ function CompanyMasterData() {
         <div className="mb-6">
           <button
             onClick={() => {
-              const orgIdFromState = location.state?.orgId || orgId;
-              if (orgIdFromState) {
-                navigate(`/company-documents/${orgIdFromState}/business`, { state: { orgId: orgIdFromState } });
+              if (isAdmin) {
+                navigate(`/admin/client-company-documents/${userId}/${currentOrgId}/business`, { state: { orgId: currentOrgId, userId } });
               } else {
-                navigate("/organizations-list");
+                const orgIdFromState = location.state?.orgId || currentOrgId;
+                if (orgIdFromState) {
+                  navigate(`/company-documents/${orgIdFromState}/business`, { state: { orgId: orgIdFromState } });
+                } else {
+                  navigate("/organizations-list");
+                }
               }
             }}
             className="text-[#01334C] hover:text-[#00486D] mb-4 flex items-center gap-2"
@@ -171,9 +192,29 @@ function CompanyMasterData() {
                 className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 cursor-pointer hover:shadow-md transition-shadow"
                 onClick={() => {
                   if (category.id === "client-data") {
-                    navigate(`/company-documents/${orgId}/business/company-master-data/client-data`, { state: { orgId } });
-                  } else {
-                    navigate(`/company-documents/${orgId}/business/company-master-data/${category.id}`, { state: { orgId } });
+                    if (isAdmin) {
+                      navigate(`/admin/client-company-documents/${userId}/${currentOrgId}/business/company-master-data/client-data`, { state: { orgId: currentOrgId, userId } });
+                    } else {
+                      navigate(`/company-documents/${currentOrgId}/business/company-master-data/client-data`, { state: { orgId: currentOrgId } });
+                    }
+                  } else if (category.id === "accounting") {
+                    if (isAdmin) {
+                      navigate(`/admin/client-company-documents/${userId}/${currentOrgId}/business/company-master-data/accounting`, { state: { orgId: currentOrgId, userId } });
+                    } else {
+                      navigate(`/company-documents/${currentOrgId}/business/company-master-data/accounting`, { state: { orgId: currentOrgId } });
+                    }
+                  } else if (category.id === "compliance") {
+                    if (isAdmin) {
+                      navigate(`/admin/client-company-documents/${userId}/${currentOrgId}/business/company-master-data/compliance`, { state: { orgId: currentOrgId, userId } });
+                    } else {
+                      navigate(`/company-documents/${currentOrgId}/business/company-master-data/compliance`, { state: { orgId: currentOrgId } });
+                    }
+                  } else if (category.id === "annual-compliance") {
+                    if (isAdmin) {
+                      navigate(`/admin/client-company-documents/${userId}/${currentOrgId}/business/company-master-data/annual-compliance`, { state: { orgId: currentOrgId, userId } });
+                    } else {
+                      navigate(`/company-documents/${currentOrgId}/business/company-master-data/annual-compliance`, { state: { orgId: currentOrgId } });
+                    }
                   }
                 }}
               >
