@@ -405,3 +405,82 @@ export const viewFile = async (fileData) => {
   }
 };
 
+/**
+ * Download a file (handles S3 URLs and regular URLs)
+ * @param {string} fileData - File URL (S3 URL or regular URL)
+ * @param {string} fileName - Optional file name for download
+ * @returns {Promise<void>}
+ */
+export const downloadFile = async (fileData, fileName = null) => {
+  if (!fileData || typeof fileData !== 'string' || fileData.trim() === '') {
+    alert('No file data provided to download.');
+    return;
+  }
+
+  const normalizedData = fileData.trim();
+
+  try {
+    let urlToDownload = normalizedData;
+
+    // Ensure it has a protocol if missing
+    if (!normalizedData.startsWith('http://') && !normalizedData.startsWith('https://')) {
+      urlToDownload = `https://${normalizedData}`;
+    }
+
+    // Check if it's an S3 URL
+    if (urlToDownload.includes('.s3.') || urlToDownload.includes('amazonaws.com') || urlToDownload.includes('s3://')) {
+      // Get signed URL for S3 file (for private buckets)
+      try {
+        const response = await apiClient.post('/admin/get-signed-url', { s3Url: urlToDownload });
+        if (response.success && response.signedUrl) {
+          urlToDownload = response.signedUrl;
+        } else {
+          // If signed URL fails, try direct download
+          console.warn('Failed to get signed URL, trying direct download');
+        }
+      } catch (error) {
+        // If signed URL fails, try direct download
+        console.warn('Error getting signed URL, trying direct download:', error.message);
+      }
+    }
+
+    // Download the file
+    const response = await fetch(urlToDownload);
+    if (!response.ok) {
+      throw new Error(`Failed to download file: ${response.statusText}`);
+    }
+
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    // Determine file name
+    let downloadFileName = fileName;
+    if (!downloadFileName) {
+      // Try to extract from URL
+      try {
+        const url = new URL(urlToDownload);
+        const pathParts = url.pathname.split('/');
+        downloadFileName = pathParts[pathParts.length - 1] || 'document';
+        // Remove query parameters from filename
+        downloadFileName = downloadFileName.split('?')[0];
+      } catch {
+        downloadFileName = 'document';
+      }
+    }
+
+    // Create download link
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = downloadFileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Clean up
+    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100);
+  } catch (error) {
+    console.error('Error downloading file:', error);
+    alert('Failed to download file. Please try again.');
+  }
+};
+
