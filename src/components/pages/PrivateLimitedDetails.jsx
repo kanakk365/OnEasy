@@ -126,7 +126,7 @@ function PrivateLimitedDetails() {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', { 
       year: 'numeric', 
@@ -136,7 +136,7 @@ function PrivateLimitedDetails() {
   };
 
   const formatValue = (value) => {
-    if (value === null || value === undefined || value === '') return 'N/A';
+    if (value === null || value === undefined || value === '') return '-';
     if (typeof value === 'boolean') return value ? 'Yes' : 'No';
     return String(value);
   };
@@ -269,7 +269,7 @@ function PrivateLimitedDetails() {
             </div>
             <div>
               <span className="font-medium text-gray-700">Package Price:</span>
-              <p className="text-gray-600">₹{registration.package_price ? Number(registration.package_price).toLocaleString('en-IN') : 'N/A'}</p>
+              <p className="text-gray-600">₹{registration.package_price ? Number(registration.package_price).toLocaleString('en-IN') : '-'}</p>
             </div>
             <div>
               <span className="font-medium text-gray-700">Payment Status:</span>
@@ -581,11 +581,11 @@ function PrivateLimitedDetails() {
               </div>
               <div>
                 <span className="font-medium text-gray-700">Authorized Capital:</span>
-                <p className="text-gray-600">₹{registration.authorized_capital ? Number(registration.authorized_capital).toLocaleString('en-IN') : 'N/A'}</p>
+                <p className="text-gray-600">₹{registration.authorized_capital ? Number(registration.authorized_capital).toLocaleString('en-IN') : '-'}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Paid-Up Capital:</span>
-                <p className="text-gray-600">₹{registration.paid_up_capital ? Number(registration.paid_up_capital).toLocaleString('en-IN') : 'N/A'}</p>
+                <p className="text-gray-600">₹{registration.paid_up_capital ? Number(registration.paid_up_capital).toLocaleString('en-IN') : '-'}</p>
               </div>
             </div>
           </div>
@@ -673,7 +673,7 @@ function PrivateLimitedDetails() {
                     </a>
                   </div>
                 ) : (
-                  <p className="text-gray-500">N/A</p>
+                  <p className="text-gray-500">-</p>
                 )}
               </div>
             </div>
@@ -685,7 +685,7 @@ function PrivateLimitedDetails() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
               <div>
                 <span className="font-medium text-gray-700">NOC Date:</span>
-                <p className="text-gray-600">{registration.noc_date ? formatDate(registration.noc_date) : 'N/A'}</p>
+                <p className="text-gray-600">{registration.noc_date ? formatDate(registration.noc_date) : '-'}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Landlord Name:</span>
@@ -728,7 +728,7 @@ function PrivateLimitedDetails() {
                   </a>
                 </div>
               ) : (
-                <p className="text-gray-500 mt-1">N/A</p>
+                <p className="text-gray-500 mt-1">-</p>
               )}
             </div>
           </div>
@@ -768,7 +768,7 @@ function PrivateLimitedDetails() {
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Date of Birth:</span>
-                        <p className="text-gray-600">{director.date_of_birth ? formatDate(director.date_of_birth) : 'N/A'}</p>
+                        <p className="text-gray-600">{director.date_of_birth ? formatDate(director.date_of_birth) : '-'}</p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Gender:</span>
@@ -783,7 +783,7 @@ function PrivateLimitedDetails() {
                         <p className="text-gray-600">
                           {director.place_of_birth_district || director.place_of_birth_state 
                             ? `${formatValue(director.place_of_birth_district)}, ${formatValue(director.place_of_birth_state)}`
-                            : 'N/A'}
+                            : '-'}
                         </p>
                       </div>
                     </div>
@@ -804,11 +804,11 @@ function PrivateLimitedDetails() {
                         </div>
                         <div>
                           <span className="font-medium text-gray-700">Total Equity:</span>
-                          <p className="text-gray-600">₹{director.total_equity ? Number(director.total_equity).toLocaleString('en-IN') : 'N/A'}</p>
+                          <p className="text-gray-600">₹{director.total_equity ? Number(director.total_equity).toLocaleString('en-IN') : '-'}</p>
                         </div>
                         <div>
                           <span className="font-medium text-gray-700">Share Percentage:</span>
-                          <p className="text-gray-600">{director.share_percentage ? director.share_percentage + '%' : 'N/A'}</p>
+                          <p className="text-gray-600">{director.share_percentage ? director.share_percentage + '%' : '-'}</p>
                         </div>
                       </div>
                     </div>
@@ -944,7 +944,7 @@ function PrivateLimitedDetails() {
                               View
                             </a>
                           </div>
-                        ) : (<p className="text-gray-500">N/A</p>)}
+                        ) : (<p className="text-gray-500">-</p>)}
                       </div>
 
                       {/* Passport Photo */}
@@ -961,7 +961,7 @@ function PrivateLimitedDetails() {
                               View
                             </a>
                           </div>
-                        ) : (<p className="text-gray-500">N/A</p>)}
+                        ) : (<p className="text-gray-500">-</p>)}
                       </div>
 
                       {/* PAN Card */}
@@ -978,7 +978,7 @@ function PrivateLimitedDetails() {
                               View
                             </a>
                           </div>
-                        ) : (<p className="text-gray-500">N/A</p>)}
+                        ) : (<p className="text-gray-500">-</p>)}
                       </div>
 
                       {/* Bank Statement */}
@@ -995,7 +995,7 @@ function PrivateLimitedDetails() {
                               View
                             </a>
                           </div>
-                        ) : (<p className="text-gray-500">N/A</p>)}
+                        ) : (<p className="text-gray-500">-</p>)}
                       </div>
 
                       {/* Specimen Signature */}
@@ -1012,7 +1012,7 @@ function PrivateLimitedDetails() {
                               View
                             </a>
                           </div>
-                        ) : (<p className="text-gray-500">N/A</p>)}
+                        ) : (<p className="text-gray-500">-</p>)}
                       </div>
                     </div>
                   </div>

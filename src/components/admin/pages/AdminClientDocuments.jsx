@@ -67,9 +67,9 @@ function AdminClientDocuments() {
       
       if (orgResponse.success && orgResponse.data && orgResponse.data.organisations) {
         const validOrgs = orgResponse.data.organisations.filter(org => {
-          const hasLegalName = org.legal_name && org.legal_name.trim() !== '' && org.legal_name !== 'N/A';
-          const hasTradeName = org.trade_name && org.trade_name.trim() !== '' && org.trade_name !== 'N/A';
-          const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== 'N/A';
+          const hasLegalName = org.legal_name && org.legal_name.trim() !== '' && org.legal_name !== '-';
+          const hasTradeName = org.trade_name && org.trade_name.trim() !== '' && org.trade_name !== '-';
+          const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== '-';
           return hasLegalName || hasTradeName || hasGstin;
         });
         setOrganizationsCount(validOrgs.length);
@@ -114,7 +114,7 @@ function AdminClientDocuments() {
             {clientInfo && (
               <div className="mt-2">
                 <p className="text-gray-600">
-                  <span className="font-medium">{clientInfo.name || 'N/A'}</span>
+                  <span className="font-medium">{clientInfo.name || '-'}</span>
                   {clientInfo.email && <span className="text-gray-500"> • {clientInfo.email}</span>}
                 </p>
                 <p className="text-sm text-gray-500 font-mono mt-1">{clientInfo.user_id}</p>

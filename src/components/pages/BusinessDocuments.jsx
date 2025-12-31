@@ -54,13 +54,13 @@ function BusinessDocuments() {
             name: "Landlord PAN Card", 
             url: reg.landlord_pan_card_url, 
             type: "landlord_pan_card",
-            service: reg.ticket_id || "N/A"
+            service: reg.ticket_id || "-"
           });
           if (reg.landlord_aadhaar_card_url) directorsPartnersDocs.push({ 
             name: "Landlord Aadhaar Card", 
             url: reg.landlord_aadhaar_card_url, 
             type: "landlord_aadhaar_card",
-            service: reg.ticket_id || "N/A"
+            service: reg.ticket_id || "-"
           });
           
           // Extract director documents from directors_data if available
@@ -77,7 +77,7 @@ function BusinessDocuments() {
                       name: `Director ${index + 1} - Aadhaar Card`,
                       url: director.aadhaarCardUrl || director.aadhaar_doc_path,
                       type: "director_aadhaar",
-                      service: reg.ticket_id || "N/A"
+                      service: reg.ticket_id || "-"
                     });
                   }
                   if (director.panCardUrl || director.pan_doc_path) {
@@ -85,7 +85,7 @@ function BusinessDocuments() {
                       name: `Director ${index + 1} - PAN Card`,
                       url: director.panCardUrl || director.pan_doc_path,
                       type: "director_pan",
-                      service: reg.ticket_id || "N/A"
+                      service: reg.ticket_id || "-"
                     });
                   }
                   if (director.photo_path || director.photoUrl) {
@@ -93,7 +93,7 @@ function BusinessDocuments() {
                       name: `Director ${index + 1} - Photo`,
                       url: director.photo_path || director.photoUrl,
                       type: "director_photo",
-                      service: reg.ticket_id || "N/A"
+                      service: reg.ticket_id || "-"
                     });
                   }
                   if (director.bank_statement_or_utility_bill || director.bankStatementUrl) {
@@ -101,7 +101,7 @@ function BusinessDocuments() {
                       name: `Director ${index + 1} - Bank Statement`,
                       url: director.bank_statement_or_utility_bill || director.bankStatementUrl,
                       type: "director_bank_statement",
-                      service: reg.ticket_id || "N/A"
+                      service: reg.ticket_id || "-"
                     });
                   }
                   if (director.specimen_signature || director.specimenSignatureUrl) {
@@ -109,7 +109,7 @@ function BusinessDocuments() {
                       name: `Director ${index + 1} - Signature`,
                       url: director.specimen_signature || director.specimenSignatureUrl,
                       type: "director_signature",
-                      service: reg.ticket_id || "N/A"
+                      service: reg.ticket_id || "-"
                     });
                   }
                 });
@@ -124,67 +124,67 @@ function BusinessDocuments() {
             name: "Electricity Bill", 
             url: reg.electricity_bill_url, 
             type: "electricity_bill",
-            service: reg.ticket_id || "N/A"
+            service: reg.ticket_id || "-"
           });
           if (reg.property_tax_url) organizationDocs.push({ 
             name: "Property Tax", 
             url: reg.property_tax_url, 
             type: "property_tax",
-            service: reg.ticket_id || "N/A"
+            service: reg.ticket_id || "-"
           });
           if (reg.rental_agreement_url) organizationDocs.push({ 
             name: "Rental Agreement", 
             url: reg.rental_agreement_url, 
             type: "rental_agreement",
-            service: reg.ticket_id || "N/A"
+            service: reg.ticket_id || "-"
           });
           if (reg.utility_bill) organizationDocs.push({ 
             name: "Utility Bill", 
             url: reg.utility_bill, 
             type: "utility_bill",
-            service: reg.ticket_id || "N/A"
+            service: reg.ticket_id || "-"
           });
           if (reg.logo_path) organizationDocs.push({ 
             name: "Company Logo", 
             url: reg.logo_path, 
             type: "logo",
-            service: reg.ticket_id || "N/A"
+            service: reg.ticket_id || "-"
           });
           if (reg.pan_entity_doc_path) organizationDocs.push({ 
             name: "Entity PAN Card", 
             url: reg.pan_entity_doc_path, 
             type: "pan_entity",
-            service: reg.ticket_id || "N/A"
+            service: reg.ticket_id || "-"
           });
           if (reg.tan_entity_doc_path) organizationDocs.push({ 
             name: "Entity TAN Card", 
             url: reg.tan_entity_doc_path, 
             type: "tan_entity",
-            service: reg.ticket_id || "N/A"
+            service: reg.ticket_id || "-"
           });
           if (reg.principal_place_photo_url) organizationDocs.push({ 
             name: "Principal Place Photo", 
             url: reg.principal_place_photo_url, 
             type: "principal_place_photo",
-            service: reg.ticket_id || "N/A"
+            service: reg.ticket_id || "-"
           });
           if (reg.business_bank_statement_url) organizationDocs.push({ 
             name: "Business Bank Statement", 
             url: reg.business_bank_statement_url, 
             type: "business_bank_statement",
-            service: reg.ticket_id || "N/A"
+            service: reg.ticket_id || "-"
           });
           if (reg.partnership_deed_url) organizationDocs.push({ 
             name: "Partnership Deed", 
             url: reg.partnership_deed_url, 
             type: "partnership_deed",
-            service: reg.ticket_id || "N/A"
+            service: reg.ticket_id || "-"
           });
           if (reg.certificate_of_incorporation_url) organizationDocs.push({ 
             name: "Certificate of Incorporation", 
             url: reg.certificate_of_incorporation_url, 
             type: "certificate_of_incorporation",
-            service: reg.ticket_id || "N/A"
+            service: reg.ticket_id || "-"
           });
         });
 
@@ -328,7 +328,7 @@ function BusinessDocuments() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">{doc.name}</p>
-                        {doc.service && doc.service !== "N/A" && (
+                        {doc.service && doc.service !== "-" && (
                           <p className="text-xs text-gray-500 truncate">Service: {doc.service}</p>
                         )}
                       </div>

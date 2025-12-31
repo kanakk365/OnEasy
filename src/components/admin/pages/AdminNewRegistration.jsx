@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import apiClient from '../../../utils/api';
 import {
   FaBuilding,
@@ -37,6 +38,7 @@ import PaymentLinkGeneration from './PaymentLinkGeneration';
 import { usePackages } from '../../../hooks/usePackages';
 
 function AdminNewRegistration() {
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState(1); // 1: Select User, 2: Select Type, 3: Select Plan, 4: Payment Link, 5: Fill Form
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -461,6 +463,18 @@ function AdminNewRegistration() {
     fetchUsers();
   }, []);
 
+  // Auto-select user if userId is provided in URL params
+  useEffect(() => {
+    const userIdFromUrl = searchParams.get('userId');
+    if (userIdFromUrl && users.length > 0 && !selectedUser) {
+      const user = users.find(u => String(u.id) === String(userIdFromUrl));
+      if (user) {
+        setSelectedUser(user);
+        setStep(2); // Skip to step 2 (Select Registration Type)
+      }
+    }
+  }, [users, searchParams, selectedUser]);
+
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -620,8 +634,8 @@ function AdminNewRegistration() {
                         <span className="font-medium text-gray-900">{user.name || 'Unknown'}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{user.email || 'N/A'}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{user.phone || 'N/A'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{user.email || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{user.phone || '-'}</td>
                     <td className="px-6 py-4">
                       <button
                         onClick={() => handleUserSelect(user)}

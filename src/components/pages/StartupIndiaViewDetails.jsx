@@ -123,7 +123,7 @@ function StartupIndiaViewDetails() {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', { 
       year: 'numeric', 
@@ -133,7 +133,7 @@ function StartupIndiaViewDetails() {
   };
 
   const formatValue = (value) => {
-    if (value === null || value === undefined || value === '') return 'N/A';
+    if (value === null || value === undefined || value === '') return '-';
     if (typeof value === 'boolean') return value ? 'Yes' : 'No';
     return String(value);
   };
@@ -243,7 +243,7 @@ function StartupIndiaViewDetails() {
             </div>
             <div>
               <p className="text-sm text-gray-600">Package Price</p>
-              <p className="font-medium">₹{registration.package_price ? Number(registration.package_price).toLocaleString('en-IN') : 'N/A'}</p>
+              <p className="font-medium">₹{registration.package_price ? Number(registration.package_price).toLocaleString('en-IN') : '-'}</p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Payment Status</p>
@@ -314,7 +314,7 @@ function StartupIndiaViewDetails() {
                   <a href={registration.mobile_app_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                     {registration.mobile_app_link}
                   </a>
-                ) : 'N/A'}
+                ) : '-'}
               </p>
             </div>
             <div>
@@ -324,7 +324,7 @@ function StartupIndiaViewDetails() {
                   <a href={registration.website_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                     {registration.website_link}
                   </a>
-                ) : 'N/A'}
+                ) : '-'}
               </p>
             </div>
             <div>

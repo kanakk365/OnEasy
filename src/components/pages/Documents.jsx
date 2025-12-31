@@ -96,9 +96,9 @@ function Documents() {
       if (orgResponse.success && orgResponse.data && orgResponse.data.organisations) {
         // Filter organizations that have at least one meaningful field
         const validOrgs = orgResponse.data.organisations.filter(org => {
-          const hasLegalName = org.legal_name && org.legal_name.trim() !== '' && org.legal_name !== 'N/A';
-          const hasTradeName = org.trade_name && org.trade_name.trim() !== '' && org.trade_name !== 'N/A';
-          const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== 'N/A';
+          const hasLegalName = org.legal_name && org.legal_name.trim() !== '' && org.legal_name !== '-';
+          const hasTradeName = org.trade_name && org.trade_name.trim() !== '' && org.trade_name !== '-';
+          const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== '-';
           return hasLegalName || hasTradeName || hasGstin;
         });
         setOrganizationsCount(validOrgs.length);
@@ -164,9 +164,9 @@ function Documents() {
       if (orgResponse.success && orgResponse.data && orgResponse.data.organisations) {
         // Filter organizations that have at least one meaningful field
         const validOrgs = orgResponse.data.organisations.filter(org => {
-          const hasLegalName = org.legal_name && org.legal_name.trim() !== '' && org.legal_name !== 'N/A';
-          const hasTradeName = org.trade_name && org.trade_name.trim() !== '' && org.trade_name !== 'N/A';
-          const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== 'N/A';
+          const hasLegalName = org.legal_name && org.legal_name.trim() !== '' && org.legal_name !== '-';
+          const hasTradeName = org.trade_name && org.trade_name.trim() !== '' && org.trade_name !== '-';
+          const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== '-';
           return hasLegalName || hasTradeName || hasGstin;
         });
         setOrganizationsCount(validOrgs.length);
@@ -260,8 +260,8 @@ function Documents() {
                           {client.name ? client.name.charAt(0).toUpperCase() : 'C'}
                         </div>
                         <div className="flex-1 min-w-0 overflow-hidden">
-                          <h3 className="text-lg font-semibold text-gray-900 truncate" title={client.name || 'N/A'}>
-                            {client.name || 'N/A'}
+                          <h3 className="text-lg font-semibold text-gray-900 truncate" title={client.name || '-'}>
+                            {client.name || '-'}
                           </h3>
                           <p className="text-xs text-gray-500 font-mono truncate" title={client.user_id}>{client.user_id}</p>
                         </div>

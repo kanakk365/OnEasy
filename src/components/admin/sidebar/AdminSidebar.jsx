@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { RiUser3Line, RiUserAddLine, RiTicketLine, RiSettings3Line, RiAlertLine, RiFolderSettingsLine, RiMoneyDollarCircleLine } from "react-icons/ri";
+import { BsBuilding } from "react-icons/bs";
 import { HiOutlineUsers } from "react-icons/hi";
 import {
   MdMenu,
@@ -57,6 +58,7 @@ function AdminSidebar() {
     { icon: <RiUserAddLine />, text: "New Registration", path: "/admin/new-registration" },
     { icon: <RiMoneyDollarCircleLine />, text: "Custom Payment", path: "/admin/custom-payment" },
     { icon: <RiSettings3Line />, text: "Services", path: "/admin/services" },
+    { icon: <BsBuilding />, text: "Organizations", path: "/admin/organizations" },
     { icon: <RiFolderSettingsLine />, text: "Documents Vault", path: "/admin/documents-vault", subPaths: ['/admin/client-documents', '/admin/client-kyc', '/admin/client-directors'] },
     { icon: <RiAlertLine />, text: "Notice Board", path: "/admin/notice-board" },
     { icon: <RiTicketLine />, text: "Coupon Code Generator", path: "/admin/coupon-generator" },
@@ -124,7 +126,7 @@ function AdminSidebar() {
         <nav
           className={`flex-1 ${
             isCollapsed ? "px-2" : "px-4"
-          } pt-3 space-y-2.5 transition-all duration-300`}
+          } pt-3 space-y-1 transition-all duration-300`}
         >
           {menuItems.map((item, index) => (
             <Link
@@ -132,7 +134,7 @@ function AdminSidebar() {
               key={index}
               className={`flex items-center ${
                 isCollapsed ? "justify-center px-2" : "space-x-3 px-3"
-              } py-2 rounded-lg transition-all duration-200 ${
+              } py-1.5 rounded-lg transition-all duration-200 ${
                 location.pathname === item.path || 
                 location.pathname.startsWith(item.path + '/') ||
                 (item.subPaths && item.subPaths.some(subPath => location.pathname.startsWith(subPath)))
@@ -214,18 +216,24 @@ function AdminSidebar() {
                 )}
                 {!isCollapsed && (
                   <>
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <div className="text-[11px] text-gray-500">
                         Welcome 👋
                       </div>
-                      <div className="text-[13px] text-gray-700">
+                      <div className="text-[13px] text-gray-700 font-medium truncate">
                         {userData?.name || 'Admin'}
                       </div>
                     </div>
-                    <span className="text-base text-gray-400 ml-auto transform transition-transform duration-200 group-hover:rotate-90">
+                    <span className="text-base text-gray-400 ml-auto transform transition-transform duration-200 group-hover:rotate-90 flex-shrink-0">
                       ›
                     </span>
                   </>
+                )}
+                {isCollapsed && (
+                  <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
+                    <div className="text-xs text-gray-300 mb-1">Welcome 👋</div>
+                    <div className="font-medium">{userData?.name || 'Admin'}</div>
+                  </div>
                 )}
               </div>
 
@@ -235,8 +243,29 @@ function AdminSidebar() {
                     isCollapsed ? "left-full ml-2" : "left-0"
                   } mb-1 ${
                     isCollapsed ? "w-auto" : "w-full"
-                  } bg-white rounded-lg shadow-lg py-2 z-50`}
+                  } bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200`}
                 >
+                  {!isCollapsed && (
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <div className="text-xs text-gray-500 mb-1">Signed in as</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {userData?.name || 'Admin'}
+                      </div>
+                      {userData?.email && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          {userData.email}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <Link
+                    to="/admin/profile"
+                    onClick={() => setIsProfileOpen(false)}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2 whitespace-nowrap"
+                  >
+                    <RiUser3Line className="w-4 h-4" />
+                    <span>Profile</span>
+                  </Link>
                   <button
                     onClick={() => {
                       setIsProfileOpen(false);

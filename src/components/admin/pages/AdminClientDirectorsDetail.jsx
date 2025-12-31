@@ -84,9 +84,9 @@ function AdminClientDirectorsDetail() {
         if (org) {
           setOrganization({
             id: org.id,
-            legalName: org.legal_name || 'N/A',
-            tradeName: org.trade_name || 'N/A',
-            gstin: org.gstin || 'N/A'
+            legalName: org.legal_name || '-',
+            tradeName: org.trade_name || '-',
+            gstin: org.gstin || '-'
           });
         }
       }
@@ -460,7 +460,7 @@ function AdminClientDirectorsDetail() {
           {clientInfo && (
             <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-4 mb-4">
               <p className="text-sm text-gray-600">
-                <span className="font-medium">{clientInfo.name || 'N/A'}</span>
+                <span className="font-medium">{clientInfo.name || '-'}</span>
                 {clientInfo.email && <span className="text-gray-500"> • {clientInfo.email}</span>}
               </p>
               <p className="text-xs text-gray-500 font-mono mt-1">{clientInfo.user_id}</p>

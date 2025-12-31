@@ -259,7 +259,7 @@ function PrivateLimitedForm({
             });
             
             console.log('✅ Registration data loaded for editing');
-            console.log('🎫 Registration ticket_id:', reg.ticket_id || 'N/A');
+            console.log('🎫 Registration ticket_id:', reg.ticket_id || '-');
             if (reg.ticket_id) {
               console.log('✅ Ticket ID available for team fill request:', reg.ticket_id);
               

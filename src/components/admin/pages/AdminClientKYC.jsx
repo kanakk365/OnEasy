@@ -215,7 +215,7 @@ function AdminClientKYC() {
             <h1 className="text-2xl font-semibold text-gray-900">KYC Documents</h1>
             {clientInfo && (
               <p className="text-gray-600 mt-1">
-                {clientInfo.name || 'N/A'} • {clientInfo.user_id}
+                {clientInfo.name || '-'} • {clientInfo.user_id}
               </p>
             )}
           </div>

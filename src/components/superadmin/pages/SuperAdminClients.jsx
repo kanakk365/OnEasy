@@ -35,7 +35,7 @@ function SuperAdminClients() {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', { 
       year: 'numeric', 

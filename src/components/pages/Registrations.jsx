@@ -81,9 +81,9 @@ function Registrations() {
   }, [view]);
 
   const formatDate = (date) => {
-    if (!date) return "N/A";
+    if (!date) return "-";
     const d = new Date(date);
-    if (isNaN(d.getTime())) return "N/A";
+    if (isNaN(d.getTime())) return "-";
     return d.toLocaleDateString("en-IN", {
       year: "numeric",
       month: "short",
@@ -562,7 +562,7 @@ function Registrations() {
                                 {reg.service_status}
                               </span>
                             ) : (
-                              <span className="text-xs text-gray-400">N/A</span>
+                              <span className="text-xs text-gray-400">-</span>
                             )}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">

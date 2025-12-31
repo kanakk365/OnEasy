@@ -90,7 +90,7 @@ function ProprietorshipViewDetails() {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', { 
       year: 'numeric', 
@@ -100,7 +100,7 @@ function ProprietorshipViewDetails() {
   };
 
   const formatValue = (value) => {
-    if (value === null || value === undefined || value === '') return 'N/A';
+    if (value === null || value === undefined || value === '') return '-';
     if (typeof value === 'boolean') return value ? 'Yes' : 'No';
     return String(value);
   };
@@ -229,11 +229,11 @@ function ProprietorshipViewDetails() {
             </div>
             <div>
               <span className="font-medium text-gray-700">Package:</span>
-              <p className="text-gray-600">{registration.package_name || 'N/A'}</p>
+              <p className="text-gray-600">{registration.package_name || '-'}</p>
             </div>
             <div>
               <span className="font-medium text-gray-700">Package Price:</span>
-              <p className="text-gray-600">₹{registration.package_price ? Number(registration.package_price).toLocaleString('en-IN') : 'N/A'}</p>
+              <p className="text-gray-600">₹{registration.package_price ? Number(registration.package_price).toLocaleString('en-IN') : '-'}</p>
             </div>
             <div>
               <span className="font-medium text-gray-700">Payment Status:</span>
@@ -241,7 +241,7 @@ function ProprietorshipViewDetails() {
             </div>
             <div>
               <span className="font-medium text-gray-700">Razorpay Payment ID:</span>
-              <p className="text-gray-600 text-xs">{registration.razorpay_payment_id || 'N/A'}</p>
+              <p className="text-gray-600 text-xs">{registration.razorpay_payment_id || '-'}</p>
             </div>
           </div>
         </div>
@@ -338,7 +338,7 @@ function ProprietorshipViewDetails() {
                     </a>
                   </div>
                 ) : (
-                  <p className="text-gray-500">N/A</p>
+                  <p className="text-gray-500">-</p>
                 )}
               </div>
 
@@ -372,7 +372,7 @@ function ProprietorshipViewDetails() {
                     </a>
                   </div>
                 ) : (
-                  <p className="text-gray-500">N/A</p>
+                  <p className="text-gray-500">-</p>
                 )}
               </div>
             </div>
@@ -392,11 +392,11 @@ function ProprietorshipViewDetails() {
               </div>
               <div>
                 <span className="font-medium text-gray-700">Business Type:</span>
-                <p className="text-gray-600">{registration.business_type || 'N/A'}</p>
+                <p className="text-gray-600">{registration.business_type || '-'}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Social Category:</span>
-                <p className="text-gray-600">{registration.social_category || 'N/A'}</p>
+                <p className="text-gray-600">{registration.social_category || '-'}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Special Abled:</span>
@@ -477,15 +477,15 @@ function ProprietorshipViewDetails() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="font-medium text-gray-700">Bank Name:</span>
-                  <p className="text-gray-600">{registration.bank_name || 'N/A'}</p>
+                  <p className="text-gray-600">{registration.bank_name || '-'}</p>
                 </div>
                 <div>
                   <span className="font-medium text-gray-700">Account Number:</span>
-                  <p className="text-gray-600">{registration.bank_account_number || 'N/A'}</p>
+                  <p className="text-gray-600">{registration.bank_account_number || '-'}</p>
                 </div>
                 <div>
                   <span className="font-medium text-gray-700">IFSC Code:</span>
-                  <p className="text-gray-600">{registration.ifsc_code || 'N/A'}</p>
+                  <p className="text-gray-600">{registration.ifsc_code || '-'}</p>
                 </div>
               </div>
             </div>
@@ -572,7 +572,7 @@ function ProprietorshipViewDetails() {
                       View
                     </a>
                   </div>
-                ) : (<p className="text-gray-500">N/A</p>)}
+                ) : (<p className="text-gray-500">-</p>)}
               </div>
 
               {/* Passport Photo */}
@@ -589,7 +589,7 @@ function ProprietorshipViewDetails() {
                       View
                     </a>
                   </div>
-                ) : (<p className="text-gray-500">N/A</p>)}
+                ) : (<p className="text-gray-500">-</p>)}
               </div>
 
               {/* PAN Card */}
@@ -606,7 +606,7 @@ function ProprietorshipViewDetails() {
                       View
                     </a>
                   </div>
-                ) : (<p className="text-gray-500">N/A</p>)}
+                ) : (<p className="text-gray-500">-</p>)}
               </div>
 
               {/* Bank Statement */}
@@ -623,7 +623,7 @@ function ProprietorshipViewDetails() {
                       View
                     </a>
                   </div>
-                ) : (<p className="text-gray-500">N/A</p>)}
+                ) : (<p className="text-gray-500">-</p>)}
               </div>
 
               {/* Name Board (Optional) */}

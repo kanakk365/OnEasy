@@ -7,6 +7,7 @@ function AdminClients() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, signups, subscribed, pending-payments, oneasy-form-fill, support-requests
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchClients();
@@ -50,7 +51,7 @@ function AdminClients() {
   };
 
   const _formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', { 
       year: 'numeric', 
@@ -63,6 +64,16 @@ function AdminClients() {
 
 
   const filteredClients = clients.filter(client => {
+    // Search filter - search by name, email, or phone
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase().trim();
+      const matchesSearch = 
+        (client.name && client.name.toLowerCase().includes(searchLower)) ||
+        (client.email && client.email.toLowerCase().includes(searchLower)) ||
+        (client.phone && client.phone.toLowerCase().includes(searchLower));
+      if (!matchesSearch) return false;
+    }
+
     // Debug: log how many clients have team_fill_requested flag
     if (filter === 'oneasy-form-fill') {
       const teamFillClients = clients.filter(c => c.team_fill_requested);
@@ -131,6 +142,42 @@ function AdminClients() {
         <p className="text-sm md:text-base text-gray-600">
           Manage client signups, pending payments and Oneasy form fill requests
         </p>
+      </div>
+
+      {/* Search Bar */}
+      <div className="bg-white rounded-xl p-5 mb-6 transition-all duration-300 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
+        <div className="flex items-center gap-4">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search clients by name, email, or phone..."
+              className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] text-sm"
+            />
+            <svg
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="px-4 py-3 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filter Tabs */}
@@ -263,8 +310,8 @@ function AdminClients() {
                       <span className="font-medium text-gray-900">{client.name || 'Unknown'}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{client.email || 'N/A'}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{client.phone || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{client.email || '-'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{client.phone || '-'}</td>
                   {filter === 'support-requests' && (
                     <td className="px-6 py-4 text-sm text-gray-700">
                       {client.support_requests && client.support_requests.length > 0 ? (
@@ -294,7 +341,7 @@ function AdminClients() {
                       <button
                         onClick={async (e) => {
                           e.stopPropagation();
-                          const confirmMessage = `Are you sure you want to permanently delete this client?\\n\\nName: ${client.name || 'Unknown'}\\nEmail: ${client.email || 'N/A'}\\nPhone: ${client.phone || 'N/A'}\\n\\nThis will also delete their services and related records.`;
+                          const confirmMessage = `Are you sure you want to permanently delete this client?\\n\\nName: ${client.name || 'Unknown'}\\nEmail: ${client.email || '-'}\\nPhone: ${client.phone || '-'}\\n\\nThis will also delete their services and related records.`;
                           if (!window.confirm(confirmMessage)) return;
 
                           try {

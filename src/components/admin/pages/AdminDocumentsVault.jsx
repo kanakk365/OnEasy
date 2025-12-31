@@ -95,8 +95,8 @@ function AdminDocumentsVault() {
                         {client.name ? client.name.charAt(0).toUpperCase() : 'C'}
                       </div>
                       <div className="flex-1 min-w-0 overflow-hidden">
-                        <h3 className="text-lg font-semibold text-gray-900 truncate" title={client.name || 'N/A'}>
-                          {client.name || 'N/A'}
+                        <h3 className="text-lg font-semibold text-gray-900 truncate" title={client.name || '-'}>
+                          {client.name || '-'}
                         </h3>
                         <p className="text-xs text-gray-500 font-mono truncate" title={client.user_id}>{client.user_id}</p>
                       </div>

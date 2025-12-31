@@ -83,9 +83,9 @@ function AnnualCompliance() {
         if (org) {
           setOrganization({
             id: org.id,
-            legalName: org.legal_name || 'N/A',
-            tradeName: org.trade_name || 'N/A',
-            gstin: org.gstin || 'N/A'
+            legalName: org.legal_name || '-',
+            tradeName: org.trade_name || '-',
+            gstin: org.gstin || '-'
           });
         }
       }
@@ -329,7 +329,7 @@ function AnnualCompliance() {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', {
       year: 'numeric',
@@ -409,12 +409,12 @@ function AnnualCompliance() {
           {organization && (
             <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
               <h1 className="text-2xl font-semibold text-gray-900">
-                {organization.legalName !== 'N/A' ? organization.legalName : organization.tradeName}
+                {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
               </h1>
-              {organization.tradeName !== 'N/A' && organization.legalName !== 'N/A' && organization.tradeName !== organization.legalName && (
+              {organization.tradeName !== '-' && organization.legalName !== '-' && organization.tradeName !== organization.legalName && (
                 <p className="text-gray-600 mt-1">{organization.tradeName}</p>
               )}
-              {organization.gstin !== 'N/A' && (
+              {organization.gstin !== '-' && (
                 <p className="text-sm text-gray-500 mt-1 font-mono">GSTIN: {organization.gstin}</p>
               )}
             </div>

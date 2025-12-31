@@ -67,15 +67,15 @@ function Organization() {
             
             return {
               id: org.id,
-              organisationType: org.organisation_type || 'N/A',
-              legalName: org.legal_name || 'N/A',
-              tradeName: org.trade_name || 'N/A',
-              category: org.category || 'N/A',
-              gstin: org.gstin || 'N/A',
-              incorporationDate: org.incorporation_date || 'N/A',
-              tan: org.tan || 'N/A',
-              cin: org.cin || 'N/A',
-              registeredAddress: org.registered_address || 'N/A',
+              organisationType: org.organisation_type || '-',
+              legalName: org.legal_name || '-',
+              tradeName: org.trade_name || '-',
+              category: org.category || '-',
+              gstin: org.gstin || '-',
+              incorporationDate: org.incorporation_date || '-',
+              tan: org.tan || '-',
+              cin: org.cin || '-',
+              registeredAddress: org.registered_address || '-',
               panFile: org.pan_file || null,
               directorsPartners: directorsPartners.map((dp, idx) => ({
                 id: dp.id || `dp-${Date.now()}-${idx}`,
@@ -101,6 +101,7 @@ function Organization() {
                 return {
                   ...w, // Spread to create a new object
                   id: w.id || (baseId + index * 1000), // Ensure unique IDs with index offset
+                  remarks: w.remarks || '',
                   showPassword: w.showPassword || false
                 };
               })
@@ -116,7 +117,7 @@ function Organization() {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString || dateString === 'N/A') return 'N/A';
+    if (!dateString || dateString === '-') return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', { 
       year: 'numeric', 
@@ -154,6 +155,7 @@ function Organization() {
         url: '',
         login: '',
         password: '',
+        remarks: '',
         showPassword: false
       }]
     };
@@ -319,9 +321,9 @@ function Organization() {
     if (!editingOrg) return;
     
     // Validate that at least one required field is filled
-    const hasLegalName = editingOrg.legalName && editingOrg.legalName.trim() !== '' && editingOrg.legalName !== 'N/A';
-    const hasTradeName = editingOrg.tradeName && editingOrg.tradeName.trim() !== '' && editingOrg.tradeName !== 'N/A';
-    const hasGstin = editingOrg.gstin && editingOrg.gstin.trim() !== '' && editingOrg.gstin !== 'N/A';
+    const hasLegalName = editingOrg.legalName && editingOrg.legalName.trim() !== '' && editingOrg.legalName !== '-';
+    const hasTradeName = editingOrg.tradeName && editingOrg.tradeName.trim() !== '' && editingOrg.tradeName !== '-';
+    const hasGstin = editingOrg.gstin && editingOrg.gstin.trim() !== '' && editingOrg.gstin !== '-';
     
     // At least one of legal name, trade name, or GST number should be filled
     if (!hasLegalName && !hasTradeName && !hasGstin) {
@@ -339,9 +341,9 @@ function Organization() {
       
       // Filter out empty organizations (those with no meaningful data)
       const validOrganizations = updatedOrganizations.filter(org => {
-        const hasLegalName = org.legalName && org.legalName.trim() !== '' && org.legalName !== 'N/A';
-        const hasTradeName = org.tradeName && org.tradeName.trim() !== '' && org.tradeName !== 'N/A';
-        const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== 'N/A';
+        const hasLegalName = org.legalName && org.legalName.trim() !== '' && org.legalName !== '-';
+        const hasTradeName = org.tradeName && org.tradeName.trim() !== '' && org.tradeName !== '-';
+        const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== '-';
         return hasLegalName || hasTradeName || hasGstin;
       });
       
@@ -354,16 +356,16 @@ function Organization() {
       
       const payload = {
         organisations: validOrganizations.map(org => ({
-          organisationType: org.organisationType !== 'N/A' ? org.organisationType : '',
-          legalName: org.legalName !== 'N/A' ? org.legalName : '',
-          tradeName: org.tradeName !== 'N/A' ? org.tradeName : '',
-          category: org.category !== 'N/A' ? org.category : '',
-          gstin: org.gstin !== 'N/A' ? org.gstin : '',
-          incorporationDate: org.incorporationDate !== 'N/A' ? org.incorporationDate : '',
+          organisationType: org.organisationType !== '-' ? org.organisationType : '',
+          legalName: org.legalName !== '-' ? org.legalName : '',
+          tradeName: org.tradeName !== '-' ? org.tradeName : '',
+          category: org.category !== '-' ? org.category : '',
+          gstin: org.gstin !== '-' ? org.gstin : '',
+          incorporationDate: org.incorporationDate !== '-' ? org.incorporationDate : '',
           panFile: org.panFile,
-          tan: org.tan !== 'N/A' ? org.tan : '',
-          cin: org.cin !== 'N/A' ? org.cin : '',
-          registeredAddress: org.registeredAddress !== 'N/A' ? org.registeredAddress : '',
+          tan: org.tan !== '-' ? org.tan : '',
+          cin: org.cin !== '-' ? org.cin : '',
+          registeredAddress: org.registeredAddress !== '-' ? org.registeredAddress : '',
           directorsPartners: (org.directorsPartners || []).filter(dp => dp.name || dp.dinNumber || dp.contact || dp.email),
           digitalSignatures: (org.digitalSignatures || []).filter(ds => ds.name || ds.dscNumber),
           optionalAttachment1: org.optionalAttachment1 || null,
@@ -372,7 +374,8 @@ function Organization() {
             type: w.type,
             url: w.url,
             login: w.login,
-            password: w.password
+            password: w.password,
+            remarks: w.remarks || ''
           }))
         }))
       };
@@ -470,7 +473,7 @@ function Organization() {
         <div className="mb-6 flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {editingOrg ? (editingOrg.legalName !== 'N/A' ? editingOrg.legalName : 'Edit Organization') : selectedOrg.legalName}
+              {editingOrg ? (editingOrg.legalName !== '-' ? editingOrg.legalName : 'Edit Organization') : selectedOrg.legalName}
             </h1>
             {!editingOrg && (
               <p className="text-gray-600 mt-2">
@@ -495,27 +498,8 @@ function Organization() {
         <div className="bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
           <div className="px-6 py-6">
             <div className="space-y-6">
-              {/* Row 1: Organisation Type, Legal Name, Trade Name */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Organisation Type
-                  </label>
-                  {editingOrg ? (
-                    <input
-                      type="text"
-                      value={editingOrg.organisationType !== 'N/A' ? editingOrg.organisationType : ''}
-                      onChange={(e) => updateOrganizationField('organisationType', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter organisation type"
-                    />
-                  ) : (
-                    <div className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg">
-                      <p className="text-gray-900">{selectedOrg.organisationType}</p>
-                    </div>
-                  )}
-                </div>
-                
+              {/* Row 1: Legal Name, Trade Name */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Legal Name
@@ -523,7 +507,7 @@ function Organization() {
                   {editingOrg ? (
                     <input
                       type="text"
-                      value={editingOrg.legalName !== 'N/A' ? editingOrg.legalName : ''}
+                      value={editingOrg.legalName !== '-' ? editingOrg.legalName : ''}
                       onChange={(e) => updateOrganizationField('legalName', e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Enter legal name"
@@ -542,7 +526,7 @@ function Organization() {
                   {editingOrg ? (
                     <input
                       type="text"
-                      value={editingOrg.tradeName !== 'N/A' ? editingOrg.tradeName : ''}
+                      value={editingOrg.tradeName !== '-' ? editingOrg.tradeName : ''}
                       onChange={(e) => updateOrganizationField('tradeName', e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Enter trade name"
@@ -563,7 +547,7 @@ function Organization() {
                   </label>
                   {editingOrg ? (
                     <select
-                      value={editingOrg.category !== 'N/A' ? editingOrg.category : ''}
+                      value={editingOrg.category !== '-' ? editingOrg.category : ''}
                       onChange={(e) => updateOrganizationField('category', e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
                     >
@@ -599,7 +583,7 @@ function Organization() {
                   {editingOrg ? (
                     <input
                       type="text"
-                      value={editingOrg.gstin !== 'N/A' ? editingOrg.gstin : ''}
+                      value={editingOrg.gstin !== '-' ? editingOrg.gstin : ''}
                       onChange={(e) => updateOrganizationField('gstin', e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                       placeholder="Enter GSTIN"
@@ -619,7 +603,7 @@ function Organization() {
                     <div className="relative">
                       <input
                         type="date"
-                        value={editingOrg.incorporationDate !== 'N/A' ? editingOrg.incorporationDate : ''}
+                        value={editingOrg.incorporationDate !== '-' ? editingOrg.incorporationDate : ''}
                         onChange={(e) => updateOrganizationField('incorporationDate', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
@@ -722,7 +706,7 @@ function Organization() {
                   {editingOrg ? (
                     <input
                       type="text"
-                      value={editingOrg.tan !== 'N/A' ? editingOrg.tan : ''}
+                      value={editingOrg.tan !== '-' ? editingOrg.tan : ''}
                       onChange={(e) => updateOrganizationField('tan', e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                       placeholder="Enter TAN"
@@ -741,7 +725,7 @@ function Organization() {
                   {editingOrg ? (
                     <input
                       type="text"
-                      value={editingOrg.cin !== 'N/A' ? editingOrg.cin : ''}
+                      value={editingOrg.cin !== '-' ? editingOrg.cin : ''}
                       onChange={(e) => updateOrganizationField('cin', e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                       placeholder="Enter CIN"
@@ -760,7 +744,7 @@ function Organization() {
                   {editingOrg ? (
                     <textarea
                       rows={3}
-                      value={editingOrg.registeredAddress !== 'N/A' ? editingOrg.registeredAddress : ''}
+                      value={editingOrg.registeredAddress !== '-' ? editingOrg.registeredAddress : ''}
                       onChange={(e) => updateOrganizationField('registeredAddress', e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
                       placeholder="Enter registered address"
@@ -816,7 +800,7 @@ function Organization() {
                                   placeholder="Name"
                                 />
                               ) : (
-                                <span className="text-sm text-gray-700">{dp.name || 'N/A'}</span>
+                                <span className="text-sm text-gray-700">{dp.name || '-'}</span>
                               )}
                             </td>
                             <td className="px-4 py-3 border border-gray-300">
@@ -829,7 +813,7 @@ function Organization() {
                                   placeholder="DIN/Number"
                                 />
                               ) : (
-                                <span className="text-sm text-gray-700">{dp.dinNumber || 'N/A'}</span>
+                                <span className="text-sm text-gray-700">{dp.dinNumber || '-'}</span>
                               )}
                             </td>
                             <td className="px-4 py-3 border border-gray-300">
@@ -842,7 +826,7 @@ function Organization() {
                                   placeholder="Contact"
                                 />
                               ) : (
-                                <span className="text-sm text-gray-700">{dp.contact || 'N/A'}</span>
+                                <span className="text-sm text-gray-700">{dp.contact || '-'}</span>
                               )}
                             </td>
                             <td className="px-4 py-3 border border-gray-300">
@@ -855,7 +839,7 @@ function Organization() {
                                   placeholder="Email"
                                 />
                               ) : (
-                                <span className="text-sm text-gray-700">{dp.email || 'N/A'}</span>
+                                <span className="text-sm text-gray-700">{dp.email || '-'}</span>
                               )}
                             </td>
                             <td className="px-4 py-3 border border-gray-300">
@@ -867,7 +851,7 @@ function Organization() {
                                   className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                                 />
                               ) : (
-                                <span className="text-sm text-gray-700">{dp.dateOfAddition ? formatDate(dp.dateOfAddition) : 'N/A'}</span>
+                                <span className="text-sm text-gray-700">{dp.dateOfAddition ? formatDate(dp.dateOfAddition) : '-'}</span>
                               )}
                             </td>
                             <td className="px-4 py-3 border border-gray-300">
@@ -950,7 +934,7 @@ function Organization() {
                                   placeholder="Name"
                                 />
                               ) : (
-                                <span className="text-sm text-gray-700">{ds.name || 'N/A'}</span>
+                                <span className="text-sm text-gray-700">{ds.name || '-'}</span>
                               )}
                             </td>
                             <td className="px-4 py-3 border border-gray-300">
@@ -963,7 +947,7 @@ function Organization() {
                                   placeholder="DSC Number"
                                 />
                               ) : (
-                                <span className="text-sm text-gray-700">{ds.dscNumber || 'N/A'}</span>
+                                <span className="text-sm text-gray-700">{ds.dscNumber || '-'}</span>
                               )}
                             </td>
                             <td className="px-4 py-3 border border-gray-300">
@@ -975,7 +959,7 @@ function Organization() {
                                   className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                                 />
                               ) : (
-                                <span className="text-sm text-gray-700">{ds.expiryDate ? formatDate(ds.expiryDate) : 'N/A'}</span>
+                                <span className="text-sm text-gray-700">{ds.expiryDate ? formatDate(ds.expiryDate) : '-'}</span>
                               )}
                             </td>
                             <td className="px-4 py-3 border border-gray-300">
@@ -1229,7 +1213,7 @@ function Organization() {
                 {/* Website Details Section */}
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Website Details</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">Credentials</h3>
                   {editingOrg && (
                     <button
                       onClick={addWebsite}
@@ -1258,6 +1242,7 @@ function Organization() {
                           <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">URL</th>
                           <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Login</th>
                           <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Password</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Remarks</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1288,7 +1273,7 @@ function Organization() {
                                   <option value="Others 3">Others 3</option>
                                 </select>
                               ) : (
-                                website.type || 'N/A'
+                                website.type || '-'
                               )}
                             </td>
                             <td className="px-4 py-3 border border-gray-300 text-sm">
@@ -1306,7 +1291,7 @@ function Organization() {
                                     {website.url}
                                   </a>
                                 ) : (
-                                  <span className="text-gray-500">N/A</span>
+                                  <span className="text-gray-500">-</span>
                                 )
                               )}
                             </td>
@@ -1320,7 +1305,7 @@ function Organization() {
                                   placeholder="Enter login"
                                 />
                               ) : (
-                                website.login || 'N/A'
+                                website.login || '-'
                               )}
                             </td>
                             <td className="px-4 py-3 border border-gray-300 text-sm">
@@ -1342,7 +1327,20 @@ function Organization() {
                                   </button>
                                 </div>
                               ) : (
-                                <span className="text-gray-900">{website.password ? '••••••••' : 'N/A'}</span>
+                                <span className="text-gray-900">{website.password ? '••••••••' : '-'}</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 border border-gray-300 text-sm">
+                              {editingOrg ? (
+                                <input
+                                  type="text"
+                                  value={website.remarks || ''}
+                                  onChange={(e) => updateWebsite(website.id, 'remarks', e.target.value)}
+                                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                  placeholder="Enter remarks"
+                                />
+                              ) : (
+                                <span className="text-gray-900">{website.remarks || '-'}</span>
                               )}
                             </td>
                           </tr>
@@ -1357,7 +1355,7 @@ function Organization() {
                   <div className="space-y-4">
                     {(editingOrg.websites || []).filter(w => !w.url || w.url.trim() === '').map((website) => (
                       <div key={website.id} className="p-4 border border-gray-300 rounded-lg bg-gray-50">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                           <div>
                             <label className="block text-sm text-gray-600 mb-2">Website Type</label>
                             <select
@@ -1421,6 +1419,16 @@ function Organization() {
                                 {website.showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
                               </button>
                             </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm text-gray-600 mb-2">Remarks</label>
+                            <input
+                              type="text"
+                              value={website.remarks || ''}
+                              onChange={(e) => updateWebsite(website.id, 'remarks', e.target.value)}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                              placeholder="Enter remarks"
+                            />
                           </div>
                         </div>
                       </div>
@@ -1514,16 +1522,11 @@ function Organization() {
                 <td className="px-6 py-4">
                   <div>
                     <p className="text-sm font-semibold text-gray-900">
-                      {org.legalName !== 'N/A' ? org.legalName : org.tradeName}
+                      {org.legalName !== '-' ? org.legalName : org.tradeName}
                     </p>
-                    {org.tradeName !== 'N/A' && org.legalName !== 'N/A' && org.tradeName !== org.legalName && (
+                    {org.tradeName !== '-' && org.legalName !== '-' && org.tradeName !== org.legalName && (
                       <p className="text-xs text-gray-500 mt-1">
                         Trade: {org.tradeName}
-                      </p>
-                    )}
-                    {org.organisationType !== 'N/A' && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        {org.organisationType}
                       </p>
                     )}
                   </div>
@@ -1534,7 +1537,7 @@ function Organization() {
                   <p className="text-sm font-mono text-gray-900">
                     {org.gstin}
                   </p>
-                  {org.incorporationDate !== 'N/A' && (
+                  {org.incorporationDate !== '-' && (
                     <p className="text-xs text-gray-500 mt-1">
                       Since: {formatDate(org.incorporationDate)}
                     </p>

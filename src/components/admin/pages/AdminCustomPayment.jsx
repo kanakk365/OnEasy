@@ -490,15 +490,15 @@ function AdminCustomPayment() {
                     <tr key={index} className="border-b border-gray-200 hover:bg-gray-50">
                       <td className="px-4 py-3">
                         <div>
-                          <div className="font-medium text-gray-900">{item.user_name || 'N/A'}</div>
-                          <div className="text-sm text-gray-600">{item.user_email || 'N/A'}</div>
+                          <div className="font-medium text-gray-900">{item.user_name || '-'}</div>
+                          <div className="text-sm text-gray-600">{item.user_email || '-'}</div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{item.service_name || item.registration_type || 'N/A'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{item.package_name || 'N/A'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{item.service_name || item.registration_type || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{item.package_name || '-'}</td>
                       <td className="px-4 py-3 text-sm font-medium text-gray-900">₹{parseFloat(item.package_price || item.amount || 0).toLocaleString('en-IN')}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600 font-mono">{item.ticket_id || 'N/A'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 font-mono">{item.ticket_id || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{item.created_at ? new Date(item.created_at).toLocaleDateString() : '-'}</td>
                       <td className="px-4 py-3">
                         <div className="flex flex-col gap-2">
                           <button
@@ -573,9 +573,9 @@ function AdminCustomPayment() {
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-medium text-gray-900">{user.name || 'N/A'}</div>
-                      <div className="text-sm text-gray-600">{user.email || 'N/A'}</div>
-                      <div className="text-sm text-gray-500">{user.phone || 'N/A'}</div>
+                      <div className="font-medium text-gray-900">{user.name || '-'}</div>
+                      <div className="text-sm text-gray-600">{user.email || '-'}</div>
+                      <div className="text-sm text-gray-500">{user.phone || '-'}</div>
                     </div>
                     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

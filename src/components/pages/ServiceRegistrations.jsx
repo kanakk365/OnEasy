@@ -413,9 +413,9 @@ function ServiceRegistrations() {
           <div className="space-y-4">
             {registrations.map((reg) => {
               const formatDate = (dateString) => {
-                if (!dateString) return "N/A";
+                if (!dateString) return "-";
                 const d = new Date(dateString);
-                if (isNaN(d.getTime())) return "N/A";
+                if (isNaN(d.getTime())) return "-";
                 return d.toLocaleString("en-IN", {
                   year: "numeric",
                   month: "2-digit",

@@ -11,6 +11,8 @@ function AdminServices() {
   const [serviceFilter, setServiceFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [progressFilter, setProgressFilter] = useState('');
+  const [showPaymentMethodDialog, setShowPaymentMethodDialog] = useState(false);
+  const [pendingStatusUpdate, setPendingStatusUpdate] = useState(null);
 
   useEffect(() => {
     fetchServices();
@@ -33,7 +35,7 @@ function AdminServices() {
   };
 
   const formatDateTime = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     try {
       let date;
       
@@ -59,7 +61,7 @@ function AdminServices() {
       }
       
       // Check if date is valid
-      if (isNaN(date.getTime())) return 'N/A';
+      if (isNaN(date.getTime())) return '-';
       
       // Format in IST (Asia/Kolkata timezone)
       const datePart = date.toLocaleDateString('en-IN', {
@@ -79,7 +81,7 @@ function AdminServices() {
       return `${datePart}, ${timePart}`;
     } catch (error) {
       console.error('Error formatting date:', dateString, error);
-      return 'N/A';
+      return '-';
     }
   };
 
@@ -368,7 +370,7 @@ function AdminServices() {
     () =>
       Array.from(
         new Set(
-          services.map((s) => s.name || s.legal_name || s.client_name || s.email || 'N/A')
+          services.map((s) => s.name || s.legal_name || s.client_name || s.email || '-')
         )
       ),
     [services]
@@ -400,7 +402,56 @@ function AdminServices() {
         alert('Ticket ID is required to update status');
         return;
       }
-      const payload = { ticketId: svc.ticket_id, status: newStatus };
+
+      // Check if payment is pending and status is being changed from "Payment pending"
+      const currentStatus = (svc.service_status || '').toLowerCase().trim();
+      const isPaymentPending = currentStatus === 'payment pending' || 
+                              (svc.payment_status && 
+                               (svc.payment_status.toLowerCase() === 'pending' || 
+                                svc.payment_status.toLowerCase() === 'unpaid'));
+      const hasPaymentId = !!svc.razorpay_payment_id;
+      const isChangingFromPending = isPaymentPending && newStatus.toLowerCase().trim() !== 'payment pending';
+
+      // If payment is pending and trying to change status, show payment method dialog
+      if (isChangingFromPending && !hasPaymentId) {
+        setPendingStatusUpdate({ svc, newStatus });
+        setShowPaymentMethodDialog(true);
+        return;
+      }
+
+      // If already paid (has payment ID) or not changing from pending, proceed with status update
+      await performStatusUpdate(svc, newStatus, null);
+    } catch (error) {
+      console.error('Error updating status:', error);
+      const errorMessage = error.message || error.response?.data?.message || 'Unknown error';
+      alert('Failed to update status: ' + errorMessage);
+    }
+  };
+
+  const handlePaymentMethodSelection = async (paymentMethod) => {
+    if (!pendingStatusUpdate) return;
+
+    setShowPaymentMethodDialog(false);
+    const { svc, newStatus } = pendingStatusUpdate;
+    
+    try {
+      await performStatusUpdate(svc, newStatus, paymentMethod);
+    } catch (error) {
+      console.error('Error updating status with payment method:', error);
+      const errorMessage = error.message || error.response?.data?.message || 'Unknown error';
+      alert('Failed to update status: ' + errorMessage);
+    } finally {
+      setPendingStatusUpdate(null);
+    }
+  };
+
+  const performStatusUpdate = async (svc, newStatus, paymentMethod) => {
+    try {
+      const payload = { 
+        ticketId: svc.ticket_id, 
+        status: newStatus,
+        ...(paymentMethod && { paymentMethod })
+      };
       console.log('📝 Updating status:', payload);
       const response = await apiClient.post('/admin/update-service-status', payload);
       console.log('📝 Update status response:', response);
@@ -417,7 +468,13 @@ function AdminServices() {
           await fetchServices();
         }, 500);
       } else {
-        throw new Error(response.message || 'Failed to update status');
+        // Check if it requires payment method
+        if (response.requiresPaymentMethod) {
+          setPendingStatusUpdate({ svc, newStatus });
+          setShowPaymentMethodDialog(true);
+        } else {
+          throw new Error(response.message || 'Failed to update status');
+        }
       }
     } catch (error) {
       console.error('Error updating status:', error);
@@ -426,9 +483,14 @@ function AdminServices() {
       // Check if it's a database column error
       if (errorMessage.includes('service_status') && errorMessage.includes('column')) {
         alert('The service_status column does not exist in the database. Please run the migration SQL first. See backend/migrations/add_service_status_column.sql');
+      } else if (error.response?.data?.requiresPaymentMethod) {
+        // Backend is asking for payment method
+        setPendingStatusUpdate({ svc, newStatus });
+        setShowPaymentMethodDialog(true);
       } else {
         alert('Failed to update status: ' + errorMessage);
       }
+      throw error;
     }
   };
 
@@ -628,7 +690,7 @@ function AdminServices() {
       const status = getStatusLabel(svc);
       const progress = getProgressLabel(svc);
       const serviceName = getServiceLabel(svc);
-      const clientName = svc.name || svc.legal_name || svc.client_name || svc.email || 'N/A';
+      const clientName = svc.name || svc.legal_name || svc.client_name || svc.email || '-';
 
       return (
         (clientFilter ? clientName === clientFilter : true) &&
@@ -751,10 +813,10 @@ function AdminServices() {
               {filteredServices.map((svc, index) => (
                 <tr key={`${svc.ticket_id || svc.order_id || svc.user_id || 'row'}-${index}`} className="hover:bg-gray-50">
                   <td className="px-3 py-3 text-sm text-gray-900 whitespace-normal break-words">
-                    <div className="font-semibold">{svc.name || svc.legal_name || 'N/A'}</div>
+                    <div className="font-semibold">{svc.name || svc.legal_name || '-'}</div>
                     <div className="text-xs text-gray-500 break-words">{svc.email || 'No email'}</div>
                   </td>
-                  <td className="px-3 py-3 text-sm text-gray-900 whitespace-normal break-words">{svc.phone || 'N/A'}</td>
+                  <td className="px-3 py-3 text-sm text-gray-900 whitespace-normal break-words">{svc.phone || '-'}</td>
                   <td className="px-3 py-3 text-sm text-gray-900 whitespace-normal break-words">{getServiceLabel(svc)}</td>
                   <td className="px-3 py-3 text-sm text-gray-900 whitespace-normal">
                     {svc.ticket_id ? (
@@ -771,7 +833,7 @@ function AdminServices() {
                         ))}
                       </select>
                     ) : (
-                      <span className="text-xs text-gray-400">N/A</span>
+                      <span className="text-xs text-gray-400">-</span>
                     )}
                   </td>
                   <td className="px-3 py-3 text-sm text-gray-900 whitespace-normal">
@@ -787,7 +849,7 @@ function AdminServices() {
                         <option value="Resolved">Resolved</option>
                       </select>
                     ) : (
-                      <span className="text-xs text-gray-400">N/A</span>
+                      <span className="text-xs text-gray-400">-</span>
                     )}
                   </td>
                   <td className="px-3 py-3 text-sm text-gray-900 whitespace-normal break-words">
@@ -863,6 +925,43 @@ function AdminServices() {
           </table>
         </div>
       </div>
+
+      {/* Payment Method Selection Dialog */}
+      {showPaymentMethodDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Payment Method Required
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Payment is pending. Please select the payment method before changing the status.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => handlePaymentMethodSelection('cash')}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
+              >
+                Paid by Cash
+              </button>
+              <button
+                onClick={() => handlePaymentMethodSelection('other')}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+              >
+                Paid by Other Source
+              </button>
+              <button
+                onClick={() => {
+                  setShowPaymentMethodDialog(false);
+                  setPendingStatusUpdate(null);
+                }}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

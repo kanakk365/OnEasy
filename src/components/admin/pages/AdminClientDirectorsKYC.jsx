@@ -166,9 +166,9 @@ function AdminClientDirectorsKYC() {
         if (org) {
           setOrganization({
             id: org.id,
-            legalName: org.legal_name || 'N/A',
-            tradeName: org.trade_name || 'N/A',
-            gstin: org.gstin || 'N/A'
+            legalName: org.legal_name || '-',
+            tradeName: org.trade_name || '-',
+            gstin: org.gstin || '-'
           });
         }
       }
@@ -245,15 +245,15 @@ function AdminClientDirectorsKYC() {
             <h1 className="text-2xl font-semibold text-gray-900">Directors/Partners Documents</h1>
             {clientInfo && (
               <p className="text-gray-600 mt-1">
-                {clientInfo.name || 'N/A'} • {clientInfo.user_id}
+                {clientInfo.name || '-'} • {clientInfo.user_id}
               </p>
             )}
             {organization && (
               <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-4 mt-4">
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">Organization:</span> {organization.legalName !== 'N/A' ? organization.legalName : organization.tradeName}
+                  <span className="font-medium">Organization:</span> {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
                 </p>
-                {organization.gstin !== 'N/A' && (
+                {organization.gstin !== '-' && (
                   <p className="text-xs text-gray-500 font-mono mt-1">GSTIN: {organization.gstin}</p>
                 )}
               </div>

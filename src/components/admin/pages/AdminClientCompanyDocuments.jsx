@@ -42,10 +42,10 @@ function AdminClientCompanyDocuments() {
         if (org) {
           setOrganization({
             id: org.id,
-            legalName: org.legal_name || 'N/A',
-            tradeName: org.trade_name || 'N/A',
-            gstin: org.gstin || 'N/A',
-            organisationType: org.organisation_type || 'N/A'
+            legalName: org.legal_name || '-',
+            tradeName: org.trade_name || '-',
+            gstin: org.gstin || '-',
+            organisationType: org.organisation_type || '-'
           });
         }
       }
@@ -96,19 +96,19 @@ function AdminClientCompanyDocuments() {
           name: "Business Bank Statement", 
           url: reg.business_bank_statement_url, 
           type: "business_bank_statement",
-          service: reg.ticket_id || "N/A"
+          service: reg.ticket_id || "-"
         });
         if (reg.partnership_deed_url) organizationDocs.push({ 
           name: "Partnership Deed", 
           url: reg.partnership_deed_url, 
           type: "partnership_deed",
-          service: reg.ticket_id || "N/A"
+          service: reg.ticket_id || "-"
         });
         if (reg.certificate_of_incorporation_url) organizationDocs.push({ 
           name: "Certificate of Incorporation", 
           url: reg.certificate_of_incorporation_url, 
           type: "certificate_of_incorporation",
-          service: reg.ticket_id || "N/A"
+          service: reg.ticket_id || "-"
         });
       });
 
@@ -187,12 +187,12 @@ function AdminClientCompanyDocuments() {
               </div>
               <div className="flex-1">
                 <h1 className="text-2xl font-semibold text-gray-900">
-                  {organization.legalName !== 'N/A' ? organization.legalName : organization.tradeName}
+                  {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
                 </h1>
-                {organization.tradeName !== 'N/A' && organization.legalName !== 'N/A' && organization.tradeName !== organization.legalName && (
+                {organization.tradeName !== '-' && organization.legalName !== '-' && organization.tradeName !== organization.legalName && (
                   <p className="text-gray-600 mt-1">{organization.tradeName}</p>
                 )}
-                {organization.gstin !== 'N/A' && (
+                {organization.gstin !== '-' && (
                   <p className="text-sm text-gray-500 mt-1 font-mono">GSTIN: {organization.gstin}</p>
                 )}
               </div>

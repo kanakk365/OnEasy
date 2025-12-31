@@ -132,6 +132,7 @@ function Settings() {
               url: w.url || '',
               login: w.login || '',
               password: w.password || '',
+              remarks: w.remarks || '',
               showPassword: false
             }));
             
@@ -205,6 +206,7 @@ function Settings() {
               url: w.website_url || '',
               login: w.login || '',
               password: w.password || '',
+              remarks: w.remarks || '',
               showPassword: false
             }));
           }
@@ -383,7 +385,8 @@ function Settings() {
             type: w.type,
             url: w.url,
             login: w.login,
-            password: w.password
+            password: w.password,
+            remarks: w.remarks || ''
           }))
         }))
       };
@@ -851,15 +854,15 @@ function Settings() {
                         onClick={() => setExpandedAdminNoteId(expandedAdminNoteId === idx ? null : idx)}
                         className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
                       >
-                        <td className="px-2 py-2 text-gray-600 text-xs">{note.date || 'N/A'}</td>
-                        <td className="px-2 py-2 text-gray-600 truncate text-xs">{note.description || 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs">{note.date || '-'}</td>
+                        <td className="px-2 py-2 text-gray-600 truncate text-xs">{note.description || '-'}</td>
                         <td className="px-2 py-2 text-gray-600 text-xs">{note.attachments?.length || 0}</td>
                       </tr>
                       {expandedAdminNoteId === idx && (
                         <tr className="bg-gray-50">
                           <td colSpan="3" className="px-3 py-3">
                             <div className="space-y-2 text-xs">
-                              <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{note.date || 'N/A'}</span></div>
+                              <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{note.date || '-'}</span></div>
                               <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1">{note.description}</p></div>
                               {note.attachments && note.attachments.length > 0 && (
                                 <div>
@@ -997,15 +1000,15 @@ function Settings() {
                       onClick={() => setExpandedUserNoteId(expandedUserNoteId === idx ? null : idx)}
                       className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
                     >
-                      <td className="px-2 py-2 text-gray-600 text-xs">{note.date || 'N/A'}</td>
-                      <td className="px-2 py-2 text-gray-600 truncate text-xs">{note.description || 'N/A'}</td>
+                      <td className="px-2 py-2 text-gray-600 text-xs">{note.date || '-'}</td>
+                      <td className="px-2 py-2 text-gray-600 truncate text-xs">{note.description || '-'}</td>
                       <td className="px-2 py-2 text-gray-600 text-xs">{note.attachments?.length || 0}</td>
                     </tr>
                     {expandedUserNoteId === idx && (
                       <tr className="bg-gray-50">
                         <td colSpan="3" className="px-3 py-3">
                           <div className="space-y-2 text-xs">
-                            <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{note.date || 'N/A'}</span></div>
+                            <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{note.date || '-'}</span></div>
                             <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1">{note.description}</p></div>
                             {note.attachments && note.attachments.length > 0 && (
                               <div>
@@ -1087,8 +1090,8 @@ function Settings() {
                         onClick={() => setExpandedAdminTaskId(expandedAdminTaskId === idx ? null : idx)}
                         className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
                       >
-                        <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</td>
-                        <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.title || 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</td>
+                        <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.title || '-'}</td>
                         <td className="px-2 py-2 text-gray-600 text-xs">
                           {task.type ? (
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -1099,17 +1102,17 @@ function Settings() {
                             }`}>
                               {task.type.charAt(0).toUpperCase() + task.type.slice(1)}
                             </span>
-                          ) : 'N/A'}
+                          ) : '-'}
                         </td>
-                        <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.description || 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.description || '-'}</td>
                       </tr>
                       {expandedAdminTaskId === idx && (
                         <tr className="bg-gray-50">
                           <td colSpan="4" className="px-3 py-3">
                             <div className="space-y-2 text-xs">
-                              <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</span></div>
-                              <div><span className="font-medium text-gray-700">Title:</span> <span className="text-gray-600">{task.title || 'N/A'}</span></div>
-                              <div><span className="font-medium text-gray-700">Type:</span> <span className="text-gray-600">{task.type ? task.type.charAt(0).toUpperCase() + task.type.slice(1) : 'N/A'}</span></div>
+                              <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</span></div>
+                              <div><span className="font-medium text-gray-700">Title:</span> <span className="text-gray-600">{task.title || '-'}</span></div>
+                              <div><span className="font-medium text-gray-700">Type:</span> <span className="text-gray-600">{task.type ? task.type.charAt(0).toUpperCase() + task.type.slice(1) : '-'}</span></div>
                               <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1 whitespace-pre-wrap">{task.description || 'No description'}</p></div>
                             </div>
                           </td>
@@ -1227,8 +1230,8 @@ function Settings() {
                         onClick={() => setExpandedUserTaskId(expandedUserTaskId === idx ? null : idx)}
                         className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
                       >
-                        <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</td>
-                        <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.title || 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</td>
+                        <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.title || '-'}</td>
                         <td className="px-2 py-2 text-gray-600 text-xs">
                           {task.type ? (
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -1239,17 +1242,17 @@ function Settings() {
                             }`}>
                               {task.type.charAt(0).toUpperCase() + task.type.slice(1)}
                             </span>
-                          ) : 'N/A'}
+                          ) : '-'}
                         </td>
-                        <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.description || 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.description || '-'}</td>
                       </tr>
                       {expandedUserTaskId === idx && (
                         <tr className="bg-gray-50">
                           <td colSpan="4" className="px-3 py-3">
                             <div className="space-y-2 text-xs">
-                              <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</span></div>
-                              <div><span className="font-medium text-gray-700">Title:</span> <span className="text-gray-600">{task.title || 'N/A'}</span></div>
-                              <div><span className="font-medium text-gray-700">Type:</span> <span className="text-gray-600">{task.type ? task.type.charAt(0).toUpperCase() + task.type.slice(1) : 'N/A'}</span></div>
+                              <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</span></div>
+                              <div><span className="font-medium text-gray-700">Title:</span> <span className="text-gray-600">{task.title || '-'}</span></div>
+                              <div><span className="font-medium text-gray-700">Type:</span> <span className="text-gray-600">{task.type ? task.type.charAt(0).toUpperCase() + task.type.slice(1) : '-'}</span></div>
                               <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1 whitespace-pre-wrap">{task.description || 'No description'}</p></div>
                             </div>
                           </td>
@@ -1385,7 +1388,6 @@ function Settings() {
               <table className="w-full text-sm table-fixed border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
                 <colgroup>
                   <col className="w-12" />
-                  <col className="w-28" />
                   <col className="w-auto" />
                   <col className="w-auto" />
                   <col className="w-32" />
@@ -1395,7 +1397,6 @@ function Settings() {
                 <thead className="bg-gray-100">
                   <tr>
                     <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">ID</th>
-                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">Type</th>
                     <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">Legal Name</th>
                     <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">Trade Name</th>
                     <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">GSTIN</th>
@@ -1414,16 +1415,15 @@ function Settings() {
                         className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer transition-colors"
                       >
                         <td className="px-2 py-2 text-gray-700 font-medium text-xs border border-gray-300">{idx + 1}</td>
-                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.organisationType}>{org.organisationType || 'N/A'}</td>
-                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.legalName}>{org.legalName || 'N/A'}</td>
-                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.tradeName}>{org.tradeName || 'N/A'}</td>
-                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.gstin}>{org.gstin || 'N/A'}</td>
-                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.tan}>{org.tan || 'N/A'}</td>
-                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.cin}>{org.cin || 'N/A'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.legalName}>{org.legalName || '-'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.tradeName}>{org.tradeName || '-'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.gstin}>{org.gstin || '-'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.tan}>{org.tan || '-'}</td>
+                        <td className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300" title={org.cin}>{org.cin || '-'}</td>
                       </tr>
                       {expandedOrgId === idx && (
                         <tr className="bg-white">
-                          <td colSpan="7" className="p-6 border border-gray-300">
+                          <td colSpan="6" className="p-6 border border-gray-300">
                             <div className="bg-white rounded-lg border border-gray-200 p-6">
                               <h4 className="text-lg font-semibold text-gray-900 mb-4">{org.legalName || 'Organization Details'}</h4>
                               
@@ -1431,16 +1431,12 @@ function Settings() {
                                 {/* Column 1 */}
                                 <div className="space-y-4">
                                   <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Organisation Type</label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.organisationType || 'N/A'}</div>
-                                  </div>
-                                  <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">GSTIN</label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.gstin || 'N/A'}</div>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.gstin || '-'}</div>
                                   </div>
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">TAN</label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.tan || 'N/A'}</div>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.tan || '-'}</div>
                                   </div>
                                 </div>
 
@@ -1448,7 +1444,7 @@ function Settings() {
                                 <div className="space-y-4">
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Legal Name</label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.legalName || 'N/A'}</div>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.legalName || '-'}</div>
                                   </div>
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Incorporation Date</label>
@@ -1456,12 +1452,12 @@ function Settings() {
                                       <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                       </svg>
-                                      {org.incorporationDate ? new Date(org.incorporationDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                                      {org.incorporationDate ? new Date(org.incorporationDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
                                     </div>
                                   </div>
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">CIN</label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.cin || 'N/A'}</div>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.cin || '-'}</div>
                                   </div>
                                 </div>
 
@@ -1469,11 +1465,11 @@ function Settings() {
                                 <div className="space-y-4">
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Trade Name</label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.tradeName || 'N/A'}</div>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.tradeName || '-'}</div>
                                   </div>
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.category || 'N/A'}</div>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.category || '-'}</div>
                                   </div>
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">PAN File</label>
@@ -1492,7 +1488,7 @@ function Settings() {
                                   </div>
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Registered Address</label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.registeredAddress || 'N/A'}</div>
+                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.registeredAddress || '-'}</div>
                                   </div>
                                 </div>
                               </div>
@@ -1558,19 +1554,8 @@ function Settings() {
                 
                 return (
                   <div key={org.id} className="space-y-4">
-                    {/* Row 1: Organisation Type, Legal Name, Trade Name */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Organisation Type</label>
-                        <input
-                          type="text"
-                          value={org.organisationType}
-                          onChange={(e) => updateOrganization(org.id, 'organisationType', e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="Enter organisation type"
-                        />
-                      </div>
-                      
+                    {/* Row 1: Legal Name, Trade Name */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Legal Name</label>
                         <input
@@ -2134,7 +2119,7 @@ function Settings() {
                     {/* Websites Section */}
                     <div className="mt-6 pt-6 border-t border-gray-200">
                       <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-md font-semibold text-gray-900">Website Details</h4>
+                        <h4 className="text-md font-semibold text-gray-900">Credentials</h4>
                         <button
                           type="button"
                           onClick={() => addWebsite(org.id)}
@@ -2155,30 +2140,31 @@ function Settings() {
                                 <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">URL</th>
                                 <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Login</th>
                                 <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Password</th>
+                                <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Remarks</th>
                                 <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">Actions</th>
                               </tr>
                             </thead>
                             <tbody>
                               {org.websites.filter(w => w.url && w.url.trim() !== '').map((website) => (
                                 <tr key={website.id} className="bg-white border-b border-gray-200">
-                                  <td className="px-4 py-3 text-gray-900 border border-gray-300 text-sm">{website.type || 'N/A'}</td>
+                                  <td className="px-4 py-3 text-gray-900 border border-gray-300 text-sm">{website.type || '-'}</td>
                                   <td className="px-4 py-3 border border-gray-300 text-sm">
                                     {website.url ? (
                                       <a href={website.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                                         {website.url}
                                       </a>
                                     ) : (
-                                      <span className="text-gray-600">N/A</span>
+                                      <span className="text-gray-600">-</span>
                                     )}
                                   </td>
-                                  <td className="px-4 py-3 text-gray-900 border border-gray-300 text-sm">{website.login || 'N/A'}</td>
+                                  <td className="px-4 py-3 text-gray-900 border border-gray-300 text-sm">{website.login || '-'}</td>
                                   <td className="px-4 py-3 border border-gray-300 text-sm">
                                     <div className="flex items-center gap-2">
                                       <span className="text-gray-900">
                                         {website.password ? (
                                           website.showPassword ? website.password : '••••••••'
                                         ) : (
-                                          'N/A'
+                                          '-'
                                         )}
                                       </span>
                                       {website.password && (
@@ -2197,6 +2183,7 @@ function Settings() {
                                       )}
                                     </div>
                                   </td>
+                                  <td className="px-4 py-3 text-gray-900 border border-gray-300 text-sm">{website.remarks || '-'}</td>
                                   <td className="px-4 py-3 border border-gray-300 text-sm">
                                     {/* <button
                                       type="button"
@@ -2216,7 +2203,7 @@ function Settings() {
                       {/* Website Entry Forms */}
                       {(org.websites || []).filter(w => !w.url || w.url.trim() === '').map((website) => (
                         <div key={website.id} className="mb-4 p-4 border border-gray-300 rounded-lg bg-gray-50">
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                             <div>
                               <label className="block text-sm text-gray-600 mb-2">Website Type</label>
                               <select
@@ -2287,6 +2274,16 @@ function Settings() {
                                   )}
                                 </button>
                               </div>
+                            </div>
+                            <div>
+                              <label className="block text-sm text-gray-600 mb-2">Remarks</label>
+                              <input
+                                type="text"
+                                value={website.remarks || ''}
+                                onChange={(e) => updateWebsite(org.id, website.id, 'remarks', e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                placeholder="Enter remarks"
+                              />
                             </div>
                           </div>
                           

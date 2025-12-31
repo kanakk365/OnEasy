@@ -13,6 +13,7 @@ function AdminClientOverview() {
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'services'); // profile, services, compliance, subscriptions
+  const orgIdFromQuery = searchParams.get('orgId');
   const [expandedSection, setExpandedSection] = useState(null);
   const [clientProfile, setClientProfile] = useState(null);
   const [allRegistrations, setAllRegistrations] = useState([]);
@@ -53,6 +54,8 @@ function AdminClientOverview() {
   const [isServiceCardExpanded, setIsServiceCardExpanded] = useState(null); // Track which card index is expanded
   const [_serviceStatus, setServiceStatus] = useState('registered');
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(null); // Track which card's dropdown is open (by index)
+  const [showPaymentMethodDialog, setShowPaymentMethodDialog] = useState(false);
+  const [pendingStatusUpdate, setPendingStatusUpdate] = useState(null);
   const [_visiblePasswords] = useState({});
   const [isEditingOrganisations, setIsEditingOrganisations] = useState(false);
   const [_isEditingWebsites, setIsEditingWebsites] = useState(false);
@@ -85,10 +88,25 @@ function AdminClientOverview() {
     
     // Set active tab from URL params
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['profile', 'services', 'compliance', 'subscriptions'].includes(tabParam)) {
+    if (tabParam && ['profile', 'services', 'compliance', 'subscriptions', 'organizations'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [userId, searchParams]);
+
+  // Auto-expand organization if orgId is in query params
+  useEffect(() => {
+    if (orgIdFromQuery && clientProfile?.user?.organisations) {
+      const orgIndex = clientProfile.user.organisations.findIndex(
+        org => org.id === parseInt(orgIdFromQuery) || org.id === orgIdFromQuery || String(org.id) === String(orgIdFromQuery)
+      );
+      if (orgIndex !== -1) {
+        setExpandedOrgId(orgIndex);
+        if (activeTab !== 'organizations') {
+          setActiveTab('organizations');
+        }
+      }
+    }
+  }, [orgIdFromQuery, clientProfile, activeTab]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -280,6 +298,7 @@ function AdminClientOverview() {
                 url: w.url || '',
                 login: w.login || '',
                 password: w.password || '',
+                remarks: w.remarks || '',
                 showPassword: false
               }))
             };
@@ -891,6 +910,7 @@ function AdminClientOverview() {
               url: '', 
               login: '', 
               password: '', 
+              remarks: '',
               showPassword: false 
             }]
           } 
@@ -1042,7 +1062,8 @@ function AdminClientOverview() {
                 type: w.type || '',
                 url: w.url || '',
                 login: w.login || '',
-                password: w.password || ''
+                password: w.password || '',
+                remarks: w.remarks || ''
               }))
           }))
       };
@@ -1103,7 +1124,8 @@ function AdminClientOverview() {
               type: w.type || '',
               url: w.url || '',
               login: w.login || '',
-              password: w.password || ''
+              password: w.password || '',
+              remarks: w.remarks || ''
             }))
           };
         })
@@ -1163,7 +1185,8 @@ function AdminClientOverview() {
           type: w.type,
           url: w.url,
           login: w.login,
-          password: w.password
+          password: w.password,
+          remarks: w.remarks || ''
         }))
       };
       
@@ -1284,13 +1307,64 @@ function AdminClientOverview() {
         return;
       }
 
-      // Use the status directly (no mapping needed)
-      const statusToSet = newStatus;
+      // Find the registration to check payment status
+      const registration = allRegistrations.find(r => r.ticket_id === ticketId);
+      if (!registration) {
+        alert('Registration not found');
+        return;
+      }
 
-      const response = await apiClient.post('/admin/update-service-status', {
+      // Check if payment is pending and status is being changed from "Payment pending"
+      const currentStatus = (registration.service_status || '').toLowerCase().trim();
+      const isPaymentPending = currentStatus === 'payment pending' || 
+                              (registration.payment_status && 
+                               (registration.payment_status.toLowerCase() === 'pending' || 
+                                registration.payment_status.toLowerCase() === 'unpaid'));
+      const hasPaymentId = !!registration.razorpay_payment_id;
+      const isChangingFromPending = isPaymentPending && newStatus.toLowerCase().trim() !== 'Payment pending';
+
+      // If payment is pending and trying to change status, show payment method dialog
+      if (isChangingFromPending && !hasPaymentId) {
+        setPendingStatusUpdate({ newStatus, ticketId });
+        setShowPaymentMethodDialog(true);
+        return;
+      }
+
+      // If already paid (has payment ID) or not changing from pending, proceed with status update
+      await performStatusUpdate(newStatus, ticketId, null);
+    } catch (error) {
+      console.error('Error updating service status:', error);
+      const errorMessage = error.message || error.response?.data?.message || 'Unknown error';
+      alert('Failed to update status: ' + errorMessage);
+    }
+  };
+
+  const handlePaymentMethodSelection = async (paymentMethod) => {
+    if (!pendingStatusUpdate) return;
+
+    setShowPaymentMethodDialog(false);
+    const { newStatus, ticketId } = pendingStatusUpdate;
+    
+    try {
+      await performStatusUpdate(newStatus, ticketId, paymentMethod);
+    } catch (error) {
+      console.error('Error updating status with payment method:', error);
+      const errorMessage = error.message || error.response?.data?.message || 'Unknown error';
+      alert('Failed to update status: ' + errorMessage);
+    } finally {
+      setPendingStatusUpdate(null);
+    }
+  };
+
+  const performStatusUpdate = async (newStatus, ticketId, paymentMethod) => {
+    try {
+      const payload = { 
         ticketId,
-        status: statusToSet
-      });
+        status: newStatus,
+        ...(paymentMethod && { paymentMethod })
+      };
+
+      const response = await apiClient.post('/admin/update-service-status', payload);
 
       console.log('📝 Update status response:', response);
 
@@ -1300,7 +1374,13 @@ function AdminClientOverview() {
         fetchClientProfile();
         console.log('✅ Service status updated:', newStatus);
       } else {
-        throw new Error(response.message || 'Failed to update status');
+        // Check if it requires payment method
+        if (response.requiresPaymentMethod) {
+          setPendingStatusUpdate({ newStatus, ticketId });
+          setShowPaymentMethodDialog(true);
+        } else {
+          throw new Error(response.message || 'Failed to update status');
+        }
       }
     } catch (error) {
       console.error('Error updating service status:', error);
@@ -1309,14 +1389,19 @@ function AdminClientOverview() {
       // Check if it's a database column error
       if (errorMessage.includes('service_status') && errorMessage.includes('column')) {
         alert('The service_status column does not exist in the database. Please run the migration SQL first. See backend/migrations/add_service_status_column.sql');
+      } else if (error.response?.data?.requiresPaymentMethod) {
+        // Backend is asking for payment method
+        setPendingStatusUpdate({ newStatus, ticketId });
+        setShowPaymentMethodDialog(true);
       } else {
         alert('Failed to update status: ' + errorMessage);
       }
+      throw error;
     }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     try {
       let date;
       
@@ -1342,7 +1427,7 @@ function AdminClientOverview() {
       }
       
       // Check if date is valid
-      if (isNaN(date.getTime())) return 'N/A';
+      if (isNaN(date.getTime())) return '-';
       
       // Format in IST (Asia/Kolkata timezone)
       const datePart = date.toLocaleDateString('en-IN', {
@@ -1362,12 +1447,12 @@ function AdminClientOverview() {
       return `${datePart}, ${timePart}`;
     } catch (error) {
       console.error('Error formatting date:', dateString, error);
-      return 'N/A';
+      return '-';
     }
   };
 
   const formatDateOnly = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     try {
       let date;
       
@@ -1389,7 +1474,7 @@ function AdminClientOverview() {
       }
       
       // Check if date is valid
-      if (isNaN(date.getTime())) return 'N/A';
+      if (isNaN(date.getTime())) return '-';
       
       // Format only the date part in IST (Asia/Kolkata timezone)
       return date.toLocaleDateString('en-IN', {
@@ -1400,7 +1485,7 @@ function AdminClientOverview() {
       });
     } catch (error) {
       console.error('Error formatting date:', dateString, error);
-      return 'N/A';
+      return '-';
     }
   };
 
@@ -1710,12 +1795,12 @@ function AdminClientOverview() {
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-6">
-                      <div><span className="font-medium text-gray-700">Name:</span> <span className="text-gray-600">{clientProfile.user?.name || 'N/A'}</span></div>
-                      <div><span className="font-medium text-gray-700">WhatsApp:</span> <span className="text-gray-600">{clientProfile.user?.whatsapp || 'N/A'}</span></div>
-                      <div><span className="font-medium text-gray-700">Email:</span> <span className="text-gray-600">{clientProfile.user?.email || 'N/A'}</span></div>
-                      <div><span className="font-medium text-gray-700">DOB:</span> <span className="text-gray-600">{clientProfile.user?.dob || 'N/A'}</span></div>
-                      <div className="col-span-2"><span className="font-medium text-gray-700">Address:</span> <span className="text-gray-600">{clientProfile.user?.address_line1 || 'N/A'}</span></div>
-                      <div className="col-span-2"><span className="font-medium text-gray-700">Business Address:</span> <span className="text-gray-600">{clientProfile.user?.business_address || 'N/A'}</span></div>
+                      <div><span className="font-medium text-gray-700">Name:</span> <span className="text-gray-600">{clientProfile.user?.name || '-'}</span></div>
+                      <div><span className="font-medium text-gray-700">WhatsApp:</span> <span className="text-gray-600">{clientProfile.user?.whatsapp || '-'}</span></div>
+                      <div><span className="font-medium text-gray-700">Email:</span> <span className="text-gray-600">{clientProfile.user?.email || '-'}</span></div>
+                      <div><span className="font-medium text-gray-700">DOB:</span> <span className="text-gray-600">{clientProfile.user?.dob || '-'}</span></div>
+                      <div className="col-span-2"><span className="font-medium text-gray-700">Address:</span> <span className="text-gray-600">{clientProfile.user?.address_line1 || '-'}</span></div>
+                      <div className="col-span-2"><span className="font-medium text-gray-700">Business Address:</span> <span className="text-gray-600">{clientProfile.user?.business_address || '-'}</span></div>
                     </div>
                   </div>
                 )}
@@ -1745,7 +1830,7 @@ function AdminClientOverview() {
                           View
                         </button>
                       ) : (
-                        <span className="text-gray-600">N/A</span>
+                        <span className="text-gray-600">-</span>
                       )}
                       <label className="cursor-pointer">
                         <input
@@ -1781,7 +1866,7 @@ function AdminClientOverview() {
                           View
                         </button>
                       ) : (
-                        <span className="text-gray-600">N/A</span>
+                        <span className="text-gray-600">-</span>
                       )}
                       <label className="cursor-pointer">
                         <input
@@ -1817,7 +1902,7 @@ function AdminClientOverview() {
                           View
                         </button>
                       ) : (
-                        <span className="text-gray-600">N/A</span>
+                        <span className="text-gray-600">-</span>
                       )}
                       <label className="cursor-pointer">
                         <input
@@ -1864,17 +1949,7 @@ function AdminClientOverview() {
                             Remove
                           </button>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Organisation Type</label>
-                            <input
-                              type="text"
-                              value={org.organisationType}
-                              onChange={(e) => updateOrganization(org.id, 'organisationType', e.target.value)}
-                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
-                              placeholder="e.g., Private Limited"
-                            />
-                          </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Legal Name</label>
                             <input
@@ -2253,7 +2328,7 @@ function AdminClientOverview() {
                         {/* Website Details Section */}
                         <div className="mt-6 pt-4 border-t border-gray-200">
                           <div className="flex items-center justify-between mb-4">
-                            <h5 className="text-md font-semibold text-gray-900">Website Details</h5>
+                            <h5 className="text-md font-semibold text-gray-900">Credentials</h5>
                             <button
                               onClick={() => addWebsiteToOrg(org.id)}
                               className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
@@ -2272,6 +2347,7 @@ function AdminClientOverview() {
                                     <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">URL</th>
                                     <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">Login</th>
                                     <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">Password</th>
+                                    <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">Remarks</th>
                                     <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">Actions</th>
                                   </tr>
                                 </thead>
@@ -2337,6 +2413,15 @@ function AdminClientOverview() {
                                             {website.showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
                                           </button>
                                         </div>
+                                      </td>
+                                      <td className="px-3 py-2 border border-gray-300">
+                                        <input
+                                          type="text"
+                                          value={website.remarks || ''}
+                                          onChange={(e) => updateWebsiteInOrg(org.id, website.id, 'remarks', e.target.value)}
+                                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                          placeholder="Enter remarks"
+                                        />
                                       </td>
                                       <td className="px-3 py-2 border border-gray-300">
                                         <button
@@ -2506,12 +2591,12 @@ function AdminClientOverview() {
                               className={`border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors ${expandedOrgId === idx ? 'bg-gray-50' : 'bg-white'}`}
                             >
                               <td className="px-4 py-3 text-gray-700 font-semibold text-sm">{idx + 1}</td>
-                              <td className="px-4 py-3 text-gray-700 text-sm truncate" title={org.organisation_type}>{org.organisation_type || 'N/A'}</td>
-                              <td className="px-4 py-3 text-gray-700 font-medium text-sm truncate" title={org.legal_name}>{org.legal_name || 'N/A'}</td>
-                              <td className="px-4 py-3 text-gray-600 text-sm truncate" title={org.trade_name}>{org.trade_name || 'N/A'}</td>
-                              <td className="px-4 py-3 text-gray-600 text-sm font-mono truncate" title={org.gstin}>{org.gstin || 'N/A'}</td>
-                              <td className="px-4 py-3 text-gray-600 text-sm font-mono truncate" title={org.tan}>{org.tan || 'N/A'}</td>
-                              <td className="px-4 py-3 text-gray-600 text-sm font-mono truncate" title={org.cin}>{org.cin || 'N/A'}</td>
+                              <td className="px-4 py-3 text-gray-700 text-sm truncate" title={org.organisation_type}>{org.organisation_type || '-'}</td>
+                              <td className="px-4 py-3 text-gray-700 font-medium text-sm truncate" title={org.legal_name}>{org.legal_name || '-'}</td>
+                              <td className="px-4 py-3 text-gray-600 text-sm truncate" title={org.trade_name}>{org.trade_name || '-'}</td>
+                              <td className="px-4 py-3 text-gray-600 text-sm font-mono truncate" title={org.gstin}>{org.gstin || '-'}</td>
+                              <td className="px-4 py-3 text-gray-600 text-sm font-mono truncate" title={org.tan}>{org.tan || '-'}</td>
+                              <td className="px-4 py-3 text-gray-600 text-sm font-mono truncate" title={org.cin}>{org.cin || '-'}</td>
                               <td className="px-4 py-3 text-sm">
                                 <button
                                   onClick={(e) => {
@@ -2653,6 +2738,7 @@ function AdminClientOverview() {
                                                   url: w.url || '',
                                                   login: w.login || '',
                                                   password: w.password || '',
+                                                  remarks: w.remarks || '',
                                                   showPassword: false
                                                 }))
                                               };
@@ -2694,19 +2780,6 @@ function AdminClientOverview() {
                                         {/* Column 1 */}
                                         <div className="space-y-4">
                                           <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Organisation Type</label>
-                                            {isEditingThisOrg ? (
-                                              <input
-                                                type="text"
-                                                value={orgInState?.organisationType || ''}
-                                                onChange={(e) => updateOrganization(orgInState.id, 'organisationType', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                              />
-                                            ) : (
-                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.organisation_type || 'N/A'}</div>
-                                            )}
-                                          </div>
-                                          <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">GSTIN</label>
                                             {isEditingThisOrg ? (
                                               <input
@@ -2716,7 +2789,7 @@ function AdminClientOverview() {
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
                                               />
                                             ) : (
-                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.gstin || 'N/A'}</div>
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.gstin || '-'}</div>
                                             )}
                                           </div>
                                           <div>
@@ -2729,7 +2802,7 @@ function AdminClientOverview() {
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
                                               />
                                             ) : (
-                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.tan || 'N/A'}</div>
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.tan || '-'}</div>
                                             )}
                                           </div>
                                         </div>
@@ -2746,7 +2819,7 @@ function AdminClientOverview() {
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                                               />
                                             ) : (
-                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.legal_name || 'N/A'}</div>
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.legal_name || '-'}</div>
                                             )}
                                           </div>
                                           <div>
@@ -2763,7 +2836,7 @@ function AdminClientOverview() {
                                                 <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                 </svg>
-                                                {org.incorporation_date ? new Date(org.incorporation_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : 'N/A'}
+                                                {org.incorporation_date ? new Date(org.incorporation_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : '-'}
                                               </div>
                                             )}
                                           </div>
@@ -2777,7 +2850,7 @@ function AdminClientOverview() {
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
                                               />
                                             ) : (
-                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.cin || 'N/A'}</div>
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.cin || '-'}</div>
                                             )}
                                           </div>
                                         </div>
@@ -2794,7 +2867,7 @@ function AdminClientOverview() {
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                                               />
                                             ) : (
-                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.trade_name || 'N/A'}</div>
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.trade_name || '-'}</div>
                                             )}
                                           </div>
                                           <div>
@@ -2821,7 +2894,7 @@ function AdminClientOverview() {
                                                 <option value="Artificial Judicial Person">Artificial Judicial Person</option>
                                               </select>
                                             ) : (
-                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.category || 'N/A'}</div>
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.category || '-'}</div>
                                             )}
                                           </div>
                                           <div>
@@ -2898,7 +2971,7 @@ function AdminClientOverview() {
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-y"
                                               />
                                             ) : (
-                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.registered_address || 'N/A'}</div>
+                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">{org.registered_address || '-'}</div>
                                             )}
                                           </div>
                                         </div>
@@ -2943,7 +3016,7 @@ function AdminClientOverview() {
                                                         placeholder="Name"
                                                       />
                                                     ) : (
-                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">{dp.name || 'N/A'}</div>
+                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">{dp.name || '-'}</div>
                                                     )}
                                                   </div>
                                                   <div>
@@ -2957,7 +3030,7 @@ function AdminClientOverview() {
                                                         placeholder="DIN/Number"
                                                       />
                                                     ) : (
-                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">{dp.din_number || dp.dinNumber || 'N/A'}</div>
+                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">{dp.din_number || dp.dinNumber || '-'}</div>
                                                     )}
                                                   </div>
                                                   <div>
@@ -2971,7 +3044,7 @@ function AdminClientOverview() {
                                                         placeholder="Contact"
                                                       />
                                                     ) : (
-                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">{dp.contact || 'N/A'}</div>
+                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">{dp.contact || '-'}</div>
                                                     )}
                                                   </div>
                                                   <div>
@@ -2985,7 +3058,7 @@ function AdminClientOverview() {
                                                         placeholder="Email"
                                                       />
                                                     ) : (
-                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">{dp.email || 'N/A'}</div>
+                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">{dp.email || '-'}</div>
                                                     )}
                                                   </div>
                                                   <div>
@@ -2999,7 +3072,7 @@ function AdminClientOverview() {
                                                       />
                                                     ) : (
                                                       <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
-                                                        {dp.date_of_addition ? formatDateOnly(dp.date_of_addition) : (dp.dateOfAddition ? formatDateOnly(dp.dateOfAddition) : 'N/A')}
+                                                        {dp.date_of_addition ? formatDateOnly(dp.date_of_addition) : (dp.dateOfAddition ? formatDateOnly(dp.dateOfAddition) : '-')}
                                                       </div>
                                                     )}
                                                   </div>
@@ -3080,7 +3153,7 @@ function AdminClientOverview() {
                                                         placeholder="Name"
                                                       />
                                                     ) : (
-                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">{ds.name || 'N/A'}</div>
+                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">{ds.name || '-'}</div>
                                                     )}
                                                   </div>
                                                   <div>
@@ -3094,7 +3167,7 @@ function AdminClientOverview() {
                                                         placeholder="DSC Number"
                                                       />
                                                     ) : (
-                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">{ds.dsc_number || ds.dscNumber || 'N/A'}</div>
+                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">{ds.dsc_number || ds.dscNumber || '-'}</div>
                                                     )}
                                                   </div>
                                                   <div>
@@ -3108,7 +3181,7 @@ function AdminClientOverview() {
                                                       />
                                                     ) : (
                                                       <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
-                                                        {ds.expiry_date ? formatDateOnly(ds.expiry_date) : (ds.expiryDate ? formatDateOnly(ds.expiryDate) : 'N/A')}
+                                                        {ds.expiry_date ? formatDateOnly(ds.expiry_date) : (ds.expiryDate ? formatDateOnly(ds.expiryDate) : '-')}
                                                       </div>
                                                     )}
                                                   </div>
@@ -3288,7 +3361,7 @@ function AdminClientOverview() {
                                       {/* Website Details Section */}
                                       <div className="mt-6 pt-6 border-t border-gray-200">
                                         <div className="flex items-center justify-between mb-4">
-                                          <h5 className="text-md font-semibold text-gray-900">Website Details</h5>
+                                          <h5 className="text-md font-semibold text-gray-900">Credentials</h5>
                                           {isEditingThisOrg && (
                                             <button
                                               onClick={() => addWebsiteToOrg(orgInState.id)}
@@ -3340,7 +3413,7 @@ function AdminClientOverview() {
                                                           <option value="Others 3">Others 3</option>
                                                         </select>
                                                       ) : (
-                                                        website.type || 'N/A'
+                                                        website.type || '-'
                                                       )}
                                                     </td>
                                                     <td className="px-3 py-2 border border-gray-300">
@@ -3357,7 +3430,7 @@ function AdminClientOverview() {
                                                             {website.url}
                                                           </a>
                                                         ) : (
-                                                          'N/A'
+                                                          '-'
                                                         )
                                                       )}
                                                     </td>
@@ -3370,7 +3443,7 @@ function AdminClientOverview() {
                                                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                                                         />
                                                       ) : (
-                                                        website.login || 'N/A'
+                                                        website.login || '-'
                                                       )}
                                                     </td>
                                                     <td className="px-3 py-2 border border-gray-300">
@@ -3391,7 +3464,7 @@ function AdminClientOverview() {
                                                           </button>
                                                         </div>
                                                       ) : (
-                                                        website.password ? '••••••••' : 'N/A'
+                                                        website.password ? '••••••••' : '-'
                                                       )}
                                                     </td>
                                                     {isEditingThisOrg && (
@@ -3601,8 +3674,8 @@ function AdminClientOverview() {
                                 onClick={() => setExpandedAdminTaskId(expandedAdminTaskId === idx ? null : idx)}
                                 className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
                               >
-                                <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : 'N/A'}</td>
-                                <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.title || 'N/A'}</td>
+                                <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : '-'}</td>
+                                <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.title || '-'}</td>
                                 <td className="px-2 py-2 text-gray-600 text-xs">
                                   {task.type ? (
                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -3612,17 +3685,17 @@ function AdminClientOverview() {
                                     }`}>
                                       {task.type.charAt(0).toUpperCase() + task.type.slice(1)}
                                     </span>
-                                  ) : 'N/A'}
+                                  ) : '-'}
                                 </td>
-                                <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.description || 'N/A'}</td>
+                                <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.description || '-'}</td>
                           </tr>
                               {expandedAdminTaskId === idx && (
                                 <tr className="bg-gray-50">
                                   <td colSpan="4" className="px-3 py-3">
                                     <div className="space-y-2 text-xs">
-                                      <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : 'N/A'}</span></div>
-                                      <div><span className="font-medium text-gray-700">Title:</span> <span className="text-gray-600">{task.title || 'N/A'}</span></div>
-                                      <div><span className="font-medium text-gray-700">Type:</span> <span className="text-gray-600">{task.type ? task.type.charAt(0).toUpperCase() + task.type.slice(1) : 'N/A'}</span></div>
+                                      <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : '-'}</span></div>
+                                      <div><span className="font-medium text-gray-700">Title:</span> <span className="text-gray-600">{task.title || '-'}</span></div>
+                                      <div><span className="font-medium text-gray-700">Type:</span> <span className="text-gray-600">{task.type ? task.type.charAt(0).toUpperCase() + task.type.slice(1) : '-'}</span></div>
                                       <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1 whitespace-pre-wrap">{task.description || 'No description'}</p></div>
                                     </div>
                                   </td>
@@ -3662,8 +3735,8 @@ function AdminClientOverview() {
                                 onClick={() => setExpandedUserTaskId(expandedUserTaskId === idx ? null : idx)}
                                 className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
                               >
-                                <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : 'N/A'}</td>
-                                <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.title || 'N/A'}</td>
+                                <td className="px-2 py-2 text-gray-600 text-xs">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : '-'}</td>
+                                <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.title || '-'}</td>
                                 <td className="px-2 py-2 text-gray-600 text-xs">
                                   {task.type ? (
                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -3673,17 +3746,17 @@ function AdminClientOverview() {
                                     }`}>
                                       {task.type.charAt(0).toUpperCase() + task.type.slice(1)}
                                     </span>
-                                  ) : 'N/A'}
+                                  ) : '-'}
                                 </td>
-                                <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.description || 'N/A'}</td>
+                                <td className="px-2 py-2 text-gray-600 truncate text-xs">{task.description || '-'}</td>
                               </tr>
                               {expandedUserTaskId === idx && (
                                 <tr className="bg-gray-50">
                                   <td colSpan="4" className="px-3 py-3">
                                     <div className="space-y-2 text-xs">
-                                      <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : 'N/A'}</span></div>
-                                      <div><span className="font-medium text-gray-700">Title:</span> <span className="text-gray-600">{task.title || 'N/A'}</span></div>
-                                      <div><span className="font-medium text-gray-700">Type:</span> <span className="text-gray-600">{task.type ? task.type.charAt(0).toUpperCase() + task.type.slice(1) : 'N/A'}</span></div>
+                                      <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{task.date ? new Date(task.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : '-'}</span></div>
+                                      <div><span className="font-medium text-gray-700">Title:</span> <span className="text-gray-600">{task.title || '-'}</span></div>
+                                      <div><span className="font-medium text-gray-700">Type:</span> <span className="text-gray-600">{task.type ? task.type.charAt(0).toUpperCase() + task.type.slice(1) : '-'}</span></div>
                                       <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1 whitespace-pre-wrap">{task.description || 'No description'}</p></div>
                                     </div>
                                   </td>
@@ -3880,8 +3953,8 @@ function AdminClientOverview() {
                           onClick={() => setExpandedAdminNoteId(expandedAdminNoteId === idx ? null : idx)}
                           className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
                         >
-                          <td className="px-2 py-2 text-gray-600 text-xs">{note.date || 'N/A'}</td>
-                          <td className="px-2 py-2 text-gray-600 truncate text-xs">{note.description || 'N/A'}</td>
+                          <td className="px-2 py-2 text-gray-600 text-xs">{note.date || '-'}</td>
+                          <td className="px-2 py-2 text-gray-600 truncate text-xs">{note.description || '-'}</td>
                           <td className="px-2 py-2 text-gray-600 text-xs">{note.attachments?.length || 0}</td>
                         </tr>
                         {expandedAdminNoteId === idx && (
@@ -3889,7 +3962,7 @@ function AdminClientOverview() {
                             <td colSpan="3" className="px-3 py-3">
                               <div className="flex justify-between">
                                 <div className="space-y-2 text-xs flex-1">
-                                  <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{note.date || 'N/A'}</span></div>
+                                  <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{note.date || '-'}</span></div>
                                   <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1">{note.description}</p></div>
                                   {note.clientActionItems && note.clientActionItems.length > 0 && (
                                     <div>
@@ -4016,15 +4089,15 @@ function AdminClientOverview() {
                               onClick={() => setExpandedUserNoteId(expandedUserNoteId === idx ? null : idx)}
                               className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
                             >
-                              <td className="px-2 py-2 text-gray-600 text-xs">{note.date || 'N/A'}</td>
-                              <td className="px-2 py-2 text-gray-600 truncate text-xs">{note.description || 'N/A'}</td>
+                              <td className="px-2 py-2 text-gray-600 text-xs">{note.date || '-'}</td>
+                              <td className="px-2 py-2 text-gray-600 truncate text-xs">{note.description || '-'}</td>
                               <td className="px-2 py-2 text-gray-600 text-xs">{note.attachments?.length || 0}</td>
                             </tr>
                             {expandedUserNoteId === idx && (
                               <tr className="bg-gray-50">
                                 <td colSpan="3" className="px-3 py-3">
                                   <div className="space-y-2 text-xs">
-                                    <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{note.date || 'N/A'}</span></div>
+                                    <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{note.date || '-'}</span></div>
                                     <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1">{note.description}</p></div>
                                     {note.attachments && note.attachments.length > 0 && (
                                       <div>
@@ -4094,6 +4167,19 @@ function AdminClientOverview() {
       {/* Services Tab */}
       {activeTab === 'services' && (
         <div className="space-y-4">
+          {/* Header with Add Button */}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Services</h2>
+            <button
+              onClick={() => navigate(`/admin/new-registration?userId=${userId}`)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-all duration-200 shadow-md"
+              title="New Registration"
+            >
+              <AiOutlinePlus className="w-5 h-5" />
+              <span className="text-sm font-medium">New Registration</span>
+            </button>
+          </div>
+
           {allRegistrations.length === 0 ? (
             <div className="bg-white rounded-xl p-12 text-center border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
               <p className="text-gray-600">No registrations found for this client.</p>
@@ -4540,9 +4626,9 @@ function AdminClientOverview() {
                               className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
                             >
                               <td className="px-2 py-2 text-gray-600 text-xs">
-                                {entry.date ? new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : 'N/A'}
+                                {entry.date ? new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : '-'}
                               </td>
-                              <td className="px-2 py-2 text-gray-600 truncate text-xs">{entry.description || 'N/A'}</td>
+                              <td className="px-2 py-2 text-gray-600 truncate text-xs">{entry.description || '-'}</td>
                               <td className="px-2 py-2 text-gray-600 text-xs">
                                 <button
                                   onClick={(e) => {
@@ -4559,7 +4645,7 @@ function AdminClientOverview() {
                               <tr className="bg-gray-50">
                                 <td colSpan="3" className="px-3 py-3">
                                   <div className="space-y-2 text-xs">
-                                    <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{entry.date ? new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : 'N/A'}</span></div>
+                                    <div><span className="font-medium text-gray-700">Date:</span> <span className="text-gray-600">{entry.date ? new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : '-'}</span></div>
                                     <div><span className="font-medium text-gray-700">Description:</span><p className="text-gray-600 mt-1 whitespace-pre-wrap">{entry.description || 'No description'}</p></div>
                                   </div>
                                 </td>
@@ -4611,6 +4697,43 @@ function AdminClientOverview() {
             </div>
           )}
         </>
+      )}
+
+      {/* Payment Method Selection Dialog */}
+      {showPaymentMethodDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Payment Method Required
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Payment is pending. Please select the payment method before changing the status.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => handlePaymentMethodSelection('cash')}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
+              >
+                Paid by Cash
+              </button>
+              <button
+                onClick={() => handlePaymentMethodSelection('other')}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+              >
+                Paid by Other Source
+              </button>
+              <button
+                onClick={() => {
+                  setShowPaymentMethodDialog(false);
+                  setPendingStatusUpdate(null);
+                }}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

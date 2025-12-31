@@ -423,7 +423,7 @@ function AdminClientKYCDetail() {
           {clientInfo && (
             <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-4 mb-4">
               <p className="text-sm text-gray-600">
-                <span className="font-medium">{clientInfo.name || 'N/A'}</span>
+                <span className="font-medium">{clientInfo.name || '-'}</span>
                 {clientInfo.email && <span className="text-gray-500"> • {clientInfo.email}</span>}
               </p>
               <p className="text-xs text-gray-500 font-mono mt-1">{clientInfo.user_id}</p>

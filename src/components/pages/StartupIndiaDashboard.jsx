@@ -60,7 +60,7 @@ function StartupIndiaDashboard() {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', { 
       year: 'numeric', 
@@ -163,11 +163,11 @@ function StartupIndiaDashboard() {
                         </div>
                         <div>
                           <span className="font-medium">Package:</span>{' '}
-                          {registration.package_name || 'N/A'}
+                          {registration.package_name || '-'}
                         </div>
                         <div>
                           <span className="font-medium">Amount:</span>{' '}
-                          ₹{registration.package_price ? Number(registration.package_price).toLocaleString('en-IN') : 'N/A'}
+                          ₹{registration.package_price ? Number(registration.package_price).toLocaleString('en-IN') : '-'}
                         </div>
                         <div>
                           <span className="font-medium">Created:</span>{' '}

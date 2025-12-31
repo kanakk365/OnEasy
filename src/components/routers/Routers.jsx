@@ -137,6 +137,7 @@ import AdminClientDirectorsKYC from "../admin/pages/AdminClientDirectorsKYC";
 import AdminClientDirectorsDetail from "../admin/pages/AdminClientDirectorsDetail";
 import AdminClientOrganizations from "../admin/pages/AdminClientOrganizations";
 import AdminClientCompanyDocuments from "../admin/pages/AdminClientCompanyDocuments";
+import AdminOrganizations from "../admin/pages/AdminOrganizations";
 import SuperAdminLayout from "../superadmin/layout/SuperAdminLayout";
 import SuperAdminClients from "../superadmin/pages/SuperAdminClients";
 import SuperAdminProfile from "../superadmin/pages/SuperAdminProfile";
@@ -768,6 +769,7 @@ function Routers() {
         <Route path="custom-payment" element={<AdminCustomPayment />} />
         <Route path="fill-form-new" element={<AdminFillFormNew />} />
         <Route path="services" element={<AdminServices />} />
+        <Route path="organizations" element={<AdminOrganizations />} />
         <Route path="documents-vault" element={<AdminDocumentsVault />} />
         <Route path="client-documents/:userId" element={<AdminClientDocuments />} />
         <Route path="client-kyc/:userId" element={<AdminClientKYC />} />

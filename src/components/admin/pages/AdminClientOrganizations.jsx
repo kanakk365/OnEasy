@@ -37,9 +37,9 @@ function AdminClientOrganizations() {
       
       if (orgResponse.success && orgResponse.data && orgResponse.data.organisations) {
         const validOrgs = orgResponse.data.organisations.filter(org => {
-          const hasLegalName = org.legal_name && org.legal_name.trim() !== '' && org.legal_name !== 'N/A';
-          const hasTradeName = org.trade_name && org.trade_name.trim() !== '' && org.trade_name !== 'N/A';
-          const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== 'N/A';
+          const hasLegalName = org.legal_name && org.legal_name.trim() !== '' && org.legal_name !== '-';
+          const hasTradeName = org.trade_name && org.trade_name.trim() !== '' && org.trade_name !== '-';
+          const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== '-';
           return hasLegalName || hasTradeName || hasGstin;
         });
         setOrganizations(validOrgs);
@@ -86,7 +86,7 @@ function AdminClientOrganizations() {
               <h1 className="text-2xl font-semibold text-gray-900">Directors/Partners Documents</h1>
               <div className="mt-2">
                 <p className="text-gray-600">
-                  <span className="font-medium">{clientInfo.name || 'N/A'}</span>
+                  <span className="font-medium">{clientInfo.name || '-'}</span>
                   {clientInfo.email && <span className="text-gray-500"> • {clientInfo.email}</span>}
                 </p>
                 <p className="text-sm text-gray-500 font-mono mt-1">{clientInfo.user_id}</p>
@@ -134,9 +134,9 @@ function AdminClientOrganizations() {
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-gray-900">
-                          {org.legal_name !== 'N/A' ? org.legal_name : org.trade_name}
+                          {org.legal_name !== '-' ? org.legal_name : org.trade_name}
                         </p>
-                        {org.trade_name !== 'N/A' && org.legal_name !== 'N/A' && org.trade_name !== org.legal_name && (
+                        {org.trade_name !== '-' && org.legal_name !== '-' && org.trade_name !== org.legal_name && (
                           <p className="text-xs text-gray-500 mt-1">
                             Trade: {org.trade_name}
                           </p>
@@ -150,7 +150,7 @@ function AdminClientOrganizations() {
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-sm text-gray-900">
-                        {org.organisation_type || 'N/A'}
+                        {org.organisation_type || '-'}
                       </p>
                     </td>
                     <td className="px-6 py-4">

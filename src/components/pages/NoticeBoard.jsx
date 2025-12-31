@@ -57,10 +57,10 @@ function NoticeBoard() {
   }, [allNotices, activeTab]);
 
   const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
+    if (!dateString) return "-";
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return "N/A";
+      if (isNaN(date.getTime())) return "-";
       return date.toLocaleDateString("en-IN", {
         year: "numeric",
         month: "short",
@@ -68,7 +68,7 @@ function NoticeBoard() {
         timeZone: "Asia/Kolkata",
       });
     } catch {
-      return "N/A";
+      return "-";
     }
   };
 

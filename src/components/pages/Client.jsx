@@ -146,7 +146,7 @@ function Client() {
   }, []);
 
   const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
+    if (!dateString) return "-";
     const d = new Date(dateString);
     return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
   };
@@ -581,17 +581,17 @@ function Client() {
                       </div>
                       <div className="col-span-3 flex items-center">
                         <span className="text-sm text-gray-900">
-                          {org.legal_name || 'N/A'}
+                          {org.legal_name || '-'}
                         </span>
                       </div>
                       <div className="col-span-3 flex items-center">
                         <span className="text-sm text-gray-900">
-                          {org.trade_name || 'N/A'}
+                          {org.trade_name || '-'}
                         </span>
                       </div>
                       <div className="col-span-2 flex items-center">
                         <span className="text-sm text-gray-500">
-                          {org.gstin || 'N/A'}
+                          {org.gstin || '-'}
                         </span>
                       </div>
                       <div className="col-span-2 flex items-center">

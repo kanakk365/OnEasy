@@ -64,7 +64,7 @@ function PrivateLimitedDashboard() {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', { 
       year: 'numeric', 
@@ -216,15 +216,15 @@ function PrivateLimitedDashboard() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
                       <div>
                         <span className="font-medium">Ticket ID:</span>{' '}
-                        <span className="text-[#00486D]">{registration.ticket_id || 'N/A'}</span>
+                        <span className="text-[#00486D]">{registration.ticket_id || '-'}</span>
                       </div>
                       <div>
                         <span className="font-medium">Package:</span>{' '}
-                        {registration.package_name || 'N/A'}
+                        {registration.package_name || '-'}
                       </div>
                       <div>
                         <span className="font-medium">Amount:</span>{' '}
-                        ₹{registration.package_price ? Number(registration.package_price).toLocaleString('en-IN') : 'N/A'}
+                        ₹{registration.package_price ? Number(registration.package_price).toLocaleString('en-IN') : '-'}
                       </div>
                       <div>
                         <span className="font-medium">Created:</span>{' '}

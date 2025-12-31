@@ -23,18 +23,18 @@ function OrganizationsList() {
         if (organisations && organisations.length > 0) {
           // Filter organizations that have at least one meaningful field
           const validOrgs = organisations.filter(org => {
-            const hasLegalName = org.legal_name && org.legal_name.trim() !== '' && org.legal_name !== 'N/A';
-            const hasTradeName = org.trade_name && org.trade_name.trim() !== '' && org.trade_name !== 'N/A';
-            const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== 'N/A';
+            const hasLegalName = org.legal_name && org.legal_name.trim() !== '' && org.legal_name !== '-';
+            const hasTradeName = org.trade_name && org.trade_name.trim() !== '' && org.trade_name !== '-';
+            const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== '-';
             return hasLegalName || hasTradeName || hasGstin;
           });
           
           setOrganizations(validOrgs.map(org => ({
             id: org.id,
-            legalName: org.legal_name || 'N/A',
-            tradeName: org.trade_name || 'N/A',
-            gstin: org.gstin || 'N/A',
-            organisationType: org.organisation_type || 'N/A',
+            legalName: org.legal_name || '-',
+            tradeName: org.trade_name || '-',
+            gstin: org.gstin || '-',
+            organisationType: org.organisation_type || '-',
             incorporationDate: org.incorporation_date || null
           })));
         } else {
@@ -52,7 +52,7 @@ function OrganizationsList() {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString || dateString === 'N/A') return 'N/A';
+    if (!dateString || dateString === '-') return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', { 
       year: 'numeric', 
@@ -109,19 +109,19 @@ function OrganizationsList() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-semibold text-gray-900 truncate">
-                      {org.legalName !== 'N/A' ? org.legalName : org.tradeName}
+                      {org.legalName !== '-' ? org.legalName : org.tradeName}
                     </h3>
-                    {org.tradeName !== 'N/A' && org.legalName !== 'N/A' && org.tradeName !== org.legalName && (
+                    {org.tradeName !== '-' && org.legalName !== '-' && org.tradeName !== org.legalName && (
                       <p className="text-sm text-gray-500 truncate mt-1">
                         {org.tradeName}
                       </p>
                     )}
-                    {org.organisationType !== 'N/A' && (
+                    {org.organisationType !== '-' && (
                       <p className="text-xs text-gray-400 mt-1">
                         {org.organisationType}
                       </p>
                     )}
-                    {org.gstin !== 'N/A' && (
+                    {org.gstin !== '-' && (
                       <p className="text-xs font-mono text-gray-600 mt-2">
                         GSTIN: {org.gstin}
                       </p>

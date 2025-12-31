@@ -105,7 +105,7 @@ function GSTViewDetails() {
 
   const formatValue = (value) => {
     if (value === null || value === undefined || value === '') {
-      return 'N/A';
+      return '-';
     }
     if (typeof value === 'boolean') {
       return value ? 'Yes' : 'No';
@@ -117,7 +117,7 @@ function GSTViewDetails() {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', { 
       year: 'numeric', 
@@ -346,7 +346,7 @@ function GSTViewDetails() {
               <div>
                 <span className="text-sm font-medium text-gray-600">Amount:</span>
                 <p className="text-gray-900">
-                  {registration.package_price ? `₹${Number(registration.package_price).toLocaleString('en-IN')}` : 'N/A'}
+                  {registration.package_price ? `₹${Number(registration.package_price).toLocaleString('en-IN')}` : '-'}
                 </p>
               </div>
               <div>
