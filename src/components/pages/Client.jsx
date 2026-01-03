@@ -12,8 +12,8 @@ function Client() {
   const [loadingService, setLoadingService] = React.useState(true);
   const [allNotices, setAllNotices] = React.useState([]);
   const [loadingNotice, setLoadingNotice] = React.useState(true);
-  const [activeNoticeTab, setActiveNoticeTab] = React.useState('All Notices'); // 'All Notices' or 'My Notices'
-  const [activeServiceTab, setActiveServiceTab] = React.useState('Open');
+  const [activeNoticeTab, setActiveNoticeTab] = React.useState("All Notices"); // 'All Notices' or 'My Notices'
+  const [activeServiceTab, setActiveServiceTab] = React.useState("Open");
   const [organizations, setOrganizations] = React.useState([]);
   const [loadingOrganizations, setLoadingOrganizations] = React.useState(true);
   const [greeting, setGreeting] = React.useState("");
@@ -29,7 +29,9 @@ function Client() {
   React.useEffect(() => {
     const loadLatestService = async () => {
       try {
-        const storedUser = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}");
+        const storedUser = JSON.parse(
+          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+        );
         const userId = storedUser.id;
         const rawName = storedUser.name || storedUser.fullName || "there";
         const userName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
@@ -39,9 +41,12 @@ function Client() {
           `Great to see you, ${userName}! Let's make today productive!`,
           `${userName}, you're doing amazing. Keep going!`,
           `Welcome, ${userName}! Small steps lead to big wins!`,
-          `Hey ${userName}, you've got this! Let's get it done!`
+          `Hey ${userName}, you've got this! Let's get it done!`,
         ];
-        const pick = motivationalLines[Math.floor(Math.random() * motivationalLines.length)];
+        const pick =
+          motivationalLines[
+            Math.floor(Math.random() * motivationalLines.length)
+          ];
         setGreeting(pick);
 
         if (!userId) {
@@ -50,10 +55,18 @@ function Client() {
         }
 
         const [pl, prop, si, gst] = await Promise.all([
-          apiClient.get(`/private-limited/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
-          apiClient.get(`/proprietorship/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
-          apiClient.get(`/startup-india/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
-          apiClient.get(`/gst/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
+          apiClient
+            .get(`/private-limited/user-registrations/${userId}`)
+            .catch(() => ({ success: false, data: [] })),
+          apiClient
+            .get(`/proprietorship/user-registrations/${userId}`)
+            .catch(() => ({ success: false, data: [] })),
+          apiClient
+            .get(`/startup-india/user-registrations/${userId}`)
+            .catch(() => ({ success: false, data: [] })),
+          apiClient
+            .get(`/gst/user-registrations/${userId}`)
+            .catch(() => ({ success: false, data: [] })),
         ]);
 
         const normalize = (resp) =>
@@ -77,7 +90,8 @@ function Client() {
 
         const sorted = combined.sort(
           (a, b) =>
-            new Date(b.created_at || b.createdAt || b.updated_at || 0) - new Date(a.created_at || a.createdAt || a.updated_at || 0)
+            new Date(b.created_at || b.createdAt || b.updated_at || 0) -
+            new Date(a.created_at || a.createdAt || a.updated_at || 0)
         );
 
         setAllServices(sorted);
@@ -93,11 +107,15 @@ function Client() {
     const loadNotice = async () => {
       try {
         // Get current user ID to fetch user-specific notices
-        const storedUser = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}");
+        const storedUser = JSON.parse(
+          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+        );
         const userId = storedUser.id;
-        
+
         // Pass userId as query parameter to get global notices + user-specific notices
-        const url = userId ? `/admin/notices?userId=${userId}` : '/admin/notices';
+        const url = userId
+          ? `/admin/notices?userId=${userId}`
+          : "/admin/notices";
         const res = await apiClient.get(url);
         if (res.success && Array.isArray(res.data)) {
           // Sort by created_at descending (newest first)
@@ -111,22 +129,22 @@ function Client() {
           setAllNotices([]);
         }
       } catch (e) {
-        console.error('Failed to fetch notice:', e);
+        console.error("Failed to fetch notice:", e);
         setAllNotices([]);
       } finally {
         setLoadingNotice(false);
       }
     };
     loadNotice();
-    
+
     const loadOrganizations = async () => {
       try {
         setLoadingOrganizations(true);
         const response = await getUsersPageData();
-        
+
         if (response.success && response.data) {
           const { organisations } = response.data;
-          
+
           if (organisations && organisations.length > 0) {
             setOrganizations(organisations);
           } else {
@@ -136,7 +154,7 @@ function Client() {
           setOrganizations([]);
         }
       } catch (error) {
-        console.error('Error loading organizations:', error);
+        console.error("Error loading organizations:", error);
         setOrganizations([]);
       } finally {
         setLoadingOrganizations(false);
@@ -148,7 +166,11 @@ function Client() {
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     const d = new Date(dateString);
-    return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+    return d.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
   const getStatusLabel = (reg) => {
@@ -163,15 +185,19 @@ function Client() {
 
   // Filter notices based on active tab
   const filteredNotices = React.useMemo(() => {
-    const storedUser = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}");
+    const storedUser = JSON.parse(
+      localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+    );
     const userId = storedUser.id;
 
-    if (activeNoticeTab === 'All Notices') {
+    if (activeNoticeTab === "All Notices") {
       // Show only global notices (user_id is null)
-      return allNotices.filter(notice => !notice.user_id);
+      return allNotices.filter((notice) => !notice.user_id);
     } else {
       // Show only user-specific notices (user_id matches current user)
-      return allNotices.filter(notice => notice.user_id && String(notice.user_id) === String(userId));
+      return allNotices.filter(
+        (notice) => notice.user_id && String(notice.user_id) === String(userId)
+      );
     }
   }, [allNotices, activeNoticeTab]);
 
@@ -182,39 +208,46 @@ function Client() {
 
   const getServiceTab = React.useCallback((reg) => {
     const status = getStatusLabel(reg);
-    if (!status) return 'Open';
-    
+    if (!status) return "Open";
+
     const statusLower = status.toLowerCase();
-    
+
     // Completed statuses go to Resolved
-    if (statusLower === 'completed' || statusLower === 'payment completed') {
-      return 'Resolved';
+    if (statusLower === "completed" || statusLower === "payment completed") {
+      return "Resolved";
     }
-    
+
     // In Progress statuses
-    if (statusLower === 'wip' || 
-        statusLower === 'data received' || 
-        statusLower === 'awaiting confirmation from the govt' ||
-        statusLower === 'awaiting confirmation from the government' ||
-        statusLower === 'data pending from client' ||
-        statusLower === 'in progress' ||
-        statusLower === 'submitted' ||
-        statusLower === 'registered') {
-      return 'In progress';
+    if (
+      statusLower === "wip" ||
+      statusLower === "data received" ||
+      statusLower === "awaiting confirmation from the govt" ||
+      statusLower === "awaiting confirmation from the government" ||
+      statusLower === "data pending from client" ||
+      statusLower === "in progress" ||
+      statusLower === "submitted" ||
+      statusLower === "registered"
+    ) {
+      return "In progress";
     }
-    
+
     // Technical issues and payment pending are still in progress
-    if (statusLower === 'technical issue' || statusLower === 'payment pending') {
-      return 'In progress';
+    if (
+      statusLower === "technical issue" ||
+      statusLower === "payment pending"
+    ) {
+      return "In progress";
     }
-    
+
     // Default to Open
-    return 'Open';
+    return "Open";
   }, []);
 
   const filteredServices = React.useMemo(() => {
     if (!allServices || allServices.length === 0) return [];
-    return allServices.filter(service => getServiceTab(service) === activeServiceTab);
+    return allServices.filter(
+      (service) => getServiceTab(service) === activeServiceTab
+    );
   }, [allServices, activeServiceTab, getServiceTab]);
 
   // Get the latest service for the active tab
@@ -225,14 +258,18 @@ function Client() {
 
   const getStatusBadgeColor = (status) => {
     if (!status) return "bg-gray-100 text-gray-800";
-    
+
     const statusLower = status.toLowerCase();
-    
+
     // Admin service status colors
     if (statusLower === "completed") {
       return "bg-green-100 text-green-800";
     }
-    if (statusLower === "wip" || statusLower === "data received" || statusLower === "awaiting confirmation from the govt") {
+    if (
+      statusLower === "wip" ||
+      statusLower === "data received" ||
+      statusLower === "awaiting confirmation from the govt"
+    ) {
       return "bg-blue-100 text-blue-800";
     }
     if (statusLower === "data pending from client") {
@@ -244,9 +281,13 @@ function Client() {
     if (statusLower === "payment pending") {
       return "bg-orange-100 text-orange-800";
     }
-    
+
     // Default status colors
-    if (statusLower === "payment_completed" || statusLower === "paid" || statusLower === "payment completed") {
+    if (
+      statusLower === "payment_completed" ||
+      statusLower === "paid" ||
+      statusLower === "payment completed"
+    ) {
       return "bg-green-100 text-green-800";
     }
     if (statusLower === "submitted" || statusLower === "registered") {
@@ -255,7 +296,7 @@ function Client() {
     if (statusLower === "draft") {
       return "bg-gray-100 text-gray-800";
     }
-    
+
     return "bg-gray-100 text-gray-800";
   };
 
@@ -268,8 +309,10 @@ function Client() {
     const tid = (reg.ticket_id || reg.id || "").toString().toUpperCase();
     if (tid.startsWith("OPC_")) return "OPC";
     if (tid.startsWith("LLP_")) return "LLP";
-    if (tid.startsWith("PART_") || tid.startsWith("PARTNERSHIP_")) return "Partnership";
-    if (tid.startsWith("SEC8_") || tid.startsWith("SECTION8_")) return "Section 8";
+    if (tid.startsWith("PART_") || tid.startsWith("PARTNERSHIP_"))
+      return "Partnership";
+    if (tid.startsWith("SEC8_") || tid.startsWith("SECTION8_"))
+      return "Section 8";
     if (tid.startsWith("PVT_")) return "Private Limited";
     if (tid.startsWith("PROP_")) return "Proprietorship";
     if (tid.startsWith("SI_")) return "Startup India";
@@ -278,338 +321,299 @@ function Client() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-4 md:py-6">
-      <div className="mb-6 md:mb-8">
-        <h1 className="text-xl md:text-2xl font-semibold text-gray-900 mb-1">
-          {greeting || "Welcome back!"}
-        </h1>
-        <p className="text-sm md:text-base text-gray-600">
+    <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
+      <div className="mb-8">
+        <h1 className="text-2xl font-medium text-gray-900 mb-2">
           The Intelligent Business Owner Dashboard
+        </h1>
+        <p className="text-gray-500">
+          A Unified Hub for Management and Insights
         </p>
       </div>
 
-      <div className="grid grid-cols-12 gap-4 md:gap-6 lg:gap-8">
-        <div className="col-span-12 lg:col-span-6 space-y-4 md:space-y-6 lg:space-y-8">
-          <div className="bg-white rounded-xl p-5 transition-all duration-300 cursor-pointer border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
-            <div className="flex justify-between items-center mb-4">
+      {/* Overall Compliances Section - Wrapped in White Card */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">
+          Overall Compliances - 5
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
+            <div className="text-3xl font-semibold text-[#023752] mb-2">3</div>
+            <div className="text-sm font-medium text-gray-700">
+              Upcoming Compliances
+            </div>
+          </div>
+          <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
+            <div className="text-3xl font-semibold text-[#023752] mb-2">0</div>
+            <div className="text-sm font-medium text-gray-700">
+              Ongoing Services
+            </div>
+          </div>
+          <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
+            <div className="text-3xl font-semibold text-[#023752] mb-2">2</div>
+            <div className="text-sm font-medium text-gray-700">
+              Pending Requests
+            </div>
+          </div>
+          <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
+            <div className="text-3xl font-semibold text-[#023752] mb-2">0</div>
+            <div className="text-sm font-medium text-gray-700">
+              Upcoming Compliances
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-12 gap-8">
+        {/* Left Column: Service Requests */}
+        <div className="col-span-12 lg:col-span-7">
+          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm h-full">
+            <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg font-medium text-gray-900">
-                Notice Board
+                Service Requests
               </h2>
-              <a
-                href="/notice-board"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate('/notice-board');
-                }}
-                className="text-[#01334C] hover:text-[#00486D] transition-colors duration-200 text-sm font-medium hover:underline"
+              <button
+                onClick={() => navigate("/client-services")}
+                className="text-sm font-medium text-[#00486D] hover:underline cursor-pointer"
               >
                 View all
-              </a>
-            </div>
-            
-            {/* Tabs */}
-            <div className="flex border-b border-gray-100 mb-4 overflow-x-auto">
-              <button 
-                onClick={() => setActiveNoticeTab('All Notices')}
-                className={`pb-2 mr-4 text-xs font-medium whitespace-nowrap transition-colors ${
-                  activeNoticeTab === 'All Notices' 
-                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                All Notices
-              </button>
-              <button 
-                onClick={() => setActiveNoticeTab('My Notices')}
-                className={`pb-2 text-xs font-medium whitespace-nowrap transition-colors ${
-                  activeNoticeTab === 'My Notices' 
-                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                My Notices
               </button>
             </div>
 
-            <div className="bg-amber-50 p-4 rounded-lg flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-amber-400 rounded-full flex items-center justify-center">
-                  <TriangleAlert className="text-white w-5 h-5" />
-                </div>
-              </div>
-              <div>
-                {loadingNotice ? (
-                  <p className="text-gray-600 text-sm">Loading notice...</p>
-                ) : notice ? (
-                  <div className="space-y-1">
-                    <p className="text-gray-800 text-sm leading-relaxed font-semibold">
-                      {notice.title}
-                    </p>
-                    <p className="text-gray-800 text-sm leading-relaxed">
-                      {notice.description}
-                      {notice.link && (
-                        <>
-                          {" "}
-                          <a
-                            href={notice.link}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-[#01334C] hover:text-[#00486D] transition-colors duration-200 hover:underline ml-1 font-medium"
-                          >
-                            Learn more
-                          </a>
-                        </>
-                      )}
-                    </p>
+            {/* Tabs */}
+            <div className="flex w-full border-b border-gray-100 mb-0">
+              {["Open", "In progress", "Resolved"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveServiceTab(tab)}
+                  className={`flex-1 py-3 text-sm font-medium transition-all relative ${
+                    activeServiceTab === tab
+                      ? "bg-[#01334C] text-white rounded-tl-2xl rounded-br-2xl"
+                      : "text-gray-400 hover:text-gray-600 bg-gray-50/50"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {/* Service List Items */}
+            <div className="bg-[#F8FAFC] rounded-b-xl p-4 min-h-[300px]">
+              <div className="space-y-0">
+                {loadingService ? (
+                  <div className="text-center py-8 text-gray-400">
+                    Loading services...
                   </div>
+                ) : filteredServices.length > 0 ? (
+                  filteredServices.slice(0, 5).map((service, idx) => (
+                    <div
+                      key={idx}
+                      className="grid grid-cols-12 gap-4 py-4 px-2 border-b border-gray-100 items-center last:border-0 hover:bg-white transition-colors cursor-pointer"
+                    >
+                      <div className="col-span-2 text-sm font-medium text-gray-900">
+                        #
+                        {String(service.ticket_id || service.id)
+                          .slice(-5)
+                          .toUpperCase()}
+                        CIN
+                      </div>
+                      <div className="col-span-4 text-sm font-medium text-gray-900 truncate">
+                        {formatServiceName(service)}
+                      </div>
+                      <div className="col-span-3 flex justify-center">
+                        <span
+                          className={`px-6 py-1.5 rounded-full text-sm font-medium ${
+                            service.status === "Open" ||
+                            getStatusLabel(service) === "Open"
+                              ? "bg-[#D1FAE5] text-[#065F46]"
+                              : getStatusBadgeColor(getStatusLabel(service))
+                          }`}
+                        >
+                          {getStatusLabel(service)}
+                        </span>
+                      </div>
+                      <div className="col-span-3 text-sm font-medium text-gray-900 text-right">
+                        {formatDate(service.updated_at || service.created_at)}
+                      </div>
+                    </div>
+                  ))
                 ) : (
-                  <p className="text-gray-600 text-sm">
-                    {activeNoticeTab === 'All Notices' 
-                      ? 'No global notices available.' 
-                      : 'No notices assigned to you.'}
-                  </p>
+                  <div className="text-center py-10 text-gray-400">
+                    No services found.
+                  </div>
                 )}
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="bg-white rounded-lg p-4 transition-all duration-300 cursor-pointer border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
-            <div className="mb-4">
+        {/* Right Column: Notice Board & Upcoming Compliances */}
+        <div className="col-span-12 lg:col-span-5 space-y-8">
+          {/* Notice Board */}
+          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-medium text-gray-900">
+                Notice Board
+              </h2>
+              <button
+                onClick={() => navigate("/notice-board")}
+                className="text-sm font-medium text-[#00486D] hover:underline cursor-pointer"
+              >
+                View all
+              </button>
+            </div>
+
+            {loadingNotice ? (
+              <div className="text-sm text-gray-400">Loading...</div>
+            ) : notice ? (
+              <div className="bg-[#FFF9F0] rounded-xl p-6 border border-[#FFF0D4]">
+                <div className="flex items-start space-x-4">
+                  <div className="bg-[#FFAB00] rounded-full p-2.5 flex-shrink-0 shadow-sm text-white">
+                    <TriangleAlert className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-gray-900 text-sm font-medium mb-1">
+                      {notice.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-1">
+                      {notice.description}
+                    </p>
+                    {notice.link && (
+                      <a
+                        href={notice.link}
+                        className="text-[#023752] font-medium text-sm hover:underline"
+                      >
+                        File Now.
+                      </a>
+                    )}
+                    {/* Pagination dots simulation */}
+                    <div className="mt-4 flex space-x-1.5 opacity-50">
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-800"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 text-center text-sm text-gray-500">
+                No notices.
+              </div>
+            )}
+          </div>
+
+          {/* Upcoming Compliances */}
+          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm relative overflow-hidden">
+            <div className="mb-6">
               <h2 className="text-lg font-medium text-gray-900">
                 Upcoming Compliances
               </h2>
             </div>
-            <div className="bg-red-50 rounded-lg p-5 space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2"></div>
-                <p className="text-gray-700 text-sm">
-                  GST Filing – Due in 7 days
-                </p>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2"></div>
-                <p className="text-gray-700 text-sm">
-                  Income Tax Return – Due in 14 days
-                </p>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2"></div>
-                <p className="text-gray-700 text-sm">
-                  ROC Annual Filing – Due in 21 days
-                </p>
-              </div>
-              <button className="mt-2 text-white text-sm px-4 py-2 rounded-lg transition-all duration-200" style={{ background: 'linear-gradient(180deg, #FF3D00 0%, #AD2C04 100%)' }}>
+
+            <div className="bg-[#FFF5F3] rounded-xl p-6">
+              <ul className="space-y-4 mb-6">
+                {[
+                  "GST Filing – Due in 7 days",
+                  "Income Tax Return – Due in 14 days",
+                  "ROC Annual Filing – Due in 21 days",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center space-x-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#FF3D00]"></div>
+                    <span className="text-sm text-gray-800 font-medium">
+                      {item}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                className="text-white text-sm font-medium px-6 py-2.5 rounded-lg transition-all shadow-md active:scale-95 cursor-pointer"
+                style={{
+                  background:
+                    "linear-gradient(180deg, #FF3D00 0%, #AD2C04 100%)",
+                }}
+              >
                 Get Help
               </button>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="col-span-12 lg:col-span-6 space-y-4 md:space-y-6 lg:space-y-8">
-          {/* <div className="bg-white rounded-lg p-5 transition-all duration-300 cursor-pointer border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-medium text-gray-900">
-                Ongoing Services & Status
-              </h2>
-              <a
-                href="#"
-                className="text-[#01334C] hover:text-[#00486D] transition-colors duration-200 text-sm font-medium hover:underline"
-              >
-                View all
-              </a>
-            </div>
-            <div className="space-y-5">
-              <div>
-                <div className="flex items-center space-x-2 mb-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
-                  <p className="text-gray-700 text-sm">
-                    Document Collection (In Progress)
-                  </p>
-                </div>
-                <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-amber-500 rounded-full"
-                    style={{ width: "30%" }}
-                  ></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center space-x-2 mb-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
-                  <p className="text-gray-700 text-sm">
-                    Trademark Filing (Awaiting Approval)
-                  </p>
-                </div>
-                <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-red-500 rounded-full"
-                    style={{ width: "60%" }}
-                  ></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center space-x-2 mb-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                  <p className="text-gray-700 text-sm">
-                    MSME Registration (Completed)
-                  </p>
-                </div>
-                <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-green-500 rounded-full"
-                    style={{ width: "100%" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div> */}
-
-          <div className="bg-white rounded-lg p-5 mt-6 transition-all duration-300 cursor-pointer border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium">Service Requests</h2>
-              <a
-                href="/client-services"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate('/client-services');
-                }}
-                className="text-[#01334C] hover:text-[#00486D] transition-colors duration-200 text-sm font-medium hover:underline"
-              >
-                View all
-              </a>
-            </div>
-            <div className="flex border-b border-gray-100 mb-4 overflow-x-auto">
-              <button 
-                onClick={() => setActiveServiceTab('Open')}
-                className={`pb-2 mr-4 md:mr-6 text-xs md:text-sm font-medium whitespace-nowrap transition-colors ${
-                  activeServiceTab === 'Open' 
-                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Open
-              </button>
-              <button 
-                onClick={() => setActiveServiceTab('In progress')}
-                className={`pb-2 mr-4 md:mr-6 text-xs md:text-sm font-medium whitespace-nowrap transition-colors ${
-                  activeServiceTab === 'In progress' 
-                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                In progress
-              </button>
-              <button 
-                onClick={() => setActiveServiceTab('Resolved')}
-                className={`pb-2 text-xs md:text-sm font-medium whitespace-nowrap transition-colors ${
-                  activeServiceTab === 'Resolved' 
-                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Resolved
-              </button>
-            </div>
-            <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
-              {loadingService ? (
-                <div className="text-sm text-gray-500">Loading latest service...</div>
-              ) : latestServiceForTab ? (
-                <div className="flex flex-wrap items-center justify-between gap-2 text-xs md:text-sm">
-                  <span className="text-gray-900 font-medium">
-                    {deriveType(latestServiceForTab)}
-                  </span>
-                  <span className="text-gray-900 font-medium">
-                    {formatServiceName(latestServiceForTab)}
-                  </span>
-                  <span className={`${getStatusBadgeColor(getStatusLabel(latestServiceForTab))} px-2 py-1 rounded-full text-xs font-medium`}>
-                    {getStatusLabel(latestServiceForTab)}
-                  </span>
-                  <span className="text-gray-600">
-                    {formatDate(latestServiceForTab.updated_at || latestServiceForTab.created_at || latestServiceForTab.createdAt)}
-                  </span>
-                </div>
-              ) : (
-                <div className="text-sm text-gray-500">No services found in this category.</div>
-              )}
-            </div>
+      {/* List Of Companies */}
+      <div className="mt-8">
+        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-medium text-gray-900">
+              List Of Companies
+            </h2>
+            <button
+              onClick={() => navigate("/organization")}
+              className="text-sm font-medium text-[#00486D] hover:underline cursor-pointer"
+            >
+              View all
+            </button>
           </div>
-        </div>
 
-        <div className="col-span-12 ">
-          <div className="bg-white rounded-lg p-5 transition-all duration-300 cursor-pointer border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012]">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium">List Of Companies</h2>
-              <a
-                href="/organization"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate('/organization');
-                }}
-                className="text-[#01334C] hover:text-[#00486D] transition-colors duration-200 text-sm font-medium hover:underline"
-              >
-                View all
-              </a>
-            </div>
-            <div className="overflow-x-auto">
-              <div className="rounded-lg overflow-hidden min-w-[600px]">
-                <div className="grid grid-cols-12 gap-4 px-4 py-3 text-xs font-medium bg-[#F8FAFC] text-[#64748B]">
-                  <div className="col-span-2">Logo</div>
-                  <div className="col-span-3">Legal Name</div>
-                  <div className="col-span-3">IS Name</div>
-                  <div className="col-span-2">GST number</div>
-                  <div className="col-span-2">Action</div>
+          <div className="overflow-x-auto">
+            <div className="min-w-[700px]">
+              {/* Table Header */}
+              <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-[#f2f6f7] rounded-xl text-sm font-medium text-[#023752]">
+                <div className="col-span-2">Logo</div>
+                <div className="col-span-3">Name</div>
+                <div className="col-span-5">GST number</div>
+                <div className="col-span-2 text-right">Action</div>
+              </div>
+
+              {loadingOrganizations ? (
+                <div className="px-6 py-8 text-center text-sm text-gray-500">
+                  Loading organizations...
                 </div>
-
-                {loadingOrganizations ? (
-                  <div className="px-4 py-8 text-center text-sm text-gray-500">
-                    Loading organizations...
-                  </div>
-                ) : organizations.length > 0 ? (
-                  organizations.map((org, index) => (
-                    <div
-                      key={org.id || index}
-                      className="grid grid-cols-12 gap-4 px-4 py-3 bg-white border-t border-[#F1F5F9]"
-                    >
-                      <div className="col-span-2">
-                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center p-1 border border-gray-100">
-                          <img
-                            src={logo}
-                            alt={org.legal_name || "Company"}
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                      </div>
-                      <div className="col-span-3 flex items-center">
-                        <span className="text-sm text-gray-900">
-                          {org.legal_name || '-'}
-                        </span>
-                      </div>
-                      <div className="col-span-3 flex items-center">
-                        <span className="text-sm text-gray-900">
-                          {org.trade_name || '-'}
-                        </span>
-                      </div>
-                      <div className="col-span-2 flex items-center">
-                        <span className="text-sm text-gray-500">
-                          {org.gstin || '-'}
-                        </span>
-                      </div>
-                      <div className="col-span-2 flex items-center">
-                        <button 
-                          onClick={() => navigate('/organization')}
-                          className="text-white text-xs px-3 md:px-4 py-1.5 rounded-lg transition-all duration-200 bg-gradient-to-r from-[#01334C] to-[#00486D] hover:from-[#00486D] hover:to-[#002D44]"
-                        >
-                          View all
-                        </button>
+              ) : organizations.length > 0 ? (
+                organizations.map((org, index) => (
+                  <div
+                    key={org.id || index}
+                    className="grid grid-cols-12 gap-4 px-6 py-4 bg-white border-b border-gray-50 items-center hover:bg-gray-50 transition-colors last:border-0 cursor-pointer"
+                  >
+                    <div className="col-span-2">
+                      <div className="w-12 h-12 rounded-full border border-gray-100 p-2 bg-white shadow-sm flex items-center justify-center">
+                        <img
+                          src={logo}
+                          alt={org.legal_name || "Company"}
+                          className="w-full h-full object-contain"
+                        />
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <div className="px-4 py-8 text-center text-sm text-gray-500">
-                    No organizations found.
+                    <div className="col-span-3">
+                      <span className="text-sm font-medium text-gray-900 block">
+                        {org.legal_name || "OneEasy Technologies Pvt. Ltd."}
+                      </span>
+                    </div>
+                    <div className="col-span-5">
+                      <span className="text-sm text-gray-500 font-medium">
+                        {org.gstin || "27ABCDE1234F1Z5"}
+                      </span>
+                    </div>
+                    <div className="col-span-2 text-right">
+                      <button
+                        onClick={() => navigate("/organization")}
+                        className="text-white text-xs px-4 py-2 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer"
+                        style={{
+                          background:
+                            "linear-gradient(90deg, #00486D 0%, #023752 100%)",
+                        }}
+                      >
+                        View all
+                      </button>
+                    </div>
                   </div>
-                )}
-              </div>
+                ))
+              ) : (
+                <div className="px-6 py-8 text-center text-sm text-gray-500">
+                  No organizations found.
+                </div>
+              )}
             </div>
           </div>
         </div>

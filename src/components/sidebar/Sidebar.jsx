@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { RiDashboardLine, RiRobot2Line, RiFileEditLine, RiUser3Line } from "react-icons/ri";
+import {
+  RiDashboardLine,
+  RiRobot2Line,
+  RiFileEditLine,
+  RiUser3Line,
+} from "react-icons/ri";
 import {
   MdOutlineSubscriptions,
   MdOutlineArticle,
@@ -35,7 +40,12 @@ function Sidebar() {
     location.pathname === "/company-form";
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const [userData, setUserData] = React.useState(null);
-  const { showLogoutModal, setShowLogoutModal, closeLogoutModal, handleLogout } = useLogoutModalStore();
+  const {
+    showLogoutModal,
+    setShowLogoutModal,
+    closeLogoutModal,
+    handleLogout,
+  } = useLogoutModalStore();
 
   // Load user data from localStorage
   const loadUserData = React.useCallback(() => {
@@ -44,7 +54,7 @@ function Sidebar() {
       try {
         setUserData(JSON.parse(storedUser));
       } catch (e) {
-        console.error('Error parsing user data:', e);
+        console.error("Error parsing user data:", e);
       }
     }
   }, []);
@@ -58,10 +68,10 @@ function Sidebar() {
       loadUserData();
     };
 
-    window.addEventListener('profileUpdated', handleProfileUpdate);
-    
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+
     return () => {
-      window.removeEventListener('profileUpdated', handleProfileUpdate);
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
     };
   }, [loadUserData]);
   const menuItems = [
@@ -76,14 +86,13 @@ function Sidebar() {
     { icon: <RiRobot2Line />, text: "AI Agent", path: "/ai-agent" },
     { icon: <TbCopy />, text: "Resources", path: "/resources" },
     { icon: <RiFileEditLine />, text: "My Documents", path: "/documents" },
-    
+
     { icon: <BsBuilding />, text: "My Companies", path: "/organization" },
     {
       icon: <MdOutlineSubscriptions />,
       text: "Invoices",
       path: "/subscriptions",
     },
-    
   ];
 
   return (
@@ -122,13 +131,13 @@ function Sidebar() {
       <div
         className={`${
           isCollapsed ? "w-[70px]" : "w-[240px]"
-        } h-screen bg-white fixed left-0 top-0 flex flex-col hidden lg:flex transition-all duration-300 border-r border-gray-200`}
+        } h-screen bg-[#022b51] fixed left-0 top-0 flex flex-col hidden lg:flex transition-all duration-300 border-r border-[#022b51]`}
       >
         {/* Logo Section with Toggle Button */}
         <div
           className={`${
             isCollapsed ? "px-3" : "px-6"
-          } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-gray-100`}
+          } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-[#26496a]/30`}
         >
           <img
             src={logo}
@@ -137,14 +146,14 @@ function Sidebar() {
               isCollapsed ? "h-8" : "h-10"
             } w-auto transition-all duration-300 ${
               isCollapsed ? "mx-auto" : ""
-            }`}
+            } brightness-0 invert`}
           />
           {!isCollapsed && (
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="bg-gray-100 hover:bg-gray-200 rounded-lg p-1.5 transition-colors duration-200"
+              className="bg-[#26496a] hover:bg-[#345d82] rounded-lg p-1.5 transition-colors duration-200"
             >
-              <IoChevronBackOutline className="w-4 h-4 text-gray-600" />
+              <IoChevronBackOutline className="w-4 h-4 text-white" />
             </button>
           )}
         </div>
@@ -153,9 +162,9 @@ function Sidebar() {
         {isCollapsed && (
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="mx-auto mt-3 mb-2 bg-gray-100 hover:bg-gray-200 rounded-lg p-1.5 transition-colors duration-200"
+            className="mx-auto mt-3 mb-2 bg-[#26496a] hover:bg-[#345d82] rounded-lg p-1.5 transition-colors duration-200"
           >
-            <IoChevronForwardOutline className="w-4 h-4 text-gray-600" />
+            <IoChevronForwardOutline className="w-4 h-4 text-white" />
           </button>
         )}
 
@@ -177,8 +186,8 @@ function Sidebar() {
                     ? isRegistrationsActive
                     : location.pathname === item.path
                 )
-                  ? "bg-[#01334C] text-white"
-                  : "text-gray-700 hover:bg-gray-50"
+                  ? "bg-[#26496a] text-white"
+                  : "text-gray-300 hover:bg-[#26496a]/50 hover:text-white"
               } group relative`}
               title={isCollapsed ? item.text : ""}
             >
@@ -191,7 +200,7 @@ function Sidebar() {
                   className: `text-base ${
                     location.pathname === item.path
                       ? "text-white"
-                      : "text-gray-400"
+                      : "text-gray-400 group-hover:text-white"
                   }`,
                 })}
               </span>
@@ -208,7 +217,7 @@ function Sidebar() {
         </nav>
 
         {/* Profile Section */}
-        <div className="mt-auto border-t border-gray-100">
+        <div className="mt-auto border-t border-[#26496a]/30">
           <div
             className={`${
               isCollapsed ? "p-2" : "p-4"
@@ -222,7 +231,7 @@ function Sidebar() {
               <div
                 className={`flex items-center ${
                   isCollapsed ? "justify-center" : "space-x-3"
-                } cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-all duration-200`}
+                } cursor-pointer p-2 hover:bg-[#26496a]/50 rounded-lg transition-all duration-200`}
               >
                 {userData?.profile_image ? (
                   <img
@@ -236,19 +245,21 @@ function Sidebar() {
                   <div
                     className={`${
                       isCollapsed ? "w-8 h-8" : "w-6 h-6"
-                    } bg-[#01334C] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
+                    } bg-[#26496a] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
                   >
-                    {userData?.name ? userData.name.charAt(0).toUpperCase() : 'A'}
+                    {userData?.name
+                      ? userData.name.charAt(0).toUpperCase()
+                      : "A"}
                   </div>
                 )}
                 {!isCollapsed && (
                   <>
                     <div>
-                      <div className="text-[11px] text-gray-500">
+                      <div className="text-[11px] text-gray-400">
                         Welcome 👋
                       </div>
-                      <div className="text-[13px] text-gray-700">
-                        {userData?.name || 'User'}
+                      <div className="text-[13px] text-white">
+                        {userData?.name || "User"}
                       </div>
                     </div>
                     <span className="text-base text-gray-400 ml-auto transform transition-transform duration-200 group-hover:rotate-90">
@@ -342,15 +353,17 @@ function Sidebar() {
                   />
                 ) : (
                   <div className="w-8 h-8 bg-[#01334C] text-white rounded-full flex items-center justify-center text-sm font-medium">
-                    {userData?.name ? userData.name.charAt(0).toUpperCase() : 'A'}
+                    {userData?.name
+                      ? userData.name.charAt(0).toUpperCase()
+                      : "A"}
                   </div>
                 )}
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900">
-                    {userData?.name || 'User'}
+                    {userData?.name || "User"}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {userData?.email || userData?.phone || ''}
+                    {userData?.email || userData?.phone || ""}
                   </p>
                 </div>
               </div>
