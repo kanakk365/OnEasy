@@ -9,21 +9,26 @@ function PrerequisitesSection({ prerequisites }) {
       <div className="space-y-6">
         {prerequisites.map((prerequisite, index) => {
           // Handle both string and object formats
-          const title = typeof prerequisite === 'string' ? prerequisite : prerequisite.title;
-          const description = typeof prerequisite === 'object' ? prerequisite.description : null;
-          
+          const title =
+            typeof prerequisite === "string"
+              ? prerequisite
+              : prerequisite.title;
+          const description =
+            typeof prerequisite === "object" ? prerequisite.description : null;
+
           return (
             <div key={index} className="flex items-start gap-6">
               <div
-                className="w-6 h-6 rounded-full text-white text-xs font-semibold flex items-center justify-center flex-shrink-0 mt-0.5"
+                className="w-6 h-6 rounded-full text-white text-xs font-medium flex items-center justify-center flex-shrink-0 mt-0.5"
                 style={{
-                  background: "linear-gradient(180deg, #00486D 0%, #01334C 100%)",
+                  background:
+                    "linear-gradient(180deg, #00486D 0%, #01334C 100%)",
                 }}
               >
                 {index + 1}
               </div>
               <div className="flex-1">
-                <p className="text-gray-900 text-sm font-semibold tracking-[0.03em]">
+                <p className="text-gray-900 text-sm font-medium tracking-[0.03em]">
                   {title}
                 </p>
                 {description && (
@@ -41,5 +46,3 @@ function PrerequisitesSection({ prerequisites }) {
 }
 
 export default PrerequisitesSection;
-
-

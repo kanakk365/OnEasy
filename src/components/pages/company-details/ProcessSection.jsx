@@ -15,15 +15,18 @@ function ProcessSection({ processSteps }) {
             )}
 
             <div className="flex-shrink-0 mr-4 relative z-10">
-              <div className="w-8 h-8 rounded-full bg-[#01334C] text-white flex items-center justify-center text-xs font-bold">
+              <div className="w-8 h-8 rounded-full bg-[#01334C] text-white flex items-center justify-center text-xs font-medium">
                 {step.step}
               </div>
             </div>
 
             <div>
               <h3 className="font-medium text-gray-900 text-sm">
-                <span className="font-semibold">Step no {step.step}:</span> {step.title}
-                {step.description && <span className="text-gray-600"> {step.description}</span>}
+                <span className="font-medium">Step no {step.step}:</span>{" "}
+                {step.title}
+                {step.description && (
+                  <span className="text-gray-600"> {step.description}</span>
+                )}
               </h3>
             </div>
           </div>
@@ -35,7 +38,10 @@ function ProcessSection({ processSteps }) {
           Certificate of Incorporation
         </h3>
         <p className="text-gray-600 text-sm leading-relaxed">
-          Once the documents are verified, the MCA will issue the Certificate of Incorporation (COI) along with the Company Identification Number (CIN), Permanent Account Number (PAN) and Tax Deduction and Collection Account Number (TAN).
+          Once the documents are verified, the MCA will issue the Certificate of
+          Incorporation (COI) along with the Company Identification Number
+          (CIN), Permanent Account Number (PAN) and Tax Deduction and Collection
+          Account Number (TAN).
         </p>
       </div>
 
@@ -44,7 +50,9 @@ function ProcessSection({ processSteps }) {
           Post-Registration Compliance
         </h3>
         <p className="text-gray-600 text-sm leading-relaxed">
-          After the company is registered, it's crucial to maintain compliance with annual filings and regulatory requirements to ensure smooth operations.
+          After the company is registered, it's crucial to maintain compliance
+          with annual filings and regulatory requirements to ensure smooth
+          operations.
         </p>
       </div>
 
@@ -53,7 +61,10 @@ function ProcessSection({ processSteps }) {
           Register Your Company with Oneasy
         </h3>
         <p className="text-gray-600 text-sm leading-relaxed">
-          At Oneasy, we provide expert support for Private Limited Company registration, ensuring a smooth and compliant process. We handle everything from document preparation to name reservation and compliance management, allowing you to focus on growing your business.
+          At Oneasy, we provide expert support for Private Limited Company
+          registration, ensuring a smooth and compliant process. We handle
+          everything from document preparation to name reservation and
+          compliance management, allowing you to focus on growing your business.
         </p>
       </div>
     </div>
@@ -61,5 +72,3 @@ function ProcessSection({ processSteps }) {
 }
 
 export default ProcessSection;
-
-

@@ -11,7 +11,7 @@ function DocumentsSection({ illustration, documents }) {
     "Rental Agreement and NOC (Company)",
     "Latest utility bill of the Company (Electricity Bill)",
   ];
-  
+
   const documentsList = documents || defaultDocuments;
 
   return (
@@ -24,14 +24,15 @@ function DocumentsSection({ illustration, documents }) {
           {documentsList.map((doc, index) => (
             <div key={index} className="flex items-center gap-3">
               <div
-                className="w-6 h-6 rounded-full text-white text-xs font-semibold flex items-center justify-center"
+                className="w-6 h-6 rounded-full text-white text-xs font-medium flex items-center justify-center"
                 style={{
-                  background: "linear-gradient(180deg, #00486D 0%, #01334C 100%)",
+                  background:
+                    "linear-gradient(180deg, #00486D 0%, #01334C 100%)",
                 }}
               >
                 {index + 1}
               </div>
-              <p className="text-gray-900 text-sm font-semibold tracking-[0.03em]">
+              <p className="text-gray-900 text-sm font-normal tracking-[0.03em]">
                 {doc}
               </p>
             </div>
@@ -39,7 +40,11 @@ function DocumentsSection({ illustration, documents }) {
         </div>
         {illustration && (
           <div className="flex-1 flex justify-center items-center">
-            <img src={illustration} alt="Documents Illustration" className="max-w-full h-auto" />
+            <img
+              src={illustration}
+              alt="Documents Illustration"
+              className="max-w-full h-auto"
+            />
           </div>
         )}
       </div>
@@ -48,5 +53,3 @@ function DocumentsSection({ illustration, documents }) {
 }
 
 export default DocumentsSection;
-
-

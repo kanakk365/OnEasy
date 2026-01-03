@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { IoSearchOutline } from "react-icons/io5";
+import { IoSearchOutline, IoChevronForwardOutline } from "react-icons/io5";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
 import { initPaymentWithOrderId } from "../../utils/payment";
@@ -27,43 +27,69 @@ function Registrations() {
           return;
         }
         const [pl, prop, si, gst, allServices] = await Promise.all([
-          apiClient.get(`/private-limited/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
-          apiClient.get(`/proprietorship/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
-          apiClient.get(`/startup-india/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
-          apiClient.get(`/gst/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
-          apiClient.get(`/registrations`).catch(() => ({ success: false, data: [] })),
+          apiClient
+            .get(`/private-limited/user-registrations/${userId}`)
+            .catch(() => ({ success: false, data: [] })),
+          apiClient
+            .get(`/proprietorship/user-registrations/${userId}`)
+            .catch(() => ({ success: false, data: [] })),
+          apiClient
+            .get(`/startup-india/user-registrations/${userId}`)
+            .catch(() => ({ success: false, data: [] })),
+          apiClient
+            .get(`/gst/user-registrations/${userId}`)
+            .catch(() => ({ success: false, data: [] })),
+          apiClient
+            .get(`/registrations`)
+            .catch(() => ({ success: false, data: [] })),
         ]);
         const norm = (resp) =>
-          resp.success ? (Array.isArray(resp.data) ? resp.data : resp.data?.data || []) : [];
+          resp.success
+            ? Array.isArray(resp.data)
+              ? resp.data
+              : resp.data?.data || []
+            : [];
         // Include both paid and pending payment registrations
         // Show services that are either paid OR have pending payment status (created by admin)
-        const paidAllServices = norm(allServices).filter(reg => {
-          const isPaid = 
-            (reg.razorpay_payment_id && reg.razorpay_payment_id.trim() !== '') ||
-            (reg.payment_id && reg.payment_id.trim() !== '') ||
-            (reg.payment_status && reg.payment_status.toLowerCase() === 'paid');
-          
-          const isPendingPayment = 
-            reg.ticket_id && 
-            reg.payment_status && 
-            (reg.payment_status.toLowerCase() === 'pending' || reg.payment_status.toLowerCase() === 'unpaid') &&
-            (reg.service_status === 'Payment pending' || !reg.service_status);
-          
+        const paidAllServices = norm(allServices).filter((reg) => {
+          const isPaid =
+            (reg.razorpay_payment_id &&
+              reg.razorpay_payment_id.trim() !== "") ||
+            (reg.payment_id && reg.payment_id.trim() !== "") ||
+            (reg.payment_status && reg.payment_status.toLowerCase() === "paid");
+
+          const isPendingPayment =
+            reg.ticket_id &&
+            reg.payment_status &&
+            (reg.payment_status.toLowerCase() === "pending" ||
+              reg.payment_status.toLowerCase() === "unpaid") &&
+            (reg.service_status === "Payment pending" || !reg.service_status);
+
           return isPaid || isPendingPayment;
         });
-        const combined = [...norm(pl), ...norm(prop), ...norm(si), ...norm(gst), ...paidAllServices];
-        
+        const combined = [
+          ...norm(pl),
+          ...norm(prop),
+          ...norm(si),
+          ...norm(gst),
+          ...paidAllServices,
+        ];
+
         // Deduplicate based on ticket_id or payment_id
         const seen = new Set();
-        const unique = combined.filter(reg => {
-          const key = reg.ticket_id || reg.razorpay_payment_id || reg.payment_id || `${reg.user_id}_${reg.package_name}_${reg.created_at}`;
+        const unique = combined.filter((reg) => {
+          const key =
+            reg.ticket_id ||
+            reg.razorpay_payment_id ||
+            reg.payment_id ||
+            `${reg.user_id}_${reg.package_name}_${reg.created_at}`;
           if (seen.has(key)) {
             return false;
           }
           seen.add(key);
           return true;
         });
-        
+
         const sorted = unique.sort(
           (a, b) =>
             new Date(b.updated_at || b.created_at || b.createdAt || 0) -
@@ -96,12 +122,24 @@ function Registrations() {
     if (!status) return "bg-gray-100 text-gray-800";
     const s = status.toLowerCase();
     if (s === "completed") return "bg-green-100 text-green-800";
-    if (["wip", "data received", "awaiting confirmation from the govt", "awaiting confirmation from the government", "data pending from client", "in progress", "submitted", "registered"].includes(s))
+    if (
+      [
+        "wip",
+        "data received",
+        "awaiting confirmation from the govt",
+        "awaiting confirmation from the government",
+        "data pending from client",
+        "in progress",
+        "submitted",
+        "registered",
+      ].includes(s)
+    )
       return "bg-blue-100 text-blue-800";
     if (s === "technical issue") return "bg-red-100 text-red-800";
     if (s === "payment pending") return "bg-orange-100 text-orange-800";
     if (s === "draft") return "bg-gray-100 text-gray-800";
-    if (s === "paid" || s === "payment_completed") return "bg-green-100 text-green-800";
+    if (s === "paid" || s === "payment_completed")
+      return "bg-green-100 text-green-800";
     return "bg-gray-100 text-gray-800";
   };
 
@@ -113,144 +151,281 @@ function Registrations() {
     if (tid.startsWith("GST_")) return "GST";
     if (tid.startsWith("OPC_")) return "OPC";
     if (tid.startsWith("LLP_")) return "LLP";
-    if (tid.startsWith("PART_") || tid.startsWith("PARTNERSHIP_")) return "Partnership";
-    if (tid.startsWith("SEC8_") || tid.startsWith("SECTION8_")) return "Section 8";
+    if (tid.startsWith("PART_") || tid.startsWith("PARTNERSHIP_"))
+      return "Partnership";
+    if (tid.startsWith("SEC8_") || tid.startsWith("SECTION8_"))
+      return "Section 8";
     // GST Services
-    if (tid.startsWith("GST-RETURNS_") || tid.includes("GST-RETURNS")) return "GST Returns";
-    if (tid.startsWith("GST-ANNUAL-RETURN_") || tid.includes("GST-ANNUAL-RETURN")) return "GST Annual Return";
-    if (tid.startsWith("GST-AMENDMENT_") || tid.includes("GST-AMENDMENT")) return "GST Amendment";
-    if (tid.startsWith("GST-NOTICE_") || tid.includes("GST-NOTICE")) return "GST Notice";
+    if (tid.startsWith("GST-RETURNS_") || tid.includes("GST-RETURNS"))
+      return "GST Returns";
+    if (
+      tid.startsWith("GST-ANNUAL-RETURN_") ||
+      tid.includes("GST-ANNUAL-RETURN")
+    )
+      return "GST Annual Return";
+    if (tid.startsWith("GST-AMENDMENT_") || tid.includes("GST-AMENDMENT"))
+      return "GST Amendment";
+    if (tid.startsWith("GST-NOTICE_") || tid.includes("GST-NOTICE"))
+      return "GST Notice";
     // ROC & MCA Services
-    if (tid.startsWith("DIRECTOR-ADDITION_") || tid.includes("DIRECTOR-ADDITION")) return "Director Addition";
-    if (tid.startsWith("SHARE-TRANSFER_") || tid.includes("SHARE-TRANSFER")) return "Share Transfer";
-    if (tid.startsWith("ADDRESS-CHANGE_") || tid.includes("ADDRESS-CHANGE")) return "Address Change";
-    if (tid.startsWith("CHARGE-CREATION_") || tid.includes("CHARGE-CREATION")) return "Charge Creation";
-    if (tid.startsWith("DIRECTOR-REMOVAL_") || tid.includes("DIRECTOR-REMOVAL")) return "Director Removal";
-    if (tid.startsWith("MOA-AMENDMENT_") || tid.includes("MOA-AMENDMENT")) return "MOA Amendment";
-    if (tid.startsWith("AOA-AMENDMENT_") || tid.includes("AOA-AMENDMENT")) return "AOA Amendment";
-    if (tid.startsWith("OBJECTS-CLAUSE-CHANGE_") || tid.includes("OBJECTS-CLAUSE")) return "Objects Clause Change";
-    if (tid.startsWith("INCREASE-SHARE-CAPITAL_") || tid.includes("INCREASE-SHARE-CAPITAL")) return "Increase Share Capital";
-    if (tid.startsWith("NAME-CHANGE-COMPANY_") || tid.includes("NAME-CHANGE-COMPANY")) return "Name Change - Company";
-    if (tid.startsWith("DIN-DEACTIVATION_") || tid.includes("DIN-DEACTIVATION")) return "DIN Deactivation";
-    if (tid.startsWith("DIN-REACTIVATION_") || tid.includes("DIN-REACTIVATION")) return "DIN Reactivation";
+    if (
+      tid.startsWith("DIRECTOR-ADDITION_") ||
+      tid.includes("DIRECTOR-ADDITION")
+    )
+      return "Director Addition";
+    if (tid.startsWith("SHARE-TRANSFER_") || tid.includes("SHARE-TRANSFER"))
+      return "Share Transfer";
+    if (tid.startsWith("ADDRESS-CHANGE_") || tid.includes("ADDRESS-CHANGE"))
+      return "Address Change";
+    if (tid.startsWith("CHARGE-CREATION_") || tid.includes("CHARGE-CREATION"))
+      return "Charge Creation";
+    if (tid.startsWith("DIRECTOR-REMOVAL_") || tid.includes("DIRECTOR-REMOVAL"))
+      return "Director Removal";
+    if (tid.startsWith("MOA-AMENDMENT_") || tid.includes("MOA-AMENDMENT"))
+      return "MOA Amendment";
+    if (tid.startsWith("AOA-AMENDMENT_") || tid.includes("AOA-AMENDMENT"))
+      return "AOA Amendment";
+    if (
+      tid.startsWith("OBJECTS-CLAUSE-CHANGE_") ||
+      tid.includes("OBJECTS-CLAUSE")
+    )
+      return "Objects Clause Change";
+    if (
+      tid.startsWith("INCREASE-SHARE-CAPITAL_") ||
+      tid.includes("INCREASE-SHARE-CAPITAL")
+    )
+      return "Increase Share Capital";
+    if (
+      tid.startsWith("NAME-CHANGE-COMPANY_") ||
+      tid.includes("NAME-CHANGE-COMPANY")
+    )
+      return "Name Change - Company";
+    if (tid.startsWith("DIN-DEACTIVATION_") || tid.includes("DIN-DEACTIVATION"))
+      return "DIN Deactivation";
+    if (tid.startsWith("DIN-REACTIVATION_") || tid.includes("DIN-REACTIVATION"))
+      return "DIN Reactivation";
     if (tid.startsWith("ADT-1_") || tid.includes("ADT-1")) return "ADT-1";
-    if (tid.startsWith("WINDING-UP-COMPANY_") || tid.includes("WINDING-UP-COMPANY")) return "Winding Up - Company";
-    if (tid.startsWith("WINDING-UP-LLP_") || tid.includes("WINDING-UP-LLP")) return "Winding Up - LLP";
-    if (tid.startsWith("DIN-APPLICATION_") || tid.includes("DIN-APPLICATION")) return "DIN Application";
+    if (
+      tid.startsWith("WINDING-UP-COMPANY_") ||
+      tid.includes("WINDING-UP-COMPANY")
+    )
+      return "Winding Up - Company";
+    if (tid.startsWith("WINDING-UP-LLP_") || tid.includes("WINDING-UP-LLP"))
+      return "Winding Up - LLP";
+    if (tid.startsWith("DIN-APPLICATION_") || tid.includes("DIN-APPLICATION"))
+      return "DIN Application";
     if (tid.startsWith("INC-20A_") || tid.includes("INC-20A")) return "INC 20A";
     // Compliance Services
-    if (tid.startsWith("FSSAI-RENEWAL_") || tid.includes("FSSAI-RENEWAL")) return "FSSAI Renewal";
-    if (tid.startsWith("FSSAI-RETURN-FILING_") || tid.includes("FSSAI-RETURN-FILING")) return "FSSAI Return Filing";
-    if (tid.startsWith("BUSINESS-PLAN_") || tid.includes("BUSINESS-PLAN")) return "Business Plan";
-    if (tid.startsWith("HR-PAYROLL_") || tid.includes("HR-PAYROLL")) return "HR & Payroll";
-    if (tid.startsWith("PF-RETURN-FILING_") || tid.includes("PF-RETURN-FILING")) return "PF Return Filing";
-    if (tid.startsWith("ESI-RETURN-FILING_") || tid.includes("ESI-RETURN-FILING")) return "ESI Return Filing";
-    if (tid.startsWith("PROFESSIONAL-TAX-RETURN_") || tid.includes("PROFESSIONAL-TAX-RETURN")) return "Professional Tax Return";
-    if (tid.startsWith("PARTNERSHIP-COMPLIANCE_") || tid.includes("PARTNERSHIP-COMPLIANCE")) return "Partnership Compliance";
-    if (tid.startsWith("PROPRIETORSHIP-COMPLIANCE_") || tid.includes("PROPRIETORSHIP-COMPLIANCE")) return "Proprietorship Compliance";
-    if (tid.startsWith("COMPANY-COMPLIANCE_") || tid.includes("COMPANY-COMPLIANCE")) return "Company Compliance";
-    if (tid.startsWith("TRADEMARK_") || tid.includes("TRADEMARK")) return "Trademark";
+    if (tid.startsWith("FSSAI-RENEWAL_") || tid.includes("FSSAI-RENEWAL"))
+      return "FSSAI Renewal";
+    if (
+      tid.startsWith("FSSAI-RETURN-FILING_") ||
+      tid.includes("FSSAI-RETURN-FILING")
+    )
+      return "FSSAI Return Filing";
+    if (tid.startsWith("BUSINESS-PLAN_") || tid.includes("BUSINESS-PLAN"))
+      return "Business Plan";
+    if (tid.startsWith("HR-PAYROLL_") || tid.includes("HR-PAYROLL"))
+      return "HR & Payroll";
+    if (tid.startsWith("PF-RETURN-FILING_") || tid.includes("PF-RETURN-FILING"))
+      return "PF Return Filing";
+    if (
+      tid.startsWith("ESI-RETURN-FILING_") ||
+      tid.includes("ESI-RETURN-FILING")
+    )
+      return "ESI Return Filing";
+    if (
+      tid.startsWith("PROFESSIONAL-TAX-RETURN_") ||
+      tid.includes("PROFESSIONAL-TAX-RETURN")
+    )
+      return "Professional Tax Return";
+    if (
+      tid.startsWith("PARTNERSHIP-COMPLIANCE_") ||
+      tid.includes("PARTNERSHIP-COMPLIANCE")
+    )
+      return "Partnership Compliance";
+    if (
+      tid.startsWith("PROPRIETORSHIP-COMPLIANCE_") ||
+      tid.includes("PROPRIETORSHIP-COMPLIANCE")
+    )
+      return "Proprietorship Compliance";
+    if (
+      tid.startsWith("COMPANY-COMPLIANCE_") ||
+      tid.includes("COMPANY-COMPLIANCE")
+    )
+      return "Company Compliance";
+    if (tid.startsWith("TRADEMARK_") || tid.includes("TRADEMARK"))
+      return "Trademark";
     // Tax & Accounting Services
-    if (tid.startsWith("SALARY-ITR_") || tid.includes("SALARY-ITR")) return "Income Tax Return - Salary";
-    if (tid.startsWith("BUSINESS-ITR_") || tid.includes("BUSINESS-ITR")) return "Business - Income Tax Return";
-    if (tid.startsWith("HOUSE-PROPERTY-ITR_") || tid.includes("HOUSE-PROPERTY-ITR")) return "House Property - Income Tax Return";
-    if (tid.startsWith("TRUST-ITR_") || tid.includes("TRUST-ITR")) return "Trust - Income Tax Return";
-    if (tid.startsWith("SALARY-HP-CAPITAL-GAINS_") || tid.includes("SALARY-HP-CAPITAL-GAINS")) return "Income From Salary, HP and Capital gains";
-    if (tid.startsWith("PARTNERSHIP-FIRM-ITR_") || tid.includes("PARTNERSHIP-FIRM-ITR")) return "Partnership Firm";
-    if (tid.startsWith("COMPANY-ITR_") || tid.includes("COMPANY-ITR")) return "Company - ITR";
+    if (tid.startsWith("SALARY-ITR_") || tid.includes("SALARY-ITR"))
+      return "Income Tax Return - Salary";
+    if (tid.startsWith("BUSINESS-ITR_") || tid.includes("BUSINESS-ITR"))
+      return "Business - Income Tax Return";
+    if (
+      tid.startsWith("HOUSE-PROPERTY-ITR_") ||
+      tid.includes("HOUSE-PROPERTY-ITR")
+    )
+      return "House Property - Income Tax Return";
+    if (tid.startsWith("TRUST-ITR_") || tid.includes("TRUST-ITR"))
+      return "Trust - Income Tax Return";
+    if (
+      tid.startsWith("SALARY-HP-CAPITAL-GAINS_") ||
+      tid.includes("SALARY-HP-CAPITAL-GAINS")
+    )
+      return "Income From Salary, HP and Capital gains";
+    if (
+      tid.startsWith("PARTNERSHIP-FIRM-ITR_") ||
+      tid.includes("PARTNERSHIP-FIRM-ITR")
+    )
+      return "Partnership Firm";
+    if (tid.startsWith("COMPANY-ITR_") || tid.includes("COMPANY-ITR"))
+      return "Company - ITR";
     // Fallback to business_name, package_name, service_name, or service_type
-    const fallbackName = (reg.business_name || reg.package_name || reg.service_name || "").toLowerCase();
+    const fallbackName = (
+      reg.business_name ||
+      reg.package_name ||
+      reg.service_name ||
+      ""
+    ).toLowerCase();
     if (fallbackName) {
       const name = fallbackName;
-      if (name.includes('gst returns')) return "GST Returns";
-      if (name.includes('gst annual return')) return "GST Annual Return";
-      if (name.includes('gst amendment')) return "GST Amendment";
-      if (name.includes('gst notice')) return "GST Notice";
-      if (name.includes('director addition')) return "Director Addition";
-      if (name.includes('share transfer')) return "Share Transfer";
-      if (name.includes('address change') || name.includes('registered office')) return "Address Change";
-      if (name.includes('charge creation')) return "Charge Creation";
-      if (name.includes('director removal')) return "Director Removal";
-      if (name.includes('moa amendment')) return "MOA Amendment";
-      if (name.includes('aoa amendment')) return "AOA Amendment";
-      if (name.includes('objects clause')) return "Objects Clause Change";
-      if (name.includes('increase share capital')) return "Increase Share Capital";
-      if (name.includes('name change')) return "Name Change - Company";
-      if (name.includes('din deactivation')) return "DIN Deactivation";
-      if (name.includes('din reactivation')) return "DIN Reactivation";
-      if (name.includes('adt-1') || name.includes('adt 1')) return "ADT-1";
-      if (name.includes('winding up company')) return "Winding Up - Company";
-      if (name.includes('winding up llp')) return "Winding Up - LLP";
-      if (name.includes('din application')) return "DIN Application";
-      if (name.includes('inc-20a') || name.includes('inc 20a')) return "INC 20A";
-      if (name.includes('fssai renewal')) return "FSSAI Renewal";
-      if (name.includes('fssai return filing')) return "FSSAI Return Filing";
-      if (name.includes('business plan')) return "Business Plan";
-      if (name.includes('hr payroll')) return "HR & Payroll";
-      if (name.includes('pf return filing')) return "PF Return Filing";
-      if (name.includes('esi return filing')) return "ESI Return Filing";
-      if (name.includes('professional tax return')) return "Professional Tax Return";
-      if (name.includes('partnership compliance') || name.includes('partnership-compliance')) return "Partnership Compliance";
-      if (name.includes('proprietorship compliance') || name.includes('proprietorship-compliance')) return "Proprietorship Compliance";
-      if (name.includes('company compliance') || name.includes('company-compliance')) return "Company Compliance";
-      if (name.includes('trademark')) return "Trademark";
-      if (name.includes('salary itr') || name.includes('income tax return salary')) return "Income Tax Return - Salary";
-      if (name.includes('business itr') || name.includes('business income tax')) return "Business - Income Tax Return";
-      if (name.includes('house property itr')) return "House Property - Income Tax Return";
-      if (name.includes('trust itr')) return "Trust - Income Tax Return";
-      if (name.includes('salary hp capital')) return "Income From Salary, HP and Capital gains";
-      if (name.includes('partnership firm itr')) return "Partnership Firm";
-      if (name.includes('company itr')) return "Company - ITR";
+      if (name.includes("gst returns")) return "GST Returns";
+      if (name.includes("gst annual return")) return "GST Annual Return";
+      if (name.includes("gst amendment")) return "GST Amendment";
+      if (name.includes("gst notice")) return "GST Notice";
+      if (name.includes("director addition")) return "Director Addition";
+      if (name.includes("share transfer")) return "Share Transfer";
+      if (name.includes("address change") || name.includes("registered office"))
+        return "Address Change";
+      if (name.includes("charge creation")) return "Charge Creation";
+      if (name.includes("director removal")) return "Director Removal";
+      if (name.includes("moa amendment")) return "MOA Amendment";
+      if (name.includes("aoa amendment")) return "AOA Amendment";
+      if (name.includes("objects clause")) return "Objects Clause Change";
+      if (name.includes("increase share capital"))
+        return "Increase Share Capital";
+      if (name.includes("name change")) return "Name Change - Company";
+      if (name.includes("din deactivation")) return "DIN Deactivation";
+      if (name.includes("din reactivation")) return "DIN Reactivation";
+      if (name.includes("adt-1") || name.includes("adt 1")) return "ADT-1";
+      if (name.includes("winding up company")) return "Winding Up - Company";
+      if (name.includes("winding up llp")) return "Winding Up - LLP";
+      if (name.includes("din application")) return "DIN Application";
+      if (name.includes("inc-20a") || name.includes("inc 20a"))
+        return "INC 20A";
+      if (name.includes("fssai renewal")) return "FSSAI Renewal";
+      if (name.includes("fssai return filing")) return "FSSAI Return Filing";
+      if (name.includes("business plan")) return "Business Plan";
+      if (name.includes("hr payroll")) return "HR & Payroll";
+      if (name.includes("pf return filing")) return "PF Return Filing";
+      if (name.includes("esi return filing")) return "ESI Return Filing";
+      if (name.includes("professional tax return"))
+        return "Professional Tax Return";
+      if (
+        name.includes("partnership compliance") ||
+        name.includes("partnership-compliance")
+      )
+        return "Partnership Compliance";
+      if (
+        name.includes("proprietorship compliance") ||
+        name.includes("proprietorship-compliance")
+      )
+        return "Proprietorship Compliance";
+      if (
+        name.includes("company compliance") ||
+        name.includes("company-compliance")
+      )
+        return "Company Compliance";
+      if (name.includes("trademark")) return "Trademark";
+      if (
+        name.includes("salary itr") ||
+        name.includes("income tax return salary")
+      )
+        return "Income Tax Return - Salary";
+      if (name.includes("business itr") || name.includes("business income tax"))
+        return "Business - Income Tax Return";
+      if (name.includes("house property itr"))
+        return "House Property - Income Tax Return";
+      if (name.includes("trust itr")) return "Trust - Income Tax Return";
+      if (name.includes("salary hp capital"))
+        return "Income From Salary, HP and Capital gains";
+      if (name.includes("partnership firm itr")) return "Partnership Firm";
+      if (name.includes("company itr")) return "Company - ITR";
       // Other registration services
-      if (name.includes('esi') && !name.includes('return filing')) return "ESI";
-      if (name.includes('section 8') || name.includes('section-8')) return "Section 8";
-      if (name.includes('labour license') || name.includes('labour-license')) return "Labour License";
-      if (name.includes('dsc') || name.includes('digital signature')) return "DSC";
+      if (name.includes("esi") && !name.includes("return filing")) return "ESI";
+      if (name.includes("section 8") || name.includes("section-8"))
+        return "Section 8";
+      if (name.includes("labour license") || name.includes("labour-license"))
+        return "Labour License";
+      if (name.includes("dsc") || name.includes("digital signature"))
+        return "DSC";
       // Company registration types
-      if (name.includes('opc') || name.includes('one person company')) return "OPC";
-      if (name.includes('llp') || name.includes('limited liability partnership')) return "LLP";
-      if (name.includes('partnership') && !name.includes('compliance') && !name.includes('firm itr')) return "Partnership";
-      if (name.includes('public limited')) return "Public Limited";
-      if (name.includes('mca name') || name.includes('mca-name')) return "MCA Name Approval";
-      if (name.includes('indian subsidiary')) return "Indian Subsidiary";
+      if (name.includes("opc") || name.includes("one person company"))
+        return "OPC";
+      if (
+        name.includes("llp") ||
+        name.includes("limited liability partnership")
+      )
+        return "LLP";
+      if (
+        name.includes("partnership") &&
+        !name.includes("compliance") &&
+        !name.includes("firm itr")
+      )
+        return "Partnership";
+      if (name.includes("public limited")) return "Public Limited";
+      if (name.includes("mca name") || name.includes("mca-name"))
+        return "MCA Name Approval";
+      if (name.includes("indian subsidiary")) return "Indian Subsidiary";
     }
-    return reg.registration_type || reg.service_type || reg.business_name || reg.package_name || reg.service_name || "Service";
+    return (
+      reg.registration_type ||
+      reg.service_type ||
+      reg.business_name ||
+      reg.package_name ||
+      reg.service_name ||
+      "Service"
+    );
   };
 
   const formatName = (reg) => {
     // Prioritize package_name first since that's what should show in "Service Name" column
     // (package names like "Starter", "Pro", etc.)
-    const raw = reg.package_name || reg.business_name || reg.service_name || "Service";
+    const raw =
+      reg.package_name || reg.business_name || reg.service_name || "Service";
     const cleaned = raw.replace(/[-–]\s*Payment\s*Completed/i, "").trim();
 
     // If the package name is incorrectly set to "Private Limited Registration" but the service type
     // is different (determined by ticket ID), replace it with the correct service name
     const type = deriveType(reg);
-    if (cleaned === "Private Limited Registration" && type !== "Private Limited") {
+    if (
+      cleaned === "Private Limited Registration" &&
+      type !== "Private Limited"
+    ) {
       // For services that already have descriptive names (Returns, Amendment, Compliance, etc.), use type as-is
       // For others, append "Registration" if not already present
       const typeLower = type.toLowerCase();
-      const hasDescriptiveSuffix = 
-        typeLower.includes('return') || 
-        typeLower.includes('amendment') || 
-        typeLower.includes('compliance') ||
-        typeLower.includes('notice') ||
-        typeLower.includes('addition') ||
-        typeLower.includes('removal') ||
-        typeLower.includes('change') ||
-        typeLower.includes('creation') ||
-        typeLower.includes('transfer') ||
-        typeLower.includes('deactivation') ||
-        typeLower.includes('reactivation') ||
-        typeLower.includes('application') ||
-        typeLower.includes('winding up') ||
-        typeLower.includes('plan') ||
-        typeLower.includes('payroll') ||
-        typeLower.includes('itr') ||
-        typeLower.includes('tax') ||
-        typeLower.includes('license') ||
-        typeLower.includes('trademark');
-      
+      const hasDescriptiveSuffix =
+        typeLower.includes("return") ||
+        typeLower.includes("amendment") ||
+        typeLower.includes("compliance") ||
+        typeLower.includes("notice") ||
+        typeLower.includes("addition") ||
+        typeLower.includes("removal") ||
+        typeLower.includes("change") ||
+        typeLower.includes("creation") ||
+        typeLower.includes("transfer") ||
+        typeLower.includes("deactivation") ||
+        typeLower.includes("reactivation") ||
+        typeLower.includes("application") ||
+        typeLower.includes("winding up") ||
+        typeLower.includes("plan") ||
+        typeLower.includes("payroll") ||
+        typeLower.includes("itr") ||
+        typeLower.includes("tax") ||
+        typeLower.includes("license") ||
+        typeLower.includes("trademark");
+
       if (hasDescriptiveSuffix) {
         return type; // Use type as-is for descriptive names
       } else {
@@ -308,12 +483,27 @@ function Registrations() {
     if (t.includes("pf return filing")) return "pf-return-filing";
     if (t.includes("esi return filing")) return "esi-return-filing";
     if (t.includes("professional tax return")) return "professional-tax-return";
-    if (t.includes("partnership compliance") || t.includes("partnership-compliance")) return "partnership-compliance";
-    if (t.includes("proprietorship compliance") || t.includes("proprietorship-compliance")) return "proprietorship-compliance";
-    if (t.includes("company compliance") || t.includes("company-compliance") || t === "company-compliance") return "company-compliance";
+    if (
+      t.includes("partnership compliance") ||
+      t.includes("partnership-compliance")
+    )
+      return "partnership-compliance";
+    if (
+      t.includes("proprietorship compliance") ||
+      t.includes("proprietorship-compliance")
+    )
+      return "proprietorship-compliance";
+    if (
+      t.includes("company compliance") ||
+      t.includes("company-compliance") ||
+      t === "company-compliance"
+    )
+      return "company-compliance";
     if (t.includes("trademark")) return "trademark";
-    if (t.includes("salary itr") || t.includes("income tax return salary")) return "salary-itr";
-    if (t.includes("business itr") || t.includes("business income tax")) return "business-itr";
+    if (t.includes("salary itr") || t.includes("income tax return salary"))
+      return "salary-itr";
+    if (t.includes("business itr") || t.includes("business income tax"))
+      return "business-itr";
     if (t.includes("house property itr")) return "house-property-itr";
     if (t.includes("trust itr")) return "trust-itr";
     if (t.includes("salary hp capital")) return "salary-hp-capital-gains";
@@ -326,10 +516,14 @@ function Registrations() {
 
   const getDetailRoute = (type, slug) => {
     // Services with forms - use view route
-    if (["private-limited", "proprietorship", "startup-india", "gst"].includes(slug)) {
+    if (
+      ["private-limited", "proprietorship", "startup-india", "gst"].includes(
+        slug
+      )
+    ) {
       return null; // Will use view route with ticket ID
     }
-    
+
     // All other services use registration pages (ServiceRegistrations component)
     // Company Registration Services
     if (slug === "opc") return "/registrations/opc";
@@ -337,16 +531,18 @@ function Registrations() {
     if (slug === "partnership") return "/registrations/partnership";
     if (slug === "section-8") return "/registrations/section-8";
     if (slug === "public-limited") return "/registrations/public-limited";
-    if (slug === "mca-name-approval" || slug === "mca") return "/registrations/mca-name-approval";
+    if (slug === "mca-name-approval" || slug === "mca")
+      return "/registrations/mca-name-approval";
     if (slug === "indian-subsidiary") return "/registrations/indian-subsidiary";
-    
+
     // GST Services
     if (slug === "gst-returns") return "/registrations/gst-returns";
     if (slug === "gst-annual-return") return "/registrations/gst-annual-return";
     if (slug === "gst-amendment") return "/registrations/gst-amendment";
     if (slug === "gst-notice") return "/registrations/gst-notice";
-    if (slug === "lut" || type.toLowerCase().includes("letter of undertaking")) return "/registrations/gst-lut";
-    
+    if (slug === "lut" || type.toLowerCase().includes("letter of undertaking"))
+      return "/registrations/gst-lut";
+
     // ROC & MCA Services
     if (slug === "director-addition") return "/registrations/director-addition";
     if (slug === "share-transfer") return "/registrations/share-transfer";
@@ -355,45 +551,63 @@ function Registrations() {
     if (slug === "director-removal") return "/registrations/director-removal";
     if (slug === "moa-amendment") return "/registrations/moa-amendment";
     if (slug === "aoa-amendment") return "/registrations/aoa-amendment";
-    if (slug === "objects-clause-change") return "/registrations/objects-clause-change";
-    if (slug === "increase-share-capital") return "/registrations/increase-share-capital";
-    if (slug === "name-change-company") return "/registrations/name-change-company";
+    if (slug === "objects-clause-change")
+      return "/registrations/objects-clause-change";
+    if (slug === "increase-share-capital")
+      return "/registrations/increase-share-capital";
+    if (slug === "name-change-company")
+      return "/registrations/name-change-company";
     if (slug === "din-deactivation") return "/registrations/din-deactivation";
     if (slug === "din-reactivation") return "/registrations/din-reactivation";
     if (slug === "adt-1") return "/registrations/adt-1";
-    if (slug === "winding-up-company") return "/registrations/winding-up-company";
+    if (slug === "winding-up-company")
+      return "/registrations/winding-up-company";
     if (slug === "winding-up-llp") return "/registrations/winding-up-llp";
     if (slug === "din-application") return "/registrations/din-application";
     if (slug === "inc-20a") return "/registrations/inc-20a";
-    
+
     // Compliance Services
     if (slug === "fssai-renewal") return "/registrations/fssai-renewal";
-    if (slug === "fssai-return-filing") return "/registrations/fssai-return-filing";
+    if (slug === "fssai-return-filing")
+      return "/registrations/fssai-return-filing";
     if (slug === "business-plan") return "/registrations/business-plan";
     if (slug === "hr-payroll") return "/registrations/hr-payroll";
     if (slug === "pf-return-filing") return "/registrations/pf-return-filing";
     if (slug === "esi-return-filing") return "/registrations/esi-return-filing";
-    if (slug === "professional-tax-return") return "/registrations/professional-tax-return";
-    if (slug === "partnership-compliance") return "/registrations/partnership-compliance";
-    if (slug === "proprietorship-compliance") return "/registrations/proprietorship-compliance";
-    if (slug === "company-compliance") return "/registrations/company-compliance";
+    if (slug === "professional-tax-return")
+      return "/registrations/professional-tax-return";
+    if (slug === "partnership-compliance")
+      return "/registrations/partnership-compliance";
+    if (slug === "proprietorship-compliance")
+      return "/registrations/proprietorship-compliance";
+    if (slug === "company-compliance")
+      return "/registrations/company-compliance";
     if (slug === "trademark") return "/registrations/trademark";
-    
+
     // Tax & Accounting Services
     if (slug === "salary-itr") return "/registrations/salary-itr";
     if (slug === "business-itr") return "/registrations/business-itr";
-    if (slug === "house-property-itr") return "/registrations/house-property-itr";
+    if (slug === "house-property-itr")
+      return "/registrations/house-property-itr";
     if (slug === "trust-itr") return "/registrations/trust-itr";
-    if (slug === "salary-hp-capital-gains") return "/registrations/salary-hp-capital-gains";
-    if (slug === "partnership-firm-itr") return "/registrations/partnership-firm-itr";
+    if (slug === "salary-hp-capital-gains")
+      return "/registrations/salary-hp-capital-gains";
+    if (slug === "partnership-firm-itr")
+      return "/registrations/partnership-firm-itr";
     if (slug === "company-itr") return "/registrations/company-itr";
-    
+
     // Other registration services
-    if (slug === "esi" || type.toLowerCase().includes("esi")) return "/registrations/esi";
+    if (slug === "esi" || type.toLowerCase().includes("esi"))
+      return "/registrations/esi";
     if (slug === "section-8") return "/registrations/section-8";
-    if (slug === "labour-license" || type.toLowerCase().includes("labour license")) return "/registrations/labour-license";
-    if (slug === "dsc" || type.toLowerCase().includes("digital signature")) return "/registrations/dsc";
-    
+    if (
+      slug === "labour-license" ||
+      type.toLowerCase().includes("labour license")
+    )
+      return "/registrations/labour-license";
+    if (slug === "dsc" || type.toLowerCase().includes("digital signature"))
+      return "/registrations/dsc";
+
     return null;
   };
 
@@ -408,7 +622,9 @@ function Registrations() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="mb-6">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-semibold text-gray-900">Select your Services</h1>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              Select your Services
+            </h1>
             <div className="relative w-[400px]">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <IoSearchOutline className="h-5 w-5 text-gray-400" />
@@ -426,16 +642,20 @@ function Registrations() {
             <div className="flex space-x-8">
               <button
                 onClick={() => setView("services")}
-                className={`py-2 px-5 relative rounded-lg ${
-                  view === "services" ? "bg-[#004568] text-white" : "text-gray-500 hover:text-gray-700"
+                className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
+                  view === "services"
+                    ? "bg-[#01466a] text-white"
+                    : "text-gray-500 hover:text-gray-900"
                 }`}
               >
                 Services
               </button>
               <button
                 onClick={() => setView("my")}
-                className={`py-2 px-5 relative rounded-lg ${
-                  view === "my" ? "bg-[#004568] text-white" : "text-gray-500 hover:text-gray-700"
+                className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
+                  view === "my"
+                    ? "bg-[#01466a] text-white"
+                    : "text-gray-500 hover:text-gray-900"
                 }`}
               >
                 My Registrations
@@ -448,28 +668,58 @@ function Registrations() {
           <>
             <div className="grid gap-4">
               {[
-                { title: "Start up Services", desc: "Incorporation, funding, and advisory support", onClick: () => navigate("/company-categories"), comingSoon: false },
-                { title: "Registration Services", desc: "Quick and easy business registrations", onClick: () => navigate("/registration-categories"), comingSoon: false },
-                { title: "Goods and Services Tax Services", desc: "GST registration, filing, and compliance", onClick: () => navigate("/gst-categories"), comingSoon: false },
-                { title: "ROC & MCA Services", desc: "Company law filings and MCA compliance", onClick: () => navigate("/roc-categories"), comingSoon: false },
-                { title: "Compliance Services", desc: "Ongoing compliance and regulatory support", onClick: () => navigate("/compliance-categories"), comingSoon: false },
-                { title: "Tax & Accounting Services", desc: "Income tax, accounting, and financial services", onClick: () => navigate("/tax-accounting-categories"), comingSoon: false },
+                {
+                  title: "Start up Services",
+                  desc: "Incorporation, funding, and advisory support.",
+                  onClick: () => navigate("/company-categories"),
+                  comingSoon: false,
+                },
+                {
+                  title: "Registration Services",
+                  desc: "Quick and easy business registrations.",
+                  onClick: () => navigate("/registration-categories"),
+                  comingSoon: false,
+                },
+                {
+                  title: "Goods and Services Tax Services",
+                  desc: "GST registration, filing, and compliance.",
+                  onClick: () => navigate("/gst-categories"),
+                  comingSoon: false,
+                },
+                {
+                  title: "ROC & MCA Services",
+                  desc: "Company law filings and MCA compliance.",
+                  onClick: () => navigate("/roc-categories"),
+                  comingSoon: false,
+                },
+                {
+                  title: "Income Tax Services",
+                  desc: "Tax planning, filing, and assessments.",
+                  onClick: () => navigate("/tax-accounting-categories"),
+                  comingSoon: false,
+                },
+                {
+                  title: "Compliance Services",
+                  desc: "End-to-end legal and regulatory compliance.",
+                  onClick: () => navigate("/compliance-categories"),
+                  comingSoon: false,
+                },
               ].map((service, idx) => (
                 <div
                   key={idx}
-                  className="relative group bg-white rounded-2xl p-5 hover:bg-[#01334C] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full"
+                  className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#01334C] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-transparent hover:border-gray-100/10"
                   onClick={service.onClick}
                 >
                   <div>
-                    <h3 className="text-lg font-medium text-[#00486D] group-hover:text-white">
+                    <h3 className="text-lg font-semibold text-[#00486D] mb-1 group-hover:text-white">
                       {service.title}
                     </h3>
-                    <p className="mt-1 text-sm text-gray-500 group-hover:text-gray-200">
+                    <p className="text-sm text-gray-400 group-hover:text-gray-200">
                       {service.desc}
                     </p>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-gray-50 group-hover:bg-[#246181] flex items-center justify-center">
-                    <span className="text-[#01334C] group-hover:text-white text-lg">→</span>
+                  <div className="w-10 h-10 rounded-full bg-[#F5F7FA] group-hover:bg-[#246181] flex items-center justify-center transition-colors">
+                    <IoChevronForwardOutline className="text-[#00486D] text-xl group-hover:text-white" />
                   </div>
                 </div>
               ))}
@@ -479,24 +729,35 @@ function Registrations() {
             {showComingSoon && (
               <div className="fixed inset-0 z-50 flex items-center justify-center">
                 {/* Blurred Background */}
-                <div 
+                <div
                   className="absolute inset-0 backdrop-blur-lg"
                   onClick={() => setShowComingSoon(false)}
                 ></div>
-                
+
                 {/* Popup Content */}
                 <div className="relative bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl transform transition-all">
                   <div className="text-center">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <svg
+                        className="w-8 h-8 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
                       </svg>
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-3">
                       Coming Soon!
                     </h3>
                     <p className="text-gray-600 mb-6 leading-relaxed">
-                      We're working hard to bring you this amazing service. We'll deliver it as soon as possible!
+                      We're working hard to bring you this amazing service.
+                      We'll deliver it as soon as possible!
                     </p>
                     <p className="text-sm text-gray-500 mb-6">
                       Stay tuned for updates and exciting new features.
@@ -513,102 +774,159 @@ function Registrations() {
             )}
           </>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm border border-[#F3F3F3]">
-            <div className="p-5 overflow-x-auto">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div className="overflow-x-auto">
               {loading ? (
-                <div className="text-sm text-gray-500 p-4 text-center">Loading registrations...</div>
+                <div className="text-sm text-gray-500 p-8 text-center">
+                  Loading registrations...
+                </div>
               ) : filtered.length > 0 ? (
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <tr className="bg-[#00486D] text-white">
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wide first:rounded-tl-lg">
                         Service
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wide">
                         Service Name
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-center text-sm font-medium tracking-wide">
                         Service Status
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-center text-sm font-medium tracking-wide">
                         Date
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-center text-sm font-medium tracking-wide last:rounded-tr-lg">
                         Action
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white">
                     {filtered.map((reg, idx) => {
                       const type = deriveType(reg);
                       const slug = getTypeSlug(type);
                       const ticketId = getTicketId(reg);
                       const detailRoute = getDetailRoute(type, slug);
                       // Services with forms - use view route with ticket ID
-                      const hasFormRoute = ["private-limited", "proprietorship", "startup-india", "gst"].includes(slug) && ticketId;
+                      const hasFormRoute =
+                        [
+                          "private-limited",
+                          "proprietorship",
+                          "startup-india",
+                          "gst",
+                        ].includes(slug) && ticketId;
                       // For formless services, show View Details if route exists (ticketId not required)
-                      const hasDetailRoute = detailRoute !== null && detailRoute !== undefined;
+                      const hasDetailRoute =
+                        detailRoute !== null && detailRoute !== undefined;
+
+                      // Format date like "12 Day , 2025" as requested
+                      const dateObj = new Date(
+                        reg.updated_at || reg.created_at || reg.createdAt
+                      );
+                      const formattedDate = !isNaN(dateObj.getTime())
+                        ? `${dateObj.getDate()} ${dateObj.toLocaleString(
+                            "default",
+                            { month: "short" }
+                          )} , ${dateObj.getFullYear()}`
+                        : "-";
+
                       return (
-                        <tr key={reg.ticket_id || reg.id || idx} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <tr
+                          key={reg.ticket_id || reg.id || idx}
+                          className="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
+                        >
+                          <td className="px-6 py-5 whitespace-nowrap text-sm font-medium text-gray-900">
                             {type}
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-600">
                             {formatName(reg)}
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
+                          <td className="px-6 py-5 whitespace-nowrap text-center">
                             {reg.service_status ? (
-                              <span className={`${badge(reg.service_status)} px-2 py-1 rounded-full text-xs font-medium`}>
+                              <span
+                                className={`${
+                                  reg.service_status.toLowerCase() ===
+                                  "payment pending"
+                                    ? "bg-[#FFF4E5] text-[#B54708]"
+                                    : reg.service_status
+                                        .toLowerCase()
+                                        .includes("completed")
+                                    ? "bg-[#E6F4EA] text-[#1E8E3E]"
+                                    : badge(reg.service_status)
+                                } px-4 py-1.5 rounded-full text-xs font-medium inline-block min-w-[120px]`}
+                              >
                                 {reg.service_status}
                               </span>
                             ) : (
                               <span className="text-xs text-gray-400">-</span>
                             )}
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                            {formatDate(reg.updated_at || reg.created_at || reg.createdAt)}
+                          <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-600 text-center">
+                            {formattedDate}
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm">
-                            <div className="flex items-center gap-2">
-                              {/* Pay button for pending payments */}
-                              {reg.service_status === 'Payment pending' && (reg.razorpay_order_id || reg.order_id) ? (
-                                <button
-                                  onClick={async () => {
-                                    try {
-                                      const orderId = reg.razorpay_order_id || reg.order_id;
-                                      const amount = reg.package_price || reg.amount || 0;
-                                      await initPaymentWithOrderId(orderId, amount, {
+                          <td className="px-6 py-5 whitespace-nowrap text-sm text-center">
+                            {/* Pay button for pending payments */}
+                            {reg.service_status === "Payment pending" &&
+                            (reg.razorpay_order_id || reg.order_id) ? (
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    const orderId =
+                                      reg.razorpay_order_id || reg.order_id;
+                                    const amount =
+                                      reg.package_price || reg.amount || 0;
+                                    await initPaymentWithOrderId(
+                                      orderId,
+                                      amount,
+                                      {
                                         ticket_id: ticketId,
                                         registration_type: slug,
-                                        package_name: reg.package_name || formatName(reg)
-                                      });
-                                    } catch (error) {
-                                      console.error('Payment error:', error);
-                                      alert(error.message || 'Failed to initiate payment. Please try again.');
-                                    }
-                                  }}
-                                  className="px-3 py-1 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors"
-                                >
-                                  Pay
-                                </button>
-                              ) : null}
-                              {hasFormRoute ? (
-                                <button
-                                  onClick={() => navigate(`/${slug}/view/${ticketId}`)}
-                                  className="px-3 py-1 text-xs font-medium text-[#00486D] border border-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
-                                >
-                                  View Details
-                                </button>
-                              ) : hasDetailRoute ? (
-                                <button
-                                  onClick={() => navigate(detailRoute)}
-                                  className="px-3 py-1 text-xs font-medium text-[#00486D] border border-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
-                                >
-                                  View Details
-                                </button>
-                              ) : null}
-                              {/* Edit Registration button removed for users; only allow viewing details here */}
-                            </div>
+                                        package_name:
+                                          reg.package_name || formatName(reg),
+                                      }
+                                    );
+                                  } catch (error) {
+                                    console.error("Payment error:", error);
+                                    alert(
+                                      error.message ||
+                                        "Failed to initiate payment. Please try again."
+                                    );
+                                  }
+                                }}
+                                className="px-6 py-2 text-xs font-semibold text-white rounded-md shadow-sm hover:shadow-md transition-all uppercase tracking-wide"
+                                style={{
+                                  background:
+                                    "linear-gradient(90deg, #16a34a 0%, #15803d 100%)",
+                                }}
+                              >
+                                Pay Now
+                              </button>
+                            ) : hasFormRoute ? (
+                              <button
+                                onClick={() =>
+                                  navigate(`/${slug}/view/${ticketId}`)
+                                }
+                                className="px-8 py-2 text-xs font-semibold text-white rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide"
+                                style={{
+                                  background:
+                                    "linear-gradient(90deg, #00486D 0%, #023752 100%)",
+                                }}
+                              >
+                                View
+                              </button>
+                            ) : hasDetailRoute ? (
+                              <button
+                                onClick={() => navigate(detailRoute)}
+                                className="px-8 py-2 text-xs font-semibold text-white rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide"
+                                style={{
+                                  background:
+                                    "linear-gradient(90deg, #00486D 0%, #023752 100%)",
+                                }}
+                              >
+                                View
+                              </button>
+                            ) : null}
                           </td>
                         </tr>
                       );
@@ -616,7 +934,9 @@ function Registrations() {
                   </tbody>
                 </table>
               ) : (
-                <div className="text-sm text-gray-500 p-4 text-center">No registrations found.</div>
+                <div className="text-sm text-gray-500 p-8 text-center">
+                  No registrations found.
+                </div>
               )}
             </div>
           </div>

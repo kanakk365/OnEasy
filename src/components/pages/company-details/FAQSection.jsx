@@ -12,7 +12,8 @@ function FAQSection({ faqs }) {
     {
       question:
         "What is the maximum number of shareholders allowed in a Private Limited Company?",
-      answer: "A Private Limited Company can have a maximum of 200 shareholders.",
+      answer:
+        "A Private Limited Company can have a maximum of 200 shareholders.",
     },
     {
       question:
@@ -27,7 +28,8 @@ function FAQSection({ faqs }) {
         "Yes, a foreign national can be a director, but at least one director must be an Indian resident.",
     },
     {
-      question: "How long does it take to register a Private Limited Company in India?",
+      question:
+        "How long does it take to register a Private Limited Company in India?",
       answer:
         "The registration process typically takes 10-15 business days, depending on the processing time of the MCA.",
     },
@@ -43,7 +45,8 @@ function FAQSection({ faqs }) {
         "Post-registration, companies must comply with annual filings, maintain financial records, and conduct board and general meetings regularly.",
     },
     {
-      question: "Can a Private Limited Company be converted into another business structure?",
+      question:
+        "Can a Private Limited Company be converted into another business structure?",
       answer:
         "Yes, a Private Limited Company can be converted into an LLP, public company, or other business structures, subject to regulatory approvals.",
     },
@@ -59,19 +62,19 @@ function FAQSection({ faqs }) {
         "Yes, shares in a Private Limited Company can only be transferred with the approval of the Board of Directors as per the company's Articles of Association.",
     },
   ];
-  
+
   const faqsList = faqs || defaultFaqs;
 
   return (
     <div className=" bg-white p-8 rounded-lg shadow-sm">
-      <h2 className="text-xl mb-6 text-[#00486D] " >
-        FAQs
-      </h2>
+      <h2 className="text-xl mb-6 text-[#00486D] ">FAQs</h2>
       <div className="space-y-6">
         {faqsList.map((faq, index) => (
           <div key={index} className="space-y-2">
             <div className="flex items-start">
-              <span className=" font-bold text-gray-900 mr-2">{index + 1}.</span>
+              <span className=" font-medium text-gray-900 mr-2">
+                {index + 1}.
+              </span>
               <p className="font-medium text-gray-900">{faq.question}</p>
             </div>
             <div className="ml-4">
@@ -85,5 +88,3 @@ function FAQSection({ faqs }) {
 }
 
 export default FAQSection;
-
-

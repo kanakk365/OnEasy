@@ -24,7 +24,7 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
 
     // Validate coupon with minimum package price to check basic validity
     // Will be re-validated with actual package price when user selects a package
-    const minPrice = Math.min(...packages.map(p => p.priceValue));
+    const minPrice = Math.min(...packages.map((p) => p.priceValue));
     const result = await validateCoupon(couponCode, minPrice);
 
     setValidatingCoupon(false);
@@ -46,14 +46,16 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
 
   const handleGetStartedWithCoupon = async (pkg) => {
     setSelectedPackage(pkg);
-    
+
     // If coupon is applied, re-validate with this specific package's price
     if (appliedCoupon && appliedCoupon.valid && couponCode.trim()) {
       // Re-validate coupon with actual package price
       const validation = await validateCoupon(couponCode, pkg.priceValue);
-      
+
       if (!validation.valid) {
-        setCouponError(validation.message || "Coupon is not valid for this package");
+        setCouponError(
+          validation.message || "Coupon is not valid for this package"
+        );
         setAppliedCoupon(null);
         // Still proceed with payment without coupon
         onGetStarted(pkg);
@@ -63,19 +65,19 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
       // Calculate discount for this specific package
       const discountAmount = validation.discountAmount;
       const finalAmount = validation.finalAmount;
-      
+
       // Create package with discounted price
       const discountedPackage = {
         ...pkg,
         originalPrice: pkg.price,
         originalPriceValue: pkg.priceValue,
-        price: finalAmount.toLocaleString('en-IN'),
+        price: finalAmount.toLocaleString("en-IN"),
         priceValue: Math.round(finalAmount),
         couponCode: couponCode.toUpperCase().trim(),
         discountAmount: Math.round(discountAmount),
-        discountPercentage: validation.discountPercentage
+        discountPercentage: validation.discountPercentage,
       };
-      
+
       onGetStarted(discountedPackage);
     } else {
       onGetStarted(pkg);
@@ -84,10 +86,12 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
 
   return (
     <div className="mt-8">
-      <h2 className="text-2xl font-semibold text-center mb-2">Choose your Package</h2>
+      <h2 className="text-2xl font-semibold text-center mb-2">
+        Choose your Package
+      </h2>
       <p className="text-center text-gray-600 mb-8">
-        Our carefully designed pricing plans take into consideration the
-        needs of teams of various sizes.
+        Our carefully designed pricing plans take into consideration the needs
+        of teams of various sizes.
       </p>
 
       {/* Coupon Code Section */}
@@ -130,13 +134,12 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
           </div>
           {appliedCoupon && appliedCoupon.valid && (
             <div className="mt-2 text-sm text-green-600 font-medium">
-              ✓ Coupon applied! {appliedCoupon.discountPercentage}% discount will be applied at checkout.
+              ✓ Coupon applied! {appliedCoupon.discountPercentage}% discount
+              will be applied at checkout.
             </div>
           )}
           {couponError && (
-            <div className="mt-2 text-sm text-red-600">
-              {couponError}
-            </div>
+            <div className="mt-2 text-sm text-red-600">{couponError}</div>
           )}
         </div>
       </div>
@@ -153,66 +156,152 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
           >
             <div
               className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 text-xl ${
-                pkg.isHighlighted ? "bg-white/15 text-white" : "bg-[#ED1C25] text-white"
+                pkg.isHighlighted
+                  ? "bg-white/15 text-white"
+                  : "bg-[#ED1C25] text-white"
               }`}
             >
               {pkg.icon}
             </div>
-            <h3 className={`mb-2 font-medium ${pkg.isHighlighted ? "text-white text-2xl" : "text-[#101828] text-2xl"}`}>
+            <h3
+              className={`mb-2 font-medium ${
+                pkg.isHighlighted
+                  ? "text-white text-2xl"
+                  : "text-[#101828] text-2xl"
+              }`}
+            >
               {pkg.name}
             </h3>
             <div className="flex items-center gap-3 mb-4">
-              <span className={`font-medium ${pkg.isHighlighted ? "text-5xl text-white" : "text-5xl text-[#101828]"}`}>
+              <span
+                className={`font-medium ${
+                  pkg.isHighlighted
+                    ? "text-5xl text-white"
+                    : "text-5xl text-[#101828]"
+                }`}
+              >
                 ₹{pkg.price}
               </span>
               <div className="flex flex-col">
                 {pkg.originalPrice && (
-                  <span className={`line-through ${pkg.isHighlighted ? "text-white/90" : "text-[#101828]"} text-base`}>
+                  <span
+                    className={`line-through ${
+                      pkg.isHighlighted ? "text-white/90" : "text-[#101828]"
+                    } text-base`}
+                  >
                     ₹{pkg.originalPrice}
                   </span>
                 )}
-                <span className={`${pkg.isHighlighted ? "text-white/60" : "text-[#475467]"} text-sm`}>
+                <span
+                  className={`${
+                    pkg.isHighlighted ? "text-white/60" : "text-[#475467]"
+                  } text-sm`}
+                >
                   /per month
                 </span>
               </div>
             </div>
-            <p className={`mb-6 text-base ${pkg.isHighlighted ? "text-white/80" : "text-[#101828]/80"}`}>
+            <p
+              className={`mb-6 text-base ${
+                pkg.isHighlighted ? "text-white/80" : "text-[#101828]/80"
+              }`}
+            >
               {pkg.description}
             </p>
             <ul className="space-y-4 mb-8 flex-1">
               {pkg.features.map((feature, i) => (
                 <li key={i} className="flex items-center space-x-3">
-                  <div className={`w-4 h-4 rounded-full flex items-center justify-center ${pkg.isHighlighted ? "bg-white" : "bg-[#01334C]"}`}>
-                    <span className={`text-[10px] ${pkg.isHighlighted ? "text-[#01334C]" : "text-white"}`}>✓</span>
+                  <div
+                    className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                      pkg.isHighlighted ? "bg-white" : "bg-[#01334C]"
+                    }`}
+                  >
+                    <span
+                      className={`text-[10px] ${
+                        pkg.isHighlighted ? "text-[#01334C]" : "text-white"
+                      }`}
+                    >
+                      ✓
+                    </span>
                   </div>
-                  <span className={`text-sm ${pkg.isHighlighted ? "text-white" : "text-[#101828]"}`}>{feature}</span>
+                  <span
+                    className={`text-sm ${
+                      pkg.isHighlighted ? "text-white" : "text-[#101828]"
+                    }`}
+                  >
+                    {feature}
+                  </span>
                 </li>
               ))}
             </ul>
             {appliedCoupon && appliedCoupon.valid && (
               <div className="mb-3 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className={pkg.isHighlighted ? "text-white/80" : "text-gray-600"}>
+                  <span
+                    className={
+                      pkg.isHighlighted ? "text-white/80" : "text-gray-600"
+                    }
+                  >
                     Original Price:
                   </span>
-                  <span className={pkg.isHighlighted ? "text-white line-through" : "text-gray-500 line-through"}>
+                  <span
+                    className={
+                      pkg.isHighlighted
+                        ? "text-white line-through"
+                        : "text-gray-500 line-through"
+                    }
+                  >
                     ₹{pkg.price}
                   </span>
                 </div>
                 <div className="flex justify-between items-center mt-1">
-                  <span className={pkg.isHighlighted ? "text-white font-semibold" : "text-[#101828] font-semibold"}>
+                  <span
+                    className={
+                      pkg.isHighlighted
+                        ? "text-white font-medium"
+                        : "text-[#101828] font-medium"
+                    }
+                  >
                     Discount ({appliedCoupon.discountPercentage}%):
                   </span>
-                  <span className={pkg.isHighlighted ? "text-white font-semibold" : "text-green-600 font-semibold"}>
-                    -₹{Math.round((pkg.priceValue * appliedCoupon.discountPercentage) / 100).toLocaleString('en-IN')}
+                  <span
+                    className={
+                      pkg.isHighlighted
+                        ? "text-white font-medium"
+                        : "text-green-600 font-medium"
+                    }
+                  >
+                    -₹
+                    {Math.round(
+                      (pkg.priceValue * appliedCoupon.discountPercentage) / 100
+                    ).toLocaleString("en-IN")}
                   </span>
                 </div>
                 <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-300">
-                  <span className={pkg.isHighlighted ? "text-white font-bold text-lg" : "text-[#101828] font-bold text-lg"}>
+                  <span
+                    className={
+                      pkg.isHighlighted
+                        ? "text-white font-semibold text-lg"
+                        : "text-[#101828] font-semibold text-lg"
+                    }
+                  >
                     Final Price:
                   </span>
-                  <span className={pkg.isHighlighted ? "text-white font-bold text-lg" : "text-[#01334C] font-bold text-lg"}>
-                    ₹{(pkg.priceValue - Math.round((pkg.priceValue * appliedCoupon.discountPercentage) / 100)).toLocaleString('en-IN')}
+                  <span
+                    className={
+                      pkg.isHighlighted
+                        ? "text-white font-semibold text-lg"
+                        : "text-[#01334C] font-semibold text-lg"
+                    }
+                  >
+                    ₹
+                    {(
+                      pkg.priceValue -
+                      Math.round(
+                        (pkg.priceValue * appliedCoupon.discountPercentage) /
+                          100
+                      )
+                    ).toLocaleString("en-IN")}
                   </span>
                 </div>
               </div>
@@ -230,12 +319,14 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
             <button
               onClick={async () => {
                 try {
-                  const user = JSON.parse(localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || '{}');
+                  const user = JSON.parse(
+                    localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+                  );
                   if (!user.id) {
-                    alert('Please login to contact support.');
+                    alert("Please login to contact support.");
                     return;
                   }
-                  
+
                   // Get service display name using utility function
                   const requestServiceName = getServiceDisplayName(
                     serviceName,
@@ -243,16 +334,23 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
                     location.pathname
                   );
                   const packageName = pkg.name || null;
-                  
-                  const result = await createSupportRequest(requestServiceName, packageName);
+
+                  const result = await createSupportRequest(
+                    requestServiceName,
+                    packageName
+                  );
                   if (result.success) {
-                    alert('Support request submitted successfully! Our team will contact you soon.');
+                    alert(
+                      "Support request submitted successfully! Our team will contact you soon."
+                    );
                   } else {
-                    alert('Failed to submit support request. Please try again.');
+                    alert(
+                      "Failed to submit support request. Please try again."
+                    );
                   }
                 } catch (error) {
-                  console.error('Error submitting support request:', error);
-                  alert('An error occurred. Please try again.');
+                  console.error("Error submitting support request:", error);
+                  alert("An error occurred. Please try again.");
                 }
               }}
               className={`w-full py-2 mt-2 rounded-lg font-medium transition-all duration-300 text-sm ${
@@ -271,5 +369,3 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
 }
 
 export default PackagesSection;
-
-

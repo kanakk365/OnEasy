@@ -98,9 +98,10 @@ function ComplianceCategories() {
     },
   ];
 
-  const filteredServices = complianceServices.filter((service) =>
-    service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredServices = complianceServices.filter(
+    (service) =>
+      service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -149,4 +150,3 @@ function ComplianceCategories() {
 }
 
 export default ComplianceCategories;
-
