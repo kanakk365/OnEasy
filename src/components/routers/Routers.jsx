@@ -14,6 +14,7 @@ import GSTCategories from "../pages/GSTCategories";
 import ROCCategories from "../pages/ROCCategories";
 import ComplianceCategories from "../pages/ComplianceCategories";
 import ComplianceChat from "../pages/ComplianceChat";
+import Resources from "../pages/Resources";
 import TaxAccountingCategories from "../pages/TaxAccountingCategories";
 import RegistrationPackageSelection from "../pages/RegistrationPackageSelection";
 import RegistrationForm from "../forms/RegistrationForm";
@@ -233,6 +234,14 @@ function Routers() {
         element={
           <ProtectedRoute>
             <ComplianceChat />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/resources"
+        element={
+          <ProtectedRoute>
+            <Resources />
           </ProtectedRoute>
         }
       />
