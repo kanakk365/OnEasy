@@ -525,26 +525,28 @@ function KYCDocumentDetail() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
-            <button 
+            <button
               onClick={() => navigate("/kyc")}
               className="p-1 hover:bg-gray-100 rounded-full transition-colors"
             >
               <FiChevronLeft className="w-6 h-6 text-gray-900" />
             </button>
-            <h1 className="text-2xl font-semibold text-gray-900">{docConfig.label}</h1>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              {docConfig.label}
+            </h1>
           </div>
           <div className="ml-9 flex items-center justify-between">
-            <p className="text-gray-500 italic">
-              {docConfig.description}
-            </p>
-            <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-                documents.length >= 3 
-                  ? "bg-red-50 text-red-600" 
-                  : documents.length > 0 
-                  ? "bg-blue-50 text-[#00486D]" 
+            <p className="text-gray-500 italic">{docConfig.description}</p>
+            <span
+              className={`px-3 py-1 text-sm font-medium rounded-full ${
+                documents.length >= 3
+                  ? "bg-red-50 text-red-600"
+                  : documents.length > 0
+                  ? "bg-blue-50 text-[#00486D]"
                   : "bg-gray-100 text-gray-600"
-              }`}>
-                {documents.length}/3 Uploaded
+              }`}
+            >
+              {documents.length}/3 Uploaded
             </span>
           </div>
         </div>
@@ -560,19 +562,31 @@ function KYCDocumentDetail() {
                 >
                   <div className="flex items-start gap-4 mb-3">
                     <div className="w-12 h-12 bg-[#00486D] rounded-xl flex items-center justify-center text-white flex-shrink-0">
-                       <RiFileTextLine className="w-6 h-6" />
+                      <RiFileTextLine className="w-6 h-6" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 truncate" title={doc.name || doc.document_name || `Document ${index + 1}`}>
-                        {doc.name || doc.document_name || `Document ${index + 1}`}
+                      <p
+                        className="font-semibold text-gray-900 truncate"
+                        title={
+                          doc.name ||
+                          doc.document_name ||
+                          `Document ${index + 1}`
+                        }
+                      >
+                        {doc.name ||
+                          doc.document_name ||
+                          `Document ${index + 1}`}
                       </p>
                       {doc.uploadedAt && (
                         <p className="text-xs text-gray-500 mt-1">
-                          {new Date(doc.uploadedAt).toLocaleDateString('en-IN', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
+                          {new Date(doc.uploadedAt).toLocaleDateString(
+                            "en-IN",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            }
+                          )}
                         </p>
                       )}
                     </div>
@@ -580,14 +594,22 @@ function KYCDocumentDetail() {
 
                   <div className="flex items-center gap-2 pt-3 border-t border-gray-50">
                     <button
-                      onClick={() => handleViewDocument(doc.id, doc.url || doc.document_url)}
+                      onClick={() =>
+                        handleViewDocument(doc.id, doc.url || doc.document_url)
+                      }
                       className="flex-1 flex items-center justify-center gap-2 p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                       title="View"
                     >
                       <FiEye className="w-4 h-4" /> View
                     </button>
                     <button
-                      onClick={() => handleDownloadDocument(doc.id, doc.name || doc.document_name || "document", doc.url || doc.document_url)}
+                      onClick={() =>
+                        handleDownloadDocument(
+                          doc.id,
+                          doc.name || doc.document_name || "document",
+                          doc.url || doc.document_url
+                        )
+                      }
                       className="flex-1 flex items-center justify-center gap-2 p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                       title="Download"
                     >
@@ -605,20 +627,26 @@ function KYCDocumentDetail() {
               ))}
             </div>
           ) : (
-             <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
-               <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <RiFileTextLine className="w-8 h-8 text-gray-400" />
-               </div>
-               <p className="text-gray-500 font-medium">No documents uploaded yet</p>
-               <p className="text-gray-400 text-sm mt-1">Upload your {docConfig.label} to get started</p>
-             </div>
+            <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
+              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <RiFileTextLine className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="text-gray-500 font-medium">
+                No documents uploaded yet
+              </p>
+              <p className="text-gray-400 text-sm mt-1">
+                Upload your {docConfig.label} to get started
+              </p>
+            </div>
           )}
         </div>
 
         {/* Upload Section */}
         {documents.length < 3 && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Upload New Document</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+              Upload New Document
+            </h2>
             <input
               type="file"
               ref={fileInputRef}
@@ -630,23 +658,29 @@ function KYCDocumentDetail() {
             <div
               onClick={() => !uploading && fileInputRef.current?.click()}
               className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${
-                uploading 
-                  ? "border-gray-200 bg-gray-50 cursor-not-allowed" 
+                uploading
+                  ? "border-gray-200 bg-gray-50 cursor-not-allowed"
                   : "border-blue-200 hover:border-[#00486D] hover:bg-blue-50/30"
               }`}
             >
               {uploading ? (
-                 <div className="flex flex-col items-center">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00486D] mb-3"></div>
-                    <p className="text-[#00486D] font-medium">Uploading your document...</p>
-                 </div>
+                <div className="flex flex-col items-center">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00486D] mb-3"></div>
+                  <p className="text-[#00486D] font-medium">
+                    Uploading your document...
+                  </p>
+                </div>
               ) : (
                 <div className="flex flex-col items-center">
                   <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center text-[#00486D] mb-4">
                     <RiUploadCloud2Line className="w-7 h-7" />
                   </div>
-                  <p className="text-gray-900 font-medium text-lg mb-1">Click to upload or drag and drop</p>
-                  <p className="text-gray-500 text-sm">SVG, PNG, JPG or PDF (max. 5MB)</p>
+                  <p className="text-gray-900 font-medium text-lg mb-1">
+                    Click to upload or drag and drop
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    SVG, PNG, JPG or PDF (max. 5MB)
+                  </p>
                 </div>
               )}
             </div>

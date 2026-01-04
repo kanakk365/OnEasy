@@ -1,12 +1,17 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { RiUser3Line, RiUserAddLine, RiTicketLine, RiSettings3Line, RiAlertLine, RiFolderSettingsLine, RiMoneyDollarCircleLine } from "react-icons/ri";
+import {
+  RiUser3Line,
+  RiUserAddLine,
+  RiTicketLine,
+  RiSettings3Line,
+  RiAlertLine,
+  RiFolderSettingsLine,
+  RiMoneyDollarCircleLine,
+} from "react-icons/ri";
 import { BsBuilding } from "react-icons/bs";
 import { HiOutlineUsers } from "react-icons/hi";
-import {
-  MdMenu,
-  MdClose,
-} from "react-icons/md";
+import { MdMenu, MdClose } from "react-icons/md";
 import {
   IoLogOutOutline,
   IoChevronBackOutline,
@@ -24,7 +29,12 @@ function AdminSidebar() {
   const { isCollapsed, setIsCollapsed } = useSidebarStore();
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const [userData, setUserData] = React.useState(null);
-  const { showLogoutModal, setShowLogoutModal, closeLogoutModal, handleLogout } = useLogoutModalStore();
+  const {
+    showLogoutModal,
+    setShowLogoutModal,
+    closeLogoutModal,
+    handleLogout,
+  } = useLogoutModalStore();
 
   // Load user data from localStorage
   const loadUserData = React.useCallback(() => {
@@ -33,7 +43,7 @@ function AdminSidebar() {
       try {
         setUserData(JSON.parse(storedUser));
       } catch (e) {
-        console.error('Error parsing user data:', e);
+        console.error("Error parsing user data:", e);
       }
     }
   }, []);
@@ -45,26 +55,81 @@ function AdminSidebar() {
       loadUserData();
     };
 
-    window.addEventListener('profileUpdated', handleProfileUpdate);
-    
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+
     return () => {
-      window.removeEventListener('profileUpdated', handleProfileUpdate);
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
     };
   }, [loadUserData]);
 
   const menuItems = [
-    { icon: <HiOutlineUsers />, text: "Clients", path: "/admin/clients", subPaths: ['/admin/client-overview', '/admin/client-details', '/admin/fill-form', '/admin/gst-form', '/admin/startup-india-form', '/admin/proprietorship-form', '/admin/private-limited-form'] },
+    {
+      icon: <HiOutlineUsers />,
+      text: "Clients",
+      path: "/admin/clients",
+      subPaths: [
+        "/admin/client-overview",
+        "/admin/client-details",
+        "/admin/fill-form",
+        "/admin/gst-form",
+        "/admin/startup-india-form",
+        "/admin/proprietorship-form",
+        "/admin/private-limited-form",
+      ],
+    },
     { icon: <RiUserAddLine />, text: "Add User", path: "/admin/add-user" },
-    { icon: <RiUserAddLine />, text: "New Registration", path: "/admin/new-registration" },
-    { icon: <RiMoneyDollarCircleLine />, text: "Custom Payment", path: "/admin/custom-payment" },
+    {
+      icon: <RiUserAddLine />,
+      text: "New Registration",
+      path: "/admin/new-registration",
+    },
+    {
+      icon: <RiMoneyDollarCircleLine />,
+      text: "Custom Payment",
+      path: "/admin/custom-payment",
+    },
     { icon: <RiSettings3Line />, text: "Services", path: "/admin/services" },
-    { icon: <BsBuilding />, text: "Organizations", path: "/admin/organizations" },
-    { icon: <RiFolderSettingsLine />, text: "Documents Vault", path: "/admin/documents-vault", subPaths: ['/admin/client-documents', '/admin/client-kyc', '/admin/client-directors'] },
-    { icon: <RiAlertLine />, text: "Notice Board", path: "/admin/notice-board" },
-    { icon: <RiTicketLine />, text: "Coupon Code Generator", path: "/admin/coupon-generator" },
-    { icon: <RiFolderSettingsLine />, text: "CMS for Package", path: "/admin/cms-package" },
+    {
+      icon: <BsBuilding />,
+      text: "Organizations",
+      path: "/admin/organizations",
+    },
+    {
+      icon: <RiFolderSettingsLine />,
+      text: "Documents Vault",
+      path: "/admin/documents-vault",
+      subPaths: [
+        "/admin/client-documents",
+        "/admin/client-kyc",
+        "/admin/client-directors",
+      ],
+    },
+    {
+      icon: <RiAlertLine />,
+      text: "Notice Board",
+      path: "/admin/notice-board",
+    },
+    {
+      icon: <RiTicketLine />,
+      text: "Coupon Code Generator",
+      path: "/admin/coupon-generator",
+    },
+    {
+      icon: <RiFolderSettingsLine />,
+      text: "CMS for Package",
+      path: "/admin/cms-package",
+    },
     { icon: <RiUser3Line />, text: "Profile", path: "/admin/profile" },
   ];
+
+  const isActive = (item) => {
+    return (
+      location.pathname === item.path ||
+      location.pathname.startsWith(item.path + "/") ||
+      (item.subPaths &&
+        item.subPaths.some((subPath) => location.pathname.startsWith(subPath)))
+    );
+  };
 
   return (
     <>
@@ -72,9 +137,9 @@ function AdminSidebar() {
       {!isMobileMenuOpen && (
         <button
           onClick={() => setIsMobileMenuOpen(true)}
-          className="lg:hidden absolute top-3 left-4 z-[70] bg-white p-2 rounded-lg shadow-lg border border-gray-200"
+          className="lg:hidden absolute top-3 left-4 z-[70] bg-[#022b51] p-2 rounded-lg shadow-lg border border-[#26496a]"
         >
-          <MdMenu className="w-6 h-6 text-gray-700" />
+          <MdMenu className="w-6 h-6 text-white" />
         </button>
       )}
 
@@ -95,13 +160,13 @@ function AdminSidebar() {
       <div
         className={`${
           isCollapsed ? "w-[70px]" : "w-[240px]"
-        } h-screen bg-white fixed left-0 top-0 flex flex-col hidden lg:flex transition-all duration-300 border-r border-gray-200`}
+        } h-screen bg-[#022b51] fixed left-0 top-0 flex flex-col hidden lg:flex transition-all duration-300 border-r border-[#022b51]`}
       >
         {/* Logo Section */}
         <div
           className={`${
             isCollapsed ? "px-3" : "px-6"
-          } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-gray-100`}
+          } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-[#26496a]/30`}
         >
           <img
             src={logo}
@@ -110,23 +175,33 @@ function AdminSidebar() {
               isCollapsed ? "h-8" : "h-10"
             } w-auto transition-all duration-300 ${
               isCollapsed ? "mx-auto" : ""
-            }`}
+            } brightness-0 invert`}
           />
           {!isCollapsed && (
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="bg-gray-100 hover:bg-gray-200 rounded-lg p-1.5 transition-colors duration-200"
+              className="bg-[#26496a] hover:bg-[#345d82] rounded-lg p-1.5 transition-colors duration-200"
             >
-              <IoChevronBackOutline className="w-4 h-4 text-gray-600" />
+              <IoChevronBackOutline className="w-4 h-4 text-white" />
             </button>
           )}
         </div>
+
+        {/* Toggle Button for Collapsed State */}
+        {isCollapsed && (
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="mx-auto mt-3 mb-2 bg-[#26496a] hover:bg-[#345d82] rounded-lg p-1.5 transition-colors duration-200"
+          >
+            <IoChevronForwardOutline className="w-4 h-4 text-white" />
+          </button>
+        )}
 
         {/* Navigation */}
         <nav
           className={`flex-1 ${
             isCollapsed ? "px-2" : "px-4"
-          } pt-3 space-y-1 transition-all duration-300`}
+          } pt-3 space-y-1.5 transition-all duration-300 overflow-y-auto`}
         >
           {menuItems.map((item, index) => (
             <Link
@@ -134,12 +209,10 @@ function AdminSidebar() {
               key={index}
               className={`flex items-center ${
                 isCollapsed ? "justify-center px-2" : "space-x-3 px-3"
-              } py-1.5 rounded-lg transition-all duration-200 ${
-                location.pathname === item.path || 
-                location.pathname.startsWith(item.path + '/') ||
-                (item.subPaths && item.subPaths.some(subPath => location.pathname.startsWith(subPath)))
-                  ? "bg-[#01334C] text-white"
-                  : "text-gray-700 hover:bg-gray-50"
+              } py-2 rounded-lg transition-all duration-200 ${
+                isActive(item)
+                  ? "bg-[#26496a] text-white"
+                  : "text-gray-300 hover:bg-[#26496a]/50 hover:text-white"
               } group relative`}
               title={isCollapsed ? item.text : ""}
             >
@@ -150,11 +223,7 @@ function AdminSidebar() {
               >
                 {React.cloneElement(item.icon, {
                   className: `text-base ${
-                    location.pathname === item.path || 
-                    location.pathname.startsWith(item.path + '/') ||
-                    (item.subPaths && item.subPaths.some(subPath => location.pathname.startsWith(subPath)))
-                      ? "text-white"
-                      : "text-gray-400"
+                    isActive(item) ? "text-white" : "text-gray-400"
                   }`,
                 })}
               </span>
@@ -170,18 +239,8 @@ function AdminSidebar() {
           ))}
         </nav>
 
-        {/* Toggle Button for Collapsed State */}
-        {isCollapsed && (
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="mx-auto mt-3 mb-2 bg-gray-100 hover:bg-gray-200 rounded-lg p-1.5 transition-colors duration-200"
-          >
-            <IoChevronForwardOutline className="w-4 h-4 text-gray-600" />
-          </button>
-        )}
-
         {/* Profile Section */}
-        <div className="mt-auto border-t border-gray-100">
+        <div className="mt-auto border-t border-[#26496a]/30">
           <div
             className={`${
               isCollapsed ? "p-2" : "p-4"
@@ -195,7 +254,7 @@ function AdminSidebar() {
               <div
                 className={`flex items-center ${
                   isCollapsed ? "justify-center" : "space-x-3"
-                } cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-all duration-200`}
+                } cursor-pointer p-2 hover:bg-[#26496a]/50 rounded-lg transition-all duration-200`}
               >
                 {userData?.profile_image ? (
                   <img
@@ -209,19 +268,21 @@ function AdminSidebar() {
                   <div
                     className={`${
                       isCollapsed ? "w-8 h-8" : "w-6 h-6"
-                    } bg-[#01334C] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
+                    } bg-[#26496a] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
                   >
-                    {userData?.name ? userData.name.charAt(0).toUpperCase() : 'A'}
+                    {userData?.name
+                      ? userData.name.charAt(0).toUpperCase()
+                      : "A"}
                   </div>
                 )}
                 {!isCollapsed && (
                   <>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[11px] text-gray-500">
+                      <div className="text-[11px] text-gray-400">
                         Welcome 👋
                       </div>
-                      <div className="text-[13px] text-gray-700 font-medium truncate">
-                        {userData?.name || 'Admin'}
+                      <div className="text-[13px] text-white font-medium truncate">
+                        {userData?.name || "Admin"}
                       </div>
                     </div>
                     <span className="text-base text-gray-400 ml-auto transform transition-transform duration-200 group-hover:rotate-90 flex-shrink-0">
@@ -232,7 +293,9 @@ function AdminSidebar() {
                 {isCollapsed && (
                   <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
                     <div className="text-xs text-gray-300 mb-1">Welcome 👋</div>
-                    <div className="font-medium">{userData?.name || 'Admin'}</div>
+                    <div className="font-medium">
+                      {userData?.name || "Admin"}
+                    </div>
                   </div>
                 )}
               </div>
@@ -243,16 +306,18 @@ function AdminSidebar() {
                     isCollapsed ? "left-full ml-2" : "left-0"
                   } mb-1 ${
                     isCollapsed ? "w-auto" : "w-full"
-                  } bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200`}
+                  } bg-[#1a3d5c] rounded-lg shadow-lg py-2 z-50 border border-[#26496a]`}
                 >
                   {!isCollapsed && (
-                    <div className="px-4 py-2 border-b border-gray-100">
-                      <div className="text-xs text-gray-500 mb-1">Signed in as</div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {userData?.name || 'Admin'}
+                    <div className="px-4 py-2 border-b border-[#26496a]">
+                      <div className="text-xs text-gray-400 mb-1">
+                        Signed in as
+                      </div>
+                      <div className="text-sm font-medium text-white">
+                        {userData?.name || "Admin"}
                       </div>
                       {userData?.email && (
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="text-xs text-gray-400 mt-1">
                           {userData.email}
                         </div>
                       )}
@@ -261,7 +326,7 @@ function AdminSidebar() {
                   <Link
                     to="/admin/profile"
                     onClick={() => setIsProfileOpen(false)}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2 whitespace-nowrap"
+                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-[#26496a] transition-colors duration-200 flex items-center space-x-2 whitespace-nowrap"
                   >
                     <RiUser3Line className="w-4 h-4" />
                     <span>Profile</span>
@@ -271,7 +336,7 @@ function AdminSidebar() {
                       setIsProfileOpen(false);
                       setShowLogoutModal(true);
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2 whitespace-nowrap"
+                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-[#26496a] transition-colors duration-200 flex items-center space-x-2 whitespace-nowrap"
                   >
                     <IoLogOutOutline className="w-4 h-4" />
                     <span>Logout</span>
@@ -285,34 +350,38 @@ function AdminSidebar() {
 
       {/* Mobile Sidebar */}
       <div
-        className={`lg:hidden fixed left-0 top-0 h-screen w-[280px] bg-white z-[60] transform transition-transform duration-300 ease-in-out ${
+        className={`lg:hidden fixed left-0 top-0 h-screen w-[280px] bg-[#022b51] z-[60] transform transition-transform duration-300 ease-in-out ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         } shadow-xl`}
       >
         {/* Mobile Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <img src={logo} alt="OnEasy Logo" className="h-10 w-auto" />
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#26496a]/30">
+          <img
+            src={logo}
+            alt="OnEasy Logo"
+            className="h-10 w-auto brightness-0 invert"
+          />
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-[#26496a] rounded-lg transition-colors"
           >
-            <MdClose className="w-6 h-6 text-gray-700" />
+            <MdClose className="w-6 h-6 text-white" />
           </button>
         </div>
 
         {/* Mobile Menu Items */}
         <nav className="flex-1 py-6 overflow-y-auto">
           {menuItems.map((item, index) => {
-            const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+            const active = isActive(item);
             return (
               <Link
                 key={index}
                 to={item.path}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center px-6 py-3 transition-all duration-200 ${
-                  isActive
-                    ? "bg-gradient-to-r from-[#e8f4f8] to-transparent border-r-4 border-[#00486D] text-[#00486D]"
-                    : "text-[#5A5A5A] hover:bg-gray-50"
+                  active
+                    ? "bg-[#26496a] border-r-4 border-white text-white"
+                    : "text-gray-300 hover:bg-[#26496a]/50 hover:text-white"
                 }`}
               >
                 <span className="text-2xl mr-4">{item.icon}</span>
@@ -323,13 +392,13 @@ function AdminSidebar() {
         </nav>
 
         {/* Mobile Logout */}
-        <div className="px-4 py-4 border-t border-gray-100">
+        <div className="px-4 py-4 border-t border-[#26496a]/30">
           <button
             onClick={() => {
               setIsMobileMenuOpen(false);
               setShowLogoutModal(true);
             }}
-            className="w-full flex items-center px-3 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+            className="w-full flex items-center px-3 py-3 text-red-400 hover:bg-red-500/20 rounded-lg transition-all duration-200"
           >
             <IoLogOutOutline className="text-2xl mr-3" />
             <span className="font-medium">Logout</span>
@@ -338,31 +407,13 @@ function AdminSidebar() {
       </div>
 
       {/* Logout Modal */}
-      <LogoutModal isOpen={showLogoutModal} onClose={closeLogoutModal} onConfirm={handleLogout} />
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onClose={closeLogoutModal}
+        onConfirm={handleLogout}
+      />
     </>
   );
 }
 
 export default AdminSidebar;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
