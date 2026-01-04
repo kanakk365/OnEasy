@@ -421,32 +421,37 @@ function Documents() {
                 navigate("/kyc");
               }
             }}
-            className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group"
+            className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
           >
             <div className="flex justify-between items-start mb-4">
-              <div 
+              <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center text-white"
-                style={{ background: "linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)" }}
+                style={{
+                  background:
+                    "linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)",
+                }}
               >
                 <RiFileTextLine className="w-6 h-6" />
               </div>
-              <div className="text-[#00486D] group-hover:translate-x-1 transition-transform duration-300">
+              <div className="text-[#00486D] group-hover:text-white group-hover:translate-x-1 transition-all duration-300">
                 <BsArrowRight className="w-6 h-6" />
               </div>
             </div>
 
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-white mb-2 transition-colors">
               Personal Documents
             </h3>
-            <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+            <p className="text-gray-500 text-sm mb-8 leading-relaxed group-hover:text-white/80 transition-colors">
               Manage your KYC and personal identification documents
             </p>
 
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#E6F6FD] flex items-center justify-center text-[#00486D] font-semibold text-sm">
+              <div className="w-8 h-8 rounded-full bg-[#E6F6FD] group-hover:bg-white/20 flex items-center justify-center text-[#00486D] group-hover:text-white font-semibold text-sm transition-colors">
                 {personalDocuments.length}
               </div>
-              <span className="text-gray-600 text-sm">Documents</span>
+              <span className="text-gray-600 text-sm group-hover:text-white/80 transition-colors">
+                Documents
+              </span>
             </div>
           </div>
 
@@ -459,32 +464,37 @@ function Documents() {
                 navigate("/organization"); // Updated to point to new Organization module
               }
             }}
-            className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group"
+            className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
           >
-             <div className="flex justify-between items-start mb-4">
-              <div 
+            <div className="flex justify-between items-start mb-4">
+              <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center text-white"
-                style={{ background: "linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)" }}
+                style={{
+                  background:
+                    "linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)",
+                }}
               >
                 <RiBriefcase4Line className="w-6 h-6" />
               </div>
-              <div className="text-[#00486D] group-hover:translate-x-1 transition-transform duration-300">
+              <div className="text-[#00486D] group-hover:text-white group-hover:translate-x-1 transition-all duration-300">
                 <BsArrowRight className="w-6 h-6" />
               </div>
             </div>
 
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-white mb-2 transition-colors">
               Business Documents
             </h3>
-            <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+            <p className="text-gray-500 text-sm mb-8 leading-relaxed group-hover:text-white/80 transition-colors">
               Access company documents , registrations , and compliance files
             </p>
 
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#E6F6FD] flex items-center justify-center text-[#00486D] font-semibold text-sm">
+              <div className="w-8 h-8 rounded-full bg-[#E6F6FD] group-hover:bg-white/20 flex items-center justify-center text-[#00486D] group-hover:text-white font-semibold text-sm transition-colors">
                 {organizationsCount}
               </div>
-              <span className="text-gray-600 text-sm">{organizationsCount === 1 ? "Company" : "Categories"}</span>
+              <span className="text-gray-600 text-sm group-hover:text-white/80 transition-colors">
+                {organizationsCount === 1 ? "Company" : "Categories"}
+              </span>
             </div>
           </div>
         </div>
