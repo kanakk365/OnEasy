@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
+import { RiFileTextLine, RiBriefcase4Line } from "react-icons/ri";
+import { BsArrowRight } from "react-icons/bs";
+import { FiChevronLeft } from "react-icons/fi";
 
 function Documents() {
   const navigate = useNavigate();
@@ -11,7 +14,7 @@ function Documents() {
   const [selectedClientId, setSelectedClientId] = useState(null);
   const [clients, setClients] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Check if user is admin
   const [isAdmin, setIsAdmin] = useState(false);
@@ -21,7 +24,11 @@ function Documents() {
       localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
     );
     const userRole = storedUser.role || storedUser.role_id;
-    const adminCheck = userRole === 'admin' || userRole === 'superadmin' || userRole === 1 || userRole === 2;
+    const adminCheck =
+      userRole === "admin" ||
+      userRole === "superadmin" ||
+      userRole === 1 ||
+      userRole === 2;
     setIsAdmin(adminCheck);
 
     if (adminCheck) {
@@ -40,13 +47,13 @@ function Documents() {
   const fetchClients = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/admin/clients');
-      
+      const response = await apiClient.get("/admin/clients");
+
       if (response.success) {
         setClients(response.data || []);
       }
     } catch (error) {
-      console.error('Error fetching clients:', error);
+      console.error("Error fetching clients:", error);
     } finally {
       setLoading(false);
     }
@@ -57,48 +64,63 @@ function Documents() {
       setLoading(true);
 
       // Fetch personal documents for selected client
-      const personalDocsResponse = await apiClient.get(`/users-page/personal-documents/${userId}`).catch(() => ({ 
-        success: false, 
-        data: {
-          aadhar_card: [],
-          pan_card: [],
-          passport: [],
-          profile_image: [],
-          signature: []
-        }
-      }));
-      
+      const personalDocsResponse = await apiClient
+        .get(`/users-page/personal-documents/${userId}`)
+        .catch(() => ({
+          success: false,
+          data: {
+            aadhar_card: [],
+            pan_card: [],
+            passport: [],
+            profile_image: [],
+            signature: [],
+          },
+        }));
+
       const personalDocs = [];
-      
+
       if (personalDocsResponse.success && personalDocsResponse.data) {
         // Flatten all documents from all categories
-        Object.values(personalDocsResponse.data).forEach(docArray => {
+        Object.values(personalDocsResponse.data).forEach((docArray) => {
           if (Array.isArray(docArray)) {
-            docArray.forEach(doc => {
+            docArray.forEach((doc) => {
               personalDocs.push({
                 name: doc.name || doc.type,
                 url: doc.url,
-                type: doc.type
+                type: doc.type,
               });
             });
           }
         });
       }
-      
+
       setPersonalDocuments(personalDocs);
 
       // Fetch organizations count for selected client
-      const orgResponse = await apiClient.get(`/users-page/user-data/${userId}`).catch(() => ({ 
-        success: false, 
-        data: { organisations: [] }
-      }));
-      
-      if (orgResponse.success && orgResponse.data && orgResponse.data.organisations) {
+      const orgResponse = await apiClient
+        .get(`/users-page/user-data/${userId}`)
+        .catch(() => ({
+          success: false,
+          data: { organisations: [] },
+        }));
+
+      if (
+        orgResponse.success &&
+        orgResponse.data &&
+        orgResponse.data.organisations
+      ) {
         // Filter organizations that have at least one meaningful field
-        const validOrgs = orgResponse.data.organisations.filter(org => {
-          const hasLegalName = org.legal_name && org.legal_name.trim() !== '' && org.legal_name !== '-';
-          const hasTradeName = org.trade_name && org.trade_name.trim() !== '' && org.trade_name !== '-';
-          const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== '-';
+        const validOrgs = orgResponse.data.organisations.filter((org) => {
+          const hasLegalName =
+            org.legal_name &&
+            org.legal_name.trim() !== "" &&
+            org.legal_name !== "-";
+          const hasTradeName =
+            org.trade_name &&
+            org.trade_name.trim() !== "" &&
+            org.trade_name !== "-";
+          const hasGstin =
+            org.gstin && org.gstin.trim() !== "" && org.gstin !== "-";
           return hasLegalName || hasTradeName || hasGstin;
         });
         setOrganizationsCount(validOrgs.length);
@@ -125,48 +147,61 @@ function Documents() {
       }
 
       // Fetch personal documents from new endpoint (supports multiple documents)
-      const personalDocsResponse = await apiClient.get('/users-page/personal-documents').catch(() => ({ 
-        success: false, 
-        data: {
-          aadhar_card: [],
-          pan_card: [],
-          passport: [],
-          profile_image: [],
-          signature: []
-        }
-      }));
-      
+      const personalDocsResponse = await apiClient
+        .get("/users-page/personal-documents")
+        .catch(() => ({
+          success: false,
+          data: {
+            aadhar_card: [],
+            pan_card: [],
+            passport: [],
+            profile_image: [],
+            signature: [],
+          },
+        }));
+
       const personalDocs = [];
-      
+
       if (personalDocsResponse.success && personalDocsResponse.data) {
         // Flatten all documents from all categories
-        Object.values(personalDocsResponse.data).forEach(docArray => {
+        Object.values(personalDocsResponse.data).forEach((docArray) => {
           if (Array.isArray(docArray)) {
-            docArray.forEach(doc => {
+            docArray.forEach((doc) => {
               personalDocs.push({
                 name: doc.name || doc.type,
                 url: doc.url,
-                type: doc.type
+                type: doc.type,
               });
             });
           }
         });
       }
-      
+
       setPersonalDocuments(personalDocs);
 
       // Fetch organizations count
-      const orgResponse = await apiClient.get('/users-page/data').catch(() => ({ 
-        success: false, 
-        data: { organisations: [] }
+      const orgResponse = await apiClient.get("/users-page/data").catch(() => ({
+        success: false,
+        data: { organisations: [] },
       }));
-      
-      if (orgResponse.success && orgResponse.data && orgResponse.data.organisations) {
+
+      if (
+        orgResponse.success &&
+        orgResponse.data &&
+        orgResponse.data.organisations
+      ) {
         // Filter organizations that have at least one meaningful field
-        const validOrgs = orgResponse.data.organisations.filter(org => {
-          const hasLegalName = org.legal_name && org.legal_name.trim() !== '' && org.legal_name !== '-';
-          const hasTradeName = org.trade_name && org.trade_name.trim() !== '' && org.trade_name !== '-';
-          const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== '-';
+        const validOrgs = orgResponse.data.organisations.filter((org) => {
+          const hasLegalName =
+            org.legal_name &&
+            org.legal_name.trim() !== "" &&
+            org.legal_name !== "-";
+          const hasTradeName =
+            org.trade_name &&
+            org.trade_name.trim() !== "" &&
+            org.trade_name !== "-";
+          const hasGstin =
+            org.gstin && org.gstin.trim() !== "" && org.gstin !== "-";
           return hasLegalName || hasTradeName || hasGstin;
         });
         setOrganizationsCount(validOrgs.length);
@@ -180,7 +215,7 @@ function Documents() {
     }
   };
 
-  const filteredClients = clients.filter(client => {
+  const filteredClients = clients.filter((client) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -195,8 +230,6 @@ function Documents() {
     setSelectedClientId(client.user_id);
     setSelectedClient(client);
   };
-
-
 
   if (loading) {
     return (
@@ -216,7 +249,9 @@ function Documents() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="mb-6">
             <h1 className="text-2xl font-semibold text-gray-900">Documents</h1>
-            <p className="text-gray-600 mt-1">Select a client to view and manage their documents</p>
+            <p className="text-gray-600 mt-1">
+              Select a client to view and manage their documents
+            </p>
           </div>
 
           {/* Search Bar */}
@@ -235,7 +270,12 @@ function Documents() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
             </div>
           </div>
@@ -257,24 +297,54 @@ function Documents() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-12 h-12 bg-[#01334C] rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
-                          {client.name ? client.name.charAt(0).toUpperCase() : 'C'}
+                          {client.name
+                            ? client.name.charAt(0).toUpperCase()
+                            : "C"}
                         </div>
                         <div className="flex-1 min-w-0 overflow-hidden">
-                          <h3 className="text-lg font-semibold text-gray-900 truncate" title={client.name || '-'}>
-                            {client.name || '-'}
+                          <h3
+                            className="text-lg font-semibold text-gray-900 truncate"
+                            title={client.name || "-"}
+                          >
+                            {client.name || "-"}
                           </h3>
-                          <p className="text-xs text-gray-500 font-mono truncate" title={client.user_id}>{client.user_id}</p>
+                          <p
+                            className="text-xs text-gray-500 font-mono truncate"
+                            title={client.user_id}
+                          >
+                            {client.user_id}
+                          </p>
                         </div>
                       </div>
                       {client.email && (
-                        <p className="text-sm text-gray-600 truncate mb-1" title={client.email}>{client.email}</p>
+                        <p
+                          className="text-sm text-gray-600 truncate mb-1"
+                          title={client.email}
+                        >
+                          {client.email}
+                        </p>
                       )}
                       {client.phone && (
-                        <p className="text-sm text-gray-600 truncate" title={client.phone}>{client.phone}</p>
+                        <p
+                          className="text-sm text-gray-600 truncate"
+                          title={client.phone}
+                        >
+                          {client.phone}
+                        </p>
                       )}
                     </div>
-                    <svg className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    <svg
+                      className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -296,7 +366,11 @@ function Documents() {
                 />
               </svg>
               <p className="text-gray-500 text-sm mb-2">No clients found</p>
-              <p className="text-gray-400 text-xs">{searchQuery ? 'Try a different search term' : 'No clients available'}</p>
+              <p className="text-gray-400 text-xs">
+                {searchQuery
+                  ? "Try a different search term"
+                  : "No clients available"}
+              </p>
             </div>
           )}
         </div>
@@ -305,40 +379,41 @@ function Documents() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="mb-6">
-          {isAdmin && selectedClient ? (
-            <>
-              <button
-                onClick={() => {
+    <div className="min-h-screen bg-[#F8F9FA] py-6">
+      <div className="container mx-auto px-4 md:px-8 lg:px-12">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <button
+              onClick={() => {
+                if (isAdmin && selectedClientId) {
                   setSelectedClientId(null);
                   setSelectedClient(null);
-                }}
-                className="text-[#01334C] hover:text-[#00486D] mb-4 flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Back to Client Selection
-              </button>
-              <h1 className="text-2xl font-semibold text-gray-900">Client Documents</h1>
-              <p className="text-gray-600 mt-1">
-                Viewing documents for: <span className="font-medium">{selectedClient.name || selectedClient.user_id}</span>
-              </p>
-            </>
-          ) : (
-            <>
-              <h1 className="text-2xl font-semibold text-gray-900">My Documents</h1>
-              <p className="text-gray-600 mt-1">View and manage your personal and business documents</p>
-            </>
-          )}
+                } else {
+                  window.history.back();
+                }
+              }}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <FiChevronLeft className="w-6 h-6 text-gray-900" />
+            </button>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              {isAdmin && selectedClient ? "Client Documents" : "My Documents"}
+            </h1>
+          </div>
+          <p className="text-gray-500 italic ml-9">
+            {isAdmin && selectedClient
+              ? `Viewing documents for ${
+                  selectedClient.name || selectedClient.user_id
+                }`
+              : "Select your document type"}
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Personal Documents Card */}
-          <div 
-            className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 cursor-pointer hover:shadow-md transition-shadow"
+          <div
             onClick={() => {
               if (isAdmin && selectedClientId) {
                 navigate(`/admin/client-kyc/${selectedClientId}`);
@@ -346,83 +421,70 @@ function Documents() {
                 navigate("/kyc");
               }
             }}
+            className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Personal Documents</h2>
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                  {personalDocuments.length} {personalDocuments.length === 1 ? "document" : "documents"}
-                </span>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+            <div className="flex justify-between items-start mb-4">
+              <div 
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-white"
+                style={{ background: "linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)" }}
+              >
+                <RiFileTextLine className="w-6 h-6" />
+              </div>
+              <div className="text-[#00486D] group-hover:translate-x-1 transition-transform duration-300">
+                <BsArrowRight className="w-6 h-6" />
               </div>
             </div>
-            <div className="text-center py-8">
-              <svg
-                className="w-16 h-16 text-gray-400 mx-auto mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <p className="text-gray-500 text-sm mb-2">
-                {personalDocuments.length > 0 
-                  ? `You have ${personalDocuments.length} personal ${personalDocuments.length === 1 ? 'document' : 'documents'}`
-                  : "No personal documents found"}
-              </p>
-              <p className="text-gray-400 text-xs">Click to view and manage your KYC documents</p>
+
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Personal Documents
+            </h3>
+            <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+              Manage your KYC and personal identification documents
+            </p>
+
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#E6F6FD] flex items-center justify-center text-[#00486D] font-semibold text-sm">
+                {personalDocuments.length}
+              </div>
+              <span className="text-gray-600 text-sm">Documents</span>
             </div>
           </div>
 
-          {/* Organizations Card */}
-          <div 
-            className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 cursor-pointer hover:shadow-md transition-shadow"
+          {/* Business Documents Card */}
+          <div
             onClick={() => {
               if (isAdmin && selectedClientId) {
                 navigate(`/admin/client-organizations/${selectedClientId}`);
               } else {
-                navigate("/organizations-list");
+                navigate("/organization"); // Updated to point to new Organization module
               }
             }}
+            className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Organizations</h2>
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                  {organizationsCount} {organizationsCount === 1 ? "company" : "companies"}
-                </span>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+             <div className="flex justify-between items-start mb-4">
+              <div 
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-white"
+                style={{ background: "linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)" }}
+              >
+                <RiBriefcase4Line className="w-6 h-6" />
+              </div>
+              <div className="text-[#00486D] group-hover:translate-x-1 transition-transform duration-300">
+                <BsArrowRight className="w-6 h-6" />
               </div>
             </div>
-            <div className="text-center py-8">
-              <svg
-                className="w-16 h-16 text-gray-400 mx-auto mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                />
-              </svg>
-              <p className="text-gray-500 text-sm mb-2">
-                {organizationsCount > 0 
-                  ? `You have ${organizationsCount} ${organizationsCount === 1 ? 'company' : 'companies'}`
-                  : "No organizations found"}
-              </p>
-              <p className="text-gray-400 text-xs">Click to view your companies and their documents</p>
+
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Business Documents
+            </h3>
+            <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+              Access company documents , registrations , and compliance files
+            </p>
+
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#E6F6FD] flex items-center justify-center text-[#00486D] font-semibold text-sm">
+                {organizationsCount}
+              </div>
+              <span className="text-gray-600 text-sm">{organizationsCount === 1 ? "Company" : "Categories"}</span>
             </div>
           </div>
         </div>
@@ -432,4 +494,3 @@ function Documents() {
 }
 
 export default Documents;
-
