@@ -204,7 +204,11 @@ const OrganisationDetailsContent = ({
   const EmptySectionState = ({ title, buttonText, onAdd }) => (
     <div className="bg-white rounded-xl py-8 px-8 flex flex-col items-center justify-center text-center">
       <div className="mb-4">
-        <img src="/empty.svg" alt="No Items" className="w-16 h-16 opacity-90 mx-auto" />
+        <img
+          src="/empty.svg"
+          alt="No Items"
+          className="w-16 h-16 opacity-90 mx-auto"
+        />
       </div>
       <p className="text-gray-500 text-sm mb-4">{title}</p>
       <button

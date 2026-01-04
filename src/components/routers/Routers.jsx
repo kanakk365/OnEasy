@@ -33,7 +33,7 @@ import StartupIndiaDetails from "../pages/StartupIndiaDetails";
 import StartupIndiaViewDetails from "../pages/StartupIndiaViewDetails";
 import StartupIndiaDashboard from "../pages/StartupIndiaDashboard";
 import Settings from "../pages/Settings";
-import Organization from "../pages/Organization";
+import Organization from "../pages/organization/index";
 import Documents from "../pages/Documents";
 import BusinessDocuments from "../pages/BusinessDocuments";
 import BusinessDirectorsKYC from "../pages/BusinessDirectorsKYC";
