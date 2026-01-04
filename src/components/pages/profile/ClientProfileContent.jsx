@@ -313,7 +313,7 @@ const ClientProfileContent = ({
           <button
             onClick={handleSaveClientProfile}
             disabled={saving}
-            className="px-6 py-3 text-white rounded-lg transition-colors font-medium text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+            className="px-6 py-2 text-white rounded-lg transition-colors text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
             style={{
               background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
             }}

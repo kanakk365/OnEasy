@@ -40,410 +40,404 @@ const OrganisationDetailsContent = ({
   );
   const hasNoOrganizations = savedOrganizations.length === 0 && !selectedOrgId;
 
-  return (
-    <div className="px-6 pb-6 pt-6">
-      <div className="space-y-4">
-        {/* Show message if no organizations */}
-        {hasNoOrganizations && (
-          <div className="text-center py-8 text-gray-500">
-            <p>
-              No organizations yet. Click the + button to add a new
-              organization.
-            </p>
-          </div>
-        )}
+  // Reusable Input Component to match design
+  const StyledInput = ({
+    label,
+    value,
+    onChange,
+    placeholder,
+    type = "text",
+  }) => (
+    <div>
+      <label className="block text-sm text-gray-700 mb-2 font-medium">
+        {label}
+      </label>
+      <input
+        type={type}
+        value={value || ""}
+        onChange={onChange}
+        className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        placeholder={placeholder}
+      />
+    </div>
+  );
 
-        {/* Table and Add Button side by side */}
+  // Reusable Select Component
+  const StyledSelect = ({ label, value, onChange, options, placeholder }) => (
+    <div>
+      <label className="block text-sm text-gray-700 mb-2 font-medium">
+        {label}
+      </label>
+      <div className="relative">
+        <select
+          value={value || ""}
+          onChange={onChange}
+          className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
+        >
+          <option value="">{placeholder}</option>
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+          <svg
+            className="w-4 h-4 text-gray-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Reusable File Upload Component matching the image design
+  const StyledFileUpload = ({
+    label,
+    fileUrl,
+    onFileChange,
+    onViewFile,
+    onRemoveFile,
+    id,
+    placeholder,
+  }) => (
+    <div>
+      <label className="block text-sm text-gray-700 mb-2 font-medium">
+        {label}
+      </label>
+      <div className="flex bg-white border border-gray-100 rounded-lg p-1 items-center">
+        <label
+          htmlFor={id}
+          className="flex-1 px-4 py-2 text-sm text-gray-500 cursor-pointer truncate"
+        >
+          {fileUrl && typeof fileUrl === "string" && fileUrl.trim() !== ""
+            ? "File uploaded successfully"
+            : placeholder || "Upload file"}
+          <input
+            type="file"
+            id={id}
+            onChange={onFileChange}
+            className="hidden"
+            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+          />
+        </label>
+
+        {/* Upload/View Button - Dark blue with download icon */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            if (
+              fileUrl &&
+              typeof fileUrl === "string" &&
+              fileUrl.trim() !== ""
+            ) {
+              onViewFile(fileUrl);
+            } else {
+              document.getElementById(id).click();
+            }
+          }}
+          className="bg-[#00486D] text-white w-10 h-10 rounded-lg flex items-center justify-center hover:bg-[#01334C] transition-colors flex-shrink-0"
+        >
+          {fileUrl ? (
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 16V8M12 16L9 13M12 16L15 13"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M3 15V16C3 18.2091 4.79086 20 7 20H17C19.2091 20 21 18.2091 21 16V15"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          ) : (
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 16V8M12 16L9 13M12 16L15 13"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M3 15V16C3 18.2091 4.79086 20 7 20H17C19.2091 20 21 18.2091 21 16V15"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+
+  // Empty State Component
+  const EmptySectionState = ({ title, buttonText, onAdd }) => (
+    <div className="bg-white rounded-xl py-8 px-8 flex flex-col items-center justify-center text-center">
+      <div className="mb-4">
+        <img src="/empty.svg" alt="No Items" className="w-16 h-16 opacity-90 mx-auto" />
+      </div>
+      <p className="text-gray-500 text-sm mb-4">{title}</p>
+      <button
+        type="button"
+        onClick={onAdd}
+        className="px-5 py-2.5 bg-[#01334C] text-white rounded-md hover:bg-[#01283a] transition-colors text-xs font-medium"
+      >
+        {buttonText}
+      </button>
+    </div>
+  );
+
+  return (
+    <div className="px-6 pb-6 pt-6 animate-fadeIn">
+      <div className="space-y-6">
+        {/* Show table if no organization selected */}
         {savedOrganizations.length > 0 && !selectedOrgId && (
-          <div className="flex items-start gap-4">
-            {/* Organizations Table View */}
-            <div className="flex-1 overflow-x-auto">
-              <table className="w-full text-sm table-fixed border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
-                <colgroup>
-                  <col className="w-12" />
-                  <col className="w-auto" />
-                  <col className="w-auto" />
-                  <col className="w-32" />
-                  <col className="w-28" />
-                  <col className="w-28" />
-                </colgroup>
-                <thead className="bg-gray-100">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Organizations
+              </h3>
+              <button
+                type="button"
+                onClick={addOrganization}
+                className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-sm flex items-center gap-2"
+              >
+                <AiOutlinePlus className="w-4 h-4" /> Add Organization
+              </button>
+            </div>
+            <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-[#00486D] text-white uppercase text-xs">
                   <tr>
-                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">
-                      ID
-                    </th>
-                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">
+                    <th className="px-6 py-3 font-medium border-b border-gray-200">
                       Legal Name
                     </th>
-                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">
+                    <th className="px-6 py-3 font-medium border-b border-gray-200">
                       Trade Name
                     </th>
-                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">
+                    <th className="px-6 py-3 font-medium border-b border-gray-200">
                       GSTIN
                     </th>
-                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">
-                      TAN
-                    </th>
-                    <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs border border-gray-300">
-                      CIN
+                    <th className="px-6 py-3 font-medium border-b border-gray-200">
+                      Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-200 bg-white">
                   {savedOrganizations.map((org, idx) => (
-                    <React.Fragment key={org.id}>
-                      <tr
-                        onClick={() => {
-                          setExpandedOrgId(expandedOrgId === idx ? null : idx);
-                          setSelectedOrgId(org.id);
-                        }}
-                        className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer transition-colors"
-                      >
-                        <td className="px-2 py-2 text-gray-700 font-medium text-xs border border-gray-300">
-                          {idx + 1}
-                        </td>
-                        <td
-                          className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300"
-                          title={org.legalName}
-                        >
-                          {org.legalName || "-"}
-                        </td>
-                        <td
-                          className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300"
-                          title={org.tradeName}
-                        >
-                          {org.tradeName || "-"}
-                        </td>
-                        <td
-                          className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300"
-                          title={org.gstin}
-                        >
-                          {org.gstin || "-"}
-                        </td>
-                        <td
-                          className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300"
-                          title={org.tan}
-                        >
-                          {org.tan || "-"}
-                        </td>
-                        <td
-                          className="px-2 py-2 text-gray-600 text-xs truncate border border-gray-300"
-                          title={org.cin}
-                        >
-                          {org.cin || "-"}
-                        </td>
-                      </tr>
-                      {expandedOrgId === idx && (
-                        <tr className="bg-white">
-                          <td
-                            colSpan="6"
-                            className="p-6 border border-gray-300"
-                          >
-                            <div className="bg-white rounded-lg border border-gray-200 p-6">
-                              <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                                {org.legalName || "Organization Details"}
-                              </h4>
-
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {/* Column 1 */}
-                                <div className="space-y-4">
-                                  <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                      GSTIN
-                                    </label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                      {org.gstin || "-"}
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                      TAN
-                                    </label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                      {org.tan || "-"}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Column 2 */}
-                                <div className="space-y-4">
-                                  <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                      Legal Name
-                                    </label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                      {org.legalName || "-"}
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                      Incorporation Date
-                                    </label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900 flex items-center gap-2">
-                                      <svg
-                                        className="w-4 h-4 text-gray-500"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                        />
-                                      </svg>
-                                      {org.incorporationDate
-                                        ? new Date(
-                                            org.incorporationDate
-                                          ).toLocaleDateString("en-IN", {
-                                            day: "numeric",
-                                            month: "short",
-                                            year: "numeric",
-                                          })
-                                        : "-"}
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                      CIN
-                                    </label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                      {org.cin || "-"}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Column 3 */}
-                                <div className="space-y-4">
-                                  <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                      Trade Name
-                                    </label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                      {org.tradeName || "-"}
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                      Category
-                                    </label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                      {org.category || "-"}
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                      PAN File
-                                    </label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                      {org.panFile ? (
-                                        <button
-                                          onClick={() =>
-                                            handleViewFile(org.panFile)
-                                          }
-                                          className="text-blue-600 hover:text-blue-800 hover:underline"
-                                        >
-                                          View File
-                                        </button>
-                                      ) : (
-                                        "Not uploaded"
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                      Registered Address
-                                    </label>
-                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                      {org.registeredAddress || "-"}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
+                    <tr
+                      key={org.id}
+                      className="hover:bg-gray-50 cursor-pointer transition-colors"
+                      onClick={() => setSelectedOrgId(org.id)}
+                    >
+                      <td className="px-6 py-4 font-medium text-gray-900">
+                        {org.legalName || "-"}
+                      </td>
+                      <td className="px-6 py-4 text-gray-500">
+                        {org.tradeName || "-"}
+                      </td>
+                      <td className="px-6 py-4 text-gray-500">
+                        {org.gstin || "-"}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                          Edit
+                        </span>
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-
-            {/* Add Button beside table */}
-            <button
-              type="button"
-              onClick={addOrganization}
-              className="w-12 h-12 bg-[#00486D] text-white rounded-full flex items-center justify-center hover:bg-[#01334C] transition-colors flex-shrink-0"
-              title="Add Organization"
-            >
-              <AiOutlinePlus className="w-6 h-6" />
-            </button>
           </div>
         )}
 
-        {/* Add Button when no table (empty state) */}
+        {/* Empty State when no orgs and none selected */}
         {hasNoOrganizations && (
-          <div className="flex justify-end">
+          <div className="text-center py-16 bg-white rounded-xl border border-gray-100 shadow-sm">
+            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AiOutlinePlus className="w-8 h-8 text-[#00486D]" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No organizations yet
+            </h3>
+            <p className="text-gray-500 mb-6 max-w-sm mx-auto">
+              Add your organization details to manage directors, signatures, and
+              credentials.
+            </p>
             <button
               type="button"
               onClick={addOrganization}
-              className="w-12 h-12 bg-[#00486D] text-white rounded-full flex items-center justify-center hover:bg-[#01334C] transition-colors"
-              title="Add Organization"
+              className="px-6 py-3 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors font-medium text-sm inline-flex items-center gap-2"
             >
-              <AiOutlinePlus className="w-6 h-6" />
+              <AiOutlinePlus className="w-5 h-5" />
+              Add Organization
             </button>
           </div>
         )}
 
-        {/* Expanded Organization Card (Edit Mode) */}
-        {selectedOrgId && (
-          <div className="border-2 border-blue-500 rounded-xl p-6 bg-white shadow-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {isAddingNewOrg ? "New Organization" : "Edit Organization"}
-              </h3>
-              <button
-                onClick={() => {
-                  setSelectedOrgId(null);
-                  setIsAddingNewOrg(false);
-                  setExpandedOrgId(null);
-                }}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
+        {/* Edit Organization Form */}
+        {selectedOrgId &&
+          organizations.map((org) => {
+            if (org.id !== selectedOrgId) return null;
 
-            {organizations.map((org) => {
-              if (org.id !== selectedOrgId) return null;
-
-              return (
-                <div key={org.id} className="space-y-4">
-                  {/* Row 1: Legal Name, Trade Name */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Legal Name
-                      </label>
-                      <input
-                        type="text"
-                        value={org.legalName}
-                        onChange={(e) =>
-                          updateOrganization(
-                            org.id,
-                            "legalName",
-                            e.target.value
-                          )
-                        }
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter legal name"
+            return (
+              <div key={org.id} className="space-y-8">
+                {/* Header for Form */}
+                <div className="flex justify-between items-center border-b border-gray-100 pb-4">
+                  <h3 className="text-[16px] font-bold text-gray-900">
+                    {isAddingNewOrg ? "New Organizations" : "Edit Organization"}
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setSelectedOrgId(null);
+                      setIsAddingNewOrg(false);
+                    }}
+                    className="text-gray-400 hover:text-gray-600 p-2"
+                  >
+                    <span className="sr-only">Close</span>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
                       />
-                    </div>
+                    </svg>
+                  </button>
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Trade Name
-                      </label>
-                      <input
-                        type="text"
-                        value={org.tradeName}
-                        onChange={(e) =>
-                          updateOrganization(
-                            org.id,
-                            "tradeName",
-                            e.target.value
-                          )
-                        }
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter trade name"
-                      />
-                    </div>
-                  </div>
+                {/* Basic Details Section */}
+                <div className="bg-[#F8F9FA] p-6 rounded-xl">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <StyledInput
+                      label="Organisation Type"
+                      value={org.organisationType}
+                      onChange={(e) =>
+                        updateOrganization(
+                          org.id,
+                          "organisationType",
+                          e.target.value
+                        )
+                      }
+                      placeholder="Enter Organisation Type"
+                    />
+                    <StyledInput
+                      label="Legal Name"
+                      value={org.legalName}
+                      onChange={(e) =>
+                        updateOrganization(org.id, "legalName", e.target.value)
+                      }
+                      placeholder="Enter Legal Name"
+                    />
+                    <StyledInput
+                      label="Trade Name"
+                      value={org.tradeName}
+                      onChange={(e) =>
+                        updateOrganization(org.id, "tradeName", e.target.value)
+                      }
+                      placeholder="Enter Trade Name"
+                    />
+                    <StyledSelect
+                      label="Category"
+                      value={org.category}
+                      onChange={(e) =>
+                        updateOrganization(org.id, "category", e.target.value)
+                      }
+                      placeholder="Select Category"
+                      options={[
+                        { value: "Individual", label: "Individual" },
+                        {
+                          value: "Hindu undivided family",
+                          label: "Hindu undivided family",
+                        },
+                        {
+                          value: "Partnership Firm",
+                          label: "Partnership Firm",
+                        },
+                        {
+                          value: "Limited Liability Partnership",
+                          label: "Limited Liability Partnership",
+                        },
+                        {
+                          value: "Private Limited Company",
+                          label: "Private Limited Company",
+                        },
+                        {
+                          value: "One Person Company",
+                          label: "One Person Company",
+                        },
+                        {
+                          value: "Section 8 Company",
+                          label: "Section 8 Company",
+                        },
+                        { value: "Society", label: "Society" },
+                        {
+                          value: "Charitable Trust",
+                          label: "Charitable Trust",
+                        },
+                        { value: "Government", label: "Government" },
+                        {
+                          value: "Association of Persons",
+                          label: "Association of Persons",
+                        },
+                        {
+                          value: "Body of Individuals",
+                          label: "Body of Individuals",
+                        },
+                        {
+                          value: "Artificial Judicial Person",
+                          label: "Artificial Judicial Person",
+                        },
+                      ]}
+                    />
+                    <StyledInput
+                      label="GSTIN"
+                      value={org.gstin}
+                      onChange={(e) =>
+                        updateOrganization(org.id, "gstin", e.target.value)
+                      }
+                      placeholder="Enter GSTIN"
+                    />
 
-                  {/* Row 1.5: Category */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Incorporation Date with Calendar Icon */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Category
-                      </label>
-                      <select
-                        value={org.category || ""}
-                        onChange={(e) =>
-                          updateOrganization(org.id, "category", e.target.value)
-                        }
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
-                      >
-                        <option value="">Select Category</option>
-                        <option value="Individual">Individual</option>
-                        <option value="Hindu undivided family">
-                          Hindu undivided family
-                        </option>
-                        <option value="Partnership Firm">
-                          Partnership Firm
-                        </option>
-                        <option value="Limited Liability Partnership">
-                          Limited Liability Partnership
-                        </option>
-                        <option value="Private Limited Company">
-                          Private Limited Company
-                        </option>
-                        <option value="One Person Company">
-                          One Person Company
-                        </option>
-                        <option value="Section 8 Company">
-                          Section 8 Company
-                        </option>
-                        <option value="Society">Society</option>
-                        <option value="Charitable Trust">
-                          Charitable Trust
-                        </option>
-                        <option value="Government">Government</option>
-                        <option value="Association of Persons">
-                          Association of Persons
-                        </option>
-                        <option value="Body of Individuals">
-                          Body of Individuals
-                        </option>
-                        <option value="Artificial Judicial Person">
-                          Artificial Judicial Person
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Row 2: GSTIN, Incorporation Date, PAN File */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        GSTIN
-                      </label>
-                      <input
-                        type="text"
-                        value={org.gstin}
-                        onChange={(e) =>
-                          updateOrganization(org.id, "gstin", e.target.value)
-                        }
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter GSTIN"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <label className="block text-sm text-gray-700 mb-2 font-medium">
                         Incorporation Date
                       </label>
                       <div className="relative">
@@ -457,126 +451,71 @@ const OrganisationDetailsContent = ({
                               e.target.value
                             )
                           }
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="dd-mm-yyyy"
+                          className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         />
-                        <BsCalendar3 className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        PAN File
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          readOnly
-                          value={
-                            org.panFile ? "File uploaded" : "No file chosen"
+                    <StyledFileUpload
+                      label="PAN File"
+                      fileUrl={org.panFile}
+                      id={`pan-file-${org.id}`}
+                      placeholder="Upload file"
+                      onFileChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          try {
+                            if (file.size > 5 * 1024 * 1024)
+                              return alert("File size must be less than 5MB");
+                            const userData = JSON.parse(
+                              localStorage.getItem(
+                                AUTH_CONFIG.STORAGE_KEYS.USER
+                              ) || "{}"
+                            );
+                            const currentUserId = userData.id || userId;
+                            if (!currentUserId)
+                              return alert("User ID not found");
+
+                            const folder = `user-profiles/${currentUserId}/organizations/org-${
+                              org.id || "new"
+                            }`;
+                            const { s3Url } = await uploadFileDirect(
+                              file,
+                              folder,
+                              "pan-file"
+                            );
+                            updateOrganization(org.id, "panFile", s3Url);
+                          } catch (error) {
+                            console.error("Error", error);
+                            alert("Upload failed");
                           }
-                          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
-                        />
-                        <label className="cursor-pointer">
-                          <input
-                            type="file"
-                            onChange={async (e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                try {
-                                  if (file.size > 5 * 1024 * 1024) {
-                                    alert("File size must be less than 5MB");
-                                    e.target.value = "";
-                                    return;
-                                  }
-
-                                  const userData = JSON.parse(
-                                    localStorage.getItem(
-                                      AUTH_CONFIG.STORAGE_KEYS.USER
-                                    ) || "{}"
-                                  );
-                                  const currentUserId = userData.id || userId;
-
-                                  if (!currentUserId) {
-                                    alert(
-                                      "User ID not found. Please refresh the page."
-                                    );
-                                    e.target.value = "";
-                                    return;
-                                  }
-
-                                  const folder = `user-profiles/${currentUserId}/organizations/org-${
-                                    org.id || "new"
-                                  }`;
-                                  const { s3Url } = await uploadFileDirect(
-                                    file,
-                                    folder,
-                                    "pan-file"
-                                  );
-
-                                  updateOrganization(org.id, "panFile", s3Url);
-                                  alert("File uploaded successfully!");
-                                } catch (error) {
-                                  console.error(
-                                    "Error uploading PAN file:",
-                                    error
-                                  );
-                                  alert(
-                                    "Failed to upload file. Please try again."
-                                  );
-                                  e.target.value = "";
-                                }
-                              }
-                            }}
-                            className="hidden"
-                            accept=".pdf,.jpg,.jpeg,.png"
-                          />
-                          <span className="px-4 py-3 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors inline-block">
-                            edit
-                          </span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Row 3: TAN, CIN, Registered Address */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        TAN
-                      </label>
-                      <input
-                        type="text"
-                        value={org.tan}
-                        onChange={(e) =>
-                          updateOrganization(org.id, "tan", e.target.value)
                         }
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter TAN"
-                      />
-                    </div>
+                      }}
+                      onViewFile={handleViewFile}
+                    />
 
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        CIN
-                      </label>
-                      <input
-                        type="text"
-                        value={org.cin}
-                        onChange={(e) =>
-                          updateOrganization(org.id, "cin", e.target.value)
-                        }
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter CIN"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <StyledInput
+                      label="TAN"
+                      value={org.tan}
+                      onChange={(e) =>
+                        updateOrganization(org.id, "tan", e.target.value)
+                      }
+                      placeholder="Enter TAN"
+                    />
+                    <StyledInput
+                      label="CIN"
+                      value={org.cin}
+                      onChange={(e) =>
+                        updateOrganization(org.id, "cin", e.target.value)
+                      }
+                      placeholder="Enter CIN"
+                    />
+                    <div className="col-span-1 md:col-span-1">
+                      <label className="block text-sm text-gray-700 mb-2 font-medium">
                         Registered Address
                       </label>
-                      <textarea
-                        rows={3}
+                      <input
+                        type="text"
                         value={org.registeredAddress}
                         onChange={(e) =>
                           updateOrganization(
@@ -585,764 +524,476 @@ const OrganisationDetailsContent = ({
                             e.target.value
                           )
                         }
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
-                        placeholder="Enter registered address"
+                        className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="Enter Registered Address"
                       />
                     </div>
                   </div>
+                </div>
 
-                  {/* Director/Partners Details Section */}
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-md font-semibold text-gray-900">
-                        Director/Partners Details
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => addDirectorPartner(org.id)}
-                        className="flex items-center gap-2 px-3 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-sm"
-                      >
-                        <AiOutlinePlus className="w-4 h-4" />
-                        Add Director/Partner
-                      </button>
-                    </div>
-
-                    {/* Directors/Partners Table */}
-                    {org.directorsPartners &&
-                      org.directorsPartners.length > 0 && (
-                        <div className="overflow-x-auto mb-4">
-                          <table className="w-full border-collapse bg-white min-w-[800px]">
-                            <thead>
-                              <tr className="bg-gray-100 border-b border-gray-300">
-                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">
-                                  Name
-                                </th>
-                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">
-                                  DIN/Number
-                                </th>
-                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">
-                                  Contact
-                                </th>
-                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">
-                                  Email
-                                </th>
-                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">
-                                  Date of Addition
-                                </th>
-                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">
-                                  Status
-                                </th>
-                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">
-                                  Actions
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {org.directorsPartners.map((dp) => (
-                                <tr
-                                  key={dp.id}
-                                  className="border-b border-gray-200"
-                                >
-                                  <td className="px-3 py-2 border border-gray-300">
-                                    <input
-                                      type="text"
-                                      value={dp.name || ""}
-                                      onChange={(e) =>
-                                        updateDirectorPartner(
-                                          org.id,
-                                          dp.id,
-                                          "name",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                                      placeholder="Name"
-                                    />
-                                  </td>
-                                  <td className="px-3 py-2 border border-gray-300">
-                                    <input
-                                      type="text"
-                                      value={dp.dinNumber || ""}
-                                      onChange={(e) =>
-                                        updateDirectorPartner(
-                                          org.id,
-                                          dp.id,
-                                          "dinNumber",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                                      placeholder="DIN/Number"
-                                    />
-                                  </td>
-                                  <td className="px-3 py-2 border border-gray-300">
-                                    <input
-                                      type="text"
-                                      value={dp.contact || ""}
-                                      onChange={(e) =>
-                                        updateDirectorPartner(
-                                          org.id,
-                                          dp.id,
-                                          "contact",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                                      placeholder="Contact"
-                                    />
-                                  </td>
-                                  <td className="px-3 py-2 border border-gray-300">
-                                    <input
-                                      type="email"
-                                      value={dp.email || ""}
-                                      onChange={(e) =>
-                                        updateDirectorPartner(
-                                          org.id,
-                                          dp.id,
-                                          "email",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                                      placeholder="Email"
-                                    />
-                                  </td>
-                                  <td className="px-3 py-2 border border-gray-300">
-                                    <input
-                                      type="date"
-                                      value={dp.dateOfAddition || ""}
-                                      onChange={(e) =>
-                                        updateDirectorPartner(
-                                          org.id,
-                                          dp.id,
-                                          "dateOfAddition",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                                    />
-                                  </td>
-                                  <td className="px-3 py-2 border border-gray-300">
-                                    <select
-                                      value={dp.status || "Active"}
-                                      onChange={(e) =>
-                                        updateDirectorPartner(
-                                          org.id,
-                                          dp.id,
-                                          "status",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                                    >
-                                      <option value="Active">Active</option>
-                                      <option value="Inactive">Inactive</option>
-                                    </select>
-                                  </td>
-                                  <td className="px-3 py-2 border border-gray-300">
-                                    <button
-                                      onClick={() =>
-                                        removeDirectorPartner(org.id, dp.id)
-                                      }
-                                      className="text-red-600 hover:text-red-800 text-xs font-medium"
-                                    >
-                                      Remove
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-
-                    {/* Empty State */}
-                    {(!org.directorsPartners ||
-                      org.directorsPartners.length === 0) && (
-                      <div className="text-center py-4 text-gray-500 text-xs">
-                        No directors/partners added yet.
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Digital Signature Details Section */}
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-md font-semibold text-gray-900">
-                        Digital Signature Details
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => addDigitalSignature(org.id)}
-                        className="flex items-center gap-2 px-3 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-sm"
-                      >
-                        <AiOutlinePlus className="w-4 h-4" />
-                        Add Digital Signature
-                      </button>
-                    </div>
-
-                    {/* Digital Signatures Table */}
-                    {org.digitalSignatures &&
-                      org.digitalSignatures.length > 0 && (
-                        <div className="overflow-x-auto mb-4">
-                          <table className="w-full border-collapse bg-white min-w-[600px]">
-                            <thead>
-                              <tr className="bg-gray-100 border-b border-gray-300">
-                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">
-                                  Name
-                                </th>
-                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">
-                                  DSC Number
-                                </th>
-                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">
-                                  Expiry Date
-                                </th>
-                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">
-                                  Status
-                                </th>
-                                <th className="px-3 py-2 text-left font-medium text-gray-700 border border-gray-300 text-xs">
-                                  Actions
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {org.digitalSignatures.map((ds) => (
-                                <tr
-                                  key={ds.id}
-                                  className="border-b border-gray-200"
-                                >
-                                  <td className="px-3 py-2 border border-gray-300">
-                                    <input
-                                      type="text"
-                                      value={ds.name || ""}
-                                      onChange={(e) =>
-                                        updateDigitalSignature(
-                                          org.id,
-                                          ds.id,
-                                          "name",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                                      placeholder="Name"
-                                    />
-                                  </td>
-                                  <td className="px-3 py-2 border border-gray-300">
-                                    <input
-                                      type="text"
-                                      value={ds.dscNumber || ""}
-                                      onChange={(e) =>
-                                        updateDigitalSignature(
-                                          org.id,
-                                          ds.id,
-                                          "dscNumber",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                                      placeholder="DSC Number"
-                                    />
-                                  </td>
-                                  <td className="px-3 py-2 border border-gray-300">
-                                    <input
-                                      type="date"
-                                      value={ds.expiryDate || ""}
-                                      onChange={(e) =>
-                                        updateDigitalSignature(
-                                          org.id,
-                                          ds.id,
-                                          "expiryDate",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                                    />
-                                  </td>
-                                  <td className="px-3 py-2 border border-gray-300">
-                                    <select
-                                      value={ds.status || "Active"}
-                                      onChange={(e) =>
-                                        updateDigitalSignature(
-                                          org.id,
-                                          ds.id,
-                                          "status",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                                    >
-                                      <option value="Active">Active</option>
-                                      <option value="In-active">
-                                        In-active
-                                      </option>
-                                    </select>
-                                  </td>
-                                  <td className="px-3 py-2 border border-gray-300">
-                                    <button
-                                      onClick={() =>
-                                        removeDigitalSignature(org.id, ds.id)
-                                      }
-                                      className="text-red-600 hover:text-red-800 text-xs font-medium"
-                                    >
-                                      Remove
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-
-                    {/* Empty State */}
-                    {(!org.digitalSignatures ||
-                      org.digitalSignatures.length === 0) && (
-                      <div className="text-center py-4 text-gray-500 text-xs">
-                        No digital signatures added yet.
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Attachments Section */}
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <h4 className="text-md font-semibold text-gray-900 mb-4">
-                      Attachments
+                {/* Directors / Partners Details Section */}
+                <div className="bg-[#F8F9FA] rounded-xl p-4 mt-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="text-[15px] font-medium text-gray-900">
+                      Directors / Partners Details
                     </h4>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Optional Attachment 1 */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Optional Attachment 1
-                        </label>
-                        <div>
-                          <input
-                            type="file"
-                            onChange={async (e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                try {
-                                  if (file.size > 5 * 1024 * 1024) {
-                                    alert("File size must be less than 5MB");
-                                    e.target.value = "";
-                                    return;
-                                  }
-
-                                  const userData = JSON.parse(
-                                    localStorage.getItem(
-                                      AUTH_CONFIG.STORAGE_KEYS.USER
-                                    ) || "{}"
-                                  );
-                                  const currentUserId = userData.id || userId;
-
-                                  if (!currentUserId) {
-                                    alert(
-                                      "User ID not found. Please refresh the page."
-                                    );
-                                    e.target.value = "";
-                                    return;
-                                  }
-
-                                  const folder = `organizations/${currentUserId}/org-${
-                                    org.id || "new"
-                                  }`;
-                                  const { s3Url } = await uploadFileDirect(
-                                    file,
-                                    folder,
-                                    "optional-attachment-1"
-                                  );
-
-                                  updateOrganization(
-                                    org.id,
-                                    "optionalAttachment1",
-                                    s3Url
-                                  );
-                                  alert("File uploaded successfully!");
-                                } catch (error) {
-                                  console.error("Error uploading file:", error);
-                                  alert(
-                                    "Failed to upload file. Please try again."
-                                  );
-                                  e.target.value = "";
-                                }
-                              }
-                            }}
-                            className="hidden"
-                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                            id={`optional-attachment-1-${org.id}`}
-                          />
-                          <label
-                            htmlFor={`optional-attachment-1-${org.id}`}
-                            className="cursor-pointer inline-block"
-                          >
-                            {org.optionalAttachment1 ? (
-                              <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg">
-                                <p className="text-xs text-gray-700">
-                                  File uploaded
-                                </p>
-                                <div className="flex gap-2 mt-1">
-                                  <button
-                                    type="button"
-                                    onClick={async (e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      await handleViewFile(
-                                        org.optionalAttachment1
-                                      );
-                                    }}
-                                    className="text-xs text-blue-600 hover:text-blue-800"
-                                  >
-                                    View File
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      updateOrganization(
-                                        org.id,
-                                        "optionalAttachment1",
-                                        null
-                                      );
-                                    }}
-                                    className="text-xs text-red-600 hover:text-red-800"
-                                  >
-                                    Remove
-                                  </button>
-                                </div>
-                              </div>
-                            ) : (
-                              <span className="px-3 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors inline-block text-xs">
-                                Upload File
-                              </span>
-                            )}
-                          </label>
-                        </div>
-                      </div>
-
-                      {/* Optional Attachment 2 */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Optional Attachment 2
-                        </label>
-                        <div>
-                          <input
-                            type="file"
-                            onChange={async (e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                try {
-                                  if (file.size > 5 * 1024 * 1024) {
-                                    alert("File size must be less than 5MB");
-                                    e.target.value = "";
-                                    return;
-                                  }
-
-                                  const userData = JSON.parse(
-                                    localStorage.getItem(
-                                      AUTH_CONFIG.STORAGE_KEYS.USER
-                                    ) || "{}"
-                                  );
-                                  const currentUserId = userData.id || userId;
-
-                                  if (!currentUserId) {
-                                    alert(
-                                      "User ID not found. Please refresh the page."
-                                    );
-                                    e.target.value = "";
-                                    return;
-                                  }
-
-                                  const folder = `organizations/${currentUserId}/org-${
-                                    org.id || "new"
-                                  }`;
-                                  const { s3Url } = await uploadFileDirect(
-                                    file,
-                                    folder,
-                                    "optional-attachment-2"
-                                  );
-
-                                  updateOrganization(
-                                    org.id,
-                                    "optionalAttachment2",
-                                    s3Url
-                                  );
-                                  alert("File uploaded successfully!");
-                                } catch (error) {
-                                  console.error("Error uploading file:", error);
-                                  alert(
-                                    "Failed to upload file. Please try again."
-                                  );
-                                  e.target.value = "";
-                                }
-                              }
-                            }}
-                            className="hidden"
-                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                            id={`optional-attachment-2-${org.id}`}
-                          />
-                          <label
-                            htmlFor={`optional-attachment-2-${org.id}`}
-                            className="cursor-pointer inline-block"
-                          >
-                            {org.optionalAttachment2 ? (
-                              <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg">
-                                <p className="text-xs text-gray-700">
-                                  File uploaded
-                                </p>
-                                <div className="flex gap-2 mt-1">
-                                  <button
-                                    type="button"
-                                    onClick={async (e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      await handleViewFile(
-                                        org.optionalAttachment2
-                                      );
-                                    }}
-                                    className="text-xs text-blue-600 hover:text-blue-800"
-                                  >
-                                    View File
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      updateOrganization(
-                                        org.id,
-                                        "optionalAttachment2",
-                                        null
-                                      );
-                                    }}
-                                    className="text-xs text-red-600 hover:text-red-800"
-                                  >
-                                    Remove
-                                  </button>
-                                </div>
-                              </div>
-                            ) : (
-                              <span className="px-3 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors inline-block text-xs">
-                                Upload File
-                              </span>
-                            )}
-                          </label>
-                        </div>
-                      </div>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => addDirectorPartner(org.id)}
+                      className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold flex items-center gap-2"
+                    >
+                      <AiOutlinePlus className="w-3 h-3" /> Add Directors /
+                      Patners
+                    </button>
                   </div>
 
-                  {/* Websites Section */}
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-md font-semibold text-gray-900">
-                        Credentials
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => addWebsite(org.id)}
-                        className="flex items-center gap-2 px-3 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-sm"
-                      >
-                        <AiOutlinePlus className="w-4 h-4" />
-                        Add Website
-                      </button>
+                  {!org.directorsPartners ||
+                  org.directorsPartners.length === 0 ? (
+                    <EmptySectionState
+                      title="No Directors / Partners added yet"
+                      buttonText="Add Directors / Partners"
+                      onAdd={() => addDirectorPartner(org.id)}
+                    />
+                  ) : (
+                    <div className="overflow-x-auto rounded-lg">
+                      <table className="w-full text-sm">
+                        <thead className="bg-[#00486D] text-white">
+                          <tr>
+                            <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
+                              Name
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium text-xs">
+                              DIN No.
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium text-xs">
+                              Contact
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium text-xs">
+                              Email
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium text-xs">
+                              Date of Addition
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium text-xs">
+                              Status
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium text-xs rounded-tr-lg">
+                              Action
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-100">
+                          {org.directorsPartners.map((dp) => (
+                            <tr key={dp.id}>
+                              <td className="p-3">
+                                <input
+                                  type="text"
+                                  className="w-full px-3 py-2 bg-white rounded-md text-xs border border-gray-100 focus:ring-1 focus:ring-blue-500"
+                                  value={dp.name}
+                                  onChange={(e) =>
+                                    updateDirectorPartner(
+                                      org.id,
+                                      dp.id,
+                                      "name",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Name"
+                                />
+                              </td>
+                              <td className="p-3">
+                                <input
+                                  type="text"
+                                  className="w-full px-3 py-2 bg-white rounded-md text-xs border border-gray-100 focus:ring-1 focus:ring-blue-500"
+                                  value={dp.dinNumber}
+                                  onChange={(e) =>
+                                    updateDirectorPartner(
+                                      org.id,
+                                      dp.id,
+                                      "dinNumber",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="DIN No"
+                                />
+                              </td>
+                              <td className="p-3">
+                                <input
+                                  type="text"
+                                  className="w-full px-3 py-2 bg-white rounded-md text-xs border border-gray-100 focus:ring-1 focus:ring-blue-500"
+                                  value={dp.contact}
+                                  onChange={(e) =>
+                                    updateDirectorPartner(
+                                      org.id,
+                                      dp.id,
+                                      "contact",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Contact"
+                                />
+                              </td>
+                              <td className="p-3">
+                                <input
+                                  type="email"
+                                  className="w-full px-3 py-2 bg-white rounded-md text-xs border border-gray-100 focus:ring-1 focus:ring-blue-500"
+                                  value={dp.email}
+                                  onChange={(e) =>
+                                    updateDirectorPartner(
+                                      org.id,
+                                      dp.id,
+                                      "email",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Email"
+                                />
+                              </td>
+                              <td className="p-3">
+                                <input
+                                  type="date"
+                                  className="w-full px-3 py-2 bg-white rounded-md text-xs border border-gray-100 focus:ring-1 focus:ring-blue-500"
+                                  value={dp.dateOfAddition}
+                                  onChange={(e) =>
+                                    updateDirectorPartner(
+                                      org.id,
+                                      dp.id,
+                                      "dateOfAddition",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td className="p-3">
+                                <select
+                                  className="w-full px-3 py-2 bg-white rounded-md text-xs border border-gray-100 focus:ring-1 focus:ring-blue-500"
+                                  value={dp.status}
+                                  onChange={(e) =>
+                                    updateDirectorPartner(
+                                      org.id,
+                                      dp.id,
+                                      "status",
+                                      e.target.value
+                                    )
+                                  }
+                                >
+                                  <option>Active</option>
+                                  <option>Inactive</option>
+                                </select>
+                              </td>
+                              <td className="p-3">
+                                <button
+                                  onClick={() =>
+                                    removeDirectorPartner(org.id, dp.id)
+                                  }
+                                  className="text-[#FF3B30] hover:text-red-700 text-xs font-semibold"
+                                >
+                                  Remove
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
+                  )}
+                </div>
 
-                    {/* Saved Websites Table */}
-                    {org.websites &&
-                      org.websites.filter((w) => w.url && w.url.trim() !== "")
-                        .length > 0 && (
-                        <div className="mb-4 overflow-x-auto">
-                          <table className="w-full border-collapse bg-white">
-                            <thead>
-                              <tr className="bg-gray-100">
-                                <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">
-                                  Type
-                                </th>
-                                <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">
-                                  URL
-                                </th>
-                                <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">
-                                  Login
-                                </th>
-                                <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">
-                                  Password
-                                </th>
-                                <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">
-                                  Remarks
-                                </th>
-                                <th className="px-4 py-3 text-left font-semibold text-gray-700 border border-gray-300 text-sm">
-                                  Actions
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {org.websites
-                                .filter((w) => w.url && w.url.trim() !== "")
-                                .map((website) => (
-                                  <tr
-                                    key={website.id}
-                                    className="bg-white border-b border-gray-200"
-                                  >
-                                    <td className="px-4 py-3 text-gray-900 border border-gray-300 text-sm">
-                                      {website.type || "-"}
-                                    </td>
-                                    <td className="px-4 py-3 border border-gray-300 text-sm">
-                                      {website.url ? (
-                                        <a
-                                          href={website.url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-blue-600 hover:underline"
-                                        >
-                                          {website.url}
-                                        </a>
-                                      ) : (
-                                        <span className="text-gray-600">-</span>
-                                      )}
-                                    </td>
-                                    <td className="px-4 py-3 text-gray-900 border border-gray-300 text-sm">
-                                      {website.login || "-"}
-                                    </td>
-                                    <td className="px-4 py-3 border border-gray-300 text-sm">
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-gray-900">
-                                          {website.password
-                                            ? website.showPassword
-                                              ? website.password
-                                              : "••••••••"
-                                            : "-"}
-                                        </span>
-                                        {website.password && (
-                                          <button
-                                            type="button"
-                                            onClick={() =>
-                                              togglePasswordVisibility(
-                                                org.id,
-                                                website.id
-                                              )
-                                            }
-                                            className="text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer"
-                                            title={
-                                              website.showPassword
-                                                ? "Hide password"
-                                                : "Show password"
-                                            }
-                                          >
-                                            {website.showPassword ? (
-                                              <FiEyeOff className="w-4 h-4" />
-                                            ) : (
-                                              <FiEye className="w-4 h-4" />
-                                            )}
-                                          </button>
-                                        )}
-                                      </div>
-                                    </td>
-                                    <td className="px-4 py-3 text-gray-900 border border-gray-300 text-sm">
-                                      {website.remarks || "-"}
-                                    </td>
-                                    <td className="px-4 py-3 border border-gray-300 text-sm">
-                                      {/* Action buttons can be added here */}
-                                    </td>
-                                  </tr>
-                                ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
+                {/* Digital Signature Details Section */}
+                <div className="bg-[#F8F9FA] rounded-xl p-4 mt-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="text-[15px] font-medium text-gray-900">
+                      Digital Signature Details
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => addDigitalSignature(org.id)}
+                      className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold flex items-center gap-2"
+                    >
+                      <AiOutlinePlus className="w-3 h-3" /> Add Digital
+                      Signature
+                    </button>
+                  </div>
 
-                    {/* Website Entry Forms */}
-                    {(org.websites || [])
-                      .filter((w) => !w.url || w.url.trim() === "")
-                      .map((website) => (
-                        <div
-                          key={website.id}
-                          className="mb-4 p-4 border border-gray-300 rounded-lg bg-gray-50"
-                        >
-                          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                            <div>
-                              <label className="block text-sm text-gray-600 mb-2">
-                                Website Type
-                              </label>
-                              <select
-                                value={website.type}
-                                onChange={(e) =>
-                                  updateWebsite(
-                                    org.id,
-                                    website.id,
-                                    "type",
-                                    e.target.value
-                                  )
-                                }
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm appearance-none bg-white"
-                              >
-                                <option value="">Select Website Type</option>
-                                <option value="Income Tax">Income Tax</option>
-                                <option value="GST">GST</option>
-                                <option value="Income Tax – TAN Based">
-                                  Income Tax – TAN Based
-                                </option>
-                                <option value="Professional Tax">
-                                  Professional Tax
-                                </option>
-                                <option value="Provident Fund">
-                                  Provident Fund
-                                </option>
-                                <option value="ESIC">ESIC</option>
-                                <option value="MCA">MCA</option>
-                                <option value="Labour license">
-                                  Labour license
-                                </option>
-                                <option value="TRACES">TRACES</option>
-                                <option value="ICEGATE">ICEGATE</option>
-                                <option value="Service Tax">Service Tax</option>
-                                <option value="VAT">VAT</option>
-                                <option value="Others 1">Others 1</option>
-                                <option value="Others 2">Others 2</option>
-                                <option value="Others 3">Others 3</option>
-                              </select>
-                            </div>
+                  {!org.digitalSignatures ||
+                  org.digitalSignatures.length === 0 ? (
+                    <EmptySectionState
+                      title="No Digital Signature added yet"
+                      buttonText="Add Digital Signature"
+                      onAdd={() => addDigitalSignature(org.id)}
+                    />
+                  ) : (
+                    <div className="overflow-x-auto rounded-lg">
+                      <table className="w-full text-sm">
+                        <thead className="bg-[#00486D] text-white">
+                          <tr>
+                            <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
+                              Name
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium text-xs">
+                              DSC Number
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium text-xs">
+                              Expiry Date
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium text-xs">
+                              Status
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium text-xs rounded-tr-lg">
+                              Action
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-100">
+                          {org.digitalSignatures.map((ds) => (
+                            <tr key={ds.id}>
+                              <td className="p-3">
+                                <input
+                                  type="text"
+                                  className="w-full px-3 py-2 bg-white rounded-md text-xs border border-gray-100 focus:ring-1 focus:ring-blue-500"
+                                  value={ds.name}
+                                  onChange={(e) =>
+                                    updateDigitalSignature(
+                                      org.id,
+                                      ds.id,
+                                      "name",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Name"
+                                />
+                              </td>
+                              <td className="p-3">
+                                <input
+                                  type="text"
+                                  className="w-full px-3 py-2 bg-white rounded-md text-xs border border-gray-100 focus:ring-1 focus:ring-blue-500"
+                                  value={ds.dscNumber}
+                                  onChange={(e) =>
+                                    updateDigitalSignature(
+                                      org.id,
+                                      ds.id,
+                                      "dscNumber",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="DSC Number"
+                                />
+                              </td>
+                              <td className="p-3">
+                                <input
+                                  type="date"
+                                  className="w-full px-3 py-2 bg-white rounded-md text-xs border border-gray-100 focus:ring-1 focus:ring-blue-500"
+                                  value={ds.expiryDate}
+                                  onChange={(e) =>
+                                    updateDigitalSignature(
+                                      org.id,
+                                      ds.id,
+                                      "expiryDate",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td className="p-3">
+                                <select
+                                  className="w-full px-3 py-2 bg-white rounded-md text-xs border border-gray-100 focus:ring-1 focus:ring-blue-500"
+                                  value={ds.status}
+                                  onChange={(e) =>
+                                    updateDigitalSignature(
+                                      org.id,
+                                      ds.id,
+                                      "status",
+                                      e.target.value
+                                    )
+                                  }
+                                >
+                                  <option>Active</option>
+                                  <option>Inactive</option>
+                                </select>
+                              </td>
+                              <td className="p-3">
+                                <button
+                                  onClick={() =>
+                                    removeDigitalSignature(org.id, ds.id)
+                                  }
+                                  className="text-[#FF3B30] hover:text-red-700 text-xs font-semibold"
+                                >
+                                  Remove
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
 
-                            <div>
-                              <label className="block text-sm text-gray-600 mb-2">
-                                Website URL
-                              </label>
-                              <input
-                                type="url"
-                                value={website.url}
-                                onChange={(e) =>
-                                  updateWebsite(
-                                    org.id,
-                                    website.id,
-                                    "url",
-                                    e.target.value
-                                  )
-                                }
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                                placeholder="Enter website URL"
-                              />
-                            </div>
+                {/* Attachments Section */}
+                <div className="bg-[#F8F9FA] rounded-xl p-4 mt-6">
+                  <h4 className="text-[15px] font-medium text-gray-900 mb-4">
+                    Attachments
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <StyledFileUpload
+                      label="Optional Attachment 1"
+                      fileUrl={org.optionalAttachment1}
+                      id={`opt-att-1-${org.id}`}
+                      placeholder="Upload file"
+                      onFileChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          try {
+                            if (file.size > 5 * 1024 * 1024)
+                              return alert("File size must be less than 5MB");
+                            const userData = JSON.parse(
+                              localStorage.getItem(
+                                AUTH_CONFIG.STORAGE_KEYS.USER
+                              ) || "{}"
+                            );
+                            const currentUserId = userData.id || userId;
+                            if (!currentUserId)
+                              return alert("User ID not found");
 
-                            <div>
-                              <label className="block text-sm text-gray-600 mb-2">
-                                Login
-                              </label>
-                              <input
-                                type="text"
-                                value={website.login}
-                                onChange={(e) =>
-                                  updateWebsite(
-                                    org.id,
-                                    website.id,
-                                    "login",
-                                    e.target.value
-                                  )
-                                }
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                                placeholder="Enter login"
-                              />
-                            </div>
+                            const folder = `organizations/${currentUserId}/org-${
+                              org.id || "new"
+                            }`;
+                            const { s3Url } = await uploadFileDirect(
+                              file,
+                              folder,
+                              "optional-attachment-1"
+                            );
+                            updateOrganization(
+                              org.id,
+                              "optionalAttachment1",
+                              s3Url
+                            );
+                          } catch (error) {
+                            console.error(error);
+                            alert("Upload failed");
+                          }
+                        }
+                      }}
+                      onViewFile={handleViewFile}
+                    />
+                    <StyledFileUpload
+                      label="Optional Attachment 2"
+                      fileUrl={org.optionalAttachment2}
+                      id={`opt-att-2-${org.id}`}
+                      placeholder="Upload file"
+                      onFileChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          try {
+                            if (file.size > 5 * 1024 * 1024)
+                              return alert("File size must be less than 5MB");
+                            const userData = JSON.parse(
+                              localStorage.getItem(
+                                AUTH_CONFIG.STORAGE_KEYS.USER
+                              ) || "{}"
+                            );
+                            const currentUserId = userData.id || userId;
+                            if (!currentUserId)
+                              return alert("User ID not found");
 
-                            <div>
-                              <label className="block text-sm text-gray-600 mb-2">
+                            const folder = `organizations/${currentUserId}/org-${
+                              org.id || "new"
+                            }`;
+                            const { s3Url } = await uploadFileDirect(
+                              file,
+                              folder,
+                              "optional-attachment-2"
+                            );
+                            updateOrganization(
+                              org.id,
+                              "optionalAttachment2",
+                              s3Url
+                            );
+                          } catch (error) {
+                            console.error(error);
+                            alert("Upload failed");
+                          }
+                        }
+                      }}
+                      onViewFile={handleViewFile}
+                    />
+                  </div>
+                </div>
+
+                {/* Credentials Details Section */}
+                <div className="bg-[#F8F9FA] rounded-xl p-4 mt-6 pb-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h4 className="text-[15px] font-medium text-gray-900">
+                      Credentials Details
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => addWebsite(org.id)}
+                      className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold flex items-center gap-2"
+                    >
+                      <AiOutlinePlus className="w-3 h-3" /> Add Credentials
+                      Details
+                    </button>
+                  </div>
+
+                  {!org.websites || org.websites.length === 0 ? (
+                    <EmptySectionState
+                      title="No Credential Details added yet"
+                      buttonText="Add Credentials Details"
+                      onAdd={() => addWebsite(org.id)}
+                    />
+                  ) : (
+                    <div className="space-y-4">
+                      {org.websites.map((website) => (
+                        <div key={website.id} className="relative">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                            <StyledSelect
+                              label="Credential Type"
+                              value={website.type}
+                              onChange={(e) =>
+                                updateWebsite(
+                                  org.id,
+                                  website.id,
+                                  "type",
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Enter Website Type"
+                              options={[
+                                { value: "Income Tax", label: "Income Tax" },
+                                { value: "GST", label: "GST" },
+                                { value: "MCA", label: "MCA" },
+                                { value: "Bank", label: "Bank" },
+                              ]}
+                            />
+                            <StyledInput
+                              label="Credential URL"
+                              value={website.url}
+                              onChange={(e) =>
+                                updateWebsite(
+                                  org.id,
+                                  website.id,
+                                  "url",
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Enter Website URL"
+                            />
+                            <StyledInput
+                              label="Login"
+                              value={website.login}
+                              onChange={(e) =>
+                                updateWebsite(
+                                  org.id,
+                                  website.id,
+                                  "login",
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Enter Login"
+                            />
+                            <div className="relative">
+                              <label className="block text-sm text-gray-700 mb-2 font-medium">
                                 Password
                               </label>
                               <div className="relative">
@@ -1359,75 +1010,55 @@ const OrganisationDetailsContent = ({
                                       e.target.value
                                     )
                                   }
-                                  className="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                                  placeholder="Enter password"
+                                  className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  placeholder="Enter Password"
                                 />
                                 <button
-                                  type="button"
                                   onClick={() =>
                                     togglePasswordVisibility(org.id, website.id)
                                   }
-                                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
                                 >
                                   {website.showPassword ? (
-                                    <FiEye className="w-4 h-4" />
+                                    <FiEyeOff />
                                   ) : (
-                                    <FiEyeOff className="w-4 h-4" />
+                                    <FiEye />
                                   )}
                                 </button>
                               </div>
                             </div>
-                            <div>
-                              <label className="block text-sm text-gray-600 mb-2">
-                                Remarks
-                              </label>
-                              <input
-                                type="text"
-                                value={website.remarks || ""}
-                                onChange={(e) =>
-                                  updateWebsite(
-                                    org.id,
-                                    website.id,
-                                    "remarks",
-                                    e.target.value
-                                  )
-                                }
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                                placeholder="Enter remarks"
-                              />
-                            </div>
                           </div>
-
-                          <div className="flex justify-end mt-3">
+                          <div className="flex justify-end mt-2">
                             <button
-                              type="button"
                               onClick={() => removeWebsite(org.id, website.id)}
-                              className="text-red-600 hover:text-red-800 text-sm"
+                              className="text-[#FF3B30] hover:text-red-700 text-xs font-semibold"
                             >
                               Remove
                             </button>
                           </div>
                         </div>
                       ))}
-                  </div>
+                    </div>
+                  )}
                 </div>
-              );
-            })}
-          </div>
-        )}
 
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <button
-            onClick={async () => {
-              await handleSaveOrganisation();
-            }}
-            disabled={saving}
-            className="px-8 py-3 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {saving ? "Saving..." : "Save Changes"}
-          </button>
-        </div>
+                {/* Save Button */}
+                <div className="flex justify-end pt-4">
+                  <button
+                    onClick={handleSaveOrganisation}
+                    disabled={saving}
+                    className="px-8 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{
+                      background:
+                        "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+                    }}
+                  >
+                    {saving ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
       </div>
     </div>
   );

@@ -977,17 +977,17 @@ function Settings() {
         <p className="text-gray-500 text-sm ml-8 italic">Create your profile</p>
       </div>
 
-      <div className="max-w-7xl mx-auto border border-gray-100 rounded-xl bg-white shadow-sm p-2">
+      <div className="max-w-7xl mx-auto rounded-xl bg-white p-2">
         <div className="space-y-4">
           {sections.map((section) => (
             <div
               key={section.id}
-              className="bg-white rounded-lg overflow-hidden border border-gray-100"
+              className="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-md "
             >
               {/* Accordion Header */}
               <button
                 onClick={() => toggleSection(section.id)}
-                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center justify-between px-6 py-6 cursor-pointer text-left hover:bg-gray-50 transition-colors"
               >
                 <span className="text-[16px] font-medium text-gray-800">
                   {section.label}
