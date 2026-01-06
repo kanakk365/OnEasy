@@ -106,17 +106,17 @@ function Registrations() {
     load();
   }, [view]);
 
-  const formatDate = (date) => {
-    if (!date) return "-";
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return "-";
-    return d.toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      timeZone: "Asia/Kolkata",
-    });
-  };
+  // const formatDate = (date) => {
+  //   if (!date) return "-";
+  //   const d = new Date(date);
+  //   if (isNaN(d.getTime())) return "-";
+  //   return d.toLocaleDateString("en-IN", {
+  //     year: "numeric",
+  //     month: "short",
+  //     day: "numeric",
+  //     timeZone: "Asia/Kolkata",
+  //   });
+  // };
 
   const badge = (status) => {
     if (!status) return "bg-gray-100 text-gray-800";

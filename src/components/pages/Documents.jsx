@@ -461,7 +461,7 @@ function Documents() {
               if (isAdmin && selectedClientId) {
                 navigate(`/admin/client-organizations/${selectedClientId}`);
               } else {
-                navigate("/organization"); // Updated to point to new Organization module
+                navigate("/organizations-list"); // Navigate to organizations list for business documents
               }
             }}
             className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"

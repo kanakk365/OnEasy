@@ -4,7 +4,6 @@ import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
 import { getUsersPageData } from "../../utils/usersPageApi";
 import { TriangleAlert } from "lucide-react";
-import logo from "../../assets/logo.png";
 
 function Client() {
   const navigate = useNavigate();
@@ -12,11 +11,11 @@ function Client() {
   const [loadingService, setLoadingService] = React.useState(true);
   const [allNotices, setAllNotices] = React.useState([]);
   const [loadingNotice, setLoadingNotice] = React.useState(true);
-  const [activeNoticeTab, setActiveNoticeTab] = React.useState("All Notices"); // 'All Notices' or 'My Notices'
+  const [activeNoticeTab] = React.useState("All Notices"); // 'All Notices' or 'My Notices'
   const [activeServiceTab, setActiveServiceTab] = React.useState("Open");
   const [organizations, setOrganizations] = React.useState([]);
   const [loadingOrganizations, setLoadingOrganizations] = React.useState(true);
-  const [greeting, setGreeting] = React.useState("");
+  const [, setGreeting] = React.useState("");
 
   React.useEffect(() => {
     // Add smooth scrolling behavior
@@ -250,11 +249,6 @@ function Client() {
     );
   }, [allServices, activeServiceTab, getServiceTab]);
 
-  // Get the latest service for the active tab
-  const latestServiceForTab = React.useMemo(() => {
-    if (filteredServices.length === 0) return null;
-    return filteredServices[0]; // Already sorted by updated_at/created_at
-  }, [filteredServices]);
 
   const getStatusBadgeColor = (status) => {
     if (!status) return "bg-gray-100 text-gray-800";
@@ -303,21 +297,6 @@ function Client() {
   const formatServiceName = (reg) => {
     const raw = reg.business_name || reg.package_name || "Service";
     return raw.replace(/[-–]\s*Payment\s*Completed/i, "").trim();
-  };
-
-  const deriveType = (reg) => {
-    const tid = (reg.ticket_id || reg.id || "").toString().toUpperCase();
-    if (tid.startsWith("OPC_")) return "OPC";
-    if (tid.startsWith("LLP_")) return "LLP";
-    if (tid.startsWith("PART_") || tid.startsWith("PARTNERSHIP_"))
-      return "Partnership";
-    if (tid.startsWith("SEC8_") || tid.startsWith("SECTION8_"))
-      return "Section 8";
-    if (tid.startsWith("PVT_")) return "Private Limited";
-    if (tid.startsWith("PROP_")) return "Proprietorship";
-    if (tid.startsWith("SI_")) return "Startup India";
-    if (tid.startsWith("GST_")) return "GST";
-    return reg.registration_type || reg.service_type || "Service";
   };
 
   return (
@@ -560,9 +539,8 @@ function Client() {
             <div className="min-w-[700px]">
               {/* Table Header */}
               <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-[#f2f6f7] rounded-xl text-sm font-medium text-[#023752]">
-                <div className="col-span-2">Logo</div>
-                <div className="col-span-3">Name</div>
-                <div className="col-span-5">GST number</div>
+                <div className="col-span-4">Name</div>
+                <div className="col-span-6">GST number</div>
                 <div className="col-span-2 text-right">Action</div>
               </div>
 
@@ -576,21 +554,12 @@ function Client() {
                     key={org.id || index}
                     className="grid grid-cols-12 gap-4 px-6 py-4 bg-white border-b border-gray-50 items-center hover:bg-gray-50 transition-colors last:border-0 cursor-pointer"
                   >
-                    <div className="col-span-2">
-                      <div className="w-12 h-12 rounded-full border border-gray-100 p-2 bg-white shadow-sm flex items-center justify-center">
-                        <img
-                          src={logo}
-                          alt={org.legal_name || "Company"}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    </div>
-                    <div className="col-span-3">
+                    <div className="col-span-4">
                       <span className="text-sm font-medium text-gray-900 block">
                         {org.legal_name || "OneEasy Technologies Pvt. Ltd."}
                       </span>
                     </div>
-                    <div className="col-span-5">
+                    <div className="col-span-6">
                       <span className="text-sm text-gray-500 font-medium">
                         {org.gstin || "27ABCDE1234F1Z5"}
                       </span>

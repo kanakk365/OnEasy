@@ -156,10 +156,6 @@ function CouponCodeGenerator() {
 
   const parsedDiscountPercentage = typeof discountPercentage === 'string' ? parseFloat(discountPercentage) || 0 : discountPercentage;
   const parsedDiscountAmount = typeof discountAmount === 'string' ? parseFloat(discountAmount) || 0 : discountAmount;
-  const displayDiscountLabel =
-    discountType === 'percentage'
-      ? `${parsedDiscountPercentage}%`
-      : `₹${parsedDiscountAmount}`;
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] py-6">

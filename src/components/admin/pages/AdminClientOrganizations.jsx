@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../../utils/api";
-import logo from "../../../assets/logo.png";
 
 function AdminClientOrganizations() {
   const navigate = useNavigate();
@@ -125,13 +124,6 @@ function AdminClientOrganizations() {
                     className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}
                   >
                     <td className="px-6 py-4">
-                      <div className="w-12 h-12 rounded-full bg-[#01334C] flex items-center justify-center overflow-hidden mb-2">
-                        <img
-                          src={logo}
-                          alt="Company Logo"
-                          className="w-10 h-10 object-contain"
-                        />
-                      </div>
                       <div>
                         <p className="text-sm font-semibold text-gray-900">
                           {org.legal_name !== '-' ? org.legal_name : org.trade_name}

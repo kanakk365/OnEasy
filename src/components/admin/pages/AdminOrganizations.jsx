@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import apiClient from "../../../utils/api";
 import { updateUserDataByUserId } from "../../../utils/usersPageApi";
 import { uploadFileDirect, viewFile } from "../../../utils/s3Upload";
-import logo from "../../../assets/logo.png";
 import {
   FiBriefcase,
   FiGlobe,
@@ -40,7 +39,6 @@ function AdminOrganizations() {
   const [isAddingOrg, setIsAddingOrg] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [clients, setClients] = useState([]);
-  const [loadingClients, setLoadingClients] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // Pagination
@@ -68,23 +66,18 @@ function AdminOrganizations() {
 
   const loadClients = async () => {
     try {
-      setLoadingClients(true);
       const response = await apiClient.get("/admin/clients");
       if (response.success && response.data) setClients(response.data);
     } catch (error) {
       console.error("Error loading clients:", error);
-    } finally {
-      setLoadingClients(false);
     }
   };
 
   const loadOrganizations = useCallback(async () => {
     try {
       setLoading(true);
-      const params = {};
-      if (searchTerm) params.search = searchTerm;
-      if (clientFilter) params.clientFilter = clientFilter;
-      const response = await apiClient.get("/admin/organizations", { params });
+      // Load all organizations - filtering will be done client-side
+      const response = await apiClient.get("/admin/organizations");
       if (response.success && response.data) setOrganizations(response.data);
       else setOrganizations([]);
     } catch (error) {
@@ -93,7 +86,7 @@ function AdminOrganizations() {
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, clientFilter]);
+  }, []);
 
   useEffect(() => {
     loadClients();
@@ -318,6 +311,10 @@ function AdminOrganizations() {
     } catch {
       return "-";
     }
+  };
+
+  const handleViewFile = async (fileData) => {
+    await viewFile(fileData);
   };
 
   const handleDeleteOrganization = async () => {
@@ -609,7 +606,10 @@ function AdminOrganizations() {
                 typeof foundOrg.directors_partners_details === "string"
                   ? JSON.parse(foundOrg.directors_partners_details)
                   : foundOrg.directors_partners_details;
-            } catch {}
+              if (!Array.isArray(directorsPartners)) directorsPartners = [];
+            } catch {
+              directorsPartners = [];
+            }
           }
           let digitalSignatures = [];
           if (foundOrg.digital_signature_details) {
@@ -618,7 +618,10 @@ function AdminOrganizations() {
                 typeof foundOrg.digital_signature_details === "string"
                   ? JSON.parse(foundOrg.digital_signature_details)
                   : foundOrg.digital_signature_details;
-            } catch {}
+              if (!Array.isArray(digitalSignatures)) digitalSignatures = [];
+            } catch {
+              digitalSignatures = [];
+            }
           }
           let websites = [];
           if (foundOrg.websites) {
@@ -627,7 +630,10 @@ function AdminOrganizations() {
                 typeof foundOrg.websites === "string"
                   ? JSON.parse(foundOrg.websites)
                   : foundOrg.websites;
-            } catch {}
+              if (!Array.isArray(websites)) websites = [];
+            } catch {
+              websites = [];
+            }
           }
 
           setSelectedOrg({
@@ -666,7 +672,15 @@ function AdminOrganizations() {
             })),
             optionalAttachment1: foundOrg.optional_attachment_1 || null,
             optionalAttachment2: foundOrg.optional_attachment_2 || null,
-            websites: Array.isArray(websites) ? websites : [],
+            websites: (Array.isArray(websites) ? websites : []).map((w, index) => ({
+              id: w.id || `w-${Date.now()}-${index}`,
+              type: w.type || "",
+              url: w.url || "",
+              login: w.login || "",
+              password: w.password || "",
+              remarks: w.remarks || "",
+              showPassword: false,
+            })),
           });
           setSelectedOrgUserId(org.user_id);
         } else {
@@ -683,18 +697,49 @@ function AdminOrganizations() {
     }
   };
 
-  const uniqueClients = [
-    ...new Set(organizations.map((org) => org.clientName).filter(Boolean)),
-  ];
+  const uniqueClients = useMemo(() => {
+    return [
+      ...new Set(organizations.map((org) => org.clientName).filter(Boolean)),
+    ];
+  }, [organizations]);
+
+  // Filter organizations client-side as fallback
+  const filteredOrganizations = useMemo(() => {
+    let filtered = organizations;
+
+    // Apply search filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (org) =>
+          (org.legalName && org.legalName.toLowerCase().includes(searchLower)) ||
+          (org.tradeName && org.tradeName.toLowerCase().includes(searchLower)) ||
+          (org.gstin && org.gstin.toLowerCase().includes(searchLower)) ||
+          (org.clientName && org.clientName.toLowerCase().includes(searchLower)) ||
+          (org.clientEmail && org.clientEmail.toLowerCase().includes(searchLower))
+      );
+    }
+
+    // Apply client filter
+    if (clientFilter) {
+      filtered = filtered.filter(
+        (org) =>
+          org.clientName === clientFilter ||
+          org.clientEmail === clientFilter
+      );
+    }
+
+    return filtered;
+  }, [organizations, searchTerm, clientFilter]);
 
   // Pagination Details
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentOrganizations = organizations.slice(
+  const currentOrganizations = filteredOrganizations.slice(
     indexOfFirstItem,
     indexOfLastItem
   );
-  const totalPages = Math.ceil(organizations.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredOrganizations.length / itemsPerPage);
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   if (loading || loadingOrgDetails) {
@@ -867,7 +912,533 @@ function AdminOrganizations() {
                 </div>
               </div>
 
-              {/* Sections for Directors/DSC/Websites would follow similar pattern - kept simple for this update */}
+              {/* PAN File Upload */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    PAN File
+                  </label>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="text"
+                      readOnly
+                      value={
+                        newOrganization.panFile
+                          ? "File uploaded"
+                          : "No file chosen"
+                      }
+                      className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500"
+                    />
+                    <label className="cursor-pointer flex-shrink-0">
+                      <input
+                        type="file"
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            try {
+                              // Validate file size (max 5MB)
+                              if (file.size > 5 * 1024 * 1024) {
+                                alert("File size must be less than 5MB");
+                                e.target.value = "";
+                                return;
+                              }
+
+                              // Upload directly to S3
+                              const folder = `user-profiles/${selectedClient?.id || "new"}/organizations/org-new`;
+                              const { s3Url } = await uploadFileDirect(
+                                file,
+                                folder,
+                                "pan-file"
+                              );
+
+                              // Store S3 URL
+                              updateNewOrganizationField("panFile", s3Url);
+                            } catch (error) {
+                              console.error("Error uploading PAN file:", error);
+                              alert(
+                                "Failed to upload file. Please try again."
+                              );
+                              e.target.value = "";
+                            }
+                          }
+                        }}
+                        className="hidden"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                      />
+                      <span className="px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm whitespace-nowrap">
+                        {newOrganization.panFile ? "Change" : "Upload"}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    TAN
+                  </label>
+                  <input
+                    type="text"
+                    value={newOrganization.tan}
+                    onChange={(e) =>
+                      updateNewOrganizationField("tan", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    placeholder="Enter TAN"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    CIN
+                  </label>
+                  <input
+                    type="text"
+                    value={newOrganization.cin}
+                    onChange={(e) =>
+                      updateNewOrganizationField("cin", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    placeholder="Enter CIN"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Registered Address
+                  </label>
+                  <textarea
+                    value={newOrganization.registeredAddress}
+                    onChange={(e) =>
+                      updateNewOrganizationField("registeredAddress", e.target.value)
+                    }
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    placeholder="Enter registered address"
+                  />
+                </div>
+              </div>
+
+              {/* Directors / Partners Section */}
+              <div className="border-t border-gray-200 pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Directors / Partners
+                  </h3>
+                  <button
+                    onClick={addNewDirectorPartner}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
+                  >
+                    <FiPlus className="w-4 h-4" /> Add Director/Partner
+                  </button>
+                </div>
+
+                {!newOrganization.directorsPartners ||
+                newOrganization.directorsPartners.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No Directors / Partners added yet
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-[#00486D] text-white">
+                        <tr>
+                          <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
+                            Name
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-xs">
+                            DIN No.
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-xs">
+                            Contact
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-xs">
+                            Email
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-xs">
+                            Date of Addition
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-xs">
+                            Status
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-xs rounded-tr-lg">
+                            Action
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-100">
+                        {newOrganization.directorsPartners.map((dp) => (
+                          <tr key={dp.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3">
+                              <input
+                                type="text"
+                                value={dp.name || ""}
+                                onChange={(e) =>
+                                  updateNewDirectorPartner(
+                                    dp.id,
+                                    "name",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                placeholder="Name"
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <input
+                                type="text"
+                                value={dp.dinNumber || ""}
+                                onChange={(e) =>
+                                  updateNewDirectorPartner(
+                                    dp.id,
+                                    "dinNumber",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                placeholder="DIN Number"
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <input
+                                type="text"
+                                value={dp.contact || ""}
+                                onChange={(e) =>
+                                  updateNewDirectorPartner(
+                                    dp.id,
+                                    "contact",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                placeholder="Contact"
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <input
+                                type="email"
+                                value={dp.email || ""}
+                                onChange={(e) =>
+                                  updateNewDirectorPartner(
+                                    dp.id,
+                                    "email",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                placeholder="Email"
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <input
+                                type="date"
+                                value={dp.dateOfAddition || ""}
+                                onChange={(e) =>
+                                  updateNewDirectorPartner(
+                                    dp.id,
+                                    "dateOfAddition",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <select
+                                value={dp.status || "Active"}
+                                onChange={(e) =>
+                                  updateNewDirectorPartner(
+                                    dp.id,
+                                    "status",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                              >
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                              </select>
+                            </td>
+                            <td className="px-4 py-3">
+                              <button
+                                onClick={() => removeNewDirectorPartner(dp.id)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <FiTrash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Digital Signatures Section */}
+              <div className="border-t border-gray-200 pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Digital Signatures
+                  </h3>
+                  <button
+                    onClick={addNewDigitalSignature}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
+                  >
+                    <FiPlus className="w-4 h-4" /> Add Digital Signature
+                  </button>
+                </div>
+
+                {!newOrganization.digitalSignatures ||
+                newOrganization.digitalSignatures.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No Digital Signatures added yet
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-[#00486D] text-white">
+                        <tr>
+                          <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
+                            Name
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-xs">
+                            DSC Number
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-xs">
+                            Expiry Date
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-xs">
+                            Status
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-xs rounded-tr-lg">
+                            Action
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-100">
+                        {newOrganization.digitalSignatures.map((ds) => (
+                          <tr key={ds.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3">
+                              <input
+                                type="text"
+                                value={ds.name || ""}
+                                onChange={(e) =>
+                                  updateNewDigitalSignature(
+                                    ds.id,
+                                    "name",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                placeholder="Name"
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <input
+                                type="text"
+                                value={ds.dscNumber || ""}
+                                onChange={(e) =>
+                                  updateNewDigitalSignature(
+                                    ds.id,
+                                    "dscNumber",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                placeholder="DSC Number"
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <input
+                                type="date"
+                                value={ds.expiryDate || ""}
+                                onChange={(e) =>
+                                  updateNewDigitalSignature(
+                                    ds.id,
+                                    "expiryDate",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <select
+                                value={ds.status || "Active"}
+                                onChange={(e) =>
+                                  updateNewDigitalSignature(
+                                    ds.id,
+                                    "status",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                              >
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                              </select>
+                            </td>
+                            <td className="px-4 py-3">
+                              <button
+                                onClick={() => removeNewDigitalSignature(ds.id)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <FiTrash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Credentials Section */}
+              <div className="border-t border-gray-200 pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Credentials
+                  </h3>
+                  <button
+                    onClick={addNewWebsite}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
+                  >
+                    <FiPlus className="w-4 h-4" /> Add Credential
+                  </button>
+                </div>
+
+                {!newOrganization.websites ||
+                newOrganization.websites.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No Credentials added yet
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-[#00486D] text-white">
+                        <tr>
+                          <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
+                            Type
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-xs">
+                            URL
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-xs">
+                            Login
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-xs">
+                            Password
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-xs">
+                            Remarks
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-xs rounded-tr-lg">
+                            Action
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-100">
+                        {newOrganization.websites.map((website) => (
+                          <tr key={website.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3">
+                              <select
+                                value={website.type || ""}
+                                onChange={(e) =>
+                                  updateNewWebsite(website.id, "type", e.target.value)
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                              >
+                                <option value="">Select Type</option>
+                                <option value="GST">GST</option>
+                                <option value="Income Tax">Income Tax</option>
+                                <option value="MCA (V2)">MCA (V2)</option>
+                                <option value="MCA (V3)">MCA (V3)</option>
+                                <option value="PF">PF</option>
+                                <option value="ESI">ESI</option>
+                                <option value="P-Tax">P-Tax</option>
+                                <option value="Trademarks">Trademarks</option>
+                                <option value="Other">Other</option>
+                              </select>
+                            </td>
+                            <td className="px-4 py-3">
+                              <input
+                                type="text"
+                                value={website.url || ""}
+                                onChange={(e) =>
+                                  updateNewWebsite(website.id, "url", e.target.value)
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                placeholder="URL"
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <input
+                                type="text"
+                                value={website.login || ""}
+                                onChange={(e) =>
+                                  updateNewWebsite(website.id, "login", e.target.value)
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                placeholder="Login"
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="relative">
+                                <input
+                                  type={
+                                    website.showPassword ? "text" : "password"
+                                  }
+                                  value={website.password || ""}
+                                  onChange={(e) =>
+                                    updateNewWebsite(website.id, "password", e.target.value)
+                                  }
+                                  className="w-full px-2 py-1 pr-8 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  placeholder="Password"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => toggleNewPasswordVisibility(website.id)}
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                >
+                                  {website.showPassword ? (
+                                    <FiEyeOff className="w-4 h-4" />
+                                  ) : (
+                                    <FiEye className="w-4 h-4" />
+                                  )}
+                                </button>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <input
+                                type="text"
+                                value={website.remarks || ""}
+                                onChange={(e) =>
+                                  updateNewWebsite(website.id, "remarks", e.target.value)
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                placeholder="Remarks"
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <button
+                                onClick={() => removeNewWebsite(website.id)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <FiTrash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
 
               <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
                 <button
@@ -1028,6 +1599,791 @@ function AdminOrganizations() {
               </div>
             </div>
 
+            {/* PAN File Upload */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  PAN File
+                </label>
+                {editingOrg ? (
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="text"
+                      readOnly
+                      value={
+                        editingOrg.panFile
+                          ? "File uploaded"
+                          : "No file chosen"
+                      }
+                      className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500"
+                    />
+                    <label className="cursor-pointer flex-shrink-0">
+                      <input
+                        type="file"
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            try {
+                              // Validate file size (max 5MB)
+                              if (file.size > 5 * 1024 * 1024) {
+                                alert("File size must be less than 5MB");
+                                e.target.value = "";
+                                return;
+                              }
+
+                              // Upload directly to S3
+                              const folder = `user-profiles/${selectedOrgUserId}/organizations/org-${editingOrg.id || "new"}`;
+                              const { s3Url } = await uploadFileDirect(
+                                file,
+                                folder,
+                                "pan-file"
+                              );
+
+                              // Store S3 URL
+                              updateOrganizationField("panFile", s3Url);
+                            } catch (error) {
+                              console.error("Error uploading PAN file:", error);
+                              alert(
+                                "Failed to upload file. Please try again."
+                              );
+                              e.target.value = "";
+                            }
+                          }
+                        }}
+                        className="hidden"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                      />
+                      <span className="px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm whitespace-nowrap">
+                        {editingOrg.panFile ? "Change" : "Upload"}
+                      </span>
+                    </label>
+                  </div>
+                ) : (
+                  <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                    {selectedOrg.panFile ? (
+                      <button
+                        onClick={() => handleViewFile(selectedOrg.panFile)}
+                        className="text-blue-600 hover:underline"
+                      >
+                        View File
+                      </button>
+                    ) : (
+                      "Not uploaded"
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Additional Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category
+                </label>
+                {editingOrg ? (
+                  <select
+                    value={editingOrg.category}
+                    onChange={(e) =>
+                      updateOrganizationField("category", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                  >
+                    <option value="">Select Category</option>
+                    <option value="Private Limited Company">
+                      Private Limited Company
+                    </option>
+                    <option value="Partnership Firm">Partnership Firm</option>
+                    <option value="One Person Company">
+                      One Person Company
+                    </option>
+                    <option value="Limited Liability Partnership">
+                      Limited Liability Partnership
+                    </option>
+                    <option value="Individual">Individual</option>
+                  </select>
+                ) : (
+                  <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                    {selectedOrg.category || "-"}
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  TAN
+                </label>
+                {editingOrg ? (
+                  <input
+                    type="text"
+                    value={editingOrg.tan}
+                    onChange={(e) =>
+                      updateOrganizationField("tan", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                  />
+                ) : (
+                  <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                    {selectedOrg.tan || "-"}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  CIN
+                </label>
+                {editingOrg ? (
+                  <input
+                    type="text"
+                    value={editingOrg.cin}
+                    onChange={(e) =>
+                      updateOrganizationField("cin", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                  />
+                ) : (
+                  <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                    {selectedOrg.cin || "-"}
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Registered Address
+                </label>
+                {editingOrg ? (
+                  <textarea
+                    value={editingOrg.registeredAddress}
+                    onChange={(e) =>
+                      updateOrganizationField("registeredAddress", e.target.value)
+                    }
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                  />
+                ) : (
+                  <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                    {selectedOrg.registeredAddress || "-"}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Directors / Partners Section */}
+            <div className="border-t border-gray-200 pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Directors / Partners
+                </h3>
+                {editingOrg && (
+                  <button
+                    onClick={addDirectorPartner}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
+                  >
+                    <FiPlus className="w-4 h-4" /> Add Director/Partner
+                  </button>
+                )}
+              </div>
+
+              {(!selectedOrg.directorsPartners ||
+                selectedOrg.directorsPartners.length === 0) &&
+                (!editingOrg ||
+                  !editingOrg.directorsPartners ||
+                  editingOrg.directorsPartners.length === 0) ? (
+                <div className="text-center py-8 text-gray-500">
+                  No Directors / Partners added yet
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-[#00486D] text-white">
+                      <tr>
+                        <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
+                          Name
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
+                          DIN No.
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
+                          Contact
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
+                          Email
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
+                          Date of Addition
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
+                          Status
+                        </th>
+                        {editingOrg && (
+                          <th className="px-4 py-3 text-left font-medium text-xs rounded-tr-lg">
+                            Action
+                          </th>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-100">
+                      {(editingOrg?.directorsPartners ||
+                        selectedOrg.directorsPartners ||
+                        []).map((dp) => (
+                        <tr key={dp.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3">
+                            {editingOrg ? (
+                              <input
+                                type="text"
+                                value={dp.name || ""}
+                                onChange={(e) =>
+                                  updateDirectorPartner(
+                                    dp.id,
+                                    "name",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                placeholder="Name"
+                              />
+                            ) : (
+                              <span className="text-gray-900">{dp.name || "-"}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            {editingOrg ? (
+                              <input
+                                type="text"
+                                value={dp.dinNumber || ""}
+                                onChange={(e) =>
+                                  updateDirectorPartner(
+                                    dp.id,
+                                    "dinNumber",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                placeholder="DIN Number"
+                              />
+                            ) : (
+                              <span className="text-gray-900">{dp.dinNumber || "-"}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            {editingOrg ? (
+                              <input
+                                type="text"
+                                value={dp.contact || ""}
+                                onChange={(e) =>
+                                  updateDirectorPartner(
+                                    dp.id,
+                                    "contact",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                placeholder="Contact"
+                              />
+                            ) : (
+                              <span className="text-gray-900">{dp.contact || "-"}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            {editingOrg ? (
+                              <input
+                                type="email"
+                                value={dp.email || ""}
+                                onChange={(e) =>
+                                  updateDirectorPartner(
+                                    dp.id,
+                                    "email",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                placeholder="Email"
+                              />
+                            ) : (
+                              <span className="text-gray-900">{dp.email || "-"}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            {editingOrg ? (
+                              <input
+                                type="date"
+                                value={dp.dateOfAddition || ""}
+                                onChange={(e) =>
+                                  updateDirectorPartner(
+                                    dp.id,
+                                    "dateOfAddition",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                              />
+                            ) : (
+                              <span className="text-gray-900">
+                                {dp.dateOfAddition
+                                  ? formatDate(dp.dateOfAddition)
+                                  : "-"}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            {editingOrg ? (
+                              <select
+                                value={dp.status || "Active"}
+                                onChange={(e) =>
+                                  updateDirectorPartner(
+                                    dp.id,
+                                    "status",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                              >
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                              </select>
+                            ) : (
+                              <span className="text-gray-900">{dp.status || "Active"}</span>
+                            )}
+                          </td>
+                          {editingOrg && (
+                            <td className="px-4 py-3">
+                              <button
+                                onClick={() => removeDirectorPartner(dp.id)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <FiTrash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Digital Signatures Section */}
+            <div className="border-t border-gray-200 pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Digital Signatures
+                </h3>
+                {editingOrg && (
+                  <button
+                    onClick={addDigitalSignature}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
+                  >
+                    <FiPlus className="w-4 h-4" /> Add Digital Signature
+                  </button>
+                )}
+              </div>
+
+              {(!selectedOrg.digitalSignatures ||
+                selectedOrg.digitalSignatures.length === 0) &&
+                (!editingOrg ||
+                  !editingOrg.digitalSignatures ||
+                  editingOrg.digitalSignatures.length === 0) ? (
+                <div className="text-center py-8 text-gray-500">
+                  No Digital Signatures added yet
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-[#00486D] text-white">
+                      <tr>
+                        <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
+                          Name
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
+                          DSC Number
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
+                          Expiry Date
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
+                          Status
+                        </th>
+                        {editingOrg && (
+                          <th className="px-4 py-3 text-left font-medium text-xs rounded-tr-lg">
+                            Action
+                          </th>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-100">
+                      {(editingOrg?.digitalSignatures ||
+                        selectedOrg.digitalSignatures ||
+                        []).map((ds) => (
+                        <tr key={ds.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3">
+                            {editingOrg ? (
+                              <input
+                                type="text"
+                                value={ds.name || ""}
+                                onChange={(e) =>
+                                  updateDigitalSignature(
+                                    ds.id,
+                                    "name",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                placeholder="Name"
+                              />
+                            ) : (
+                              <span className="text-gray-900">{ds.name || "-"}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            {editingOrg ? (
+                              <input
+                                type="text"
+                                value={ds.dscNumber || ""}
+                                onChange={(e) =>
+                                  updateDigitalSignature(
+                                    ds.id,
+                                    "dscNumber",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                placeholder="DSC Number"
+                              />
+                            ) : (
+                              <span className="text-gray-900">{ds.dscNumber || "-"}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            {editingOrg ? (
+                              <input
+                                type="date"
+                                value={ds.expiryDate || ""}
+                                onChange={(e) =>
+                                  updateDigitalSignature(
+                                    ds.id,
+                                    "expiryDate",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                              />
+                            ) : (
+                              <span className="text-gray-900">
+                                {ds.expiryDate ? formatDate(ds.expiryDate) : "-"}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            {editingOrg ? (
+                              <select
+                                value={ds.status || "Active"}
+                                onChange={(e) =>
+                                  updateDigitalSignature(
+                                    ds.id,
+                                    "status",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                              >
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                              </select>
+                            ) : (
+                              <span className="text-gray-900">{ds.status || "Active"}</span>
+                            )}
+                          </td>
+                          {editingOrg && (
+                            <td className="px-4 py-3">
+                              <button
+                                onClick={() => removeDigitalSignature(ds.id)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <FiTrash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Credentials Section */}
+            <div className="border-t border-gray-200 pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Credentials
+                </h3>
+                {editingOrg && (
+                  <button
+                    onClick={() => {
+                      const newWebsite = {
+                        id: Date.now(),
+                        type: "",
+                        url: "",
+                        login: "",
+                        password: "",
+                        remarks: "",
+                        showPassword: false,
+                      };
+                      setEditingOrg({
+                        ...editingOrg,
+                        websites: [...(editingOrg.websites || []), newWebsite],
+                      });
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
+                  >
+                    <FiPlus className="w-4 h-4" /> Add Credential
+                  </button>
+                )}
+              </div>
+
+              {(!selectedOrg.websites ||
+                selectedOrg.websites.length === 0) &&
+                (!editingOrg ||
+                  !editingOrg.websites ||
+                  editingOrg.websites.length === 0) ? (
+                <div className="text-center py-8 text-gray-500">
+                  No Credentials added yet
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-[#00486D] text-white">
+                      <tr>
+                        <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
+                          Type
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
+                          URL
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
+                          Login
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
+                          Password
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
+                          Remarks
+                        </th>
+                        {editingOrg && (
+                          <th className="px-4 py-3 text-left font-medium text-xs rounded-tr-lg">
+                            Action
+                          </th>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-100">
+                      {(editingOrg?.websites || selectedOrg.websites || []).map(
+                        (website) => (
+                          <tr key={website.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3">
+                              {editingOrg ? (
+                                <select
+                                  value={website.type || ""}
+                                  onChange={(e) => {
+                                    const updatedWebsites = (
+                                      editingOrg.websites || []
+                                    ).map((w) =>
+                                      w.id === website.id
+                                        ? { ...w, type: e.target.value }
+                                        : w
+                                    );
+                                    setEditingOrg({
+                                      ...editingOrg,
+                                      websites: updatedWebsites,
+                                    });
+                                  }}
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                >
+                                  <option value="">Select Type</option>
+                                  <option value="GST">GST</option>
+                                  <option value="Income Tax">Income Tax</option>
+                                  <option value="MCA (V2)">MCA (V2)</option>
+                                  <option value="MCA (V3)">MCA (V3)</option>
+                                  <option value="PF">PF</option>
+                                  <option value="ESI">ESI</option>
+                                  <option value="P-Tax">P-Tax</option>
+                                  <option value="Trademarks">Trademarks</option>
+                                  <option value="Other">Other</option>
+                                </select>
+                              ) : (
+                                <span className="text-gray-900">
+                                  {website.type || "-"}
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3">
+                              {editingOrg ? (
+                                <input
+                                  type="text"
+                                  value={website.url || ""}
+                                  onChange={(e) => {
+                                    const updatedWebsites = (
+                                      editingOrg.websites || []
+                                    ).map((w) =>
+                                      w.id === website.id
+                                        ? { ...w, url: e.target.value }
+                                        : w
+                                    );
+                                    setEditingOrg({
+                                      ...editingOrg,
+                                      websites: updatedWebsites,
+                                    });
+                                  }}
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  placeholder="URL"
+                                />
+                              ) : (
+                                <span className="text-gray-900">
+                                  {website.url || "-"}
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3">
+                              {editingOrg ? (
+                                <input
+                                  type="text"
+                                  value={website.login || ""}
+                                  onChange={(e) => {
+                                    const updatedWebsites = (
+                                      editingOrg.websites || []
+                                    ).map((w) =>
+                                      w.id === website.id
+                                        ? { ...w, login: e.target.value }
+                                        : w
+                                    );
+                                    setEditingOrg({
+                                      ...editingOrg,
+                                      websites: updatedWebsites,
+                                    });
+                                  }}
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  placeholder="Login"
+                                />
+                              ) : (
+                                <span className="text-gray-900">
+                                  {website.login || "-"}
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3">
+                              {editingOrg ? (
+                                <div className="relative">
+                                  <input
+                                    type={
+                                      website.showPassword ? "text" : "password"
+                                    }
+                                    value={website.password || ""}
+                                    onChange={(e) => {
+                                      const updatedWebsites = (
+                                        editingOrg.websites || []
+                                      ).map((w) =>
+                                        w.id === website.id
+                                          ? { ...w, password: e.target.value }
+                                          : w
+                                      );
+                                      setEditingOrg({
+                                        ...editingOrg,
+                                        websites: updatedWebsites,
+                                      });
+                                    }}
+                                    className="w-full px-2 py-1 pr-8 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                    placeholder="Password"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const updatedWebsites = (
+                                        editingOrg.websites || []
+                                      ).map((w) =>
+                                        w.id === website.id
+                                          ? {
+                                              ...w,
+                                              showPassword: !w.showPassword,
+                                            }
+                                          : w
+                                      );
+                                      setEditingOrg({
+                                        ...editingOrg,
+                                        websites: updatedWebsites,
+                                      });
+                                    }}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                  >
+                                    {website.showPassword ? (
+                                      <FiEyeOff className="w-4 h-4" />
+                                    ) : (
+                                      <FiEye className="w-4 h-4" />
+                                    )}
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className="text-gray-900">
+                                  {website.password ? "••••••••" : "-"}
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3">
+                              {editingOrg ? (
+                                <input
+                                  type="text"
+                                  value={website.remarks || ""}
+                                  onChange={(e) => {
+                                    const updatedWebsites = (
+                                      editingOrg.websites || []
+                                    ).map((w) =>
+                                      w.id === website.id
+                                        ? { ...w, remarks: e.target.value }
+                                        : w
+                                    );
+                                    setEditingOrg({
+                                      ...editingOrg,
+                                      websites: updatedWebsites,
+                                    });
+                                  }}
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  placeholder="Remarks"
+                                />
+                              ) : (
+                                <span className="text-gray-900">
+                                  {website.remarks || "-"}
+                                </span>
+                              )}
+                            </td>
+                            {editingOrg && (
+                              <td className="px-4 py-3">
+                                <button
+                                  onClick={() => {
+                                    const updatedWebsites = (
+                                      editingOrg.websites || []
+                                    ).filter((w) => w.id !== website.id);
+                                    setEditingOrg({
+                                      ...editingOrg,
+                                      websites: updatedWebsites,
+                                    });
+                                  }}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <FiTrash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            )}
+                          </tr>
+                        )
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
             {/* Edit Actions */}
             {editingOrg && (
               <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
@@ -1129,16 +2485,13 @@ function AdminOrganizations() {
                 <thead>
                   <tr className="text-white">
                     <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D] rounded-l-xl">
-                      Client Name
+                      Organisation Name
                     </th>
                     <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
-                      Logo
+                      Contact Person
                     </th>
                     <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
-                      Name
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
-                      GST Number
+                      Category
                     </th>
                     <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D] rounded-r-xl">
                       Action
@@ -1146,12 +2499,31 @@ function AdminOrganizations() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {organizations.length > 0 ? (
+                  {filteredOrganizations.length > 0 ? (
                     currentOrganizations.map((org) => (
                       <tr
                         key={org.id}
                         className="hover:bg-blue-50/50 transition-colors"
                       >
+                        <td className="px-6 py-4">
+                          <button
+                            onClick={() => handleViewAll(org)}
+                            className="text-left hover:underline"
+                          >
+                            <div className="text-sm font-medium text-[#01334C] hover:text-[#00486D]">
+                              {org.legalName !== "-"
+                                ? org.legalName
+                                : org.tradeName}
+                            </div>
+                            {org.tradeName !== "-" &&
+                              org.legalName !== "-" &&
+                              org.tradeName !== org.legalName && (
+                                <div className="text-xs text-gray-500">
+                                  {org.tradeName}
+                                </div>
+                              )}
+                          </button>
+                        </td>
                         <td className="px-6 py-4">
                           <div className="text-sm font-medium text-gray-900">
                             {org.clientName}
@@ -1161,30 +2533,9 @@ function AdminOrganizations() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="w-10 h-10 rounded-lg bg-[#01334C] flex items-center justify-center p-1">
-                            <img
-                              src={logo}
-                              alt="Logo"
-                              className="w-full h-full object-contain brightness-0 invert"
-                            />
+                          <div className="text-sm text-gray-900">
+                            {org.category && org.category !== "-" && org.category !== "N/A" ? org.category : "-"}
                           </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {org.legalName !== "-"
-                              ? org.legalName
-                              : org.tradeName}
-                          </div>
-                          {org.tradeName !== "-" &&
-                            org.legalName !== "-" &&
-                            org.tradeName !== org.legalName && (
-                              <div className="text-xs text-gray-500">
-                                {org.tradeName}
-                              </div>
-                            )}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-600 font-mono">
-                          {org.gstin !== "-" ? org.gstin : "-"}
                         </td>
                         <td className="px-6 py-4">
                           <button
@@ -1199,7 +2550,7 @@ function AdminOrganizations() {
                   ) : (
                     <tr>
                       <td
-                        colSpan="5"
+                        colSpan="4"
                         className="px-6 py-12 text-center text-gray-500"
                       >
                         <FiAlertCircle className="w-12 h-12 mx-auto text-gray-300 mb-3" />
@@ -1212,11 +2563,11 @@ function AdminOrganizations() {
             </div>
           </div>
 
-          {organizations.length > itemsPerPage && (
+          {filteredOrganizations.length > itemsPerPage && (
             <div className="mt-4 flex items-center justify-between">
               <p className="text-sm text-gray-500">
                 Showing {String(indexOfFirstItem + 1).padStart(2, "0")} of{" "}
-                {organizations.length}
+                {filteredOrganizations.length}
               </p>
               <div className="flex gap-2">
                 <button

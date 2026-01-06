@@ -1,7 +1,6 @@
 import React from "react";
 import { FiSearch, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { AiOutlinePlus } from "react-icons/ai";
-import logo from "../../../../assets/logo.png";
 
 const OrganizationList = ({
   searchTerm,
@@ -65,10 +64,7 @@ const OrganizationList = ({
             <thead>
               <tr className="text-white">
                 <th className="px-6 py-3 text-left text-sm font-medium bg-[#00486D] rounded-l-xl text-white">
-                  Logo
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium bg-[#00486D] text-white">
-                  Name
+                  Organisation Name
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-medium bg-[#00486D] text-white">
                   GST Number
@@ -85,15 +81,6 @@ const OrganizationList = ({
                     key={org.id}
                     className="hover:bg-gray-50 transition-colors"
                   >
-                    <td className="px-6 py-4">
-                      <div className="w-10 h-10 flex items-center justify-center bg-gray-50 rounded">
-                        <img
-                          src={logo}
-                          alt="brand"
-                          className="w-8 h-8 object-contain"
-                        />
-                      </div>
-                    </td>
                     <td className="px-6 py-4 text-gray-700 font-medium">
                       {org.legalName && org.legalName !== "-"
                         ? org.legalName
@@ -121,7 +108,7 @@ const OrganizationList = ({
               ) : (
                 <tr>
                   <td
-                    colSpan="4"
+                    colSpan="3"
                     className="px-6 py-12 text-center text-gray-500"
                   >
                     No organizations found.

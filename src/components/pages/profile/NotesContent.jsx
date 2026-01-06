@@ -5,10 +5,6 @@ import { BsCalendar3 } from "react-icons/bs";
 const NotesContent = ({
   adminNotesList,
   userNotesList,
-  expandedAdminNoteId,
-  setExpandedAdminNoteId,
-  expandedUserNoteId,
-  setExpandedUserNoteId,
   isAddingUserNote,
   setIsAddingUserNote,
   currentUserNote,

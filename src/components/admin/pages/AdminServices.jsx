@@ -34,6 +34,12 @@ function AdminServices() {
 
   const [showPaymentMethodDialog, setShowPaymentMethodDialog] = useState(false);
   const [pendingStatusUpdate, setPendingStatusUpdate] = useState(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
+  const [paymentFormData, setPaymentFormData] = useState({
+    dateOfPayment: "",
+    person: "",
+    remark: "",
+  });
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -493,26 +499,49 @@ function AdminServices() {
     }
   };
 
-  const handlePaymentMethodSelection = async (paymentMethod) => {
-    if (!pendingStatusUpdate) return;
-    setShowPaymentMethodDialog(false);
+  const handlePaymentMethodSelection = (paymentMethod) => {
+    setSelectedPaymentMethod(paymentMethod);
+    // Don't close the dialog, show the form instead
+  };
+
+  const handlePaymentFormSubmit = async () => {
+    if (!pendingStatusUpdate || !selectedPaymentMethod) return;
+    
+    // Validate required fields
+    if (!paymentFormData.dateOfPayment || !paymentFormData.person) {
+      alert("Please fill in Date of Payment and Person fields");
+      return;
+    }
+
     const { svc, newStatus } = pendingStatusUpdate;
     try {
-      await performStatusUpdate(svc, newStatus, paymentMethod);
+      await performStatusUpdate(svc, newStatus, selectedPaymentMethod, paymentFormData);
+      // Reset form and close dialog
+      setShowPaymentMethodDialog(false);
+      setPendingStatusUpdate(null);
+      setSelectedPaymentMethod(null);
+      setPaymentFormData({
+        dateOfPayment: "",
+        person: "",
+        remark: "",
+      });
     } catch (error) {
       console.error("Error updating status with payment method:", error);
       alert("Failed to update status: " + (error.message || "Unknown error"));
-    } finally {
-      setPendingStatusUpdate(null);
     }
   };
 
-  const performStatusUpdate = async (svc, newStatus, paymentMethod) => {
+  const performStatusUpdate = async (svc, newStatus, paymentMethod, paymentDetails = null) => {
     try {
       const payload = {
         ticketId: svc.ticket_id,
         status: newStatus,
         ...(paymentMethod && { paymentMethod }),
+        ...(paymentDetails && {
+          dateOfPayment: paymentDetails.dateOfPayment,
+          person: paymentDetails.person,
+          remark: paymentDetails.remark,
+        }),
       };
       const response = await apiClient.post(
         "/admin/update-service-status",
@@ -1092,16 +1121,24 @@ function AdminServices() {
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Payment Method Required
+                  {selectedPaymentMethod ? "Payment Details" : "Payment Method Required"}
                 </h3>
                 <p className="text-sm text-gray-500 mt-1">
-                  Please select how the payment was received.
+                  {selectedPaymentMethod
+                    ? "Please fill in the payment details below."
+                    : "Please select how the payment was received."}
                 </p>
               </div>
               <button
                 onClick={() => {
                   setShowPaymentMethodDialog(false);
                   setPendingStatusUpdate(null);
+                  setSelectedPaymentMethod(null);
+                  setPaymentFormData({
+                    dateOfPayment: "",
+                    person: "",
+                    remark: "",
+                  });
                 }}
                 className="p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
               >
@@ -1109,30 +1146,132 @@ function AdminServices() {
               </button>
             </div>
 
-            <div className="space-y-3">
-              <button
-                onClick={() => handlePaymentMethodSelection("cash")}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-50 text-green-700 hover:bg-green-100 rounded-xl font-medium transition-colors"
-              >
-                Paid by Cash
-              </button>
-              <button
-                onClick={() => handlePaymentMethodSelection("other")}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl font-medium transition-colors"
-              >
-                Paid by Other Source
-              </button>
-            </div>
+            {!selectedPaymentMethod ? (
+              <>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => handlePaymentMethodSelection("cash")}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-50 text-green-700 hover:bg-green-100 rounded-xl font-medium transition-colors"
+                  >
+                    Paid by Cash
+                  </button>
+                  <button
+                    onClick={() => handlePaymentMethodSelection("other")}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl font-medium transition-colors"
+                  >
+                    Paid by Other Source
+                  </button>
+                </div>
 
-            <button
-              onClick={() => {
-                setShowPaymentMethodDialog(false);
-                setPendingStatusUpdate(null);
-              }}
-              className="mt-4 w-full px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors"
-            >
-              Cancel
-            </button>
+                <button
+                  onClick={() => {
+                    setShowPaymentMethodDialog(false);
+                    setPendingStatusUpdate(null);
+                  }}
+                  className="mt-4 w-full px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Payment Method
+                  </label>
+                  <div className="px-4 py-2 bg-gray-50 rounded-xl">
+                    <span className="text-sm font-medium text-gray-900">
+                      {selectedPaymentMethod === "cash" ? "Paid by Cash" : "Paid by Other Source"}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setSelectedPaymentMethod(null)}
+                    className="mt-2 text-xs text-blue-600 hover:text-blue-700"
+                  >
+                    Change payment method
+                  </button>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Date of Payment <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={paymentFormData.dateOfPayment}
+                    onChange={(e) =>
+                      setPaymentFormData({
+                        ...paymentFormData,
+                        dateOfPayment: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Person <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={paymentFormData.person}
+                    onChange={(e) =>
+                      setPaymentFormData({
+                        ...paymentFormData,
+                        person: e.target.value,
+                      })
+                    }
+                    placeholder="Enter person name"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Remark
+                  </label>
+                  <textarea
+                    value={paymentFormData.remark}
+                    onChange={(e) =>
+                      setPaymentFormData({
+                        ...paymentFormData,
+                        remark: e.target.value,
+                      })
+                    }
+                    placeholder="Enter any remarks (optional)"
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={handlePaymentFormSubmit}
+                    className="flex-1 px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] font-medium transition-colors"
+                  >
+                    Submit
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowPaymentMethodDialog(false);
+                      setPendingStatusUpdate(null);
+                      setSelectedPaymentMethod(null);
+                      setPaymentFormData({
+                        dateOfPayment: "",
+                        person: "",
+                        remark: "",
+                      });
+                    }}
+                    className="px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

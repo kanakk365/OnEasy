@@ -12,7 +12,6 @@ const OrganizationDetails = ({
   setSelectedOrg,
   handleEditOrganization,
   handleSaveOrganization,
-  handleCancelEdit,
   updateOrganizationField,
   formatDate,
   handleViewFile,

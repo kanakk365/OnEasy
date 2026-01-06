@@ -199,9 +199,9 @@ function AdminSidebar() {
 
         {/* Navigation */}
         <nav
-          className={`flex-1 ${
+          className={`flex-1 min-h-0 ${
             isCollapsed ? "px-2" : "px-4"
-          } pt-3 space-y-1.5 transition-all duration-300 overflow-y-auto`}
+          } pt-2 pb-2 space-y-1 transition-all duration-300 overflow-hidden`}
         >
           {menuItems.map((item, index) => (
             <Link
@@ -209,7 +209,7 @@ function AdminSidebar() {
               key={index}
               className={`flex items-center ${
                 isCollapsed ? "justify-center px-2" : "space-x-3 px-3"
-              } py-2 rounded-lg transition-all duration-200 ${
+              } py-1.5 rounded-lg transition-all duration-200 ${
                 isActive(item)
                   ? "bg-[#26496a] text-white"
                   : "text-gray-300 hover:bg-[#26496a]/50 hover:text-white"
@@ -240,10 +240,10 @@ function AdminSidebar() {
         </nav>
 
         {/* Profile Section */}
-        <div className="mt-auto border-t border-[#26496a]/30">
+        <div className="mt-auto border-t border-[#26496a]/30 flex-shrink-0">
           <div
             className={`${
-              isCollapsed ? "p-2" : "p-4"
+              isCollapsed ? "p-2" : "p-3"
             } transition-all duration-300`}
           >
             <div
@@ -253,7 +253,7 @@ function AdminSidebar() {
             >
               <div
                 className={`flex items-center ${
-                  isCollapsed ? "justify-center" : "space-x-3"
+                  isCollapsed ? "justify-center" : "space-x-2"
                 } cursor-pointer p-2 hover:bg-[#26496a]/50 rounded-lg transition-all duration-200`}
               >
                 {userData?.profile_image ? (
@@ -261,14 +261,14 @@ function AdminSidebar() {
                     src={userData.profile_image}
                     alt="Profile"
                     className={`${
-                      isCollapsed ? "w-8 h-8" : "w-6 h-6"
-                    } rounded-full object-cover transition-all duration-300`}
+                      isCollapsed ? "w-8 h-8" : "w-8 h-8"
+                    } rounded-full object-cover transition-all duration-300 flex-shrink-0`}
                   />
                 ) : (
                   <div
                     className={`${
-                      isCollapsed ? "w-8 h-8" : "w-6 h-6"
-                    } bg-[#26496a] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
+                      isCollapsed ? "w-8 h-8" : "w-8 h-8"
+                    } bg-[#26496a] rounded-full flex items-center justify-center text-white text-sm font-medium transition-all duration-300 flex-shrink-0`}
                   >
                     {userData?.name
                       ? userData.name.charAt(0).toUpperCase()
@@ -278,21 +278,17 @@ function AdminSidebar() {
                 {!isCollapsed && (
                   <>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[11px] text-gray-400">
-                        Welcome 👋
-                      </div>
-                      <div className="text-[13px] text-white font-medium truncate">
+                      <div className="text-[13px] text-white font-medium break-words leading-tight">
                         {userData?.name || "Admin"}
                       </div>
                     </div>
-                    <span className="text-base text-gray-400 ml-auto transform transition-transform duration-200 group-hover:rotate-90 flex-shrink-0">
+                    <span className="text-base text-gray-400 ml-1 transform transition-transform duration-200 group-hover:rotate-90 flex-shrink-0">
                       ›
                     </span>
                   </>
                 )}
                 {isCollapsed && (
                   <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
-                    <div className="text-xs text-gray-300 mb-1">Welcome 👋</div>
                     <div className="font-medium">
                       {userData?.name || "Admin"}
                     </div>

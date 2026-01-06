@@ -71,7 +71,7 @@ function Settings() {
     type: "",
   });
   const [isUserAdmin, setIsUserAdmin] = useState(false);
-  const [notes, setNotes] = useState("");
+  const [, setNotes] = useState("");
   const [adminNotesList, setAdminNotesList] = useState([]);
   const [userNotesList, setUserNotesList] = useState([]);
   const [expandedAdminNoteId, setExpandedAdminNoteId] = useState(null);
@@ -83,7 +83,7 @@ function Settings() {
     attachments: [],
   });
   const [userId, setUserId] = useState("");
-  const [customClientId, setCustomClientId] = useState("");
+  const [, setCustomClientId] = useState("");
   const [clientStatus, setClientStatus] = useState("");
 
   // Load data on mount

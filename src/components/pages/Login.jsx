@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
 import logo from "../../assets/logo.png";
-import bgImage from "../../assets/bg.png";
 import ChangePasswordModal from "../common/ChangePasswordModal";
 
 function Login() {
@@ -12,7 +11,7 @@ function Login() {
   const [isSignupMode, setIsSignupMode] = useState(false); // Toggle between login and signup
   const [loginMethod, setLoginMethod] = useState("phone"); // 'phone' or 'email'
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [countryCode, setCountryCode] = useState("+91");
+  const [countryCode] = useState("+91");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

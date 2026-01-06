@@ -11,8 +11,6 @@ const OrganisationDetailsContent = ({
   setSelectedOrgId,
   isAddingNewOrg,
   setIsAddingNewOrg,
-  expandedOrgId,
-  setExpandedOrgId,
   userId,
   saving,
   addOrganization,
@@ -106,7 +104,6 @@ const OrganisationDetailsContent = ({
     fileUrl,
     onFileChange,
     onViewFile,
-    onRemoveFile,
     id,
     placeholder,
   }) => (
@@ -258,7 +255,7 @@ const OrganisationDetailsContent = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {savedOrganizations.map((org, idx) => (
+                  {savedOrganizations.map((org) => (
                     <tr
                       key={org.id}
                       className="hover:bg-gray-50 cursor-pointer transition-colors"

@@ -16,7 +16,7 @@ const ComplianceChat = () => {
 
   // Simple state machine for the chat flow
   const [currentStep, setCurrentStep] = useState("ask_org_name");
-  const [formData, setFormData] = useState({});
+  const [, setFormData] = useState({});
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -48,7 +48,6 @@ const ComplianceChat = () => {
   const processResponse = (userInput) => {
     let nextStep = currentStep;
     let botResponses = [];
-    let nextOptions = null;
 
     switch (currentStep) {
       case "ask_org_name":

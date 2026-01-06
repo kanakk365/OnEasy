@@ -7,7 +7,6 @@ const DigitalSignaturesSection = ({
   addDigitalSignature,
   removeDigitalSignature,
   updateDigitalSignature,
-  formatDate,
 }) => {
   const data = editingOrg || selectedOrg;
   const digitalSignatures = data?.digitalSignatures || [];
@@ -79,7 +78,7 @@ const DigitalSignaturesSection = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {digitalSignatures.map((ds, index) => (
+                {digitalSignatures.map((ds) => (
                   <tr key={ds.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
                       {editingOrg ? (

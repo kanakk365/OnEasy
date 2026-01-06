@@ -274,21 +274,24 @@ function AdminClients() {
             <table className="w-full border-separate border-spacing-0">
               <thead>
                 <tr className="text-white">
-                  <th className="px-6 py-3 text-left text-sm font-medium bg-[#00486D] rounded-l-xl">
+                  <th className="px-3 py-3 text-left text-sm font-medium bg-[#00486D] rounded-l-xl">
                     Client Name
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium bg-[#00486D]">
+                  <th className="px-3 py-3 text-left text-sm font-medium bg-[#00486D]">
+                    Organisation Name
+                  </th>
+                  <th className="px-3 py-3 text-left text-sm font-medium bg-[#00486D]">
                     Email
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium bg-[#00486D]">
+                  <th className="px-3 py-3 text-left text-sm font-medium bg-[#00486D]">
                     Phone Number
                   </th>
                   {filter === "support-requests" && (
-                    <th className="px-6 py-3 text-left text-sm font-medium bg-[#00486D]">
+                    <th className="px-3 py-3 text-left text-sm font-medium bg-[#00486D]">
                       Support Request
                     </th>
                   )}
-                  <th className="px-6 py-3 text-center text-sm font-medium bg-[#00486D] rounded-r-xl">
+                  <th className="px-3 py-3 text-center text-sm font-medium bg-[#00486D] rounded-r-xl">
                     Actions
                   </th>
                 </tr>
@@ -302,10 +305,10 @@ function AdminClients() {
                     }
                     className="bg-white hover:bg-blue-50/50 cursor-pointer transition-colors"
                   >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
+                    <td className="px-3 py-4">
+                      <div className="flex items-center gap-2">
                         <div
-                          className="w-10 h-10 rounded-xl text-white flex items-center justify-center font-semibold text-sm"
+                          className="w-8 h-8 rounded-lg text-white flex items-center justify-center font-semibold text-xs flex-shrink-0"
                           style={{
                             background:
                               "linear-gradient(180deg, #022B51 0%, #015079 100%)",
@@ -315,19 +318,22 @@ function AdminClients() {
                             ? client.name.charAt(0).toUpperCase()
                             : "C"}
                         </div>
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-gray-900 text-sm truncate">
                           {client.name || "Unknown"}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-3 py-4 text-sm text-gray-900 truncate max-w-xs">
+                      {client.primary_organization_name || "-"}
+                    </td>
+                    <td className="px-3 py-4 text-sm text-gray-600 truncate max-w-xs">
                       {client.email || "-"}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-3 py-4 text-sm text-gray-600">
                       {client.phone || "-"}
                     </td>
                     {filter === "support-requests" && (
-                      <td className="px-6 py-4 text-sm text-gray-700">
+                      <td className="px-3 py-4 text-sm text-gray-700">
                         {client.support_requests &&
                         client.support_requests.length > 0 ? (
                           <div className="space-y-1">
@@ -351,7 +357,7 @@ function AdminClients() {
                         )}
                       </td>
                     )}
-                    <td className="px-6 py-4">
+                    <td className="px-3 py-4">
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={(e) => {
@@ -360,21 +366,21 @@ function AdminClients() {
                               `/admin/client-overview/${client.user_id}`
                             );
                           }}
-                          className="flex items-center gap-1.5 px-4 py-1.5 text-sm text-white rounded-lg hover:opacity-90 transition-opacity"
+                          className="p-2 text-white rounded-lg hover:opacity-90 transition-opacity"
                           style={{
                             background:
                               "linear-gradient(90deg, #00486D 0%, #023752 100%)",
                           }}
+                          title="View"
                         >
                           <FiEye className="w-4 h-4" />
-                          View
                         </button>
                         <button
                           onClick={(e) => handleDeleteClient(e, client)}
-                          className="flex items-center gap-1.5 px-4 py-1.5 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                          className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                          title="Delete"
                         >
                           <FiTrash2 className="w-4 h-4" />
-                          Delete
                         </button>
                       </div>
                     </td>

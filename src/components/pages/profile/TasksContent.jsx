@@ -1,26 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsCalendar3 } from "react-icons/bs";
 
 const TasksContent = ({
   adminTasksList,
   userTasksList,
-  expandedAdminTaskId,
-  setExpandedAdminTaskId,
-  expandedUserTaskId,
-  setExpandedUserTaskId,
-  isUserAdmin,
-  isAddingAdminTask,
-  setIsAddingAdminTask,
   isAddingUserTask,
   setIsAddingUserTask,
-  currentAdminTask,
-  setCurrentAdminTask,
   currentUserTask,
   setCurrentUserTask,
   saving,
-  addAdminTask,
-  addUserTask,
   handleSaveTasks,
 }) => {
   // Reusable Input Component
@@ -99,7 +88,7 @@ const TasksContent = ({
   );
 
   // Empty State Component
-  const EmptySectionState = ({ title, buttonText, onAdd, icon }) => (
+  const EmptySectionState = ({ title, buttonText, onAdd }) => (
     <div className="flex flex-col items-center justify-center text-center py-10">
       <div className="mb-4">
         <img

@@ -67,7 +67,7 @@ const CredentialsSection = ({
         <EmptyState />
       ) : (
         <div className="space-y-6">
-          {websites.map((website, index) => (
+          {websites.map((website) => (
             /* Using a Card layout for filled state as per image, or simplified form rows */
             <div
               key={website.id}

@@ -7,7 +7,6 @@ const DirectorsPartnersSection = ({
   addDirectorPartner,
   removeDirectorPartner,
   updateDirectorPartner,
-  formatDate,
 }) => {
   const data = editingOrg || selectedOrg;
   const directorsPartners = data?.directorsPartners || [];
@@ -85,7 +84,7 @@ const DirectorsPartnersSection = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {directorsPartners.map((dp, index) => (
+                {directorsPartners.map((dp) => (
                   <tr key={dp.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
                       {editingOrg ? (
