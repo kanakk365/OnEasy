@@ -1,6 +1,7 @@
-import React, { useRef } from "react";
-import { AiOutlinePlus, AiOutlineDownload } from "react-icons/ai";
+import React, { useRef, useState, useEffect } from "react";
+import { AiOutlinePlus, AiOutlineDownload, AiOutlineEye } from "react-icons/ai";
 import { BsCalendar3 } from "react-icons/bs";
+import apiClient from "../../../utils/api";
 
 const NotesContent = ({
   adminNotesList,
@@ -15,6 +16,121 @@ const NotesContent = ({
   handleSaveUserNote,
 }) => {
   const fileInputRef = useRef(null);
+  const [selectedAdminNote, setSelectedAdminNote] = useState(null);
+  const [viewingFile, setViewingFile] = useState(null);
+  const [imageError, setImageError] = useState(false);
+  const [fileLoading, setFileLoading] = useState(false);
+  const [fileViewerUrl, setFileViewerUrl] = useState(null);
+
+  // Fetch signed URL when viewing file changes
+  useEffect(() => {
+    const fetchSignedUrl = async () => {
+      if (!viewingFile) {
+        setFileViewerUrl(null);
+        return;
+      }
+
+      const fileUrl = viewingFile.url;
+      if (!fileUrl || typeof fileUrl !== "string") {
+        setFileViewerUrl(null);
+        return;
+      }
+
+      setFileLoading(true);
+      setImageError(false);
+
+      try {
+        let urlToUse = fileUrl;
+        
+        // Check if it's an S3 URL and get signed URL if needed
+        const isS3Url = fileUrl.includes(".s3.") || fileUrl.includes("amazonaws.com") || fileUrl.includes("s3://");
+        
+        if (isS3Url) {
+          // Get signed URL for S3 file
+          try {
+            const response = await apiClient.post("/admin/get-signed-url", { s3Url: fileUrl });
+            if (response.success && response.signedUrl) {
+              urlToUse = response.signedUrl;
+            }
+          } catch (error) {
+            console.warn("Failed to get signed URL, using direct URL:", error);
+          }
+        }
+        
+        // For PDFs, always try to fetch as blob to avoid CORS issues in iframe
+        // This works better than loading directly in iframe
+        if (getFileType(fileUrl) === "pdf") {
+          try {
+            const response = await fetch(urlToUse);
+            if (response.ok) {
+              const blob = await response.blob();
+              const blobUrl = URL.createObjectURL(blob);
+              setFileViewerUrl(blobUrl);
+            } else {
+              // If fetch fails, try direct URL as fallback
+              setFileViewerUrl(urlToUse);
+            }
+          } catch (error) {
+            console.warn("Failed to fetch PDF as blob, using direct URL:", error);
+            // For signed URLs that fail to fetch, try the signed URL directly in iframe
+            setFileViewerUrl(urlToUse);
+          }
+        } else {
+          // For non-PDF files, use signed URL if available, otherwise original URL
+          setFileViewerUrl(urlToUse);
+        }
+      } catch (error) {
+        console.error("Error preparing file URL:", error);
+        setFileViewerUrl(fileUrl); // Fallback to original URL
+      } finally {
+        setFileLoading(false);
+      }
+    };
+
+    fetchSignedUrl();
+  }, [viewingFile]);
+
+  // Cleanup blob URL on unmount or when file changes
+  useEffect(() => {
+    return () => {
+      if (fileViewerUrl && fileViewerUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(fileViewerUrl);
+      }
+    };
+  }, [fileViewerUrl]);
+
+  const handleOpenAdminAttachment = (file, e) => {
+    if (!file) return;
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    const fileUrl = (file && (file.url || file.data)) || "";
+
+    if (!fileUrl || typeof fileUrl !== "string") {
+      return;
+    }
+
+    // Set the file to view in the same page
+    setViewingFile({
+      url: fileUrl,
+      name: file.name || file.file_name || "Attachment",
+    });
+    setImageError(false); // Reset error state when opening a new file
+  };
+
+  const getFileType = (url) => {
+    if (!url) return "unknown";
+    const extension = url.split(".").pop()?.toLowerCase();
+    if (["jpg", "jpeg", "png", "gif", "webp"].includes(extension)) {
+      return "image";
+    }
+    if (extension === "pdf") {
+      return "pdf";
+    }
+    return "other";
+  };
 
   // Reusable Input Component
   const StyledInput = ({
@@ -146,14 +262,21 @@ const NotesContent = ({
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
                   {adminNotesList.map((note, idx) => (
-                    <tr key={idx}>
+                    <tr
+                      key={idx}
+                      className="cursor-pointer hover:bg-gray-50"
+                      onClick={() => setSelectedAdminNote(note)}
+                    >
                       <td className="p-3">
                         <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700">
                           {note.date || "-"}
                         </div>
                       </td>
-                      <td className="p-3">
-                        <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700 truncate">
+                      <td className="p-3 align-top">
+                        <div
+                          className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700 whitespace-pre-wrap break-words"
+                          title={note.description || "-"}
+                        >
                           {note.description || "-"}
                         </div>
                       </td>
@@ -311,6 +434,207 @@ const NotesContent = ({
           </button>
         </div>
       </div>
+
+      {/* Admin Note Details Modal */}
+      {selectedAdminNote && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h4 className="text-sm font-semibold text-gray-900">
+                Admin Note Details
+              </h4>
+              <button
+                type="button"
+                onClick={() => setSelectedAdminNote(null)}
+                className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+              >
+                ×
+              </button>
+            </div>
+            <div className="px-6 py-4 space-y-3 text-sm">
+              <div>
+                <div className="text-xs font-medium text-gray-500 mb-1">
+                  Date
+                </div>
+                <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800">
+                  {selectedAdminNote.date || "-"}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs font-medium text-gray-500 mb-1">
+                  Description
+                </div>
+                <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800 whitespace-pre-wrap break-words">
+                  {selectedAdminNote.description || "-"}
+                </div>
+              </div>
+
+              {selectedAdminNote.clientActionItems &&
+                selectedAdminNote.clientActionItems.length > 0 && (
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      Client Action Items
+                    </div>
+                    <ul className="list-disc list-inside text-gray-800 text-xs space-y-1">
+                      {selectedAdminNote.clientActionItems.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+              {selectedAdminNote.adminActionItems &&
+                selectedAdminNote.adminActionItems.length > 0 && (
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      Admin Action Items
+                    </div>
+                    <ul className="list-disc list-inside text-gray-800 text-xs space-y-1">
+                      {selectedAdminNote.adminActionItems.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              <div>
+                <div className="text-xs font-medium text-gray-500 mb-1">
+                  Files
+                </div>
+                <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800 space-y-1">
+                  {selectedAdminNote.attachments &&
+                  selectedAdminNote.attachments.length > 0 ? (
+                    selectedAdminNote.attachments.map((file, idx) => (
+                      <div
+                        key={idx}
+                        className="text-xs break-all flex items-center justify-between gap-2"
+                      >
+                        <span className="truncate">
+                          📎 {file.name || file.file_name || "Attachment"}
+                        </span>
+                        {file.url || file.data ? (
+                          <button
+                            type="button"
+                            onClick={(e) => handleOpenAdminAttachment(file, e)}
+                            className="flex items-center justify-center w-7 h-7 rounded-full bg-[#00486D] text-white hover:bg-[#01334C] flex-shrink-0"
+                            title="View file"
+                          >
+                            <AiOutlineEye className="w-4 h-4" />
+                          </button>
+                        ) : null}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-xs text-gray-500">No files</div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+            <div className="px-6 py-3 border-t border-gray-100 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setSelectedAdminNote(null)}
+                className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* File Viewer Modal */}
+      {viewingFile && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-xl max-w-6xl w-full mx-4 h-[90vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+              <h4 className="text-sm font-semibold text-gray-900 truncate flex-1 mr-4">
+                {viewingFile.name}
+              </h4>
+              <button
+                type="button"
+                onClick={() => setViewingFile(null)}
+                className="text-gray-400 hover:text-gray-600 text-lg leading-none flex-shrink-0"
+              >
+                ×
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden p-4">
+              {fileLoading ? (
+                <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded-lg">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading file...</p>
+                  </div>
+                </div>
+              ) : !fileViewerUrl ? (
+                <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded-lg">
+                  <div className="text-center text-gray-500 p-8">
+                    <p className="mb-2">Unable to load file</p>
+                    <a
+                      href={viewingFile.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      Open in new tab
+                    </a>
+                  </div>
+                </div>
+              ) : getFileType(viewingFile.url) === "image" ? (
+                <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded-lg overflow-auto">
+                  {imageError ? (
+                    <div className="text-center text-gray-500 p-8">
+                      <p className="mb-2">Unable to display image</p>
+                      <a
+                        href={fileViewerUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        Open in new tab
+                      </a>
+                    </div>
+                  ) : (
+                    <img
+                      src={fileViewerUrl}
+                      alt={viewingFile.name}
+                      className="max-w-full max-h-full object-contain"
+                      onError={() => setImageError(true)}
+                    />
+                  )}
+                </div>
+              ) : getFileType(viewingFile.url) === "pdf" ? (
+                <div className="w-full h-full bg-gray-50 rounded-lg overflow-hidden relative">
+                  <iframe
+                    src={fileViewerUrl}
+                    className="w-full h-full border-0"
+                    title={viewingFile.name}
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded-lg">
+                  <div className="text-center text-gray-500 p-8">
+                    <p className="mb-4">Preview not available for this file type</p>
+                    <a
+                      href={fileViewerUrl || viewingFile.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      Open in new tab
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

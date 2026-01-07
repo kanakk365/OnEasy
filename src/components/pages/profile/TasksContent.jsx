@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsCalendar3 } from "react-icons/bs";
 
@@ -110,6 +110,8 @@ const TasksContent = ({
     </div>
   );
 
+  const [selectedAdminTask, setSelectedAdminTask] = useState(null);
+
   return (
     <div className="px-6 pb-6 pt-6">
       <div className="space-y-6">
@@ -139,7 +141,11 @@ const TasksContent = ({
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
                   {adminTasksList.map((task, idx) => (
-                    <tr key={idx}>
+                    <tr
+                      key={idx}
+                      className="cursor-pointer hover:bg-gray-50"
+                      onClick={() => setSelectedAdminTask(task)}
+                    >
                       <td className="p-3">
                         <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700">
                           {task.date
@@ -147,8 +153,11 @@ const TasksContent = ({
                             : "-"}
                         </div>
                       </td>
-                      <td className="p-3">
-                        <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700 truncate">
+                      <td className="p-3 align-top">
+                        <div
+                          className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700 whitespace-pre-wrap break-words"
+                          title={task.title || "-"}
+                        >
                           {task.title || "-"}
                         </div>
                       </td>
@@ -157,8 +166,11 @@ const TasksContent = ({
                           {task.type || "-"}
                         </div>
                       </td>
-                      <td className="p-3">
-                        <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700 truncate">
+                      <td className="p-3 align-top">
+                        <div
+                          className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700 whitespace-pre-wrap break-words"
+                          title={task.description || "-"}
+                        >
                           {task.description || "-"}
                         </div>
                       </td>
@@ -340,6 +352,77 @@ const TasksContent = ({
           </button>
         </div>
       </div>
+
+      {/* Admin Task Details Modal */}
+      {selectedAdminTask && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h4 className="text-sm font-semibold text-gray-900">
+                Admin Task Details
+              </h4>
+              <button
+                type="button"
+                onClick={() => setSelectedAdminTask(null)}
+                className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+              >
+                ×
+              </button>
+            </div>
+            <div className="px-6 py-4 space-y-3 text-sm">
+              <div>
+                <div className="text-xs font-medium text-gray-500 mb-1">
+                  Date
+                </div>
+                <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800">
+                  {selectedAdminTask.date
+                    ? new Date(selectedAdminTask.date).toLocaleDateString(
+                        "en-IN"
+                      )
+                    : "-"}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs font-medium text-gray-500 mb-1">
+                  Title
+                </div>
+                <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800 whitespace-pre-wrap break-words">
+                  {selectedAdminTask.title || "-"}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs font-medium text-gray-500 mb-1">
+                  Type
+                </div>
+                <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800">
+                  {selectedAdminTask.type || "-"}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs font-medium text-gray-500 mb-1">
+                  Description
+                </div>
+                <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800 whitespace-pre-wrap break-words">
+                  {selectedAdminTask.description || "-"}
+                </div>
+              </div>
+            </div>
+            <div className="px-6 py-3 border-t border-gray-100 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setSelectedAdminTask(null)}
+                className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

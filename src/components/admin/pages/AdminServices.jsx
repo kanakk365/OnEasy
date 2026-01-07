@@ -23,6 +23,7 @@ import {
 function AdminServices() {
   const navigate = useNavigate();
   const [services, setServices] = useState([]);
+  const [allClients, setAllClients] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Filters
@@ -47,7 +48,27 @@ function AdminServices() {
 
   useEffect(() => {
     fetchServices();
+    fetchAllClients();
   }, []);
+
+  const fetchAllClients = async () => {
+    try {
+      const response = await apiClient.get("/admin/clients");
+      if (response.success && response.data) {
+        // Extract unique client names from all clients
+        const clientNames = Array.from(
+          new Set(
+            response.data
+              .map((client) => client.name || client.email || null)
+              .filter((name) => name !== null)
+          )
+        ).sort();
+        setAllClients(clientNames);
+      }
+    } catch (error) {
+      console.error("Error fetching all clients:", error);
+    }
+  };
 
   // Reset pagination when filters change
   useEffect(() => {
@@ -432,17 +453,23 @@ function AdminServices() {
     [getServiceName]
   );
 
-  const clientsList = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          services.map(
-            (s) => s.name || s.legal_name || s.client_name || s.email || "-"
-          )
+  const clientsList = useMemo(() => {
+    // Combine clients from allClients (all clients) and services (clients with services)
+    const clientsFromServices = Array.from(
+      new Set(
+        services.map(
+          (s) => s.name || s.legal_name || s.client_name || s.email || "-"
         )
-      ),
-    [services]
-  );
+      )
+    );
+    
+    // Merge both lists and remove duplicates
+    const allClientsList = Array.from(
+      new Set([...allClients, ...clientsFromServices])
+    ).filter((name) => name !== "-"); // Remove "-" placeholder
+    
+    return allClientsList.sort(); // Sort alphabetically
+  }, [services, allClients]);
 
   const servicesList = useMemo(() => {
     const hasOther = services.some((s) => getServiceLabel(s) === "Other");

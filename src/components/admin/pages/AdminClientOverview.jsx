@@ -33,7 +33,7 @@ function AdminClientOverview() {
   });
   const [adminNotesList, setAdminNotesList] = useState([]);
   const [userNotesList, setUserNotesList] = useState([]);
-  const [expandedAdminNoteId, setExpandedAdminNoteId] = useState(null);
+  const [selectedAdminNote, setSelectedAdminNote] = useState(null);
   const [expandedUserNoteId, setExpandedUserNoteId] = useState(null);
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [editingNoteIndex, setEditingNoteIndex] = useState(null);
@@ -44,6 +44,7 @@ function AdminClientOverview() {
     adminActionItems: [""],
     clientActionItems: [""],
   });
+  const [uploadingAttachments, setUploadingAttachments] = useState(false);
   // Tasks state
   const [adminTasksList, setAdminTasksList] = useState([]);
   const [userTasksList, setUserTasksList] = useState([]);
@@ -118,6 +119,8 @@ function AdminClientOverview() {
         "compliance",
         "subscriptions",
         "organizations",
+        "tasks",
+        "notes",
       ].includes(tabParam)
     ) {
       setActiveTab(tabParam);
@@ -794,28 +797,60 @@ function AdminClientOverview() {
     }
   };
 
-  const handleNoteFileUpload = (e) => {
+  const handleNoteFileUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCurrentNote((prev) => ({
-          ...prev,
-          attachments: [
-            ...prev.attachments,
-            {
+    setUploadingAttachments(true);
+
+    try {
+      // Upload all files directly to S3
+      const uploadPromises = files.map(async (file) => {
+        try {
+          const folder = `admin-notes/${userId}`;
+          const { s3Url } = await uploadFileDirect(
+            file,
+            folder,
+            `${Date.now()}-${file.name}`,
+            (progress) => {
+              // Progress tracking can be added here if needed
+              console.log(`Upload progress for ${file.name}: ${progress}%`);
+            }
+          );
+
+          return {
               name: file.name,
-              data: reader.result,
+            url: s3Url,
               type: file.type,
               size: file.size,
-            },
-          ],
+          };
+        } catch (error) {
+          console.error(`Error uploading ${file.name}:`, error);
+          alert(`Failed to upload ${file.name}. Please try again.`);
+          return null;
+        }
+      });
+
+      const uploadedFiles = await Promise.all(uploadPromises);
+      const successfulUploads = uploadedFiles.filter((file) => file !== null);
+
+      if (successfulUploads.length > 0) {
+        setCurrentNote((prev) => ({
+          ...prev,
+          attachments: [...prev.attachments, ...successfulUploads],
         }));
-      };
-      reader.readAsDataURL(file);
-    });
+      }
+
+      // Reset file input
+      if (e.target) {
+        e.target.value = "";
+      }
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      alert("Failed to upload files. Please try again.");
+    } finally {
+      setUploadingAttachments(false);
+    }
   };
 
   const removeNoteAttachment = (index) => {
@@ -1884,6 +1919,8 @@ function AdminClientOverview() {
             },
             { key: "compliance", label: "Compliance" },
             { key: "subscriptions", label: "Subscriptions" },
+            { key: "tasks", label: "Tasks" },
+            { key: "notes", label: "Notes" },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -5368,1133 +5405,6 @@ function AdminClientOverview() {
           </div>
 
           {/* Website Details section removed - Websites are now managed within each organization */}
-
-          {/* Tasks */}
-          <div className="bg-white rounded-xl border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012] overflow-hidden">
-            <button
-              onClick={() =>
-                setExpandedSection(expandedSection === "tasks" ? null : "tasks")
-              }
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-            >
-              <h3 className="text-lg font-semibold text-gray-900">Tasks</h3>
-              <svg
-                className={`w-5 h-5 transition-transform ${
-                  expandedSection === "tasks" ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-            {expandedSection === "tasks" && (
-              <div className="p-6 border-t border-gray-200 bg-gray-50">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Admin Tasks - Left Side */}
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-sm font-semibold text-gray-900">
-                        Admin Tasks (Editable)
-                      </h4>
-                      <button
-                        onClick={() => setIsAddingAdminTask(true)}
-                        className="flex items-center gap-1 px-2 py-1 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs"
-                      >
-                        <svg
-                          className="w-3 h-3"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 4v16m8-8H4"
-                          />
-                        </svg>
-                        Add
-                      </button>
-                    </div>
-
-                    {/* Add Admin Task Form */}
-                    {isAddingAdminTask && (
-                      <div className="mb-4 p-4 border border-gray-300 rounded-lg bg-white">
-                        <h4 className="text-sm font-semibold text-gray-900 mb-3">
-                          New Admin Task
-                        </h4>
-
-                        <div className="mb-3">
-                          <label className="block text-xs font-medium text-gray-700 mb-1">
-                            Date
-                          </label>
-                          <input
-                            type="date"
-                            value={currentAdminTask.date}
-                            onChange={(e) =>
-                              setCurrentAdminTask({
-                                ...currentAdminTask,
-                                date: e.target.value,
-                              })
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                          />
-                        </div>
-
-                        <div className="mb-3">
-                          <label className="block text-xs font-medium text-gray-700 mb-1">
-                            Title
-                          </label>
-                          <input
-                            type="text"
-                            value={currentAdminTask.title}
-                            onChange={(e) =>
-                              setCurrentAdminTask({
-                                ...currentAdminTask,
-                                title: e.target.value,
-                              })
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                            placeholder="Enter task title"
-                          />
-                        </div>
-
-                        <div className="mb-3">
-                          <label className="block text-xs font-medium text-gray-700 mb-1">
-                            Type
-                          </label>
-                          <select
-                            value={currentAdminTask.type}
-                            onChange={(e) =>
-                              setCurrentAdminTask({
-                                ...currentAdminTask,
-                                type: e.target.value,
-                              })
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                          >
-                            <option value="">Select type</option>
-                            <option value="ongoing">Ongoing</option>
-                            <option value="completed">Completed</option>
-                          </select>
-                        </div>
-
-                        <div className="mb-3">
-                          <label className="block text-xs font-medium text-gray-700 mb-1">
-                            Description
-                          </label>
-                          <textarea
-                            value={currentAdminTask.description}
-                            onChange={(e) =>
-                              setCurrentAdminTask({
-                                ...currentAdminTask,
-                                description: e.target.value,
-                              })
-                            }
-                            rows={3}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                            placeholder="Enter task description"
-                          />
-                        </div>
-
-                        <div className="flex gap-2">
-                          <button
-                            onClick={addAdminTask}
-                            disabled={savingTasks}
-                            className="flex-1 px-3 py-2 bg-[#00486D] text-white rounded-md text-sm"
-                          >
-                            {savingTasks ? "Saving..." : "Save"}
-                          </button>
-                          <button
-                            onClick={() => {
-                              setIsAddingAdminTask(false);
-                              setCurrentAdminTask({
-                                date: "",
-                                title: "",
-                                description: "",
-                                type: "",
-                              });
-                            }}
-                            className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Admin Tasks Table */}
-                    {adminTasksList.length > 0 ? (
-                      <table className="w-full text-sm">
-                        <thead className="bg-gray-100">
-                          <tr>
-                            <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
-                              Date
-                            </th>
-                            <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
-                              Title
-                            </th>
-                            <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
-                              Type
-                            </th>
-                            <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
-                              Description
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {adminTasksList.map((task, idx) => (
-                            <React.Fragment key={task.id || idx}>
-                              <tr
-                                onClick={() =>
-                                  setExpandedAdminTaskId(
-                                    expandedAdminTaskId === idx ? null : idx
-                                  )
-                                }
-                                className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
-                              >
-                                <td className="px-2 py-2 text-gray-600 text-xs">
-                                  {task.date
-                                    ? new Date(task.date).toLocaleDateString(
-                                        "en-IN",
-                                        {
-                                          day: "2-digit",
-                                          month: "short",
-                                          year: "numeric",
-                                          timeZone: "Asia/Kolkata",
-                                        }
-                                      )
-                                    : "-"}
-                                </td>
-                                <td className="px-2 py-2 text-gray-600 truncate text-xs">
-                                  {task.title || "-"}
-                                </td>
-                                <td className="px-2 py-2 text-gray-600 text-xs">
-                                  {task.type ? (
-                                    <span
-                                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                        task.type === "ongoing"
-                                          ? "bg-blue-100 text-blue-700"
-                                          : task.type === "completed"
-                                          ? "bg-green-100 text-green-700"
-                                          : "bg-gray-100 text-gray-700"
-                                      }`}
-                                    >
-                                      {task.type.charAt(0).toUpperCase() +
-                                        task.type.slice(1)}
-                                    </span>
-                                  ) : (
-                                    "-"
-                                  )}
-                                </td>
-                                <td className="px-2 py-2 text-gray-600 truncate text-xs">
-                                  {task.description || "-"}
-                                </td>
-                              </tr>
-                              {expandedAdminTaskId === idx && (
-                                <tr className="bg-gray-50">
-                                  <td colSpan="4" className="px-3 py-3">
-                                    <div className="space-y-2 text-xs">
-                                      <div>
-                                        <span className="font-medium text-gray-700">
-                                          Date:
-                                        </span>{" "}
-                                        <span className="text-gray-600">
-                                          {task.date
-                                            ? new Date(
-                                                task.date
-                                              ).toLocaleDateString("en-IN", {
-                                                day: "2-digit",
-                                                month: "short",
-                                                year: "numeric",
-                                                timeZone: "Asia/Kolkata",
-                                              })
-                                            : "-"}
-                                        </span>
-                                      </div>
-                                      <div>
-                                        <span className="font-medium text-gray-700">
-                                          Title:
-                                        </span>{" "}
-                                        <span className="text-gray-600">
-                                          {task.title || "-"}
-                                        </span>
-                                      </div>
-                                      <div>
-                                        <span className="font-medium text-gray-700">
-                                          Type:
-                                        </span>{" "}
-                                        <span className="text-gray-600">
-                                          {task.type
-                                            ? task.type
-                                                .charAt(0)
-                                                .toUpperCase() +
-                                              task.type.slice(1)
-                                            : "-"}
-                                        </span>
-                                      </div>
-                                      <div>
-                                        <span className="font-medium text-gray-700">
-                                          Description:
-                                        </span>
-                                        <p className="text-gray-600 mt-1 whitespace-pre-wrap">
-                                          {task.description || "No description"}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </td>
-                                </tr>
-                              )}
-                            </React.Fragment>
-                          ))}
-                        </tbody>
-                      </table>
-                    ) : (
-                      <p className="text-gray-600 text-center py-4 text-xs">
-                        No admin tasks added yet
-                      </p>
-                    )}
-                  </div>
-
-                  {/* User Tasks - Right Side */}
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-sm font-semibold text-gray-900">
-                        User Tasks (Read Only)
-                      </h4>
-                    </div>
-
-                    {/* User Tasks Table */}
-                    {userTasksList.length > 0 ? (
-                      <div className="overflow-x-auto table-responsive">
-                        <table className="w-full text-sm min-w-[500px]">
-                          <thead className="bg-gray-100">
-                            <tr>
-                              <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
-                                Date
-                              </th>
-                              <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
-                                Title
-                              </th>
-                              <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
-                                Type
-                              </th>
-                              <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
-                                Description
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {userTasksList.map((task, idx) => (
-                              <React.Fragment key={task.id || idx}>
-                                <tr
-                                  onClick={() =>
-                                    setExpandedUserTaskId(
-                                      expandedUserTaskId === idx ? null : idx
-                                    )
-                                  }
-                                  className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
-                                >
-                                  <td className="px-2 py-2 text-gray-600 text-xs">
-                                    {task.date
-                                      ? new Date(task.date).toLocaleDateString(
-                                          "en-IN",
-                                          {
-                                            day: "2-digit",
-                                            month: "short",
-                                            year: "numeric",
-                                            timeZone: "Asia/Kolkata",
-                                          }
-                                        )
-                                      : "-"}
-                                  </td>
-                                  <td className="px-2 py-2 text-gray-600 truncate text-xs">
-                                    {task.title || "-"}
-                                  </td>
-                                  <td className="px-2 py-2 text-gray-600 text-xs">
-                                    {task.type ? (
-                                      <span
-                                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                          task.type === "ongoing"
-                                            ? "bg-blue-100 text-blue-700"
-                                            : task.type === "completed"
-                                            ? "bg-green-100 text-green-700"
-                                            : "bg-gray-100 text-gray-700"
-                                        }`}
-                                      >
-                                        {task.type.charAt(0).toUpperCase() +
-                                          task.type.slice(1)}
-                                      </span>
-                                    ) : (
-                                      "-"
-                                    )}
-                                  </td>
-                                  <td className="px-2 py-2 text-gray-600 truncate text-xs">
-                                    {task.description || "-"}
-                                  </td>
-                                </tr>
-                                {expandedUserTaskId === idx && (
-                                  <tr className="bg-gray-50">
-                                    <td colSpan="4" className="px-3 py-3">
-                                      <div className="space-y-2 text-xs">
-                                        <div>
-                                          <span className="font-medium text-gray-700">
-                                            Date:
-                                          </span>{" "}
-                                          <span className="text-gray-600">
-                                            {task.date
-                                              ? new Date(
-                                                  task.date
-                                                ).toLocaleDateString("en-IN", {
-                                                  day: "2-digit",
-                                                  month: "short",
-                                                  year: "numeric",
-                                                  timeZone: "Asia/Kolkata",
-                                                })
-                                              : "-"}
-                                          </span>
-                                        </div>
-                                        <div>
-                                          <span className="font-medium text-gray-700">
-                                            Title:
-                                          </span>{" "}
-                                          <span className="text-gray-600">
-                                            {task.title || "-"}
-                                          </span>
-                                        </div>
-                                        <div>
-                                          <span className="font-medium text-gray-700">
-                                            Type:
-                                          </span>{" "}
-                                          <span className="text-gray-600">
-                                            {task.type
-                                              ? task.type
-                                                  .charAt(0)
-                                                  .toUpperCase() +
-                                                task.type.slice(1)
-                                              : "-"}
-                                          </span>
-                                        </div>
-                                        <div>
-                                          <span className="font-medium text-gray-700">
-                                            Description:
-                                          </span>
-                                          <p className="text-gray-600 mt-1 whitespace-pre-wrap">
-                                            {task.description ||
-                                              "No description"}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                )}
-                              </React.Fragment>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ) : (
-                      <p className="text-gray-600 text-center py-4 text-xs">
-                        No user tasks added yet
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Save Button */}
-                <div className="flex justify-end mt-6">
-                  <button
-                    onClick={handleSaveTasks}
-                    disabled={savingTasks}
-                    className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {savingTasks ? "Saving..." : "Save Changes"}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Notes */}
-          <div className="bg-white rounded-xl border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012] overflow-hidden">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                setExpandedSection(
-                  expandedSection === "notes" ? null : "notes"
-                );
-              }}
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-            >
-              <h3 className="text-lg font-semibold text-gray-900">Notes</h3>
-              <svg
-                className={`w-5 h-5 transition-transform ${
-                  expandedSection === "notes" ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-
-            {expandedSection === "notes" && (
-              <div className="p-6 border-t border-gray-200 bg-gray-50">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Admin Notes - Left Side */}
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-sm font-semibold text-gray-900">
-                        Admin Notes (Editable)
-                      </h4>
-                      <button
-                        onClick={() => setIsAddingNote(true)}
-                        className="flex items-center gap-1 px-2 py-1 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs"
-                      >
-                        <svg
-                          className="w-3 h-3"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 4v16m8-8H4"
-                          />
-                        </svg>
-                        Add
-                      </button>
-                    </div>
-                    {/* Add/Edit Note Form */}
-                    {isAddingNote && (
-                      <div className="mb-4 p-4 border border-gray-300 rounded-lg bg-gray-50">
-                        <h4 className="text-sm font-semibold text-gray-900 mb-3">
-                          {editingNoteIndex !== null ? "Edit Note" : "New Note"}
-                        </h4>
-
-                        {/* Date */}
-                        <div className="mb-3">
-                          <label className="block text-xs font-medium text-gray-700 mb-1">
-                            Date
-                          </label>
-                          <input
-                            type="date"
-                            value={currentNote.date}
-                            onChange={(e) =>
-                              setCurrentNote({
-                                ...currentNote,
-                                date: e.target.value,
-                              })
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                          />
-                        </div>
-
-                        {/* Description */}
-                        <div className="mb-3 space-y-3">
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">
-                              Client Action Items
-                            </label>
-                            {(currentNote.clientActionItems || [""]).map(
-                              (item, idx) => (
-                                <div
-                                  key={idx}
-                                  className="flex items-center gap-2 mb-2"
-                                >
-                                  <input
-                                    type="text"
-                                    value={item}
-                                    onChange={(e) => {
-                                      const updated = [
-                                        ...currentNote.clientActionItems,
-                                      ];
-                                      updated[idx] = e.target.value;
-                                      setCurrentNote({
-                                        ...currentNote,
-                                        clientActionItems: updated,
-                                      });
-                                    }}
-                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                    placeholder="Add client action item"
-                                  />
-                                </div>
-                              )
-                            )}
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setCurrentNote({
-                                  ...currentNote,
-                                  clientActionItems: [
-                                    ...(currentNote.clientActionItems || []),
-                                    "",
-                                  ],
-                                })
-                              }
-                              className="mt-1 text-xs text-[#00486D] hover:underline"
-                            >
-                              + Add client action item
-                            </button>
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">
-                              Admin Action Items
-                            </label>
-                            {(currentNote.adminActionItems || [""]).map(
-                              (item, idx) => (
-                                <div
-                                  key={idx}
-                                  className="flex items-center gap-2 mb-2"
-                                >
-                                  <input
-                                    type="text"
-                                    value={item}
-                                    onChange={(e) => {
-                                      const updated = [
-                                        ...currentNote.adminActionItems,
-                                      ];
-                                      updated[idx] = e.target.value;
-                                      setCurrentNote({
-                                        ...currentNote,
-                                        adminActionItems: updated,
-                                      });
-                                    }}
-                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                    placeholder="Add admin action item"
-                                  />
-                                </div>
-                              )
-                            )}
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setCurrentNote({
-                                  ...currentNote,
-                                  adminActionItems: [
-                                    ...(currentNote.adminActionItems || []),
-                                    "",
-                                  ],
-                                })
-                              }
-                              className="mt-1 text-xs text-[#00486D] hover:underline"
-                            >
-                              + Add admin action item
-                            </button>
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">
-                              Description
-                            </label>
-                            <textarea
-                              value={currentNote.description}
-                              onChange={(e) =>
-                                setCurrentNote({
-                                  ...currentNote,
-                                  description: e.target.value,
-                                })
-                              }
-                              placeholder="Enter note description..."
-                              className="w-full h-24 px-3 py-2 border border-gray-300 rounded-md text-sm"
-                            />
-                          </div>
-                        </div>
-
-                        {/* Attachments */}
-                        <div className="mb-3">
-                          <label className="block text-xs font-medium text-gray-700 mb-1">
-                            Attachments
-                          </label>
-                          <label className="flex items-center justify-center gap-2 px-3 py-2 border-2 border-dashed border-gray-300 rounded-md hover:border-[#00486D] cursor-pointer">
-                            <svg
-                              className="w-4 h-4 text-gray-500"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                              />
-                            </svg>
-                            <span className="text-xs">Upload</span>
-                            <input
-                              type="file"
-                              multiple
-                              onChange={handleNoteFileUpload}
-                              className="hidden"
-                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                            />
-                          </label>
-                          {currentNote.attachments.length > 0 && (
-                            <div className="mt-2 space-y-1">
-                              {currentNote.attachments.map((file, idx) => (
-                                <div
-                                  key={idx}
-                                  className="flex items-center justify-between bg-white px-2 py-1 rounded border text-xs"
-                                >
-                                  <span className="truncate">{file.name}</span>
-                                  <button
-                                    onClick={() => removeNoteAttachment(idx)}
-                                    className="text-red-500 ml-2"
-                                  >
-                                    ✕
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex gap-2">
-                          <button
-                            onClick={handleSaveAdminNote}
-                            disabled={savingNotes}
-                            className="flex-1 px-3 py-2 bg-[#00486D] text-white rounded-md text-sm"
-                          >
-                            {savingNotes
-                              ? "Saving..."
-                              : editingNoteIndex !== null
-                              ? "Update"
-                              : "Save"}
-                          </button>
-                          <button
-                            onClick={() => {
-                              setIsAddingNote(false);
-                              setEditingNoteIndex(null);
-                              setCurrentNote({
-                                date: "",
-                                description: "",
-                                attachments: [],
-                              });
-                            }}
-                            className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Notes Table */}
-                    {adminNotesList.length > 0 ? (
-                      <div className="overflow-x-auto table-responsive">
-                        <table className="w-full text-sm min-w-[500px]">
-                          <thead className="bg-gray-100">
-                            <tr>
-                              <th className="px-4 py-2 text-left font-medium text-gray-700">
-                                Date
-                              </th>
-                              <th className="px-4 py-2 text-left font-medium text-gray-700">
-                                Description
-                              </th>
-                              <th className="px-4 py-2 text-left font-medium text-gray-700">
-                                Attachments
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {adminNotesList.map((note, idx) => (
-                              <React.Fragment key={note.id || idx}>
-                                <tr
-                                  onClick={() =>
-                                    setExpandedAdminNoteId(
-                                      expandedAdminNoteId === idx ? null : idx
-                                    )
-                                  }
-                                  className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
-                                >
-                                  <td className="px-2 py-2 text-gray-600 text-xs">
-                                    {note.date || "-"}
-                                  </td>
-                                  <td className="px-2 py-2 text-gray-600 truncate text-xs">
-                                    {note.description || "-"}
-                                  </td>
-                                  <td className="px-2 py-2 text-gray-600 text-xs">
-                                    {note.attachments?.length || 0}
-                                  </td>
-                                </tr>
-                                {expandedAdminNoteId === idx && (
-                                  <tr className="bg-gray-50">
-                                    <td colSpan="3" className="px-3 py-3">
-                                      <div className="flex justify-between">
-                                        <div className="space-y-2 text-xs flex-1">
-                                          <div>
-                                            <span className="font-medium text-gray-700">
-                                              Date:
-                                            </span>{" "}
-                                            <span className="text-gray-600">
-                                              {note.date || "-"}
-                                            </span>
-                                          </div>
-                                          <div>
-                                            <span className="font-medium text-gray-700">
-                                              Description:
-                                            </span>
-                                            <p className="text-gray-600 mt-1">
-                                              {note.description}
-                                            </p>
-                                          </div>
-                                          {note.clientActionItems &&
-                                            note.clientActionItems.length >
-                                              0 && (
-                                              <div>
-                                                <span className="font-medium text-gray-700">
-                                                  Client Action Items:
-                                                </span>
-                                                <ul className="list-disc list-inside text-gray-600 text-xs mt-1 space-y-1">
-                                                  {note.clientActionItems.map(
-                                                    (item, i) => (
-                                                      <li key={i}>{item}</li>
-                                                    )
-                                                  )}
-                                                </ul>
-                                              </div>
-                                            )}
-                                          {note.adminActionItems &&
-                                            note.adminActionItems.length >
-                                              0 && (
-                                              <div>
-                                                <span className="font-medium text-gray-700">
-                                                  Admin Action Items:
-                                                </span>
-                                                <ul className="list-disc list-inside text-gray-600 text-xs mt-1 space-y-1">
-                                                  {note.adminActionItems.map(
-                                                    (item, i) => (
-                                                      <li key={i}>{item}</li>
-                                                    )
-                                                  )}
-                                                </ul>
-                                              </div>
-                                            )}
-                                          {note.attachments &&
-                                            note.attachments.length > 0 && (
-                                              <div>
-                                                <span className="font-medium text-gray-700">
-                                                  Attachments:
-                                                </span>
-                                                <div className="mt-1 space-y-1">
-                                                  {note.attachments.map(
-                                                    (file, fileIdx) => (
-                                                      <div
-                                                        key={fileIdx}
-                                                        className="flex items-center gap-1"
-                                                      >
-                                                        {file.url ||
-                                                        file.data ? (
-                                                          <button
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                              e.preventDefault();
-                                                              e.stopPropagation();
-                                                              const fileUrl =
-                                                                file.url ||
-                                                                file.data;
-                                                              console.log(
-                                                                "📎 Opening file:",
-                                                                file.name
-                                                              );
-                                                              console.log(
-                                                                "📎 File type:",
-                                                                file.type
-                                                              );
-                                                              console.log(
-                                                                "📎 Has URL:",
-                                                                !!file.url
-                                                              );
-                                                              console.log(
-                                                                "📎 Has Data:",
-                                                                !!file.data
-                                                              );
-
-                                                              if (fileUrl) {
-                                                                // For base64 data, create a downloadable link
-                                                                if (
-                                                                  fileUrl.startsWith(
-                                                                    "data:"
-                                                                  )
-                                                                ) {
-                                                                  console.log(
-                                                                    "📎 Opening base64 file..."
-                                                                  );
-                                                                  const link =
-                                                                    document.createElement(
-                                                                      "a"
-                                                                    );
-                                                                  link.href =
-                                                                    fileUrl;
-                                                                  link.download =
-                                                                    file.name;
-                                                                  link.target =
-                                                                    "_blank";
-                                                                  document.body.appendChild(
-                                                                    link
-                                                                  );
-                                                                  link.click();
-                                                                  document.body.removeChild(
-                                                                    link
-                                                                  );
-                                                                } else {
-                                                                  console.log(
-                                                                    "📎 Opening S3 URL..."
-                                                                  );
-                                                                  window.open(
-                                                                    fileUrl,
-                                                                    "_blank",
-                                                                    "noopener,noreferrer"
-                                                                  );
-                                                                }
-                                                              } else {
-                                                                console.error(
-                                                                  "❌ No file URL or data found"
-                                                                );
-                                                              }
-                                                            }}
-                                                            className="text-blue-600 hover:underline text-left bg-transparent border-none p-0 cursor-pointer flex items-center gap-1"
-                                                          >
-                                                            📎{" "}
-                                                            <span className="underline">
-                                                              {file.name}
-                                                            </span>
-                                                          </button>
-                                                        ) : (
-                                                          <span className="text-gray-600">
-                                                            📎 {file.name}
-                                                          </span>
-                                                        )}
-                                                      </div>
-                                                    )
-                                                  )}
-                                                </div>
-                                              </div>
-                                            )}
-                                        </div>
-                                        <div className="flex flex-col gap-2 ml-3">
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              handleEditNote(note, idx);
-                                            }}
-                                            className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs whitespace-nowrap"
-                                          >
-                                            Edit
-                                          </button>
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              handleDeleteNote(idx);
-                                            }}
-                                            className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-xs whitespace-nowrap"
-                                          >
-                                            Delete
-                                          </button>
-                                        </div>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                )}
-                              </React.Fragment>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ) : (
-                      <p className="text-gray-600 text-center py-4 text-xs">
-                        No admin notes
-                      </p>
-                    )}
-                  </div>
-
-                  {/* User Notes - Right Side (Read Only) */}
-                  <div>
-                    <h4 className="text-sm font-semibold text-gray-900 mb-3">
-                      User Notes (Read Only)
-                    </h4>
-
-                    {userNotesList.length > 0 ? (
-                      <div className="overflow-x-auto table-responsive">
-                        <table className="w-full text-sm min-w-[500px]">
-                          <thead className="bg-gray-100">
-                            <tr>
-                              <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
-                                Date
-                              </th>
-                              <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
-                                Description
-                              </th>
-                              <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
-                                Files
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {userNotesList.map((note, idx) => (
-                              <React.Fragment key={note.id || idx}>
-                                <tr
-                                  onClick={() =>
-                                    setExpandedUserNoteId(
-                                      expandedUserNoteId === idx ? null : idx
-                                    )
-                                  }
-                                  className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
-                                >
-                                  <td className="px-2 py-2 text-gray-600 text-xs">
-                                    {note.date || "-"}
-                                  </td>
-                                  <td className="px-2 py-2 text-gray-600 truncate text-xs">
-                                    {note.description || "-"}
-                                  </td>
-                                  <td className="px-2 py-2 text-gray-600 text-xs">
-                                    {note.attachments?.length || 0}
-                                  </td>
-                                </tr>
-                                {expandedUserNoteId === idx && (
-                                  <tr className="bg-gray-50">
-                                    <td colSpan="3" className="px-3 py-3">
-                                      <div className="space-y-2 text-xs">
-                                        <div>
-                                          <span className="font-medium text-gray-700">
-                                            Date:
-                                          </span>{" "}
-                                          <span className="text-gray-600">
-                                            {note.date || "-"}
-                                          </span>
-                                        </div>
-                                        <div>
-                                          <span className="font-medium text-gray-700">
-                                            Description:
-                                          </span>
-                                          <p className="text-gray-600 mt-1">
-                                            {note.description}
-                                          </p>
-                                        </div>
-                                        {note.attachments &&
-                                          note.attachments.length > 0 && (
-                                            <div>
-                                              <span className="font-medium text-gray-700">
-                                                Attachments:
-                                              </span>
-                                              <div className="mt-1 space-y-1">
-                                                {note.attachments.map(
-                                                  (file, fileIdx) => (
-                                                    <div
-                                                      key={fileIdx}
-                                                      className="flex items-center gap-1"
-                                                    >
-                                                      {file.url || file.data ? (
-                                                        <button
-                                                          type="button"
-                                                          onClick={(e) => {
-                                                            e.preventDefault();
-                                                            e.stopPropagation();
-                                                            const fileUrl =
-                                                              file.url ||
-                                                              file.data;
-                                                            console.log(
-                                                              "📎 Opening user file:",
-                                                              file.name
-                                                            );
-                                                            console.log(
-                                                              "📎 File type:",
-                                                              file.type
-                                                            );
-
-                                                            if (fileUrl) {
-                                                              if (
-                                                                fileUrl.startsWith(
-                                                                  "data:"
-                                                                )
-                                                              ) {
-                                                                console.log(
-                                                                  "📎 Downloading base64 file..."
-                                                                );
-                                                                const link =
-                                                                  document.createElement(
-                                                                    "a"
-                                                                  );
-                                                                link.href =
-                                                                  fileUrl;
-                                                                link.download =
-                                                                  file.name;
-                                                                link.target =
-                                                                  "_blank";
-                                                                document.body.appendChild(
-                                                                  link
-                                                                );
-                                                                link.click();
-                                                                document.body.removeChild(
-                                                                  link
-                                                                );
-                                                              } else {
-                                                                console.log(
-                                                                  "📎 Opening S3 URL..."
-                                                                );
-                                                                window.open(
-                                                                  fileUrl,
-                                                                  "_blank",
-                                                                  "noopener,noreferrer"
-                                                                );
-                                                              }
-                                                            }
-                                                          }}
-                                                          className="text-blue-600 hover:underline text-left bg-transparent border-none p-0 cursor-pointer flex items-center gap-1"
-                                                        >
-                                                          📎{" "}
-                                                          <span className="underline">
-                                                            {file.name}
-                                                          </span>
-                                                        </button>
-                                                      ) : (
-                                                        <span className="text-gray-600">
-                                                          📎 {file.name}
-                                                        </span>
-                                                      )}
-                                                    </div>
-                                                  )
-                                                )}
-                                              </div>
-                                            </div>
-                                          )}
-                                      </div>
-                                    </td>
-                                  </tr>
-                                )}
-                              </React.Fragment>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ) : (
-                      <p className="text-gray-600 text-center py-4 text-xs">
-                        No user notes
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
       )}
 
@@ -7051,6 +5961,1188 @@ function AdminClientOverview() {
               </div>
             );
           })()}
+        </div>
+      )}
+
+      {/* Tasks Tab */}
+      {activeTab === "tasks" && (
+        <div className="bg-white rounded-xl border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012] overflow-hidden">
+          <div className="p-6 border-t border-gray-200 bg-gray-50">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Admin Tasks - Left Side */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-gray-900">
+                    Admin Tasks (Editable)
+                  </h4>
+                  <button
+                    onClick={() => setIsAddingAdminTask(true)}
+                    className="flex items-center gap-1 px-2 py-1 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs"
+                  >
+                    <svg
+                      className="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    Add
+                  </button>
+                </div>
+
+                {/* Add Admin Task Form */}
+                {isAddingAdminTask && (
+                  <div className="mb-4 p-4 border border-gray-300 rounded-lg bg-white">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                      New Admin Task
+                    </h4>
+
+                    <div className="mb-3">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Date
+                      </label>
+                      <input
+                        type="date"
+                        value={currentAdminTask.date}
+                        onChange={(e) =>
+                          setCurrentAdminTask({
+                            ...currentAdminTask,
+                            date: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Title
+                      </label>
+                      <input
+                        type="text"
+                        value={currentAdminTask.title}
+                        onChange={(e) =>
+                          setCurrentAdminTask({
+                            ...currentAdminTask,
+                            title: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        placeholder="Enter task title"
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Type
+                      </label>
+                      <select
+                        value={currentAdminTask.type}
+                        onChange={(e) =>
+                          setCurrentAdminTask({
+                            ...currentAdminTask,
+                            type: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      >
+                        <option value="">Select type</option>
+                        <option value="ongoing">Ongoing</option>
+                        <option value="completed">Completed</option>
+                      </select>
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Description
+                      </label>
+                      <textarea
+                        value={currentAdminTask.description}
+                        onChange={(e) =>
+                          setCurrentAdminTask({
+                            ...currentAdminTask,
+                            description: e.target.value,
+                          })
+                        }
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        placeholder="Enter task description"
+                      />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={addAdminTask}
+                        disabled={savingTasks}
+                        className="flex-1 px-3 py-2 bg-[#00486D] text-white rounded-md text-sm"
+                      >
+                        {savingTasks ? "Saving..." : "Save"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsAddingAdminTask(false);
+                          setCurrentAdminTask({
+                            date: "",
+                            title: "",
+                            description: "",
+                            type: "",
+                          });
+                        }}
+                        className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Admin Tasks Table */}
+                {adminTasksList.length > 0 ? (
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
+                          Date
+                        </th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
+                          Title
+                        </th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
+                          Type
+                        </th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
+                          Description
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adminTasksList.map((task, idx) => (
+                        <React.Fragment key={task.id || idx}>
+                          <tr
+                            onClick={() =>
+                              setExpandedAdminTaskId(
+                                expandedAdminTaskId === idx ? null : idx
+                              )
+                            }
+                            className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
+                          >
+                            <td className="px-2 py-2 text-gray-600 text-xs">
+                              {task.date
+                                ? new Date(task.date).toLocaleDateString(
+                                    "en-IN",
+                                    {
+                                      day: "2-digit",
+                                      month: "short",
+                                      year: "numeric",
+                                      timeZone: "Asia/Kolkata",
+                                    }
+                                  )
+                                : "-"}
+                            </td>
+                            <td className="px-2 py-2 text-gray-600 truncate text-xs">
+                              {task.title || "-"}
+                            </td>
+                            <td className="px-2 py-2 text-gray-600 text-xs">
+                              {task.type ? (
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                    task.type === "ongoing"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : task.type === "completed"
+                                      ? "bg-green-100 text-green-700"
+                                      : "bg-gray-100 text-gray-700"
+                                  }`}
+                                >
+                                  {task.type.charAt(0).toUpperCase() +
+                                    task.type.slice(1)}
+                                </span>
+                              ) : (
+                                "-"
+                              )}
+                            </td>
+                            <td className="px-2 py-2 text-gray-600 truncate text-xs">
+                              {task.description || "-"}
+                            </td>
+                          </tr>
+                          {expandedAdminTaskId === idx && (
+                            <tr className="bg-gray-50">
+                              <td colSpan="4" className="px-3 py-3">
+                                <div className="space-y-2 text-xs">
+                                  <div>
+                                    <span className="font-medium text-gray-700">
+                                      Date:
+                                    </span>{" "}
+                                    <span className="text-gray-600">
+                                      {task.date
+                                        ? new Date(
+                                            task.date
+                                          ).toLocaleDateString("en-IN", {
+                                            day: "2-digit",
+                                            month: "short",
+                                            year: "numeric",
+                                            timeZone: "Asia/Kolkata",
+                                          })
+                                        : "-"}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-gray-700">
+                                      Title:
+                                    </span>{" "}
+                                    <span className="text-gray-600">
+                                      {task.title || "-"}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-gray-700">
+                                      Type:
+                                    </span>{" "}
+                                    <span className="text-gray-600">
+                                      {task.type
+                                        ? task.type
+                                            .charAt(0)
+                                            .toUpperCase() +
+                                          task.type.slice(1)
+                                        : "-"}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-gray-700">
+                                      Description:
+                                    </span>
+                                    <p className="text-gray-600 mt-1 whitespace-pre-wrap">
+                                      {task.description || "No description"}
+                                    </p>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className="text-gray-600 text-center py-4 text-xs">
+                    No admin tasks added yet
+                  </p>
+                )}
+              </div>
+
+              {/* User Tasks - Right Side */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-gray-900">
+                    User Tasks (Read Only)
+                  </h4>
+                </div>
+
+                {/* User Tasks Table */}
+                {userTasksList.length > 0 ? (
+                  <div className="rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
+                            Date
+                          </th>
+                          <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
+                            Title
+                          </th>
+                          <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
+                            Type
+                          </th>
+                          <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
+                            Description
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {userTasksList.map((task, idx) => (
+                          <React.Fragment key={task.id || idx}>
+                            <tr
+                              onClick={() =>
+                                setExpandedUserTaskId(
+                                  expandedUserTaskId === idx ? null : idx
+                                )
+                              }
+                              className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
+                            >
+                              <td className="px-2 py-2 text-gray-600 text-xs">
+                                {task.date
+                                  ? new Date(task.date).toLocaleDateString(
+                                      "en-IN",
+                                      {
+                                        day: "2-digit",
+                                        month: "short",
+                                        year: "numeric",
+                                        timeZone: "Asia/Kolkata",
+                                      }
+                                    )
+                                  : "-"}
+                              </td>
+                              <td className="px-2 py-2 text-gray-600 truncate text-xs">
+                                {task.title || "-"}
+                              </td>
+                              <td className="px-2 py-2 text-gray-600 text-xs">
+                                {task.type ? (
+                                  <span
+                                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                      task.type === "ongoing"
+                                        ? "bg-blue-100 text-blue-700"
+                                        : task.type === "completed"
+                                        ? "bg-green-100 text-green-700"
+                                        : "bg-gray-100 text-gray-700"
+                                    }`}
+                                  >
+                                    {task.type.charAt(0).toUpperCase() +
+                                      task.type.slice(1)}
+                                  </span>
+                                ) : (
+                                  "-"
+                                )}
+                              </td>
+                              <td className="px-2 py-2 text-gray-600 truncate text-xs">
+                                {task.description || "-"}
+                              </td>
+                            </tr>
+                            {expandedUserTaskId === idx && (
+                              <tr className="bg-gray-50">
+                                <td colSpan="4" className="px-3 py-3">
+                                  <div className="space-y-2 text-xs">
+                                    <div>
+                                      <span className="font-medium text-gray-700">
+                                        Date:
+                                      </span>{" "}
+                                      <span className="text-gray-600">
+                                        {task.date
+                                          ? new Date(
+                                              task.date
+                                            ).toLocaleDateString("en-IN", {
+                                              day: "2-digit",
+                                              month: "short",
+                                              year: "numeric",
+                                              timeZone: "Asia/Kolkata",
+                                            })
+                                          : "-"}
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium text-gray-700">
+                                        Title:
+                                      </span>{" "}
+                                      <span className="text-gray-600">
+                                        {task.title || "-"}
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium text-gray-700">
+                                        Type:
+                                      </span>{" "}
+                                      <span className="text-gray-600">
+                                        {task.type
+                                          ? task.type
+                                              .charAt(0)
+                                              .toUpperCase() +
+                                            task.type.slice(1)
+                                          : "-"}
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium text-gray-700">
+                                        Description:
+                                      </span>
+                                      <p className="text-gray-600 mt-1 whitespace-pre-wrap">
+                                        {task.description || "No description"}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-gray-600 text-center py-4 text-xs">
+                    No user tasks added yet
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={handleSaveTasks}
+                disabled={savingTasks}
+                className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {savingTasks ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notes Tab */}
+      {activeTab === "notes" && (
+        <div className="bg-white rounded-xl border border-[#F3F3F3] [box-shadow:0px_4px_12px_0px_#00000012] overflow-hidden">
+          <div className="p-6 border-t border-gray-200 bg-gray-50">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Admin Notes - Left Side */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-gray-900">
+                    Admin Notes (Editable)
+                  </h4>
+                  <button
+                    onClick={() => setIsAddingNote(true)}
+                    className="flex items-center gap-1 px-2 py-1 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs"
+                  >
+                    <svg
+                      className="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    Add
+                  </button>
+                </div>
+                {/* Add/Edit Note Form */}
+                {isAddingNote && (
+                  <div className="mb-4 p-4 border border-gray-300 rounded-lg bg-gray-50">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                      {editingNoteIndex !== null ? "Edit Note" : "New Note"}
+                    </h4>
+
+                    {/* Date */}
+                    <div className="mb-3">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Date
+                      </label>
+                      <input
+                        type="date"
+                        value={currentNote.date}
+                        onChange={(e) =>
+                          setCurrentNote({
+                            ...currentNote,
+                            date: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      />
+                    </div>
+
+                    {/* Description */}
+                    <div className="mb-3 space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Client Action Items
+                        </label>
+                        {(currentNote.clientActionItems || [""]).map(
+                          (item, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-2 mb-2"
+                            >
+                              <input
+                                type="text"
+                                value={item}
+                                onChange={(e) => {
+                                  const updated = [
+                                    ...currentNote.clientActionItems,
+                                  ];
+                                  updated[idx] = e.target.value;
+                                  setCurrentNote({
+                                    ...currentNote,
+                                    clientActionItems: updated,
+                                  });
+                                }}
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                placeholder="Add client action item"
+                              />
+                            </div>
+                          )
+                        )}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setCurrentNote({
+                              ...currentNote,
+                              clientActionItems: [
+                                ...(currentNote.clientActionItems || []),
+                                "",
+                              ],
+                            })
+                          }
+                          className="mt-1 text-xs text-[#00486D] hover:underline"
+                        >
+                          + Add client action item
+                        </button>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Admin Action Items
+                        </label>
+                        {(currentNote.adminActionItems || [""]).map(
+                          (item, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-2 mb-2"
+                            >
+                              <input
+                                type="text"
+                                value={item}
+                                onChange={(e) => {
+                                  const updated = [
+                                    ...currentNote.adminActionItems,
+                                  ];
+                                  updated[idx] = e.target.value;
+                                  setCurrentNote({
+                                    ...currentNote,
+                                    adminActionItems: updated,
+                                  });
+                                }}
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                placeholder="Add admin action item"
+                              />
+                            </div>
+                          )
+                        )}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setCurrentNote({
+                              ...currentNote,
+                              adminActionItems: [
+                                ...(currentNote.adminActionItems || []),
+                                "",
+                              ],
+                            })
+                          }
+                          className="mt-1 text-xs text-[#00486D] hover:underline"
+                        >
+                          + Add admin action item
+                        </button>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Description
+                        </label>
+                        <textarea
+                          value={currentNote.description}
+                          onChange={(e) =>
+                            setCurrentNote({
+                              ...currentNote,
+                              description: e.target.value,
+                            })
+                          }
+                          placeholder="Enter note description..."
+                          className="w-full h-24 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Attachments */}
+                    <div className="mb-3">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Attachments
+                      </label>
+                      <label className={`flex items-center justify-center gap-2 px-3 py-2 border-2 border-dashed rounded-md ${
+                        uploadingAttachments
+                          ? "border-gray-200 bg-gray-50 cursor-not-allowed"
+                          : "border-gray-300 hover:border-[#00486D] cursor-pointer"
+                      }`}>
+                        {uploadingAttachments ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#00486D]"></div>
+                            <span className="text-xs text-gray-600">Uploading...</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg
+                              className="w-4 h-4 text-gray-500"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                              />
+                            </svg>
+                            <span className="text-xs">Upload</span>
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          multiple
+                          onChange={handleNoteFileUpload}
+                          className="hidden"
+                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                          disabled={uploadingAttachments}
+                        />
+                      </label>
+                      {currentNote.attachments.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {currentNote.attachments.map((file, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center justify-between bg-white px-2 py-1 rounded border text-xs"
+                            >
+                              <span className="truncate">{file.name}</span>
+                              <button
+                                onClick={() => removeNoteAttachment(idx)}
+                                className="text-red-500 ml-2"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSaveAdminNote}
+                        disabled={savingNotes}
+                        className="flex-1 px-3 py-2 bg-[#00486D] text-white rounded-md text-sm"
+                      >
+                        {savingNotes
+                          ? "Saving..."
+                          : editingNoteIndex !== null
+                          ? "Update"
+                          : "Save"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsAddingNote(false);
+                          setEditingNoteIndex(null);
+                          setCurrentNote({
+                            date: "",
+                            description: "",
+                            attachments: [],
+                          });
+                        }}
+                        className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Notes Table */}
+                {adminNotesList.length > 0 ? (
+                  <div className="rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-4 py-2 text-left font-medium text-gray-700">
+                            Date
+                          </th>
+                          <th className="px-4 py-2 text-left font-medium text-gray-700">
+                            Description
+                          </th>
+                          <th className="px-4 py-2 text-left font-medium text-gray-700">
+                            Attachments
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {adminNotesList.map((note, idx) => {
+                          // Helper function to limit description to 3 words
+                          const getShortDescription = (text) => {
+                            if (!text || typeof text !== "string") return "-";
+                            const words = text.trim().split(/\s+/);
+                            if (words.length <= 3) return text;
+                            return words.slice(0, 3).join(" ") + "...";
+                          };
+
+                          return (
+                            <tr
+                              key={note.id || idx}
+                              onClick={() => setSelectedAdminNote(note)}
+                              className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
+                            >
+                              <td className="px-2 py-2 text-gray-600 text-xs">
+                                {note.date || "-"}
+                              </td>
+                              <td className="px-2 py-2 text-gray-600 text-xs">
+                                {getShortDescription(note.description)}
+                              </td>
+                              <td className="px-2 py-2 text-gray-600 text-xs">
+                                {note.attachments?.length || 0}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-gray-600 text-center py-4 text-xs">
+                    No admin notes
+                  </p>
+                )}
+
+                {/* Admin Note Details Modal */}
+                {selectedAdminNote && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+                    <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+                      <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+                        <h4 className="text-sm font-semibold text-gray-900">
+                          Admin Note Details
+                        </h4>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedAdminNote(null)}
+                          className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <div className="px-6 py-4 space-y-3 text-sm">
+                        <div>
+                          <div className="text-xs font-medium text-gray-500 mb-1">
+                            Date
+                          </div>
+                          <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800">
+                            {selectedAdminNote.date || "-"}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs font-medium text-gray-500 mb-1">
+                            Description
+                          </div>
+                          <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800 whitespace-pre-wrap break-words">
+                            {selectedAdminNote.description || "-"}
+                          </div>
+                        </div>
+
+                        {selectedAdminNote.clientActionItems &&
+                          selectedAdminNote.clientActionItems.length > 0 && (
+                            <div>
+                              <div className="text-xs font-medium text-gray-500 mb-1">
+                                Client Action Items
+                              </div>
+                              <ul className="list-disc list-inside text-gray-800 text-xs space-y-1">
+                                {selectedAdminNote.clientActionItems.map(
+                                  (item, idx) => (
+                                    <li key={idx}>{item}</li>
+                                  )
+                                )}
+                              </ul>
+                            </div>
+                          )}
+
+                        {selectedAdminNote.adminActionItems &&
+                          selectedAdminNote.adminActionItems.length > 0 && (
+                            <div>
+                              <div className="text-xs font-medium text-gray-500 mb-1">
+                                Admin Action Items
+                              </div>
+                              <ul className="list-disc list-inside text-gray-800 text-xs space-y-1">
+                                {selectedAdminNote.adminActionItems.map(
+                                  (item, idx) => (
+                                    <li key={idx}>{item}</li>
+                                  )
+                                )}
+                              </ul>
+                            </div>
+                          )}
+                        <div>
+                          <div className="text-xs font-medium text-gray-500 mb-1">
+                            Files
+                          </div>
+                          <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800 space-y-1">
+                            {selectedAdminNote.attachments &&
+                            selectedAdminNote.attachments.length > 0 ? (
+                              selectedAdminNote.attachments.map(
+                                (file, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="text-xs break-all flex items-center justify-between gap-2"
+                                  >
+                                    <span className="truncate">
+                                      📎{" "}
+                                      {file.name ||
+                                        file.file_name ||
+                                        "Attachment"}
+                                    </span>
+                                    {file.url || file.data ? (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          const fileUrl =
+                                            file.url || file.data;
+                                          if (fileUrl) {
+                                            if (
+                                              fileUrl.startsWith("data:")
+                                            ) {
+                                              const link =
+                                                document.createElement("a");
+                                              link.href = fileUrl;
+                                              link.download = file.name;
+                                              link.target = "_blank";
+                                              document.body.appendChild(
+                                                link
+                                              );
+                                              link.click();
+                                              document.body.removeChild(
+                                                link
+                                              );
+                                            } else {
+                                              window.open(
+                                                fileUrl,
+                                                "_blank",
+                                                "noopener,noreferrer"
+                                              );
+                                            }
+                                          }
+                                        }}
+                                        className="flex items-center justify-center w-7 h-7 rounded-full bg-[#00486D] text-white hover:bg-[#01334C] flex-shrink-0"
+                                        title="View file"
+                                      >
+                                        <FiEye className="w-4 h-4" />
+                                      </button>
+                                    ) : null}
+                                  </div>
+                                )
+                              )
+                            ) : (
+                              <div className="text-xs text-gray-500">
+                                No files
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="px-6 py-3 border-t border-gray-100 flex justify-between items-center sticky bottom-0 bg-white">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const noteIndex = adminNotesList.findIndex(
+                              (note) =>
+                                (note.id && selectedAdminNote.id && note.id === selectedAdminNote.id) ||
+                                (note === selectedAdminNote)
+                            );
+                            if (noteIndex !== -1) {
+                              handleDeleteNote(noteIndex);
+                              setSelectedAdminNote(null);
+                            }
+                          }}
+                          className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg bg-red-600 hover:bg-red-700 transition-colors"
+                        >
+                          Delete
+                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedAdminNote(null)}
+                            className="px-4 py-1.5 text-xs font-semibold text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const noteIndex = adminNotesList.findIndex(
+                                (note) =>
+                                  (note.id && selectedAdminNote.id && note.id === selectedAdminNote.id) ||
+                                  (note === selectedAdminNote)
+                              );
+                              if (noteIndex !== -1) {
+                                handleEditNote(selectedAdminNote, noteIndex);
+                                setSelectedAdminNote(null);
+                              }
+                            }}
+                            className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg"
+                            style={{
+                              background:
+                                "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+                            }}
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* User Notes - Right Side (Read Only) */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                  User Notes (Read Only)
+                </h4>
+
+                {userNotesList.length > 0 ? (
+                  <div className="rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
+                            Date
+                          </th>
+                          <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
+                            Description
+                          </th>
+                          <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">
+                            Files
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {userNotesList.map((note, idx) => {
+                          // Helper function to limit description to 3 words
+                          const getShortDescription = (text) => {
+                            if (!text || typeof text !== "string") return "-";
+                            const words = text.trim().split(/\s+/);
+                            if (words.length <= 3) return text;
+                            return words.slice(0, 3).join(" ") + "...";
+                          };
+
+                          return (
+                            <React.Fragment key={note.id || idx}>
+                              <tr
+                                onClick={() =>
+                                  setExpandedUserNoteId(
+                                    expandedUserNoteId === idx ? null : idx
+                                  )
+                                }
+                                className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
+                              >
+                                <td className="px-2 py-2 text-gray-600 text-xs">
+                                  {note.date || "-"}
+                                </td>
+                                <td className="px-2 py-2 text-gray-600 text-xs">
+                                  {getShortDescription(note.description)}
+                                </td>
+                                <td className="px-2 py-2 text-gray-600 text-xs">
+                                  {note.attachments?.length || 0}
+                                </td>
+                              </tr>
+                              {expandedUserNoteId === idx && (
+                              <tr className="bg-gray-50">
+                                <td colSpan="3" className="px-3 py-3">
+                                  <div className="flex justify-between">
+                                    <div className="space-y-2 text-xs flex-1">
+                                      <div>
+                                        <span className="font-medium text-gray-700">
+                                          Date:
+                                        </span>{" "}
+                                        <span className="text-gray-600">
+                                          {note.date || "-"}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <span className="font-medium text-gray-700">
+                                          Description:
+                                        </span>
+                                        <p className="text-gray-600 mt-1">
+                                          {note.description}
+                                        </p>
+                                      </div>
+                                      {note.clientActionItems &&
+                                        note.clientActionItems.length >
+                                          0 && (
+                                          <div>
+                                            <span className="font-medium text-gray-700">
+                                              Client Action Items:
+                                            </span>
+                                            <ul className="list-disc list-inside text-gray-600 text-xs mt-1 space-y-1">
+                                              {note.clientActionItems.map(
+                                                (item, i) => (
+                                                  <li key={i}>{item}</li>
+                                                )
+                                              )}
+                                            </ul>
+                                          </div>
+                                        )}
+                                      {note.adminActionItems &&
+                                        note.adminActionItems.length >
+                                          0 && (
+                                          <div>
+                                            <span className="font-medium text-gray-700">
+                                              Admin Action Items:
+                                            </span>
+                                            <ul className="list-disc list-inside text-gray-600 text-xs mt-1 space-y-1">
+                                              {note.adminActionItems.map(
+                                                (item, i) => (
+                                                  <li key={i}>{item}</li>
+                                                )
+                                              )}
+                                            </ul>
+                                          </div>
+                                        )}
+                                      {note.attachments &&
+                                        note.attachments.length > 0 && (
+                                          <div>
+                                            <span className="font-medium text-gray-700">
+                                              Attachments:
+                                            </span>
+                                            <div className="mt-1 space-y-1">
+                                              {note.attachments.map(
+                                                (file, fileIdx) => (
+                                                  <div
+                                                    key={fileIdx}
+                                                    className="flex items-center gap-1"
+                                                  >
+                                                    {file.url ||
+                                                    file.data ? (
+                                                      <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                          e.preventDefault();
+                                                          e.stopPropagation();
+                                                          const fileUrl =
+                                                            file.url ||
+                                                            file.data;
+                                                          console.log(
+                                                            "📎 Opening file:",
+                                                            file.name
+                                                          );
+                                                          console.log(
+                                                            "📎 File type:",
+                                                            file.type
+                                                          );
+                                                          console.log(
+                                                            "📎 Has URL:",
+                                                            !!file.url
+                                                          );
+                                                          console.log(
+                                                            "📎 Has Data:",
+                                                            !!file.data
+                                                          );
+
+                                                          if (fileUrl) {
+                                                            // For base64 data, create a downloadable link
+                                                            if (
+                                                              fileUrl.startsWith(
+                                                                "data:"
+                                                              )
+                                                            ) {
+                                                              console.log(
+                                                                "📎 Opening base64 file..."
+                                                              );
+                                                              const link =
+                                                                document.createElement(
+                                                                  "a"
+                                                                );
+                                                              link.href =
+                                                                fileUrl;
+                                                              link.download =
+                                                                file.name;
+                                                              link.target =
+                                                                "_blank";
+                                                              document.body.appendChild(
+                                                                link
+                                                              );
+                                                              link.click();
+                                                              document.body.removeChild(
+                                                                link
+                                                              );
+                                                            } else {
+                                                              console.log(
+                                                                "📎 Opening S3 URL..."
+                                                              );
+                                                              window.open(
+                                                                fileUrl,
+                                                                "_blank",
+                                                                "noopener,noreferrer"
+                                                              );
+                                                            }
+                                                          } else {
+                                                            console.error(
+                                                              "❌ No file URL or data found"
+                                                            );
+                                                          }
+                                                        }}
+                                                        className="text-blue-600 hover:underline text-left bg-transparent border-none p-0 cursor-pointer flex items-center gap-1"
+                                                      >
+                                                        📎{" "}
+                                                        <span className="underline">
+                                                          {file.name}
+                                                        </span>
+                                                      </button>
+                                                    ) : (
+                                                      <span className="text-gray-600">
+                                                        📎 {file.name}
+                                                      </span>
+                                                    )}
+                                                  </div>
+                                                )
+                                              )}
+                                            </div>
+                                          </div>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col gap-2 ml-3">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleEditNote(note, idx);
+                                        }}
+                                        className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs whitespace-nowrap"
+                                      >
+                                        Edit
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeleteNote(idx);
+                                        }}
+                                        className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-xs whitespace-nowrap"
+                                      >
+                                        Delete
+                                      </button>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                            </React.Fragment>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-gray-600 text-center py-4 text-xs">
+                    No admin notes
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
