@@ -11,6 +11,7 @@ import {
 } from "react-icons/ri";
 import { BsBuilding } from "react-icons/bs";
 import { HiOutlineUsers } from "react-icons/hi";
+import { RiGroupLine } from "react-icons/ri";
 import { MdMenu, MdClose } from "react-icons/md";
 import {
   IoLogOutOutline,
@@ -93,6 +94,11 @@ function AdminSidebar() {
       icon: <BsBuilding />,
       text: "Organizations",
       path: "/admin/organizations",
+    },
+    {
+      icon: <RiGroupLine />,
+      text: "Directors",
+      path: "/admin/directors",
     },
     {
       icon: <RiFolderSettingsLine />,
@@ -200,15 +206,15 @@ function AdminSidebar() {
         {/* Navigation */}
         <nav
           className={`flex-1 min-h-0 ${
-            isCollapsed ? "px-2" : "px-4"
-          } pt-2 pb-2 space-y-1 transition-all duration-300 overflow-hidden`}
+            isCollapsed ? "px-2" : "px-3"
+          } pt-2 pb-0 space-y-0.5 transition-all duration-300 overflow-y-auto overflow-x-hidden`}
         >
           {menuItems.map((item, index) => (
             <Link
               to={item.path}
               key={index}
               className={`flex items-center ${
-                isCollapsed ? "justify-center px-2" : "space-x-3 px-3"
+                isCollapsed ? "justify-center px-3" : "space-x-2 px-3"
               } py-1.5 rounded-lg transition-all duration-200 ${
                 isActive(item)
                   ? "bg-[#26496a] text-white"
@@ -218,16 +224,16 @@ function AdminSidebar() {
             >
               <span
                 className={`${
-                  isCollapsed ? "w-auto" : "w-5"
+                  isCollapsed ? "w-auto" : "w-4"
                 } flex justify-center`}
               >
                 {React.cloneElement(item.icon, {
-                  className: `text-base ${
+                  className: `text-sm ${
                     isActive(item) ? "text-white" : "text-gray-400"
                   }`,
                 })}
               </span>
-              {!isCollapsed && <span className="text-[13px]">{item.text}</span>}
+              {!isCollapsed && <span className="text-[12.9px]">{item.text}</span>}
 
               {/* Tooltip for collapsed state */}
               {isCollapsed && (
@@ -240,10 +246,10 @@ function AdminSidebar() {
         </nav>
 
         {/* Profile Section */}
-        <div className="mt-auto border-t border-[#26496a]/30 flex-shrink-0">
+        <div className="mt-0 border-t border-[#26496a]/30 flex-shrink-0">
           <div
             className={`${
-              isCollapsed ? "p-2" : "p-3"
+              isCollapsed ? "p-1.5" : "p-2"
             } transition-all duration-300`}
           >
             <div
@@ -253,22 +259,22 @@ function AdminSidebar() {
             >
               <div
                 className={`flex items-center ${
-                  isCollapsed ? "justify-center" : "space-x-2"
-                } cursor-pointer p-2 hover:bg-[#26496a]/50 rounded-lg transition-all duration-200`}
+                  isCollapsed ? "justify-center" : "space-x-1.5"
+                } cursor-pointer p-1.5 hover:bg-[#26496a]/50 rounded-lg transition-all duration-200`}
               >
                 {userData?.profile_image ? (
                   <img
                     src={userData.profile_image}
                     alt="Profile"
                     className={`${
-                      isCollapsed ? "w-8 h-8" : "w-8 h-8"
+                      isCollapsed ? "w-6 h-6" : "w-6 h-6"
                     } rounded-full object-cover transition-all duration-300 flex-shrink-0`}
                   />
                 ) : (
                   <div
                     className={`${
-                      isCollapsed ? "w-8 h-8" : "w-8 h-8"
-                    } bg-[#26496a] rounded-full flex items-center justify-center text-white text-sm font-medium transition-all duration-300 flex-shrink-0`}
+                      isCollapsed ? "w-6 h-6" : "w-6 h-6"
+                    } bg-[#26496a] rounded-full flex items-center justify-center text-white text-xs font-medium transition-all duration-300 flex-shrink-0`}
                   >
                     {userData?.name
                       ? userData.name.charAt(0).toUpperCase()
@@ -278,11 +284,11 @@ function AdminSidebar() {
                 {!isCollapsed && (
                   <>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[13px] text-white font-medium break-words leading-tight">
+                      <div className="text-[11px] text-white font-medium break-words leading-tight">
                         {userData?.name || "Admin"}
                       </div>
                     </div>
-                    <span className="text-base text-gray-400 ml-1 transform transition-transform duration-200 group-hover:rotate-90 flex-shrink-0">
+                    <span className="text-sm text-gray-400 ml-0.5 transform transition-transform duration-200 group-hover:rotate-90 flex-shrink-0">
                       ›
                     </span>
                   </>

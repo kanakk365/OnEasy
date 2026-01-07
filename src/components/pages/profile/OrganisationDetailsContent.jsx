@@ -16,13 +16,10 @@ const OrganisationDetailsContent = ({
   addOrganization,
   updateOrganization,
   addDirectorPartner,
-  removeDirectorPartner,
   updateDirectorPartner,
   addDigitalSignature,
-  removeDigitalSignature,
   updateDigitalSignature,
   addWebsite,
-  removeWebsite,
   updateWebsite,
   togglePasswordVisibility,
   handleViewFile,
@@ -31,7 +28,6 @@ const OrganisationDetailsContent = ({
   // Filter out empty organizations for table display
   const savedOrganizations = organizations.filter(
     (org) =>
-      (org.organisationType && org.organisationType.trim() !== "") ||
       (org.legalName && org.legalName.trim() !== "") ||
       (org.tradeName && org.tradeName.trim() !== "") ||
       (org.gstin && org.gstin.trim() !== "")
@@ -249,9 +245,6 @@ const OrganisationDetailsContent = ({
                     <th className="px-6 py-3 font-medium border-b border-gray-200">
                       GSTIN
                     </th>
-                    <th className="px-6 py-3 font-medium border-b border-gray-200">
-                      Actions
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
@@ -346,18 +339,6 @@ const OrganisationDetailsContent = ({
                 {/* Basic Details Section */}
                 <div className="bg-[#F8F9FA] p-6 rounded-xl">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                    <StyledInput
-                      label="Organisation Type"
-                      value={org.organisationType}
-                      onChange={(e) =>
-                        updateOrganization(
-                          org.id,
-                          "organisationType",
-                          e.target.value
-                        )
-                      }
-                      placeholder="Enter Organisation Type"
-                    />
                     <StyledInput
                       label="Legal Name"
                       value={org.legalName}
@@ -578,9 +559,6 @@ const OrganisationDetailsContent = ({
                             <th className="px-4 py-3 text-left font-medium text-xs">
                               Status
                             </th>
-                            <th className="px-4 py-3 text-left font-medium text-xs rounded-tr-lg">
-                              Action
-                            </th>
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-100">
@@ -682,16 +660,6 @@ const OrganisationDetailsContent = ({
                                   <option>Inactive</option>
                                 </select>
                               </td>
-                              <td className="p-3">
-                                <button
-                                  onClick={() =>
-                                    removeDirectorPartner(org.id, dp.id)
-                                  }
-                                  className="text-[#FF3B30] hover:text-red-700 text-xs font-semibold"
-                                >
-                                  Remove
-                                </button>
-                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -739,9 +707,6 @@ const OrganisationDetailsContent = ({
                             </th>
                             <th className="px-4 py-3 text-left font-medium text-xs">
                               Status
-                            </th>
-                            <th className="px-4 py-3 text-left font-medium text-xs rounded-tr-lg">
-                              Action
                             </th>
                           </tr>
                         </thead>
@@ -811,16 +776,6 @@ const OrganisationDetailsContent = ({
                                   <option>Active</option>
                                   <option>Inactive</option>
                                 </select>
-                              </td>
-                              <td className="p-3">
-                                <button
-                                  onClick={() =>
-                                    removeDigitalSignature(org.id, ds.id)
-                                  }
-                                  className="text-[#FF3B30] hover:text-red-700 text-xs font-semibold"
-                                >
-                                  Remove
-                                </button>
                               </td>
                             </tr>
                           ))}
@@ -1028,14 +983,6 @@ const OrganisationDetailsContent = ({
                                 </button>
                               </div>
                             </div>
-                          </div>
-                          <div className="flex justify-end mt-2">
-                            <button
-                              onClick={() => removeWebsite(org.id, website.id)}
-                              className="text-[#FF3B30] hover:text-red-700 text-xs font-semibold"
-                            >
-                              Remove
-                            </button>
                           </div>
                         </div>
                       ))}

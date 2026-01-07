@@ -35,30 +35,6 @@ const BasicDetailsSection = ({
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-        {/* Organisation Type */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Organisation Type
-          </label>
-          <div className="relative">
-            {editingOrg ? (
-              <input
-                type="text"
-                value={data.organisationType || ""}
-                onChange={(e) =>
-                  updateOrganizationField("organisationType", e.target.value)
-                }
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
-                placeholder="Enter Organisation Type"
-              />
-            ) : (
-              <div className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-700">
-                {data.organisationType || "-"}
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Legal Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">

@@ -479,13 +479,6 @@ function AdminServices() {
     return [...new Set(allServices)];
   }, [services, getServiceLabel, CANONICAL_SERVICES]);
 
-  const statusList = [
-    "New",
-    "Payment Done",
-    "Registered",
-    "Team Fill Requested",
-  ];
-
   const adminStatusOptions = [
     "Data received",
     "WIP",
@@ -742,6 +735,7 @@ function AdminServices() {
   const filteredServices = useMemo(() => {
     return services.filter((svc) => {
       const status = getStatusLabel(svc);
+      const actualStatus = (svc.service_status || "").trim();
       const progress = getProgressLabel(svc);
       const serviceName = getServiceLabel(svc);
       const clientName =
@@ -755,11 +749,16 @@ function AdminServices() {
         serviceName.toLowerCase().includes(searchLower) ||
         (svc.ticket_id && svc.ticket_id.toLowerCase().includes(searchLower));
 
+      // Status filter: match against both the derived status label and the actual service_status
+      const matchesStatus = !statusFilter || 
+        status === statusFilter || 
+        actualStatus.toLowerCase() === statusFilter.toLowerCase();
+
       return (
         matchesSearch &&
         (clientFilter ? clientName === clientFilter : true) &&
         (serviceFilter ? serviceName === serviceFilter : true) &&
-        (statusFilter ? status === statusFilter : true) &&
+        matchesStatus &&
         (progressFilter ? progress === progressFilter : true)
       );
     });
@@ -879,7 +878,7 @@ function AdminServices() {
             className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] appearance-none cursor-pointer"
           >
             <option value="">All Statuses</option>
-            {statusList.map((s) => (
+            {adminStatusOptions.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
@@ -894,9 +893,9 @@ function AdminServices() {
             className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] appearance-none cursor-pointer"
           >
             <option value="">All Progress</option>
+            <option value="Open">Open</option>
             <option value="Ongoing">Ongoing</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
+            <option value="Resolved">Resolved</option>
           </select>
           <FiFilter className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
         </div>
@@ -920,34 +919,34 @@ function AdminServices() {
             No services found matching your criteria
           </div>
         ) : (
-          <div className="p-6">
-            <div className="p-4 bg-[#f5f5f5] rounded-xl overflow-hidden">
-              <div className="overflow-x-auto">
+          <div className="p-4 md:p-6">
+            <div className="bg-[#f5f5f5] rounded-xl overflow-hidden">
+              <div className="overflow-hidden">
                 <table className="w-full border-separate border-spacing-0">
                   <thead>
                     <tr className="text-white">
-                      <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D] rounded-l-xl">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D] rounded-l-xl">
                         Client
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D]">
                         Phone
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D]">
                         Service
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D]">
                         Status
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D]">
                         Progress
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D] hidden lg:table-cell">
                         Updated
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D]">
                         Action
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D] rounded-r-xl">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D] rounded-r-xl">
                         Payment
                       </th>
                     </tr>
@@ -958,24 +957,24 @@ function AdminServices() {
                         key={`${svc.ticket_id || svc.order_id || index}`}
                         className="hover:bg-blue-50/50 transition-colors"
                       >
-                        <td className="px-6 py-4">
-                          <div className="font-medium text-gray-900">
+                        <td className="px-2 md:px-3 lg:px-4 py-3">
+                          <div className="font-medium text-gray-900 text-xs md:text-sm truncate max-w-[120px] md:max-w-[150px]" title={svc.name || svc.legal_name || "-"}>
                             {svc.name || svc.legal_name || "-"}
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-gray-500 truncate max-w-[120px] md:max-w-[150px]" title={svc.email || "No email"}>
                             {svc.email || "No email"}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-600 font-mono">
+                        <td className="px-2 md:px-3 lg:px-4 py-3 text-xs text-gray-600 font-mono">
                           {svc.phone || "-"}
                         </td>
                         <td
-                          className="px-6 py-4 text-sm text-gray-900 max-w-[200px] truncate"
+                          className="px-2 md:px-3 lg:px-4 py-3 text-xs text-gray-900 truncate max-w-[120px] md:max-w-[150px]"
                           title={getServiceLabel(svc)}
                         >
                           {getServiceLabel(svc)}
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-2 md:px-3 lg:px-4 py-3">
                           {svc.ticket_id ? (
                             <div className="relative">
                               <select
@@ -983,7 +982,7 @@ function AdminServices() {
                                 onChange={(e) =>
                                   handleStatusUpdate(svc, e.target.value)
                                 }
-                                className="w-full pl-2 pr-6 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] appearance-none cursor-pointer"
+                                className="w-full max-w-[140px] md:max-w-[160px] pl-1.5 md:pl-2 pr-5 md:pr-6 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] appearance-none cursor-pointer"
                               >
                                 {adminStatusOptions.map((opt) => (
                                   <option key={opt} value={opt}>
@@ -991,9 +990,9 @@ function AdminServices() {
                                   </option>
                                 ))}
                               </select>
-                              <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                              <div className="absolute right-1 md:right-2 top-1/2 -translate-y-1/2 pointer-events-none">
                                 <svg
-                                  className="w-3 h-3 text-gray-400"
+                                  className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -1011,7 +1010,7 @@ function AdminServices() {
                             <span className="text-xs text-gray-400">-</span>
                           )}
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-2 md:px-3 lg:px-4 py-3">
                           {svc.ticket_id ? (
                             <div className="relative">
                               <select
@@ -1019,15 +1018,15 @@ function AdminServices() {
                                 onChange={(e) =>
                                   handleProgressUpdate(svc, e.target.value)
                                 }
-                                className="w-[120px] pl-2 pr-6 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] appearance-none cursor-pointer"
+                                className="w-full max-w-[100px] md:max-w-[120px] pl-1.5 md:pl-2 pr-5 md:pr-6 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] appearance-none cursor-pointer"
                               >
                                 <option value="Open">Open</option>
                                 <option value="Ongoing">Ongoing</option>
                                 <option value="Resolved">Resolved</option>
                               </select>
-                              <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                              <div className="absolute right-1 md:right-2 top-1/2 -translate-y-1/2 pointer-events-none">
                                 <svg
-                                  className="w-3 h-3 text-gray-400"
+                                  className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -1045,12 +1044,12 @@ function AdminServices() {
                             <span className="text-xs text-gray-400">-</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-xs text-gray-500">
+                        <td className="px-2 md:px-3 lg:px-4 py-3 text-xs text-gray-500 hidden lg:table-cell">
                           {formatDateTime(
                             svc.updated_at || svc.confirmed_at || svc.created_at
                           )}
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-2 md:px-3 lg:px-4 py-3">
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() =>
@@ -1080,8 +1079,8 @@ function AdminServices() {
                             )}
                           </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
+                        <td className="px-2 md:px-3 lg:px-4 py-3">
+                          <div className="flex items-center gap-1 md:gap-2">
                             {svc.service_status &&
                               svc.service_status.toLowerCase().trim() ===
                                 "payment pending" &&
@@ -1089,17 +1088,17 @@ function AdminServices() {
                                 <>
                                   <button
                                     onClick={() => handlePayClick(svc)}
-                                    className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                    className="p-1 md:p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                                     title="Pay Now"
                                   >
-                                    <FiCreditCard className="w-4 h-4" />
+                                    <FiCreditCard className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                   </button>
                                   <button
                                     onClick={() => handleCopyLinkClick(svc)}
-                                    className="p-1.5 text-[#00486D] hover:bg-blue-50 rounded-lg transition-colors"
+                                    className="p-1 md:p-1.5 text-[#00486D] hover:bg-blue-50 rounded-lg transition-colors"
                                     title="Copy Link"
                                   >
-                                    <FiLink className="w-4 h-4" />
+                                    <FiLink className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                   </button>
                                 </>
                               )}

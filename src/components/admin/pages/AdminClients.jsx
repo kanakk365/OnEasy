@@ -51,7 +51,8 @@ function AdminClients() {
       const matchesSearch =
         (client.name && client.name.toLowerCase().includes(searchLower)) ||
         (client.email && client.email.toLowerCase().includes(searchLower)) ||
-        (client.phone && client.phone.toLowerCase().includes(searchLower));
+        (client.phone && client.phone.toLowerCase().includes(searchLower)) ||
+        (client.primary_organization_name && client.primary_organization_name.toLowerCase().includes(searchLower));
       if (!matchesSearch) return false;
     }
 
@@ -203,7 +204,7 @@ function AdminClients() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search clients by name, email, or phone..."
+              placeholder="Search clients by name, email, phone, or organization name..."
               className="w-full pl-11 pr-4 py-3 bg-[#F8F9FA] border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent transition-all"
             />
           </div>

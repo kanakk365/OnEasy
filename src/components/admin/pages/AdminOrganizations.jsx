@@ -93,6 +93,25 @@ function AdminOrganizations() {
     loadOrganizations();
   }, [loadOrganizations]);
 
+  // Handle opening organization from sessionStorage (when navigating from Directors page)
+  useEffect(() => {
+    if (organizations.length > 0 && !loading) {
+      const editOrgId = sessionStorage.getItem('editOrganizationId');
+      const editOrgUserId = sessionStorage.getItem('editOrganizationUserId');
+      if (editOrgId && editOrgUserId) {
+        sessionStorage.removeItem('editOrganizationId');
+        sessionStorage.removeItem('editOrganizationUserId');
+        // Find and open the organization
+        const orgToOpen = organizations.find(
+          (org) => String(org.id) === String(editOrgId) && String(org.user_id) === String(editOrgUserId)
+        );
+        if (orgToOpen) {
+          handleViewAll(orgToOpen);
+        }
+      }
+    }
+  }, [organizations, loading]);
+
   // Reset pagination on filter change
   useEffect(() => {
     setCurrentPage(1);

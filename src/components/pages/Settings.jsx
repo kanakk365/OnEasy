@@ -16,7 +16,7 @@ import {
 } from "./profile";
 
 function Settings() {
-  const [expandedSection, setExpandedSection] = useState("client-profile");
+  const [activeTab, setActiveTab] = useState("profile"); // profile, organizations, notes, tasks
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -315,13 +315,25 @@ function Settings() {
             setAdminNotesList([notesList]);
           } else if (adminNotesRaw) {
             setAdminNotesList([
-              { date: "", description: adminNotesRaw, attachments: [] },
+              { 
+                date: "", 
+                description: adminNotesRaw, 
+                attachments: [],
+                clientActionItems: [],
+                adminActionItems: []
+              },
             ]);
           }
         } catch {
           if (adminNotesRaw) {
             setAdminNotesList([
-              { date: "", description: adminNotesRaw, attachments: [] },
+              { 
+                date: "", 
+                description: adminNotesRaw, 
+                attachments: [],
+                clientActionItems: [],
+                adminActionItems: []
+              },
             ]);
           }
         }
@@ -472,28 +484,62 @@ function Settings() {
     }
   };
 
-  const handleUserNoteFileUpload = (e) => {
+  const handleUserNoteFileUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCurrentUserNote((prev) => ({
-          ...prev,
-          attachments: [
-            ...prev.attachments,
-            {
-              name: file.name,
-              data: reader.result,
-              type: file.type,
-              size: file.size,
-            },
-          ],
-        }));
-      };
-      reader.readAsDataURL(file);
-    });
+    try {
+      // Get user ID
+      const userData = JSON.parse(
+        localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+      );
+      const currentUserId = userData.id || userId;
+
+      if (!currentUserId) {
+        alert("User ID not found. Please refresh the page.");
+        return;
+      }
+
+      // Upload each file to S3
+      for (const file of files) {
+        try {
+          // Validate file size (max 5MB)
+          if (file.size > 5 * 1024 * 1024) {
+            alert(`File ${file.name} is too large. Maximum size is 5MB.`);
+            continue;
+          }
+
+          // Show uploading status
+          console.log(`Uploading ${file.name} to S3...`);
+
+          // Upload to S3
+          const folder = `user-notes/${currentUserId}`;
+          const { s3Url } = await uploadFileDirect(file, folder, file.name);
+
+          console.log(`✅ Uploaded ${file.name} to S3:`, s3Url);
+
+          // Add the S3 URL to attachments
+          setCurrentUserNote((prev) => ({
+            ...prev,
+            attachments: [
+              ...prev.attachments,
+              {
+                name: file.name,
+                url: s3Url,
+                type: file.type,
+                size: file.size,
+              },
+            ],
+          }));
+        } catch (error) {
+          console.error(`Error uploading ${file.name}:`, error);
+          alert(`Failed to upload ${file.name}. Please try again.`);
+        }
+      }
+    } catch (error) {
+      console.error("Error in file upload:", error);
+      alert("Failed to upload files. Please try again.");
+    }
   };
 
   const removeUserNoteAttachment = (index) => {
@@ -540,8 +586,81 @@ function Settings() {
     }
   };
 
-  const toggleSection = (section) => {
-    setExpandedSection(expandedSection === section ? null : section);
+  const updateUserNote = async (updatedNote, originalNote) => {
+    try {
+      setSaving(true);
+      
+      // Update the note in the list
+      const updatedNotesList = userNotesList.map(note => {
+        // Match by id if available, otherwise match by date and description
+        if (note.id && originalNote.id && note.id === originalNote.id) {
+          return { ...note, ...updatedNote };
+        } else if (note.date === originalNote.date && note.description === originalNote.description) {
+          return { ...note, ...updatedNote };
+        }
+        return note;
+      });
+
+      const payload = {
+        userNotes: JSON.stringify(updatedNotesList),
+      };
+
+      const response = await updateUsersPageData(payload);
+
+      if (response.success) {
+        setUserNotesList(updatedNotesList);
+        alert("Note updated successfully!");
+        await loadUserData();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error updating user note:", error);
+      alert("Failed to update note");
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const removeUserNote = async (noteToRemove) => {
+    try {
+      setSaving(true);
+      
+      const updatedNotesList = userNotesList.filter(note => {
+        // Remove by comparing all properties if no id exists
+        if (note.id && noteToRemove.id) {
+          return note.id !== noteToRemove.id;
+        }
+        return !(
+          note.date === noteToRemove.date &&
+          note.description === noteToRemove.description
+        );
+      });
+
+      const payload = {
+        userNotes: JSON.stringify(updatedNotesList),
+      };
+
+      const response = await updateUsersPageData(payload);
+
+      if (response.success) {
+        setUserNotesList(updatedNotesList);
+        alert("Note removed successfully!");
+        await loadUserData();
+      }
+    } catch (error) {
+      console.error("Error removing user note:", error);
+      alert("Failed to remove note");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+
+  // Handle tab change
+  const handleTabChange = (tabKey) => {
+    setActiveTab(tabKey);
   };
 
   const handleViewFile = async (fileData) => {
@@ -906,6 +1025,43 @@ function Settings() {
     }
   };
 
+  const updateUserTask = async (updatedTask, originalTask) => {
+    try {
+      setSaving(true);
+      
+      // Update the task in the list
+      const updatedTasksList = userTasksList.map(task => {
+        // Match by id if available, otherwise match by date and title
+        if (task.id && originalTask.id && task.id === originalTask.id) {
+          return { ...task, ...updatedTask };
+        } else if (task.date === originalTask.date && task.title === originalTask.title) {
+          return { ...task, ...updatedTask };
+        }
+        return task;
+      });
+
+      const payload = {
+        userTasks: JSON.stringify(updatedTasksList),
+      };
+
+      const response = await updateUsersPageData(payload);
+
+      if (response.success) {
+        setUserTasksList(updatedTasksList);
+        alert("Task updated successfully!");
+        await loadUserData();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error updating user task:", error);
+      alert("Failed to update task");
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleSaveTasks = async () => {
     try {
       console.log("💾 Saving Tasks...");
@@ -930,12 +1086,12 @@ function Settings() {
     }
   };
 
-  // Section definitions
-  const sections = [
-    { id: "client-profile", label: "Basic details" },
-    { id: "organisation-details", label: "My Company Details" },
-    { id: "tasks", label: "Tasks" },
-    { id: "notes", label: "Notes" },
+  // Tab definitions
+  const tabs = [
+    { key: "profile", label: "Profile" },
+    { key: "organizations", label: "Organizations" },
+    { key: "notes", label: "Notes" },
+    { key: "tasks", label: "Tasks" },
   ];
 
   // Show loading state while fetching data
@@ -977,115 +1133,115 @@ function Settings() {
         <p className="text-gray-500 text-sm ml-8 italic">Create your profile</p>
       </div>
 
-      <div className="max-w-7xl mx-auto rounded-xl bg-white p-2">
-        <div className="space-y-4">
-          {sections.map((section) => (
-            <div
-              key={section.id}
-              className="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-md "
-            >
-              {/* Accordion Header */}
+      <div className="max-w-7xl mx-auto">
+        {/* Tabs Navigation */}
+        <div className="bg-white rounded-t-xl border-b border-gray-200">
+          <div className="flex space-x-1 px-4 pt-4">
+            {tabs.map((tab) => (
               <button
-                onClick={() => toggleSection(section.id)}
-                className="w-full flex items-center justify-between px-6 py-6 cursor-pointer text-left hover:bg-gray-50 transition-colors"
+                key={tab.key}
+                onClick={() => handleTabChange(tab.key)}
+                className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 ${
+                  activeTab === tab.key
+                    ? "bg-white text-[#00486D] border-b-2 border-[#00486D] -mb-px"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                }`}
               >
-                <span className="text-[16px] font-medium text-gray-800">
-                  {section.label}
-                </span>
-                {expandedSection === section.id ? (
-                  <FiChevronUp className="w-5 h-5 text-gray-500" />
-                ) : (
-                  <FiChevronDown className="w-5 h-5 text-gray-500" />
-                )}
+                {tab.label}
               </button>
+            ))}
+          </div>
+        </div>
 
-              {/* Accordion Content */}
-              {expandedSection === section.id && (
-                <div className="border-t border-gray-100">
-                  {section.id === "client-profile" && (
-                    <ClientProfileContent
-                      formData={formData}
-                      userId={userId}
-                      clientStatus={clientStatus}
-                      saving={saving}
-                      handleInputChange={handleInputChange}
-                      handleFileChange={handleFileChange}
-                      handleViewFile={handleViewFile}
-                      handleSaveClientProfile={handleSaveClientProfile}
-                    />
-                  )}
-                  {section.id === "organisation-details" && (
-                    <OrganisationDetailsContent
-                      organizations={organizations}
-                      selectedOrgId={selectedOrgId}
-                      setSelectedOrgId={setSelectedOrgId}
-                      isAddingNewOrg={isAddingNewOrg}
-                      setIsAddingNewOrg={setIsAddingNewOrg}
-                      expandedOrgId={expandedOrgId}
-                      setExpandedOrgId={setExpandedOrgId}
-                      userId={userId}
-                      saving={saving}
-                      addOrganization={addOrganization}
-                      updateOrganization={updateOrganization}
-                      addDirectorPartner={addDirectorPartner}
-                      removeDirectorPartner={removeDirectorPartner}
-                      updateDirectorPartner={updateDirectorPartner}
-                      addDigitalSignature={addDigitalSignature}
-                      removeDigitalSignature={removeDigitalSignature}
-                      updateDigitalSignature={updateDigitalSignature}
-                      addWebsite={addWebsite}
-                      removeWebsite={removeWebsite}
-                      updateWebsite={updateWebsite}
-                      togglePasswordVisibility={togglePasswordVisibility}
-                      handleViewFile={handleViewFile}
-                      handleSaveOrganisation={handleSaveOrganisation}
-                    />
-                  )}
-                  {section.id === "tasks" && (
-                    <TasksContent
-                      adminTasksList={adminTasksList}
-                      userTasksList={userTasksList}
-                      expandedAdminTaskId={expandedAdminTaskId}
-                      setExpandedAdminTaskId={setExpandedAdminTaskId}
-                      expandedUserTaskId={expandedUserTaskId}
-                      setExpandedUserTaskId={setExpandedUserTaskId}
-                      isUserAdmin={isUserAdmin}
-                      isAddingAdminTask={isAddingAdminTask}
-                      setIsAddingAdminTask={setIsAddingAdminTask}
-                      isAddingUserTask={isAddingUserTask}
-                      setIsAddingUserTask={setIsAddingUserTask}
-                      currentAdminTask={currentAdminTask}
-                      setCurrentAdminTask={setCurrentAdminTask}
-                      currentUserTask={currentUserTask}
-                      setCurrentUserTask={setCurrentUserTask}
-                      saving={saving}
-                      addAdminTask={addAdminTask}
-                      addUserTask={addUserTask}
-                      handleSaveTasks={handleSaveTasks}
-                    />
-                  )}
-                  {section.id === "notes" && (
-                    <NotesContent
-                      adminNotesList={adminNotesList}
-                      userNotesList={userNotesList}
-                      expandedAdminNoteId={expandedAdminNoteId}
-                      setExpandedAdminNoteId={setExpandedAdminNoteId}
-                      expandedUserNoteId={expandedUserNoteId}
-                      setExpandedUserNoteId={setExpandedUserNoteId}
-                      isAddingUserNote={isAddingUserNote}
-                      setIsAddingUserNote={setIsAddingUserNote}
-                      currentUserNote={currentUserNote}
-                      setCurrentUserNote={setCurrentUserNote}
-                      saving={saving}
-                      handleUserNoteFileUpload={handleUserNoteFileUpload}
-                      removeUserNoteAttachment={removeUserNoteAttachment}
-                      handleSaveUserNote={handleSaveUserNote}
-                    />
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+        {/* Tab Content */}
+        <div className="bg-white rounded-b-xl border border-gray-200 border-t-0 p-6 min-h-[400px]">
+          {activeTab === "profile" && (
+            <ClientProfileContent
+              formData={formData}
+              userId={userId}
+              clientStatus={clientStatus}
+              saving={saving}
+              handleInputChange={handleInputChange}
+              handleFileChange={handleFileChange}
+              handleViewFile={handleViewFile}
+              handleSaveClientProfile={handleSaveClientProfile}
+            />
+          )}
+          
+          {activeTab === "organizations" && (
+            <OrganisationDetailsContent
+              organizations={organizations}
+              selectedOrgId={selectedOrgId}
+              setSelectedOrgId={setSelectedOrgId}
+              isAddingNewOrg={isAddingNewOrg}
+              setIsAddingNewOrg={setIsAddingNewOrg}
+              expandedOrgId={expandedOrgId}
+              setExpandedOrgId={setExpandedOrgId}
+              userId={userId}
+              saving={saving}
+              addOrganization={addOrganization}
+              updateOrganization={updateOrganization}
+              addDirectorPartner={addDirectorPartner}
+              removeDirectorPartner={removeDirectorPartner}
+              updateDirectorPartner={updateDirectorPartner}
+              addDigitalSignature={addDigitalSignature}
+              removeDigitalSignature={removeDigitalSignature}
+              updateDigitalSignature={updateDigitalSignature}
+              addWebsite={addWebsite}
+              removeWebsite={removeWebsite}
+              updateWebsite={updateWebsite}
+              togglePasswordVisibility={togglePasswordVisibility}
+              handleViewFile={handleViewFile}
+              handleSaveOrganisation={handleSaveOrganisation}
+            />
+          )}
+          
+          {activeTab === "notes" && (
+            <NotesContent
+              adminNotesList={adminNotesList}
+              userNotesList={userNotesList}
+              expandedAdminNoteId={expandedAdminNoteId}
+              setExpandedAdminNoteId={setExpandedAdminNoteId}
+              expandedUserNoteId={expandedUserNoteId}
+              setExpandedUserNoteId={setExpandedUserNoteId}
+              isAddingUserNote={isAddingUserNote}
+              setIsAddingUserNote={setIsAddingUserNote}
+              currentUserNote={currentUserNote}
+              setCurrentUserNote={setCurrentUserNote}
+              saving={saving}
+              handleUserNoteFileUpload={handleUserNoteFileUpload}
+              removeUserNoteAttachment={removeUserNoteAttachment}
+              handleSaveUserNote={handleSaveUserNote}
+              removeUserNote={removeUserNote}
+              updateUserNote={updateUserNote}
+              handleViewFile={handleViewFile}
+            />
+          )}
+          
+          {activeTab === "tasks" && (
+            <TasksContent
+              adminTasksList={adminTasksList}
+              userTasksList={userTasksList}
+              expandedAdminTaskId={expandedAdminTaskId}
+              setExpandedAdminTaskId={setExpandedAdminTaskId}
+              expandedUserTaskId={expandedUserTaskId}
+              setExpandedUserTaskId={setExpandedUserTaskId}
+              isUserAdmin={isUserAdmin}
+              isAddingAdminTask={isAddingAdminTask}
+              setIsAddingAdminTask={setIsAddingAdminTask}
+              isAddingUserTask={isAddingUserTask}
+              setIsAddingUserTask={setIsAddingUserTask}
+              currentAdminTask={currentAdminTask}
+              setCurrentAdminTask={setCurrentAdminTask}
+              currentUserTask={currentUserTask}
+              setCurrentUserTask={setCurrentUserTask}
+              saving={saving}
+              addAdminTask={addAdminTask}
+              addUserTask={addUserTask}
+              updateUserTask={updateUserTask}
+              handleSaveTasks={handleSaveTasks}
+            />
+          )}
         </div>
       </div>
     </div>
