@@ -5,6 +5,184 @@ import { AiOutlinePlus } from "react-icons/ai";
 import { uploadFileDirect } from "../../../utils/s3Upload";
 import { AUTH_CONFIG } from "../../../config/auth";
 
+// Reusable Input Component to match design
+const StyledInput = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+}) => (
+  <div>
+    <label className="block text-sm text-gray-700 mb-2 font-medium">
+      {label}
+    </label>
+    <input
+      type={type}
+      value={value || ""}
+      onChange={onChange}
+      className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+      placeholder={placeholder}
+    />
+  </div>
+);
+
+// Reusable Select Component
+const StyledSelect = ({ label, value, onChange, options, placeholder }) => (
+  <div>
+    <label className="block text-sm text-gray-700 mb-2 font-medium">
+      {label}
+    </label>
+    <div className="relative">
+      <select
+        value={value || ""}
+        onChange={onChange}
+        className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+      <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+        <svg
+          className="w-4 h-4 text-gray-500"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </div>
+    </div>
+  </div>
+);
+
+// Reusable File Upload Component matching the image design
+const StyledFileUpload = ({
+  label,
+  fileUrl,
+  onFileChange,
+  onViewFile,
+  id,
+  placeholder,
+}) => (
+  <div>
+    <label className="block text-sm text-gray-700 mb-2 font-medium">
+      {label}
+    </label>
+    <div className="flex bg-white border border-gray-100 rounded-lg p-1 items-center">
+      <label
+        htmlFor={id}
+        className="flex-1 px-4 py-2 text-sm text-gray-500 cursor-pointer truncate"
+      >
+        {fileUrl && typeof fileUrl === "string" && fileUrl.trim() !== ""
+          ? "File uploaded successfully"
+          : placeholder || "Upload file"}
+        <input
+          type="file"
+          id={id}
+          onChange={onFileChange}
+          className="hidden"
+          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+        />
+      </label>
+
+      {/* Upload/View Button - Dark blue with download icon */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          if (
+            fileUrl &&
+            typeof fileUrl === "string" &&
+            fileUrl.trim() !== ""
+          ) {
+            onViewFile(fileUrl);
+          } else {
+            document.getElementById(id).click();
+          }
+        }}
+        className="bg-[#00486D] text-white w-10 h-10 rounded-lg flex items-center justify-center hover:bg-[#01334C] transition-colors flex-shrink-0"
+      >
+        {fileUrl ? (
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 15L12 3M12 15L16 11M12 15L8 11"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M2 17L2 19C2 20.1046 2.89543 21 4 21L20 21C21.1046 21 22 20.1046 22 19L22 17"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+        ) : (
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 15L12 3M12 15L16 11M12 15L8 11"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M2 17L2 19C2 20.1046 2.89543 21 4 21L20 21C21.1046 21 22 20.1046 22 19L22 17"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+        )}
+      </button>
+    </div>
+  </div>
+);
+
+// Empty State Component
+const EmptySectionState = ({ title, buttonText, onAdd }) => (
+  <div className="bg-white rounded-xl py-8 px-8 flex flex-col items-center justify-center text-center">
+    <div className="mb-4">
+      <img
+        src="/empty.svg"
+        alt="No Items"
+        className="w-16 h-16 opacity-90 mx-auto"
+      />
+    </div>
+    <p className="text-gray-500 text-sm mb-4">{title}</p>
+    <button
+      type="button"
+      onClick={onAdd}
+      className="px-5 py-2.5 bg-[#01334C] text-white rounded-md hover:bg-[#01283a] transition-colors text-xs font-medium"
+    >
+      {buttonText}
+    </button>
+  </div>
+);
+
 const OrganisationDetailsContent = ({
   organizations,
   selectedOrgId,
@@ -33,186 +211,6 @@ const OrganisationDetailsContent = ({
       (org.gstin && org.gstin.trim() !== "")
   );
   const hasNoOrganizations = savedOrganizations.length === 0 && !selectedOrgId;
-
-  // Reusable Input Component to match design
-  const StyledInput = ({
-    label,
-    value,
-    onChange,
-    placeholder,
-    type = "text",
-  }) => (
-    <div>
-      <label className="block text-sm text-gray-700 mb-2 font-medium">
-        {label}
-      </label>
-      <input
-        type={type}
-        value={value || ""}
-        onChange={onChange}
-        className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        placeholder={placeholder}
-      />
-    </div>
-  );
-
-  // Reusable Select Component
-  const StyledSelect = ({ label, value, onChange, options, placeholder }) => (
-    <div>
-      <label className="block text-sm text-gray-700 mb-2 font-medium">
-        {label}
-      </label>
-      <div className="relative">
-        <select
-          value={value || ""}
-          onChange={onChange}
-          className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
-        >
-          <option value="">{placeholder}</option>
-          {options.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
-          <svg
-            className="w-4 h-4 text-gray-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Reusable File Upload Component matching the image design
-  const StyledFileUpload = ({
-    label,
-    fileUrl,
-    onFileChange,
-    onViewFile,
-    id,
-    placeholder,
-  }) => (
-    <div>
-      <label className="block text-sm text-gray-700 mb-2 font-medium">
-        {label}
-      </label>
-      <div className="flex bg-white border border-gray-100 rounded-lg p-1 items-center">
-        <label
-          htmlFor={id}
-          className="flex-1 px-4 py-2 text-sm text-gray-500 cursor-pointer truncate"
-        >
-          {fileUrl && typeof fileUrl === "string" && fileUrl.trim() !== ""
-            ? "File uploaded successfully"
-            : placeholder || "Upload file"}
-          <input
-            type="file"
-            id={id}
-            onChange={onFileChange}
-            className="hidden"
-            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-          />
-        </label>
-
-        {/* Upload/View Button - Dark blue with download icon */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            if (
-              fileUrl &&
-              typeof fileUrl === "string" &&
-              fileUrl.trim() !== ""
-            ) {
-              onViewFile(fileUrl);
-            } else {
-              document.getElementById(id).click();
-            }
-          }}
-          className="bg-[#00486D] text-white w-10 h-10 rounded-lg flex items-center justify-center hover:bg-[#01334C] transition-colors flex-shrink-0"
-        >
-          {fileUrl ? (
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 16V8M12 16L9 13M12 16L15 13"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M3 15V16C3 18.2091 4.79086 20 7 20H17C19.2091 20 21 18.2091 21 16V15"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          ) : (
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 16V8M12 16L9 13M12 16L15 13"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M3 15V16C3 18.2091 4.79086 20 7 20H17C19.2091 20 21 18.2091 21 16V15"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          )}
-        </button>
-      </div>
-    </div>
-  );
-
-  // Empty State Component
-  const EmptySectionState = ({ title, buttonText, onAdd }) => (
-    <div className="bg-white rounded-xl py-8 px-8 flex flex-col items-center justify-center text-center">
-      <div className="mb-4">
-        <img
-          src="/empty.svg"
-          alt="No Items"
-          className="w-16 h-16 opacity-90 mx-auto"
-        />
-      </div>
-      <p className="text-gray-500 text-sm mb-4">{title}</p>
-      <button
-        type="button"
-        onClick={onAdd}
-        className="px-5 py-2.5 bg-[#01334C] text-white rounded-md hover:bg-[#01283a] transition-colors text-xs font-medium"
-      >
-        {buttonText}
-      </button>
-    </div>
-  );
 
   return (
     <div className="px-6 pb-6 pt-6 animate-fadeIn">
