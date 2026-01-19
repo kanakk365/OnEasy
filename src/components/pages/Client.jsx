@@ -15,7 +15,13 @@ function Client() {
   const [activeServiceTab, setActiveServiceTab] = React.useState("Open");
   const [organizations, setOrganizations] = React.useState([]);
   const [loadingOrganizations, setLoadingOrganizations] = React.useState(true);
-  const [, setGreeting] = React.useState("");
+  const [greeting, setGreeting] = React.useState("");
+  const [complianceStats, setComplianceStats] = React.useState({
+    ongoing: 0,
+    upcoming: 0,
+    overdue: 0,
+    other: 0,
+  });
 
   React.useEffect(() => {
     // Add smooth scrolling behavior
@@ -35,18 +41,16 @@ function Client() {
         const rawName = storedUser.name || storedUser.fullName || "there";
         const userName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
 
-        const motivationalLines = [
-          `Hi ${userName}, welcome back! Hope you have a good day!`,
-          `Great to see you, ${userName}! Let's make today productive!`,
-          `${userName}, you're doing amazing. Keep going!`,
-          `Welcome, ${userName}! Small steps lead to big wins!`,
-          `Hey ${userName}, you've got this! Let's get it done!`,
+        const taglines = [
+          "Welcome back! Let's make today productive.",
+          "You're doing amazing. Keep going!",
+          "Small steps lead to big wins!",
+          "You've got this! Let's get it done!",
+          "Hope you have a great day ahead!",
         ];
-        const pick =
-          motivationalLines[
-            Math.floor(Math.random() * motivationalLines.length)
-          ];
-        setGreeting(pick);
+        const tagline =
+          taglines[Math.floor(Math.random() * taglines.length)];
+        setGreeting(`Hi ${userName}, ${tagline}`);
 
         if (!userId) {
           setAllServices([]);
@@ -211,9 +215,9 @@ function Client() {
 
     const statusLower = status.toLowerCase();
 
-    // Completed statuses go to Resolved
+    // Completed statuses go to Completed
     if (statusLower === "completed" || statusLower === "payment completed") {
-      return "Resolved";
+      return "Completed";
     }
 
     // In Progress statuses
@@ -248,6 +252,52 @@ function Client() {
       (service) => getServiceTab(service) === activeServiceTab
     );
   }, [allServices, activeServiceTab, getServiceTab]);
+
+  // Calculate compliance statistics
+  React.useEffect(() => {
+    if (!allServices || allServices.length === 0) {
+      setComplianceStats({ ongoing: 0, upcoming: 0, overdue: 0, other: 0 });
+      return;
+    }
+
+    let ongoing = 0; // Open + In progress
+    let upcoming = 0; // Services with upcoming due dates
+    let overdue = 0; // Services past their due date
+    let other = 0; // Resolved/Completed or other statuses
+
+    allServices.forEach((service) => {
+      const tab = getServiceTab(service);
+      const status = getStatusLabel(service).toLowerCase();
+
+      // On-Going: Open and In progress
+      if (tab === "Open" || tab === "In progress") {
+        ongoing++;
+      }
+      // Overdue: Check if service has a due date that has passed
+      else if (service.due_date) {
+        const dueDate = new Date(service.due_date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (dueDate < today && tab !== "Resolved") {
+          overdue++;
+        } else if (dueDate >= today) {
+          upcoming++;
+        } else {
+          other++;
+        }
+      }
+      // Resolved/Completed go to other
+      else if (tab === "Completed" || status.includes("completed")) {
+        other++;
+      }
+      // Everything else that's not ongoing
+      else {
+        other++;
+      }
+    });
+
+    setComplianceStats({ ongoing, upcoming, overdue, other });
+  }, [allServices, getServiceTab]);
 
 
   const getStatusBadgeColor = (status) => {
@@ -299,46 +349,79 @@ function Client() {
     return raw.replace(/[-–]\s*Payment\s*Completed/i, "").trim();
   };
 
+  const deriveType = (reg) => {
+    const tid = (reg.ticket_id || reg.id || "").toString().toUpperCase();
+    if (tid.startsWith("OPC_")) return "OPC";
+    if (tid.startsWith("LLP_")) return "LLP";
+    if (tid.startsWith("PART_") || tid.startsWith("PARTNERSHIP_")) return "Partnership";
+    if (tid.startsWith("SEC8_") || tid.startsWith("SECTION8_")) return "Section 8";
+    if (tid.startsWith("PVT_")) return "Private Limited";
+    if (tid.startsWith("PROP_")) return "Proprietorship";
+    if (tid.startsWith("SI_")) return "Startup India";
+    if (tid.startsWith("GST_")) return "GST";
+    return reg.registration_type || reg.service_type || "Service";
+  };
+
+  const getTypeSlug = (type) => {
+    const t = type.toLowerCase();
+    if (t.includes("private")) return "private-limited";
+    if (t.includes("proprietorship")) return "proprietorship";
+    if (t.includes("startup")) return "startup-india";
+    if (t === "gst" || t.includes("gst registration")) return "gst";
+    return null;
+  };
+
   return (
     <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-medium text-gray-900 mb-2">
-          The Intelligent Business Owner Dashboard
-        </h1>
-        <p className="text-gray-500">
-          A Unified Hub for Management and Insights
-        </p>
+        {greeting && (
+          <>
+            <h1 className="text-2xl font-medium text-gray-900 mb-2">
+              {greeting.split(',')[0]}
+            </h1>
+            <p className="text-gray-500">
+              {greeting.split(',').slice(1).join(',').trim()}
+            </p>
+          </>
+        )}
       </div>
 
       {/* Overall Compliances Section - Wrapped in White Card */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">
-          Overall Compliances - 5
-        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* On-Going Service Requests */}
           <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
-            <div className="text-3xl font-semibold text-[#023752] mb-2">3</div>
+            <div className="text-3xl font-semibold text-[#023752] mb-2">
+              {complianceStats.ongoing}
+            </div>
             <div className="text-sm font-medium text-gray-700">
-              Upcoming Compliances
+              On-Going Service Requests
             </div>
           </div>
+          {/* Up-coming Compliances */}
           <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
-            <div className="text-3xl font-semibold text-[#023752] mb-2">0</div>
+            <div className="text-3xl font-semibold text-[#023752] mb-2">
+              {complianceStats.upcoming}
+            </div>
             <div className="text-sm font-medium text-gray-700">
-              Ongoing Services
+              Up-coming Compliances
             </div>
           </div>
+          {/* Overdue Compliances */}
           <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
-            <div className="text-3xl font-semibold text-[#023752] mb-2">2</div>
+            <div className="text-3xl font-semibold text-[#023752] mb-2">
+              {complianceStats.overdue}
+            </div>
             <div className="text-sm font-medium text-gray-700">
-              Pending Requests
+              Overdue Compliances
             </div>
           </div>
+          {/* Other */}
           <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
-            <div className="text-3xl font-semibold text-[#023752] mb-2">0</div>
-            <div className="text-sm font-medium text-gray-700">
-              Upcoming Compliances
+            <div className="text-3xl font-semibold text-[#023752] mb-2">
+              {complianceStats.other}
             </div>
+            <div className="text-sm font-medium text-gray-700">Other</div>
           </div>
         </div>
       </div>
@@ -361,7 +444,7 @@ function Client() {
 
             {/* Tabs */}
             <div className="flex w-full border-b border-gray-100 mb-0">
-              {["Open", "In progress", "Resolved"].map((tab) => (
+              {["Open", "In progress", "Completed"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveServiceTab(tab)}
@@ -411,7 +494,18 @@ function Client() {
                           {getStatusLabel(service)}
                         </span>
                       </div>
-                      <div className="col-span-3 text-sm font-medium text-gray-900 text-right">
+                      <div 
+                        className="col-span-3 text-sm font-medium text-[#00486D] text-right hover:underline cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const type = deriveType(service);
+                          const slug = getTypeSlug(type);
+                          const ticketId = service.ticket_id || service.id;
+                          if (slug && ticketId) {
+                            navigate(`/${slug}/view/${ticketId}`);
+                          }
+                        }}
+                      >
                         {formatDate(service.updated_at || service.created_at)}
                       </div>
                     </div>

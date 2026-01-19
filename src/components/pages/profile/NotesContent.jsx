@@ -4,34 +4,34 @@ import { BsCalendar3 } from "react-icons/bs";
 import { AiOutlineEye } from "react-icons/ai";
 
 // Reusable Input Component - moved outside to prevent recreation
-const StyledInput = ({
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-  className = "",
-}) => (
-  <div className={className}>
-    <label className="block text-sm text-gray-900 mb-2 font-medium">
-      {label}
-    </label>
-    <div className="relative">
-      <input
-        type={type}
-        value={value || ""}
-        onChange={onChange}
-        className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        placeholder={placeholder}
-      />
-      {type === "date" && (
-        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
-          <BsCalendar3 />
-        </div>
-      )}
+  const StyledInput = ({
+    label,
+    value,
+    onChange,
+    placeholder,
+    type = "text",
+    className = "",
+  }) => (
+    <div className={className}>
+      <label className="block text-sm text-gray-900 mb-2 font-medium">
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          type={type}
+          value={value || ""}
+          onChange={onChange}
+          className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          placeholder={placeholder}
+        />
+        {type === "date" && (
+          <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+            <BsCalendar3 />
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
 
 // Empty State Component - moved outside to prevent recreation
 const EmptySectionState = ({ title, buttonText, onAdd }) => (
@@ -124,7 +124,7 @@ const NotesContent = ({
               </div>
             ))}
           </div>
-        )}
+      )}
     </div>
   );
 

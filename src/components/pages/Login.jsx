@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
 import logo from "../../assets/logo.png";
 import ChangePasswordModal from "../common/ChangePasswordModal";
+import SetEmailPasswordModal from "../common/SetEmailPasswordModal";
 
 function Login() {
   const navigate = useNavigate();
@@ -21,6 +22,16 @@ function Login() {
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [userDataAfterLogin, setUserDataAfterLogin] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+
+  // Phone OTP flow state (single-page OTP verification)
+  const [isOtpStep, setIsOtpStep] = useState(false);
+  const [otp, setOtp] = useState(["", "", "", ""]);
+  const [otpPhoneNumber, setOtpPhoneNumber] = useState("");
+  const [canResend, setCanResend] = useState(false);
+  const [resendTimer, setResendTimer] = useState(30);
+  const otpInputRefs = useRef([]);
+  const [showEmailPasswordModal, setShowEmailPasswordModal] = useState(false);
+  const [userDataAfterOTP, setUserDataAfterOTP] = useState(null);
 
   // Check for payment success message from location state
   useEffect(() => {
@@ -156,6 +167,45 @@ function Login() {
     }
   };
 
+  // ----- PHONE OTP HELPERS (single-page) -----
+
+  const handleOtpChange = (index, value) => {
+    if (value.length > 1) return;
+
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+    setError("");
+
+    // Auto-focus next input
+    if (value && index < 3) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 4);
+
+    const newOtp = [...otp];
+    for (let i = 0; i < pastedData.length; i++) {
+      newOtp[i] = pastedData[i];
+    }
+    setOtp(newOtp);
+
+    const lastIndex = Math.min(pastedData.length - 1, 3);
+    otpInputRefs.current[lastIndex]?.focus();
+  };
+
   // Handle email/password login
   const handleEmailLogin = async (e) => {
     e.preventDefault();
@@ -214,19 +264,140 @@ function Login() {
 
       console.log("✅ OTP sent successfully to:", fullPhoneNumber);
 
-      // OTP will be sent via SMS (MSG91)
-      // Check your phone for the OTP message
+      // Switch to OTP step (single-page flow)
+      setIsOtpStep(true);
+      setOtp(["", "", "", ""]);
+      setOtpPhoneNumber(fullPhoneNumber);
+      setCanResend(false);
+      setResendTimer(30);
 
-      // Redirect to OTP verification page with phone number
-      navigate("/verify-otp", {
-        state: {
-          phoneNumber: fullPhoneNumber,
-        },
-      });
+      // Start resend timer
+      const interval = setInterval(() => {
+        setResendTimer((prev) => {
+          const next = prev - 1;
+          if (next <= 0) {
+            clearInterval(interval);
+            setCanResend(true);
+            return 0;
+          }
+          return next;
+        });
+      }, 1000);
     } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Verify OTP (single-page)
+  const handleVerifyPhoneOtp = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const otpString = otp.join("");
+
+      if (otpString.length !== 4) {
+        throw new Error("Please enter the complete 4-digit OTP");
+      }
+
+      if (!otpPhoneNumber) {
+        throw new Error("Phone number missing. Please try again.");
+      }
+
+      const result = await apiClient.verifyOTP(otpPhoneNumber, otpString);
+
+      if (!result.success) {
+        throw new Error(result.message || "OTP verification failed");
+      }
+
+      console.log("✅ OTP verification successful");
+      console.log("👤 User data:", result.user);
+
+      const hasEmail =
+        result.user?.email &&
+        result.user.email.trim() !== "" &&
+        result.user.email !== null &&
+        result.user.email !== undefined;
+
+      const mustChangePassword = result.user?.must_change_password === true;
+
+      // 1) Admin-created user with email/password → must change password
+      if (mustChangePassword && hasEmail) {
+        console.log(
+          "⚠️ Admin-created user must change password, showing change password modal"
+        );
+        setUserDataAfterLogin(result.user);
+        setShowChangePasswordModal(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // 2) Phone-only user without email → must set email/password
+      if (!hasEmail) {
+        console.log(
+          "⚠️ User missing email, showing email/password setup modal"
+        );
+        setUserDataAfterOTP(result.user);
+        setShowEmailPasswordModal(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // 3) Normal flow → go to dashboard
+      navigateToDashboard(result.user);
+    } catch (err) {
+      setError(err.message || "OTP verification failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Resend OTP (single-page)
+  const handleResendOtp = async () => {
+    if (!canResend || !otpPhoneNumber) return;
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      await apiClient.phoneLogin(otpPhoneNumber);
+      console.log("✅ OTP resent - check your phone for SMS");
+
+      setOtp(["", "", "", ""]);
+      setCanResend(false);
+      setResendTimer(30);
+
+      const interval = setInterval(() => {
+        setResendTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            setCanResend(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (err) {
+      setError(err.message || "Failed to resend OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle email/password setup success (for phone-only users)
+  const handleEmailPasswordSuccess = (updatedUser) => {
+    console.log("✅ Email and password set successfully");
+    setShowEmailPasswordModal(false);
+
+    const userForNav =
+      updatedUser || userDataAfterOTP || userDataAfterLogin || null;
+    if (userForNav) {
+      navigateToDashboard(userForNav);
+    } else {
+      navigate("/client");
     }
   };
 
@@ -480,34 +651,93 @@ function Login() {
           /* Login Forms */
           <>
             {loginMethod === "phone" ? (
-              <form onSubmit={handlePhoneLogin} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-800 mb-2">
-                    Phone Number
-                  </label>
-                  <div className="flex gap-3">
-                    <div className="w-20 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-sm font-medium text-gray-600">
-                      {countryCode}
+              !isOtpStep ? (
+                // Step 1: Enter phone and send OTP
+                <form onSubmit={handlePhoneLogin} className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-800 mb-2">
+                      Phone Number
+                    </label>
+                    <div className="flex gap-3">
+                      <div className="w-20 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-sm font-medium text-gray-600">
+                        {countryCode}
+                      </div>
+                      <input
+                        type="tel"
+                        value={phoneNumber}
+                        onChange={(e) =>
+                          setPhoneNumber(e.target.value.replace(/\D/g, ""))
+                        }
+                        placeholder="Enter your Phone Number"
+                        maxLength="10"
+                        className="flex-1 h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#01334C] placeholder-gray-400 text-sm transition-all"
+                        disabled={isLoading}
+                      />
                     </div>
-                    <input
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      placeholder="Enter your Phone Number"
-                      className="flex-1 h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#01334C] placeholder-gray-400 text-sm transition-all"
-                      disabled={isLoading}
-                    />
                   </div>
-                </div>
 
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full h-12 bg-[#01334C] hover:bg-[#024466] text-white font-medium rounded-lg transition-colors flex items-center justify-center"
-                >
-                  {isLoading ? "Sending OTP..." : "Send OTP"}
-                </button>
-              </form>
+                  <button
+                    type="submit"
+                    disabled={isLoading || phoneNumber.trim().length !== 10}
+                    className="w-full h-12 bg-[#01334C] hover:bg-[#024466] text-white font-medium rounded-lg transition-colors flex items-center justify-center"
+                  >
+                    {isLoading ? "Sending OTP..." : "Send OTP"}
+                  </button>
+                </form>
+              ) : (
+                // Step 2: Enter OTP
+                <form onSubmit={handleVerifyPhoneOtp} className="space-y-6">
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 mb-2">
+                      We've sent a 4-digit OTP to {otpPhoneNumber} via SMS
+                    </p>
+                  </div>
+
+                  <div className="flex justify-center space-x-2 mb-2">
+                    {otp.map((digit, index) => (
+                      <input
+                        key={index}
+                        ref={(el) => (otpInputRefs.current[index] = el)}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength="1"
+                        value={digit}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        onPaste={index === 0 ? handleOtpPaste : undefined}
+                        className="w-10 h-10 text-center text-lg font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                        disabled={isLoading}
+                      />
+                    ))}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading || otp.join("").length !== 4}
+                    className="w-full h-12 bg-[#01334C] hover:bg-[#024466] text-white font-medium rounded-lg transition-colors flex items-center justify-center disabled:bg-blue-400"
+                  >
+                    {isLoading ? "Verifying..." : "Verify & Continue"}
+                  </button>
+
+                  <div className="text-center text-sm">
+                    <p className="text-gray-600">
+                      Didn't receive code?{" "}
+                      <button
+                        type="button"
+                        onClick={handleResendOtp}
+                        disabled={!canResend || isLoading}
+                        className={`font-medium ${
+                          canResend
+                            ? "text-blue-600 hover:text-blue-700 cursor-pointer"
+                            : "text-gray-400 cursor-not-allowed"
+                        }`}
+                      >
+                        {canResend ? "Resend" : `Resend in ${resendTimer}s`}
+                      </button>
+                    </p>
+                  </div>
+                </form>
+              )
             ) : (
               <form onSubmit={handleEmailLogin} className="space-y-6">
                 <div>
@@ -624,6 +854,21 @@ function Login() {
           }}
           onSuccess={handlePasswordChangeSuccess}
           required={userDataAfterLogin?.must_change_password || false}
+        />
+      )}
+
+      {/* Email/Password Setup Modal - For new phone-only users */}
+      {showEmailPasswordModal && (
+        <SetEmailPasswordModal
+          isOpen={showEmailPasswordModal}
+          onClose={() => {
+            // Don't allow closing if required
+            if (!userDataAfterOTP) {
+              setShowEmailPasswordModal(false);
+            }
+          }}
+          onSuccess={handleEmailPasswordSuccess}
+          required={true}
         />
       )}
     </div>

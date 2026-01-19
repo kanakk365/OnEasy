@@ -519,18 +519,18 @@ function Settings() {
           console.log(`✅ Uploaded ${file.name} to S3:`, s3Url);
 
           // Add the S3 URL to attachments
-          setCurrentUserNote((prev) => ({
-            ...prev,
-            attachments: [
-              ...prev.attachments,
-              {
-                name: file.name,
+        setCurrentUserNote((prev) => ({
+          ...prev,
+          attachments: [
+            ...prev.attachments,
+            {
+              name: file.name,
                 url: s3Url,
-                type: file.type,
-                size: file.size,
-              },
-            ],
-          }));
+              type: file.type,
+              size: file.size,
+            },
+          ],
+        }));
         } catch (error) {
           console.error(`Error uploading ${file.name}:`, error);
           alert(`Failed to upload ${file.name}. Please try again.`);

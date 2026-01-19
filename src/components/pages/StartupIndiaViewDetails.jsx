@@ -247,12 +247,50 @@ function StartupIndiaViewDetails() {
             </div>
             <div>
               <p className="text-sm text-gray-600">Payment Status</p>
-              <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium mt-1 ${
-                registration.payment_status === 'paid' ? 'bg-green-100 text-green-800' :
-                'bg-red-100 text-red-800'
-              }`}>
-                {formatValue(registration.payment_status)}
-              </span>
+              {(() => {
+                // Use exact same logic as ClientServices.jsx getStatusLabel
+                const hasPaymentId = registration.razorpay_payment_id || registration.payment_id;
+                const paymentStatus = (registration.payment_status || '').toLowerCase().trim();
+                const isPaymentCompleted = registration.payment_completed || 
+                                         hasPaymentId ||
+                                         paymentStatus === 'paid' || 
+                                         paymentStatus === 'payment_completed';
+                
+                let displayStatus;
+                let statusColor;
+                
+                // If payment is NOT completed, show payment status
+                if (!isPaymentCompleted) {
+                  if (paymentStatus === 'pending' || paymentStatus === 'unpaid' || paymentStatus === '') {
+                    displayStatus = 'Payment pending';
+                  } else if (registration.payment_status) {
+                    displayStatus = registration.payment_status;
+                  } else {
+                    displayStatus = 'Payment pending';
+                  }
+                  statusColor = 'bg-red-100 text-red-800';
+                } else {
+                  // Payment IS completed, check service_status
+                  if (registration.service_status && typeof registration.service_status === "string" && registration.service_status.trim() !== '') {
+                    const serviceStatus = registration.service_status.toLowerCase().trim();
+                    // Don't show "Payment completed" as service_status if payment is actually completed
+                    if (serviceStatus !== 'payment completed' && serviceStatus !== 'payment_completed') {
+                      displayStatus = registration.service_status;
+                    } else {
+                      displayStatus = 'Payment completed';
+                    }
+                  } else {
+                    displayStatus = 'Payment completed';
+                  }
+                  statusColor = 'bg-green-100 text-green-800';
+                }
+                
+                return (
+                  <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium mt-1 ${statusColor}`}>
+                    {displayStatus}
+                  </span>
+                );
+              })()}
             </div>
             {registration.payment_id && (
               <div>

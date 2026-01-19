@@ -24,7 +24,6 @@ import useSidebarStore from "../../stores/sidebarStore";
 import useLogoutModalStore from "../../stores/logoutModalStore";
 import LogoutModal from "../common/LogoutModal";
 import { AUTH_CONFIG } from "../../config/auth";
-import logo from "../../assets/logo.png";
 
 function Sidebar() {
   const location = useLocation();
@@ -140,7 +139,7 @@ function Sidebar() {
           } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-[#26496a]/30`}
         >
           <img
-            src={logo}
+            src="/logo.jpg"
             alt="OnEasy Logo"
             className={`${
               isCollapsed ? "h-8" : "h-10"
@@ -304,7 +303,7 @@ function Sidebar() {
           )}
           {/* Mobile Sidebar Header */}
           <div className="px-6 pt-4 pb-4 flex justify-between items-center border-b border-gray-200">
-            <img src={logo} alt="OnEasy Logo" className="h-10 w-auto" />
+            <img src="/logo.jpg" alt="OnEasy Logo" className="h-10 w-auto" />
             <button
               onClick={() => {
                 console.log("Close button clicked");

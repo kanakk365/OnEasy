@@ -95,12 +95,42 @@ function ClientServices() {
   };
 
   const getStatusLabel = (reg) => {
-    // Prioritize admin-set service_status
-    if (reg.service_status && typeof reg.service_status === "string") {
-      return reg.service_status;
+    // Check actual payment completion indicators first
+    const hasPaymentId = reg.razorpay_payment_id || reg.payment_id;
+    const paymentStatus = (reg.payment_status || '').toLowerCase().trim();
+    const isPaymentCompleted = reg.payment_completed || 
+                               hasPaymentId ||
+                               paymentStatus === 'paid' || 
+                               paymentStatus === 'payment_completed';
+    
+    // If payment is NOT completed, show payment status
+    if (!isPaymentCompleted) {
+      if (paymentStatus === 'pending' || paymentStatus === 'unpaid' || paymentStatus === '') {
+        return 'Payment pending';
+      }
+      if (reg.payment_status) {
+        return reg.payment_status;
+      }
     }
+    
+    // If payment IS completed, check service_status
+    if (isPaymentCompleted) {
+      // Show service_status if it exists and is meaningful
+      if (reg.service_status && typeof reg.service_status === "string" && reg.service_status.trim() !== '') {
+        const serviceStatus = reg.service_status.toLowerCase().trim();
+        // Don't show "Payment completed" as service_status if payment is actually completed
+        if (serviceStatus !== 'payment completed' && serviceStatus !== 'payment_completed') {
+          return reg.service_status;
+        }
+      }
+      // Otherwise show payment completed status
+      return 'Payment completed';
+    }
+    
+    // Fallback to status field
     if (reg.status && typeof reg.status === "string") return reg.status;
-    if (reg.payment_status) return reg.payment_status;
+    
+    // Default
     return "Open";
   };
 
@@ -111,11 +141,11 @@ function ClientServices() {
       return 'Open';
     }
     
-    // Step 2: Check if service_status is "completed" (case-insensitive) - return "Resolved"
+    // Step 2: Check if service_status is "completed" (case-insensitive) - return "Completed"
     if (reg.service_status && reg.service_status.trim() !== '') {
       const serviceStatus = reg.service_status.toLowerCase().trim();
       if (serviceStatus === 'completed') {
-        return 'Resolved';
+        return 'Completed';
       }
     }
     
@@ -303,14 +333,14 @@ function ClientServices() {
                 In progress
               </button>
               <button 
-                onClick={() => setActiveServiceTab('Resolved')}
+                onClick={() => setActiveServiceTab('Completed')}
                 className={`pb-2 text-xs md:text-sm font-medium whitespace-nowrap transition-colors ${
-                  activeServiceTab === 'Resolved' 
+                  activeServiceTab === 'Completed' 
                     ? 'text-[#01334C] border-b-2 border-[#01334C]' 
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                Resolved
+                Completed
               </button>
             </div>
 
@@ -325,16 +355,13 @@ function ClientServices() {
                         Service
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Service Name
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Progress
+                        Package
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Status
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Date
+                        Date of Payment
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Action
@@ -355,29 +382,21 @@ function ClientServices() {
                           {formatServiceName(service)}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            getServiceTab(service) === 'Resolved' 
-                              ? 'bg-green-100 text-green-800'
-                              : getServiceTab(service) === 'In progress'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {getServiceTab(service)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
                           <span className={`${getStatusBadgeColor(getStatusLabel(service))} px-2 py-1 rounded-full text-xs font-medium`}>
                             {getStatusLabel(service)}
                           </span>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                          {formatDate(service.updated_at || service.created_at || service.createdAt)}
+                          {formatDate(service.payment_date || service.payment_completed_at || service.updated_at || service.created_at || service.createdAt)}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm">
                           <div className="flex items-center gap-2">
-                            {/* Pay button for pending payments, same logic as Registrations */}
-                            {service.service_status === 'Payment pending' &&
-                              (service.razorpay_order_id || service.order_id) && (
+                            {/* Check if payment is pending/partly paid */}
+                            {((service.payment_status && (service.payment_status.toLowerCase() === 'pending' || service.payment_status.toLowerCase() === 'unpaid' || service.payment_status.toLowerCase() === 'partly paid')) ||
+                              service.service_status === 'Payment pending' ||
+                              (!service.payment_completed && !service.razorpay_payment_id && !service.payment_id)) &&
+                              (service.razorpay_order_id || service.order_id) ? (
+                                // Show "Pay and View Details" combined button
                                 <button
                                   onClick={async (e) => {
                                     e.stopPropagation();
@@ -400,7 +419,18 @@ function ClientServices() {
                                   }}
                                   className="px-3 py-1 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors"
                                 >
-                                  Pay
+                                  Pay and View Details
+                                </button>
+                              ) : (
+                                // Show only "View Details" button if payment is completed
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleServiceClick(service);
+                                  }}
+                                  className="px-3 py-1 text-xs font-medium text-[#00486D] bg-white border border-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
+                                >
+                                  View Details
                                 </button>
                               )}
                           </div>

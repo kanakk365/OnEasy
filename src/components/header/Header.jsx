@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import {
   IoCallOutline,
@@ -8,15 +9,19 @@ import {
 } from "react-icons/io5";
 import { BiSupport } from "react-icons/bi";
 import { MdKeyboardArrowDown } from "react-icons/md";
+import { RiUser3Line } from "react-icons/ri";
+import { MdOutlinePayment } from "react-icons/md";
 import useLogoutModalStore from "../../stores/logoutModalStore";
 import { AUTH_CONFIG } from "../../config/auth";
 
 function Header() {
+  const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [userData, setUserData] = React.useState(null);
   const { setShowLogoutModal } = useLogoutModalStore();
   const profileRef = React.useRef();
+  const dropdownRef = React.useRef();
 
   // Load user data from localStorage
   const loadUserData = React.useCallback(() => {
@@ -51,6 +56,9 @@ function Header() {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileOpen(false);
       }
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -76,7 +84,7 @@ function Header() {
         {/* Right side - Actions */}
         <div className="flex items-center space-x-2 md:space-x-4">
           {/* Contact my POC Button */}
-          <div className="relative">
+          <div className="relative" ref={dropdownRef}>
             <button
               className="hidden md:flex items-center space-x-2 bg-[#01334C] hover:bg-[#00486D] text-white px-3 py-1.5 rounded-lg transition-colors duration-200 text-sm"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -114,15 +122,30 @@ function Header() {
                     Mail Sanya Singh
                   </span>
                 </a>
+                <div className="border-t border-gray-100 my-1"></div>
+                <a
+                  href="tel:+919876543210"
+                  className="flex items-center space-x-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <BiSupport className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-700">
+                    Talk to Customer Care
+                  </span>
+                </a>
+                <a
+                  href="https://mail.google.com/mail/?view=cm&to=hello@oneasy.ai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <IoMailOutline className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-700">
+                    Email Customer Care
+                  </span>
+                </a>
               </div>
             )}
           </div>
-
-          {/* Talk to Customer Care Button */}
-          <button className="hidden sm:flex items-center space-x-2 bg-white border border-[#01334C] text-[#01334C] px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm">
-            <BiSupport className="w-4 h-4" />
-            <span>Talk to Customer Care</span>
-          </button>
 
           {/* Notification and Avatar */}
           <div className="flex items-center space-x-3">
@@ -152,6 +175,27 @@ function Header() {
               </button>
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                  <button
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      navigate("/settings");
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2"
+                  >
+                    <RiUser3Line className="w-4 h-4" />
+                    <span>Profile</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      navigate("/subscriptions");
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2"
+                  >
+                    <MdOutlinePayment className="w-4 h-4" />
+                    <span>Invoices/Payments</span>
+                  </button>
+                  <div className="border-t border-gray-100 my-1"></div>
                   <button
                     onClick={() => {
                       setIsProfileOpen(false);

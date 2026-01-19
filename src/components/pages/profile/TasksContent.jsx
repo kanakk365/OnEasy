@@ -3,102 +3,102 @@ import { AiOutlinePlus, AiOutlineEye } from "react-icons/ai";
 import { BsCalendar3 } from "react-icons/bs";
 
 // Reusable Input Component - moved outside to prevent recreation
-const StyledInput = ({
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-  className = "",
-}) => (
-  <div className={className}>
-    <label className="block text-sm text-gray-700 mb-2 font-medium">
-      {label}
-    </label>
-    <div className="relative">
-      <input
-        type={type}
-        value={value || ""}
-        onChange={onChange}
-        className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        placeholder={placeholder}
-      />
-      {type === "date" && (
-        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
-          <BsCalendar3 />
-        </div>
-      )}
-    </div>
-  </div>
-);
-
-// Reusable Select Component - moved outside to prevent recreation
-const StyledSelect = ({
-  label,
-  value,
-  onChange,
-  options,
-  placeholder,
-  className = "",
-}) => (
-  <div className={className}>
-    <label className="block text-sm text-gray-700 mb-2 font-medium">
-      {label}
-    </label>
-    <div className="relative">
-      <select
-        value={value || ""}
-        onChange={onChange}
-        className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
-      >
-        <option value="">{placeholder}</option>
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
-        <svg
-          className="w-4 h-4 text-gray-500"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
+  const StyledInput = ({
+    label,
+    value,
+    onChange,
+    placeholder,
+    type = "text",
+    className = "",
+  }) => (
+    <div className={className}>
+      <label className="block text-sm text-gray-700 mb-2 font-medium">
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          type={type}
+          value={value || ""}
+          onChange={onChange}
+          className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          placeholder={placeholder}
+        />
+        {type === "date" && (
+          <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+            <BsCalendar3 />
+          </div>
+        )}
       </div>
     </div>
-  </div>
-);
+  );
+
+// Reusable Select Component - moved outside to prevent recreation
+  const StyledSelect = ({
+    label,
+    value,
+    onChange,
+    options,
+    placeholder,
+    className = "",
+  }) => (
+    <div className={className}>
+      <label className="block text-sm text-gray-700 mb-2 font-medium">
+        {label}
+      </label>
+      <div className="relative">
+        <select
+          value={value || ""}
+          onChange={onChange}
+          className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
+        >
+          <option value="">{placeholder}</option>
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+          <svg
+            className="w-4 h-4 text-gray-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
 
 // Empty State Component - moved outside to prevent recreation
-const EmptySectionState = ({ title, buttonText, onAdd }) => (
-  <div className="flex flex-col items-center justify-center text-center py-10">
-    <div className="mb-4">
-      <img
-        src="/empty.svg"
-        alt="No Items"
-        className="w-16 h-16 opacity-90 mx-auto"
-      />
+  const EmptySectionState = ({ title, buttonText, onAdd }) => (
+    <div className="flex flex-col items-center justify-center text-center py-10">
+      <div className="mb-4">
+        <img
+          src="/empty.svg"
+          alt="No Items"
+          className="w-16 h-16 opacity-90 mx-auto"
+        />
+      </div>
+      <p className="text-gray-500 text-sm mb-4">{title}</p>
+      {buttonText && (
+        <button
+          type="button"
+          onClick={onAdd}
+          className="px-5 py-2.5 bg-[#01334C] text-white rounded-md hover:bg-[#01283a] transition-colors text-xs font-medium"
+        >
+          {buttonText}
+        </button>
+      )}
     </div>
-    <p className="text-gray-500 text-sm mb-4">{title}</p>
-    {buttonText && (
-      <button
-        type="button"
-        onClick={onAdd}
-        className="px-5 py-2.5 bg-[#01334C] text-white rounded-md hover:bg-[#01283a] transition-colors text-xs font-medium"
-      >
-        {buttonText}
-      </button>
-    )}
-  </div>
-);
+  );
 
 const TasksContent = ({
   adminTasksList,
@@ -146,8 +146,8 @@ const TasksContent = ({
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
                   {adminTasksList.map((task, idx) => (
-                    <tr 
-                      key={idx} 
+                    <tr
+                      key={idx}
                       className="hover:bg-gray-50 transition-colors cursor-pointer"
                       onClick={() => setSelectedAdminTask(task)}
                     >

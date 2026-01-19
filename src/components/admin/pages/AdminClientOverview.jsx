@@ -6431,7 +6431,7 @@ function AdminClientOverview() {
                       </div>
                     </div>
                   </div>
-                )}
+                    )}
                   </div>
 
                   {/* User Tasks - Right Side */}
@@ -7094,11 +7094,11 @@ function AdminClientOverview() {
                               </div>
                             )}
                           </div>
-                        </div>
+                                        </div>
+                                      </div>
                       </div>
-                    </div>
                   </div>
-                )}
+                    )}
                   </div>
 
                   {/* User Notes - Right Side (Read Only) */}

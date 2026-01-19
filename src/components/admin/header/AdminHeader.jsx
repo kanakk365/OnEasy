@@ -23,6 +23,7 @@ function AdminHeader() {
     handleLogout,
   } = useLogoutModalStore();
   const profileRef = React.useRef();
+  const dropdownRef = React.useRef();
 
   // Load user data from localStorage
   const loadUserData = React.useCallback(() => {
@@ -57,6 +58,9 @@ function AdminHeader() {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileOpen(false);
       }
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -82,7 +86,7 @@ function AdminHeader() {
         {/* Right side - Actions */}
         <div className="flex items-center space-x-2 md:space-x-4">
           {/* Contact my POC Button */}
-          <div className="relative">
+          <div className="relative" ref={dropdownRef}>
             <button
               className="hidden md:flex items-center space-x-2 text-white px-4 py-2 rounded-xl transition-all duration-200 text-sm font-medium"
               style={{
@@ -119,15 +123,30 @@ function AdminHeader() {
                   <IoMailOutline className="w-4 h-4 text-[#00486D]" />
                   <span className="text-sm text-gray-700">Email Support</span>
                 </a>
+                <div className="border-t border-gray-100 my-1"></div>
+                <a
+                  href="tel:+919876543210"
+                  className="flex items-center space-x-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <BiSupport className="w-4 h-4 text-[#00486D]" />
+                  <span className="text-sm text-gray-700">
+                    Talk to Customer Care
+                  </span>
+                </a>
+                <a
+                  href="https://mail.google.com/mail/?view=cm&to=hello@oneasy.ai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <IoMailOutline className="w-4 h-4 text-[#00486D]" />
+                  <span className="text-sm text-gray-700">
+                    Email Customer Care
+                  </span>
+                </a>
               </div>
             )}
           </div>
-
-          {/* Talk to Customer Care Button */}
-          <button className="hidden sm:flex items-center space-x-2 bg-white border border-[#00486D] text-[#00486D] px-4 py-2 rounded-xl hover:bg-[#00486D] hover:text-white transition-all duration-200 text-sm font-medium">
-            <BiSupport className="w-4 h-4" />
-            <span>Talk to Customer Care</span>
-          </button>
 
           {/* Notification and Avatar */}
           <div className="flex items-center space-x-3">
