@@ -149,7 +149,7 @@ function ClientServices() {
       }
     }
     
-    // Step 3: If payment is completed and service_status exists (and is not completed), return "In progress"
+    // Step 3: If payment is completed, check service status
     const isPaymentCompleted = reg.payment_completed || 
                                paymentStatus === 'paid' || 
                                paymentStatus === 'payment_completed' ||
@@ -157,16 +157,17 @@ function ClientServices() {
                                reg.payment_id;
     
     if (isPaymentCompleted) {
-      // Payment completed - if service_status exists (and is not completed), it's In progress
+      // Payment completed - if service_status exists (and is not completed), it's "In progress"
+      // This includes: WIP, data received, data pending, submitted, etc.
       if (reg.service_status && reg.service_status.trim() !== '') {
-        // Already checked for 'completed' above, so any other status means In progress
+        // Already checked for 'completed' above, so any other status means "In progress"
         return 'In progress';
       }
-      // Payment completed but no service_status set yet - should be in "Open" (payment pending admin action)
-      return 'Open';
+      // Payment completed but no service_status set yet - treat as "In progress"
+      return 'In progress';
     }
     
-    // Default for services without payment (shouldn't happen in normal flow, but fallback)
+    // Default: no payment or pending payment
     return 'Open';
   }, []);
 

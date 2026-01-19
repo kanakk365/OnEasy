@@ -210,40 +210,40 @@ function Client() {
   }, [filteredNotices]);
 
   const getServiceTab = React.useCallback((reg) => {
-    const status = getStatusLabel(reg);
-    if (!status) return "Open";
-
-    const statusLower = status.toLowerCase();
-
-    // Completed statuses go to Completed
-    if (statusLower === "completed" || statusLower === "payment completed") {
-      return "Completed";
+    // Step 1: Check payment status first - if payment is pending/unpaid, return "Open"
+    const paymentStatus = (reg.payment_status || '').toLowerCase().trim();
+    if (paymentStatus === 'pending' || paymentStatus === 'unpaid') {
+      return 'Open';
     }
-
-    // In Progress statuses
-    if (
-      statusLower === "wip" ||
-      statusLower === "data received" ||
-      statusLower === "awaiting confirmation from the govt" ||
-      statusLower === "awaiting confirmation from the government" ||
-      statusLower === "data pending from client" ||
-      statusLower === "in progress" ||
-      statusLower === "submitted" ||
-      statusLower === "registered"
-    ) {
-      return "In progress";
+    
+    // Step 2: Check if service_status is "completed" (case-insensitive) - return "Completed"
+    if (reg.service_status && reg.service_status.trim() !== '') {
+      const serviceStatus = reg.service_status.toLowerCase().trim();
+      if (serviceStatus === 'completed') {
+        return 'Completed';
+      }
     }
-
-    // Technical issues and payment pending are still in progress
-    if (
-      statusLower === "technical issue" ||
-      statusLower === "payment pending"
-    ) {
-      return "In progress";
+    
+    // Step 3: If payment is completed, check service status
+    const isPaymentCompleted = reg.payment_completed || 
+                               paymentStatus === 'paid' || 
+                               paymentStatus === 'payment_completed' ||
+                               reg.razorpay_payment_id ||
+                               reg.payment_id;
+    
+    if (isPaymentCompleted) {
+      // Payment completed - if service_status exists (and is not completed), it's "In progress"
+      // This includes: WIP, data received, data pending, submitted, etc.
+      if (reg.service_status && reg.service_status.trim() !== '') {
+        // Already checked for 'completed' above, so any other status means "In progress"
+        return 'In progress';
+      }
+      // Payment completed but no service_status set yet - treat as "In progress"
+      return 'In progress';
     }
-
-    // Default to Open
-    return "Open";
+    
+    // Default: no payment or pending payment
+    return 'Open';
   }, []);
 
   const filteredServices = React.useMemo(() => {
