@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import apiClient from '../../utils/api';
+import { AUTH_CONFIG } from '../../config/auth';
 
 function PaymentSuccess() {
   const logApiError = (label, err) => {
@@ -23,8 +24,30 @@ function PaymentSuccess() {
   const [status, setStatus] = useState('success'); // processing, success, error
   const [message, setMessage] = useState('Payment successful! Finalizing your registration...');
 
+  // Check if current user is admin
+  const isAdmin = () => {
+    try {
+      const storedUser = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER);
+      if (!storedUser) return false;
+      
+      const user = JSON.parse(storedUser);
+      const userRole = user.role || user.role_id;
+      
+      return userRole === 'admin' || userRole === 1 || userRole === 'superadmin' || userRole === 2;
+    } catch (error) {
+      console.error('Error checking user role:', error);
+      return false;
+    }
+  };
+
   // Determine where to send the user after a successful payment
   const getRedirectPath = (registrationType, ticketId) => {
+    // If admin, redirect to admin services page
+    if (isAdmin()) {
+      console.log('👤 Admin user detected, redirecting to admin services...');
+      return '/admin/services';
+    }
+
     if (!registrationType) return '/login';
 
     const slug = registrationType.toLowerCase();
@@ -109,14 +132,25 @@ function PaymentSuccess() {
             if (updateResponse.success) {
               setStatus('success');
 
-              // For portal-initiated payments, send user to details/registration page.
-              // For email/copied payment links, always send to login.
-              if (source === 'portal' && ticket_id && registration_type) {
+              // For portal-initiated payments OR email payment links with ticket_id, redirect to appropriate page
+              // Check if user is logged in by checking if we can determine admin status
+              const userLoggedIn = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) !== null;
+              
+              if (userLoggedIn && ticket_id && registration_type) {
+                // User is logged in - redirect based on role
+                const targetPath = getRedirectPath(registration_type, ticket_id);
+                const redirectMessage = isAdmin() 
+                  ? 'Payment successful! Redirecting to admin panel...' 
+                  : 'Payment successful! Redirecting to your registration...';
+                setMessage(redirectMessage);
+                navigate(targetPath); // Redirect immediately
+              } else if (source === 'portal' && ticket_id && registration_type) {
+                // Portal payment but user not logged in (edge case) - redirect to registration
                 const targetPath = getRedirectPath(registration_type, ticket_id);
                 setMessage('Payment successful! Redirecting to your registration...');
-                navigate(targetPath); // Redirect immediately
+                navigate(targetPath);
               } else {
-                // Fallback: original behaviour – send to login
+                // User not logged in or missing ticket info - send to login
                 setMessage('Payment successful! Redirecting to login...');
                 navigate('/login', {
                   state: {
@@ -155,13 +189,25 @@ function PaymentSuccess() {
           if (response.success) {
             setStatus('success');
 
-            if (source === 'portal' && ticket_id && registration_type) {
+            // Check if user is logged in
+            const userLoggedIn = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) !== null;
+            
+            if (userLoggedIn && ticket_id && registration_type) {
+              // User is logged in - redirect based on role
+              const targetPath = getRedirectPath(registration_type, ticket_id);
+              const redirectMessage = isAdmin() 
+                ? 'Payment successful! Redirecting to admin panel...' 
+                : 'Payment successful! Redirecting to your registration...';
+              setMessage(redirectMessage);
+              navigate(targetPath); // Redirect immediately
+            } else if (source === 'portal' && ticket_id && registration_type) {
+              // Portal payment but user not logged in (edge case)
               const targetPath = getRedirectPath(registration_type, ticket_id);
               setMessage('Payment successful! Redirecting to your registration...');
-              navigate(targetPath); // Redirect immediately
+              navigate(targetPath);
             } else {
+              // User not logged in or missing ticket info - send to login
               setMessage('Payment successful! Redirecting to login...');
-              // Redirect to login immediately
               navigate('/login', {
                 state: {
                   message: 'Payment successful! Please login to view your registration.',
@@ -182,11 +228,24 @@ function PaymentSuccess() {
           // Show success message and redirect to appropriate page
           setStatus('success');
 
-          if (source === 'portal' && ticket_id && registration_type) {
+          // Check if user is logged in
+          const userLoggedIn = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) !== null;
+
+          if (userLoggedIn && ticket_id && registration_type) {
+            // User is logged in - redirect based on role
+            const targetPath = getRedirectPath(registration_type, ticket_id);
+            const redirectMessage = isAdmin() 
+              ? 'Payment successful! Redirecting to admin panel...' 
+              : 'Payment successful! Redirecting to your registration...';
+            setMessage(redirectMessage);
+            navigate(targetPath); // Redirect immediately
+          } else if (source === 'portal' && ticket_id && registration_type) {
+            // Portal payment but user not logged in (edge case)
             const targetPath = getRedirectPath(registration_type, ticket_id);
             setMessage('Payment successful! Redirecting to your registration...');
-            navigate(targetPath); // Redirect immediately
+            navigate(targetPath);
           } else {
+            // User not logged in or missing ticket info - send to login
             setMessage('Payment successful! Redirecting to login...');
             navigate('/login', {
               state: {
