@@ -28,7 +28,7 @@ function Settings() {
     businessAddress: "",
     aadharCard: null,
     panCard: null,
-    signature: null,
+    countryCode: "+91", // Default to India
   });
   const [organizations, setOrganizations] = useState([
     {
@@ -136,7 +136,7 @@ function Settings() {
           businessAddress: user.business_address || "",
           aadharCard: validateFileUrl(user.aadhar_card),
           panCard: validateFileUrl(user.pan_card),
-          signature: validateFileUrl(user.signature),
+          countryCode: user.country_code || "+91", // Default to India if not set
         });
 
         // Populate Organisation Details - now supports multiple organizations with websites
@@ -222,6 +222,7 @@ function Settings() {
                 optionalAttachment1: org.optional_attachment_1 || null,
                 optionalAttachment2: org.optional_attachment_2 || null,
                 incorporationDate: org.incorporation_date || "",
+                panNumber: org.pan_number || "",
                 panFile: org.pan_file || null,
                 tan: org.tan || "",
                 cin: org.cin || "",
@@ -255,6 +256,7 @@ function Settings() {
               category: user.category || "",
               gstin: user.gstin || "",
               incorporationDate: user.incorporation_date || "",
+              panNumber: user.pan_number || "",
               panFile: user.pan_file || null,
               tan: user.tan || "",
               cin: user.cin || "",
@@ -379,7 +381,7 @@ function Settings() {
       const currentUserId = userData.id || userId;
 
       // Upload any files that are File objects (not yet uploaded)
-      const documentFields = ["aadharCard", "panCard", "signature"];
+      const documentFields = ["aadharCard", "panCard"];
       const updatedFormData = { ...formData };
 
       for (const field of documentFields) {
@@ -407,13 +409,13 @@ function Settings() {
         clientProfile: {
           name: updatedFormData.name,
           whatsapp: updatedFormData.whatsapp,
+          countryCode: updatedFormData.countryCode || "+91",
           email: updatedFormData.email,
           dob: updatedFormData.dob,
           address: updatedFormData.address,
           businessAddress: updatedFormData.businessAddress,
           aadharCard: updatedFormData.aadharCard,
           panCard: updatedFormData.panCard,
-          signature: updatedFormData.signature,
         },
       };
 
@@ -444,6 +446,7 @@ function Settings() {
           category: org.category || "",
           gstin: org.gstin,
           incorporationDate: org.incorporationDate,
+          panNumber: org.panNumber || "",
           panFile: org.panFile,
           tan: org.tan,
           cin: org.cin,
@@ -742,6 +745,7 @@ function Settings() {
       category: "",
       gstin: "",
       incorporationDate: "",
+      panNumber: "",
       panFile: null,
       tan: "",
       cin: "",
@@ -887,6 +891,7 @@ function Settings() {
                   url: "",
                   login: "",
                   password: "",
+                  remarks: "",
                   showPassword: false,
                 },
               ],
@@ -1111,26 +1116,10 @@ function Settings() {
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-6">
         <div className="flex items-center gap-2 mb-1">
-          <button className="text-black">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M15 18L9 12L15 6"
-                stroke="black"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+          
           <h1 className="text-xl font-bold text-black">Profile</h1>
         </div>
-        <p className="text-gray-500 text-sm ml-8 italic">Create your profile</p>
+        
       </div>
 
       <div className="max-w-7xl mx-auto">

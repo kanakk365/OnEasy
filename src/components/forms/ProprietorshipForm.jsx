@@ -15,12 +15,14 @@ function ProprietorshipForm({
   const [searchParams] = useSearchParams();
   const urlTicketId = searchParams.get('ticketId');
   const ticketId = propTicketId || urlTicketId;
+  const [draftTicketId, setDraftTicketId] = useState(ticketId || null);
+  const [isDraftSaving, setIsDraftSaving] = useState(false);
   
   const [packageDetails, setPackageDetails] = useState(propPackageDetails);
   const [step, setStep] = useState(1);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({ step1: {}, step2: {} });
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [oneasyTeamFill, setOneasyTeamFill] = useState(false);
   const [clientFillRequest, setClientFillRequest] = useState(false);
@@ -221,8 +223,64 @@ function ProprietorshipForm({
     loadFormData();
   }, [ticketId, navigate, isAdminFilling]);
 
+  useEffect(() => {
+    if (ticketId && ticketId !== draftTicketId) {
+      setDraftTicketId(ticketId);
+    }
+  }, [ticketId, draftTicketId]);
+
+  const saveDraft = async ({ reason } = {}) => {
+    if (loadingDraft) return;
+    if (isSubmitting) return;
+    if (isDraftSaving) return;
+
+    try {
+      setIsDraftSaving(true);
+      const paymentDetails = formData.paymentDetails || JSON.parse(localStorage.getItem('paymentDetails') || '{}');
+      const submissionData = {
+        step1: formData.step1 || {},
+        step2: formData.step2 || {},
+        packageDetails: formData.packageDetails || packageDetails,
+        paymentDetails,
+        ticketId: draftTicketId || ticketId || null
+      };
+
+      console.log(`💾 Autosaving Proprietorship draft (${reason || 'unknown'})...`, {
+        step,
+        ticketId: submissionData.ticketId || null
+      });
+
+      const result = await submitProprietorshipRegistration(submissionData);
+      const newTicketId = result?.data?.ticketId || result?.ticketId || result?.data?.data?.ticketId;
+
+      if (newTicketId) {
+        setDraftTicketId(newTicketId);
+        localStorage.setItem('editingTicketId', newTicketId);
+        if (!searchParams.get('ticketId')) {
+          const qs = new URLSearchParams(window.location.search);
+          qs.set('ticketId', newTicketId);
+          navigate(`/proprietorship-form?${qs.toString()}`, { replace: true });
+        }
+      }
+    } catch (e) {
+      console.error('❌ Autosave Proprietorship draft failed:', e);
+    } finally {
+      setIsDraftSaving(false);
+    }
+  };
+
+  // Debounced autosave whenever formData changes
+  useEffect(() => {
+    const t = setTimeout(() => {
+      saveDraft({ reason: 'debounced-change' });
+    }, 900);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData]);
+
   const handleNext = () => {
     if (step < 2) {
+      saveDraft({ reason: `next-step-${step}` });
       setStep(step + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -258,7 +316,7 @@ function ProprietorshipForm({
         step2: formData.step2 || {},
         packageDetails: formData.packageDetails || packageDetails,
         paymentDetails: paymentDetails,
-        ticketId: ticketId // Include ticketId for draft updates
+        ticketId: draftTicketId || ticketId // Include ticketId for draft updates
       };
 
       console.log('📤 Submitting proprietorship registration:', submissionData);

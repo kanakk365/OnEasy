@@ -321,6 +321,7 @@ function AdminClientOverview() {
                 category: org.category || "",
                 gstin: org.gstin || "",
                 incorporationDate: org.incorporation_date || "",
+                panNumber: org.pan_number || "",
                 panFile: org.pan_file || null,
                 tan: org.tan || "",
                 cin: org.cin || "",
@@ -365,6 +366,7 @@ function AdminClientOverview() {
               category: "",
               gstin: "",
               incorporationDate: "",
+              panNumber: "",
               panFile: null,
               tan: "",
               cin: "",
@@ -1156,6 +1158,7 @@ function AdminClientOverview() {
         category: "",
         gstin: "",
         incorporationDate: "",
+        panNumber: "",
         panFile: null,
         tan: "",
         cin: "",
@@ -1379,6 +1382,7 @@ function AdminClientOverview() {
           category: org.category || "",
           gstin: org.gstin,
           incorporationDate: org.incorporationDate,
+          panNumber: org.panNumber || "",
           panFile: org.panFile,
           tan: org.tan,
           cin: org.cin,
@@ -1459,6 +1463,7 @@ function AdminClientOverview() {
             tradeName: org.trade_name || "",
             gstin: org.gstin || "",
             incorporationDate: org.incorporation_date || "",
+            panNumber: org.pan_number || "",
             panFile: org.pan_file || null,
             tan: org.tan || "",
             cin: org.cin || "",
@@ -2750,6 +2755,24 @@ function AdminClientOverview() {
                               }
                               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent font-mono"
                               placeholder="GSTIN number"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              PAN Number
+                            </label>
+                            <input
+                              type="text"
+                              value={org.panNumber || ""}
+                              onChange={(e) =>
+                                updateOrganization(
+                                  org.id,
+                                  "panNumber",
+                                  e.target.value
+                                )
+                              }
+                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent font-mono"
+                              placeholder="PAN number"
                             />
                           </div>
                           <div>
@@ -4056,6 +4079,32 @@ function AdminClientOverview() {
                                                   </div>
                                                   <div>
                                                     <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                      PAN Number
+                                                    </label>
+                                                    {isEditingThisOrg ? (
+                                                      <input
+                                                        type="text"
+                                                        value={
+                                                          orgInState?.panNumber ||
+                                                          ""
+                                                        }
+                                                        onChange={(e) =>
+                                                          updateOrganization(
+                                                            orgInState.id,
+                                                            "panNumber",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
+                                                      />
+                                                    ) : (
+                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                        {org.pan_number || "-"}
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                  <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
                                                       TAN
                                                     </label>
                                                     {isEditingThisOrg ? (
@@ -5161,6 +5210,9 @@ function AdminClientOverview() {
                                                           <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">
                                                             Password
                                                           </th>
+                                                          <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">
+                                                            Remarks
+                                                          </th>
                                                           {isEditingThisOrg && (
                                                             <th className="px-3 py-2 text-left font-semibold text-gray-700 border border-gray-300">
                                                               Actions
@@ -5359,6 +5411,26 @@ function AdminClientOverview() {
                                                                 "••••••••"
                                                               ) : (
                                                                 "-"
+                                                              )}
+                                                            </td>
+                                                            <td className="px-3 py-2 border border-gray-300">
+                                                              {isEditingThisOrg ? (
+                                                                <input
+                                                                  type="text"
+                                                                  value={website.remarks || ""}
+                                                                  onChange={(e) =>
+                                                                    updateWebsiteInOrg(
+                                                                      orgInState.id,
+                                                                      website.id,
+                                                                      "remarks",
+                                                                      e.target.value
+                                                                    )
+                                                                  }
+                                                                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                                                  placeholder="Enter remarks"
+                                                                />
+                                                              ) : (
+                                                                website.remarks || "-"
                                                               )}
                                                             </td>
                                                             {isEditingThisOrg && (

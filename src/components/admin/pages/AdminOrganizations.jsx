@@ -53,6 +53,7 @@ function AdminOrganizations() {
     category: "",
     gstin: "",
     incorporationDate: "",
+    panNumber: "",
     panFile: null,
     tan: "",
     cin: "",
@@ -270,6 +271,7 @@ function AdminOrganizations() {
               editingOrg.incorporationDate !== "-"
                 ? editingOrg.incorporationDate
                 : "",
+            panNumber: editingOrg.panNumber !== "-" ? editingOrg.panNumber || "" : "",
             panFile: editingOrg.panFile,
             tan: editingOrg.tan !== "-" ? editingOrg.tan : "",
             cin: editingOrg.cin !== "-" ? editingOrg.cin : "",
@@ -521,6 +523,7 @@ function AdminOrganizations() {
           gstin: org.gstin || "",
           incorporationDate:
             org.incorporation_date || org.incorporationDate || "",
+          panNumber: org.pan_number || org.panNumber || "",
           panFile: org.pan_file || org.panFile || null,
           tan: org.tan || "",
           cin: org.cin || "",
@@ -545,6 +548,7 @@ function AdminOrganizations() {
         category: newOrganization.category || "",
         gstin: newOrganization.gstin || "",
         incorporationDate: newOrganization.incorporationDate || "",
+        panNumber: newOrganization.panNumber || "",
         panFile: newOrganization.panFile,
         tan: newOrganization.tan || "",
         cin: newOrganization.cin || "",
@@ -580,6 +584,7 @@ function AdminOrganizations() {
           category: "",
           gstin: "",
           incorporationDate: "",
+          panNumber: "",
           panFile: null,
           tan: "",
           cin: "",
@@ -663,6 +668,7 @@ function AdminOrganizations() {
             category: foundOrg.category || "-",
             gstin: foundOrg.gstin || "-",
             incorporationDate: foundOrg.incorporation_date || "-",
+            panNumber: foundOrg.pan_number || "-",
             panFile: foundOrg.pan_file || null,
             tan: foundOrg.tan || "-",
             cin: foundOrg.cin || "-",
@@ -909,6 +915,20 @@ function AdminOrganizations() {
                     }
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
                     placeholder="Enter GSTIN"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    PAN Number
+                  </label>
+                  <input
+                    type="text"
+                    value={newOrganization.panNumber}
+                    onChange={(e) =>
+                      updateNewOrganizationField("panNumber", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    placeholder="Enter PAN Number"
                   />
                 </div>
                 <div>
@@ -1373,15 +1393,21 @@ function AdminOrganizations() {
                                 className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
                               >
                                 <option value="">Select Type</option>
-                                <option value="GST">GST</option>
                                 <option value="Income Tax">Income Tax</option>
-                                <option value="MCA (V2)">MCA (V2)</option>
-                                <option value="MCA (V3)">MCA (V3)</option>
-                                <option value="PF">PF</option>
-                                <option value="ESI">ESI</option>
-                                <option value="P-Tax">P-Tax</option>
-                                <option value="Trademarks">Trademarks</option>
-                                <option value="Other">Other</option>
+                                <option value="GST">GST</option>
+                                <option value="Income Tax – TAN Based">Income Tax – TAN Based</option>
+                                <option value="Professional Tax">Professional Tax</option>
+                                <option value="Provident Fund">Provident Fund</option>
+                                <option value="ESIC">ESIC</option>
+                                <option value="MCA">MCA</option>
+                                <option value="Labour license">Labour license</option>
+                                <option value="TRACES">TRACES</option>
+                                <option value="ICEGATE">ICEGATE</option>
+                                <option value="Service Tax">Service Tax</option>
+                                <option value="VAT">VAT</option>
+                                <option value="Others 1">Others 1</option>
+                                <option value="Others 2">Others 2</option>
+                                <option value="Others 3">Others 3</option>
                               </select>
                             </td>
                             <td className="px-4 py-3">
@@ -1573,8 +1599,8 @@ function AdminOrganizations() {
               </div>
             </div>
 
-            {/* GSTIN & Category */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* GSTIN, PAN Number & Incorporation Date */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   GSTIN
@@ -1591,6 +1617,25 @@ function AdminOrganizations() {
                 ) : (
                   <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
                     {selectedOrg.gstin}
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  PAN Number
+                </label>
+                {editingOrg ? (
+                  <input
+                    type="text"
+                    value={editingOrg.panNumber || ""}
+                    onChange={(e) =>
+                      updateOrganizationField("panNumber", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                  />
+                ) : (
+                  <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                    {selectedOrg.panNumber || "-"}
                   </div>
                 )}
               </div>
@@ -2222,15 +2267,21 @@ function AdminOrganizations() {
                                   className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
                                 >
                                   <option value="">Select Type</option>
-                                  <option value="GST">GST</option>
                                   <option value="Income Tax">Income Tax</option>
-                                  <option value="MCA (V2)">MCA (V2)</option>
-                                  <option value="MCA (V3)">MCA (V3)</option>
-                                  <option value="PF">PF</option>
-                                  <option value="ESI">ESI</option>
-                                  <option value="P-Tax">P-Tax</option>
-                                  <option value="Trademarks">Trademarks</option>
-                                  <option value="Other">Other</option>
+                                  <option value="GST">GST</option>
+                                  <option value="Income Tax – TAN Based">Income Tax – TAN Based</option>
+                                  <option value="Professional Tax">Professional Tax</option>
+                                  <option value="Provident Fund">Provident Fund</option>
+                                  <option value="ESIC">ESIC</option>
+                                  <option value="MCA">MCA</option>
+                                  <option value="Labour license">Labour license</option>
+                                  <option value="TRACES">TRACES</option>
+                                  <option value="ICEGATE">ICEGATE</option>
+                                  <option value="Service Tax">Service Tax</option>
+                                  <option value="VAT">VAT</option>
+                                  <option value="Others 1">Others 1</option>
+                                  <option value="Others 2">Others 2</option>
+                                  <option value="Others 3">Others 3</option>
                                 </select>
                               ) : (
                                 <span className="text-gray-900">

@@ -20,11 +20,12 @@ function ClientServices() {
           return;
         }
 
-        const [pl, prop, si, gst] = await Promise.all([
+        const [pl, prop, si, gst, allServices] = await Promise.all([
           apiClient.get(`/private-limited/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
           apiClient.get(`/proprietorship/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
           apiClient.get(`/startup-india/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
           apiClient.get(`/gst/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
+          apiClient.get(`/registrations`).catch(() => ({ success: false, data: [] })),
         ]);
 
         const normalize = (resp) =>
@@ -34,11 +35,38 @@ function ClientServices() {
               : resp.data?.data || []
             : [];
 
+        // Filter generic services (exclude duplicates from specific service tables)
+        const specificServiceTicketIds = new Set([
+          ...normalize(pl).map(s => s.ticket_id).filter(Boolean),
+          ...normalize(prop).map(s => s.ticket_id).filter(Boolean),
+          ...normalize(si).map(s => s.ticket_id).filter(Boolean),
+          ...normalize(gst).map(s => s.ticket_id).filter(Boolean),
+        ]);
+        
+        // Include generic services that are not in specific service tables
+        const genericServices = normalize(allServices).filter(service => {
+          const ticketId = service.ticket_id || service.id;
+          if (!ticketId) return false;
+          // Exclude services that are already in specific tables (SI_, GST_, PROP_, PVT_, PLC_, OPC_)
+          const upperTicketId = ticketId.toString().toUpperCase();
+          if (upperTicketId.startsWith('SI_') || 
+              upperTicketId.startsWith('GST_') || 
+              upperTicketId.startsWith('PROP_') ||
+              upperTicketId.startsWith('PVT_') ||
+              upperTicketId.startsWith('PLC_') ||
+              upperTicketId.startsWith('OPC_')) {
+            return false;
+          }
+          // Include if not already in specific service tables
+          return !specificServiceTicketIds.has(ticketId);
+        });
+
         const combined = [
           ...normalize(pl),
           ...normalize(prop),
           ...normalize(si),
           ...normalize(gst),
+          ...genericServices,
         ];
 
         if (combined.length === 0) {

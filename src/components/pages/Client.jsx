@@ -11,7 +11,7 @@ function Client() {
   const [loadingService, setLoadingService] = React.useState(true);
   const [allNotices, setAllNotices] = React.useState([]);
   const [loadingNotice, setLoadingNotice] = React.useState(true);
-  const [activeNoticeTab] = React.useState("All Notices"); // 'All Notices' or 'My Notices'
+  const [activeNoticeTab, setActiveNoticeTab] = React.useState("All Notices"); // 'All Notices' or 'My Notices'
   const [activeServiceTab, setActiveServiceTab] = React.useState("Open");
   const [organizations, setOrganizations] = React.useState([]);
   const [loadingOrganizations, setLoadingOrganizations] = React.useState(true);
@@ -22,6 +22,7 @@ function Client() {
     overdue: 0,
     other: 0,
   });
+  const [currentNoticeIndex, setCurrentNoticeIndex] = React.useState(0);
 
   React.useEffect(() => {
     // Add smooth scrolling behavior
@@ -57,7 +58,7 @@ function Client() {
           return;
         }
 
-        const [pl, prop, si, gst] = await Promise.all([
+        const [pl, prop, si, gst, allServices] = await Promise.all([
           apiClient
             .get(`/private-limited/user-registrations/${userId}`)
             .catch(() => ({ success: false, data: [] })),
@@ -70,6 +71,9 @@ function Client() {
           apiClient
             .get(`/gst/user-registrations/${userId}`)
             .catch(() => ({ success: false, data: [] })),
+          apiClient
+            .get(`/registrations`)
+            .catch(() => ({ success: false, data: [] })),
         ]);
 
         const normalize = (resp) =>
@@ -79,11 +83,38 @@ function Client() {
               : resp.data?.data || []
             : [];
 
+        // Filter generic services (exclude duplicates from specific service tables)
+        const specificServiceTicketIds = new Set([
+          ...normalize(pl).map(s => s.ticket_id).filter(Boolean),
+          ...normalize(prop).map(s => s.ticket_id).filter(Boolean),
+          ...normalize(si).map(s => s.ticket_id).filter(Boolean),
+          ...normalize(gst).map(s => s.ticket_id).filter(Boolean),
+        ]);
+        
+        // Include generic services that are not in specific service tables
+        const genericServices = normalize(allServices).filter(service => {
+          const ticketId = service.ticket_id || service.id;
+          if (!ticketId) return false;
+          // Exclude services that are already in specific tables (SI_, GST_, PROP_, PVT_, PLC_, OPC_)
+          const upperTicketId = ticketId.toString().toUpperCase();
+          if (upperTicketId.startsWith('SI_') || 
+              upperTicketId.startsWith('GST_') || 
+              upperTicketId.startsWith('PROP_') ||
+              upperTicketId.startsWith('PVT_') ||
+              upperTicketId.startsWith('PLC_') ||
+              upperTicketId.startsWith('OPC_')) {
+            return false;
+          }
+          // Include if not already in specific service tables
+          return !specificServiceTicketIds.has(ticketId);
+        });
+
         const combined = [
           ...normalize(pl),
           ...normalize(prop),
           ...normalize(si),
           ...normalize(gst),
+          ...genericServices,
         ];
 
         if (combined.length === 0) {
@@ -204,10 +235,35 @@ function Client() {
     }
   }, [allNotices, activeNoticeTab]);
 
-  // Get the latest notice from filtered notices
-  const notice = React.useMemo(() => {
-    return filteredNotices.length > 0 ? filteredNotices[0] : null;
-  }, [filteredNotices]);
+  // Auto-scroll carousel every 3 seconds with infinite loop
+  React.useEffect(() => {
+    if (filteredNotices.length <= 1) return; // No need to scroll if only one or no notices
+
+    const interval = setInterval(() => {
+      setCurrentNoticeIndex((prevIndex) => prevIndex + 1);
+    }, 3000); // 3 seconds
+
+    return () => clearInterval(interval);
+  }, [filteredNotices.length]);
+
+  // Handle infinite loop: reset to start when reaching the duplicate at the end
+  React.useEffect(() => {
+    if (filteredNotices.length <= 1) return;
+    
+    // When we reach the duplicate (index === filteredNotices.length), reset to 0 without animation
+    if (currentNoticeIndex === filteredNotices.length) {
+      const timeout = setTimeout(() => {
+        setCurrentNoticeIndex(0);
+      }, 700); // Wait for animation to complete (700ms)
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [currentNoticeIndex, filteredNotices.length]);
+
+  // Reset carousel index when tab changes
+  React.useEffect(() => {
+    setCurrentNoticeIndex(0);
+  }, [activeNoticeTab]);
 
   const getServiceTab = React.useCallback((reg) => {
     // Step 1: Check payment status first - if payment is pending/unpaid, return "Open"
@@ -345,8 +401,18 @@ function Client() {
   };
 
   const formatServiceName = (reg) => {
-    const raw = reg.business_name || reg.package_name || "Service";
-    return raw.replace(/[-–]\s*Payment\s*Completed/i, "").trim();
+    // Prioritize package_name first (like "Starter", "Pro", etc.), then business_name
+    const raw = reg.package_name || reg.business_name || reg.service_name || "Service";
+    const cleaned = raw.replace(/[-–]\s*Payment\s*Completed/i, "").trim();
+
+    // If the package name is incorrectly set to "Private Limited Registration" but the service type
+    // is different (determined by ticket ID), replace it with the correct service name
+    const type = deriveType(reg);
+    if (cleaned === "Private Limited Registration" && type !== "Private Limited") {
+      return `${type}`;
+    }
+
+    return cleaned;
   };
 
   const deriveType = (reg) => {
@@ -461,43 +527,32 @@ function Client() {
 
             {/* Service List Items */}
             <div className="bg-[#F8FAFC] rounded-b-xl p-4 min-h-[300px]">
-              <div className="space-y-0">
-                {loadingService ? (
-                  <div className="text-center py-8 text-gray-400">
-                    Loading services...
+              {loadingService ? (
+                <div className="text-center py-8 text-gray-400">
+                  Loading services...
+                </div>
+              ) : filteredServices.length > 0 ? (
+                <div>
+                  {/* Table Header */}
+                  <div className="grid grid-cols-12 gap-4 py-3 px-2 border-b-2 border-gray-200 mb-2">
+                    <div className="col-span-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Service
+                    </div>
+                    <div className="col-span-3 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
+                      Status
+                    </div>
+                    <div className="col-span-3 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
+                      Date
+                    </div>
                   </div>
-                ) : filteredServices.length > 0 ? (
-                  filteredServices.slice(0, 5).map((service, idx) => (
-                    <div
-                      key={idx}
-                      className="grid grid-cols-12 gap-4 py-4 px-2 border-b border-gray-100 items-center last:border-0 hover:bg-white transition-colors cursor-pointer"
-                    >
-                      <div className="col-span-2 text-sm font-medium text-gray-900">
-                        #
-                        {String(service.ticket_id || service.id)
-                          .slice(-5)
-                          .toUpperCase()}
-                        CIN
-                      </div>
-                      <div className="col-span-4 text-sm font-medium text-gray-900 truncate">
-                        {formatServiceName(service)}
-                      </div>
-                      <div className="col-span-3 flex justify-center">
-                        <span
-                          className={`px-6 py-1.5 rounded-full text-sm font-medium ${
-                            service.status === "Open" ||
-                            getStatusLabel(service) === "Open"
-                              ? "bg-[#D1FAE5] text-[#065F46]"
-                              : getStatusBadgeColor(getStatusLabel(service))
-                          }`}
-                        >
-                          {getStatusLabel(service)}
-                        </span>
-                      </div>
-                      <div 
-                        className="col-span-3 text-sm font-medium text-[#00486D] text-right hover:underline cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
+                  
+                  {/* Table Rows */}
+                  <div className="space-y-0">
+                    {filteredServices.slice(0, 5).map((service, idx) => (
+                      <div
+                        key={idx}
+                        className="grid grid-cols-12 gap-4 py-4 px-2 border-b border-gray-100 items-center last:border-0 hover:bg-white transition-colors cursor-pointer"
+                        onClick={() => {
                           const type = deriveType(service);
                           const slug = getTypeSlug(type);
                           const ticketId = service.ticket_id || service.id;
@@ -506,16 +561,38 @@ function Client() {
                           }
                         }}
                       >
-                        {formatDate(service.updated_at || service.created_at)}
+                        <div className="col-span-6">
+                          <div className="text-sm font-semibold text-gray-900">
+                            {deriveType(service)}
+                          </div>
+                          <div className="text-xs font-medium text-gray-500 mt-0.5">
+                            {formatServiceName(service)}
+                          </div>
+                        </div>
+                        <div className="col-span-3 flex justify-center">
+                          <span
+                            className={`px-4 py-1.5 rounded-full text-xs font-medium ${
+                              service.status === "Open" ||
+                              getStatusLabel(service) === "Open"
+                                ? "bg-[#D1FAE5] text-[#065F46]"
+                                : getStatusBadgeColor(getStatusLabel(service))
+                            }`}
+                          >
+                            {getStatusLabel(service)}
+                          </span>
+                        </div>
+                        <div className="col-span-3 text-sm font-medium text-gray-700 text-right">
+                          {formatDate(service.updated_at || service.created_at)}
+                        </div>
                       </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-10 text-gray-400">
-                    No services found.
+                    ))}
                   </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="text-center py-10 text-gray-400">
+                  No services found.
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -524,7 +601,7 @@ function Client() {
         <div className="col-span-12 lg:col-span-5 space-y-8">
           {/* Notice Board */}
           <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-medium text-gray-900">
                 Notice Board
               </h2>
@@ -536,38 +613,91 @@ function Client() {
               </button>
             </div>
 
+            {/* Notice Tabs */}
+            <div className="flex border-b border-gray-100 mb-4">
+              <button 
+                onClick={() => setActiveNoticeTab('All Notices')}
+                className={`pb-2 mr-6 text-sm font-medium transition-colors ${
+                  activeNoticeTab === 'All Notices' 
+                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                All Notices
+              </button>
+              <button 
+                onClick={() => setActiveNoticeTab('My Notices')}
+                className={`pb-2 text-sm font-medium transition-colors ${
+                  activeNoticeTab === 'My Notices' 
+                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                My Notices
+              </button>
+            </div>
+
             {loadingNotice ? (
               <div className="text-sm text-gray-400">Loading...</div>
-            ) : notice ? (
-              <div className="bg-[#FFF9F0] rounded-xl p-6 border border-[#FFF0D4]">
-                <div className="flex items-start space-x-4">
-                  <div className="bg-[#FFAB00] rounded-full p-2.5 flex-shrink-0 shadow-sm text-white">
-                    <TriangleAlert className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-gray-900 text-sm font-medium mb-1">
-                      {notice.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm leading-relaxed mb-1">
-                      {notice.description}
-                    </p>
-                    {notice.link && (
-                      <a
-                        href={notice.link}
-                        className="text-[#023752] font-medium text-sm hover:underline"
-                      >
-                        File Now.
-                      </a>
-                    )}
-                    {/* Pagination dots simulation */}
-                    <div className="mt-4 flex space-x-1.5 opacity-50">
-                      <div className="w-1.5 h-1.5 rounded-full bg-gray-800"></div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+            ) : filteredNotices.length > 0 ? (
+              <div className="relative overflow-hidden">
+                {/* Carousel Container */}
+                <div 
+                  className={`flex ${currentNoticeIndex === 0 ? '' : 'transition-transform duration-700 ease-in-out'}`}
+                  style={{ transform: `translateX(-${currentNoticeIndex * 100}%)` }}
+                >
+                  {/* Render all notices + duplicate first notice at the end for infinite loop */}
+                  {[...filteredNotices, ...(filteredNotices.length > 1 ? [filteredNotices[0]] : [])].map((noticeItem, index) => (
+                    <div 
+                      key={index} 
+                      className="w-full flex-shrink-0"
+                    >
+                      <div className="bg-[#FFF9F0] rounded-xl p-6 border border-[#FFF0D4]">
+                        <div className="flex items-start space-x-4">
+                          <div className="bg-[#FFAB00] rounded-full p-2.5 flex-shrink-0 shadow-sm text-white">
+                            <TriangleAlert className="w-5 h-5" />
+                          </div>
+                          <div className="w-full">
+                            <h3 className="text-gray-900 text-sm font-medium mb-1">
+                              {noticeItem.title}
+                            </h3>
+                            <p className="text-gray-600 text-sm leading-relaxed mb-1">
+                              {noticeItem.description}
+                            </p>
+                            {noticeItem.link && (
+                              <a
+                                href={noticeItem.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[#023752] font-medium text-sm hover:underline"
+                              >
+                                File Now.
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
+
+                {/* Pagination dots - only show if multiple notices */}
+                {filteredNotices.length > 1 && (
+                  <div className="mt-4 flex justify-center space-x-1.5">
+                    {filteredNotices.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentNoticeIndex(index)}
+                        className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                          index === (currentNoticeIndex % filteredNotices.length)
+                            ? 'bg-gray-800' 
+                            : 'bg-gray-300 hover:bg-gray-400'
+                        }`}
+                        aria-label={`Go to notice ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="p-4 text-center text-sm text-gray-500">
@@ -619,7 +749,7 @@ function Client() {
         <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-medium text-gray-900">
-              List Of Companies
+              My Organizations
             </h2>
             <button
               onClick={() => navigate("/organization")}
@@ -650,12 +780,12 @@ function Client() {
                   >
                     <div className="col-span-4">
                       <span className="text-sm font-medium text-gray-900 block">
-                        {org.legal_name || "OneEasy Technologies Pvt. Ltd."}
+                        {org.legal_name || org.trade_name || "-"}
                       </span>
                     </div>
                     <div className="col-span-6">
                       <span className="text-sm text-gray-500 font-medium">
-                        {org.gstin || "27ABCDE1234F1Z5"}
+                        {org.gstin || "-"}
                       </span>
                     </div>
                     <div className="col-span-2 text-right">

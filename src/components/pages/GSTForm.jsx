@@ -9,6 +9,8 @@ function GSTForm() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const ticketId = searchParams.get('ticketId');
+  const [draftTicketId, setDraftTicketId] = useState(ticketId || null);
+  const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     step1: {},
@@ -23,6 +25,12 @@ function GSTForm() {
   const [isAdminFilling, setIsAdminFilling] = useState(false);
   const [clientId, setClientId] = useState(null);
   
+  useEffect(() => {
+    if (ticketId && ticketId !== draftTicketId) {
+      setDraftTicketId(ticketId);
+    }
+  }, [ticketId, draftTicketId]);
+
   // Check if user is admin or superadmin and if admin is filling
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
@@ -149,6 +157,8 @@ function GSTForm() {
 
   const nextStep = () => {
     if (step < 2) {
+      // Save draft before moving to next step
+      saveDraft({ reason: `next-step-${step}` });
       setStep(step + 1);
     }
   };
@@ -200,7 +210,7 @@ function GSTForm() {
           price: packagePrice,
           priceValue: packagePrice
         },
-        ticketId: ticketId || null,
+        ticketId: draftTicketId || ticketId || null,
         // Pass clientId if admin is filling on behalf
         ...(isAdminFilling && clientId ? { clientId } : {})
       };
@@ -216,6 +226,16 @@ function GSTForm() {
         const ticketId = response.ticketId || response.data?.ticket_id;
         console.log('🎫 Ticket ID:', ticketId);
         
+        if (ticketId) {
+          setDraftTicketId(ticketId);
+          localStorage.setItem('editingTicketId', ticketId);
+          if (!searchParams.get('ticketId')) {
+            const qs = new URLSearchParams(window.location.search);
+            qs.set('ticketId', ticketId);
+            navigate(`/gst-form?${qs.toString()}`, { replace: true });
+          }
+        }
+
         setShowSuccessModal(true);
       } catch (apiError) {
         console.error('❌ API Error:', apiError);
@@ -248,6 +268,29 @@ function GSTForm() {
       }
     }
   };
+
+  const saveDraft = async ({ reason } = {}) => {
+    if (loadingDraft) return;
+    if (isSubmitting) return;
+    if (isDraftSaving) return;
+
+    try {
+      setIsDraftSaving(true);
+      console.log(`💾 Autosaving GST draft (${reason || 'unknown'})...`, { step, ticketId: draftTicketId || ticketId || null });
+      await handleSubmit(false);
+    } finally {
+      setIsDraftSaving(false);
+    }
+  };
+
+  // Debounced autosave whenever formData changes
+  useEffect(() => {
+    const t = setTimeout(() => {
+      saveDraft({ reason: 'debounced-change' });
+    }, 900);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData]);
 
   const steps = [
     "Basic Business Details",

@@ -30,6 +30,8 @@ function PrivateLimitedForm({
     numberOfDirectors: 1,
     numberOfShareholders: 1
   });
+  const [draftTicketId, setDraftTicketId] = useState(ticketId || localStorage.getItem('editingTicketId') || null);
+  const [isDraftSaving, setIsDraftSaving] = useState(false);
   
   // Restore scroll on component mount (fix for Razorpay modal scroll issue)
   useEffect(() => {
@@ -67,6 +69,65 @@ function PrivateLimitedForm({
       document.documentElement.classList.remove('rzp-modal-open');
     };
   }, []);
+
+  useEffect(() => {
+    if (ticketId && ticketId !== draftTicketId) {
+      setDraftTicketId(ticketId);
+    }
+  }, [ticketId, draftTicketId]);
+
+  const saveDraft = async ({ reason } = {}) => {
+    if (isSubmitting) return;
+    if (isDraftSaving) return;
+
+    try {
+      setIsDraftSaving(true);
+      const payload = {
+        step1: formData.step1 || {},
+        step2: formData.step2 || {},
+        step3: formData.step3 || {},
+        directors: formData.directors || [],
+      };
+
+      console.log(`💾 Autosaving Private Limited draft (${reason || 'unknown'})...`, {
+        step,
+        ticketId: draftTicketId || null
+      });
+
+      const result = await submitPrivateLimitedRegistration(
+        payload,
+        isFillingOnBehalf ? clientId : null,
+        draftTicketId || ticketId || null
+      );
+
+      // Try to pick up a ticket id from several possible response shapes
+      const newTicketId =
+        result?.data?.ticket_id ||
+        result?.data?.data?.ticket_id ||
+        result?.data?.ticketId ||
+        result?.ticket_id ||
+        result?.ticketId ||
+        null;
+
+      if (newTicketId) {
+        setDraftTicketId(newTicketId);
+        localStorage.setItem('editingTicketId', newTicketId);
+      }
+    } catch (e) {
+      console.error('❌ Autosave Private Limited draft failed:', e);
+    } finally {
+      setIsDraftSaving(false);
+    }
+  };
+
+  // Debounced autosave whenever formData changes
+  useEffect(() => {
+    const t = setTimeout(() => {
+      saveDraft({ reason: 'debounced-change' });
+    }, 900);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData]);
 
   // Check if user is admin or superadmin and restore team fill state
   useEffect(() => {
@@ -331,6 +392,8 @@ function PrivateLimitedForm({
 
   const goNext = () => {
     if (step === 1) {
+      // Autosave draft immediately when step 1 is completed
+      saveDraft({ reason: 'next-step-1' });
       // Show success modal for step 1
       setShowStep1CompleteModal(true);
       
@@ -346,6 +409,7 @@ function PrivateLimitedForm({
     }
     
     if (step < 3) {
+      saveDraft({ reason: `next-step-${step}` });
       const newStep = step + 1;
       setStep(newStep);
       if (onStepChange) onStepChange(newStep);

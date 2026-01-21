@@ -1,187 +1,187 @@
 import React from "react";
 import { FiEyeOff, FiEye } from "react-icons/fi";
 import { BsCalendar3 } from "react-icons/bs";
-import { AiOutlinePlus } from "react-icons/ai";
+import { AiOutlinePlus, AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { uploadFileDirect } from "../../../utils/s3Upload";
 import { AUTH_CONFIG } from "../../../config/auth";
 
-// Reusable Input Component to match design
-const StyledInput = ({
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-}) => (
-  <div>
-    <label className="block text-sm text-gray-700 mb-2 font-medium">
-      {label}
-    </label>
-    <input
-      type={type}
-      value={value || ""}
-      onChange={onChange}
-      className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-      placeholder={placeholder}
-    />
-  </div>
-);
-
-// Reusable Select Component
-const StyledSelect = ({ label, value, onChange, options, placeholder }) => (
-  <div>
-    <label className="block text-sm text-gray-700 mb-2 font-medium">
-      {label}
-    </label>
-    <div className="relative">
-      <select
+  // Reusable Input Component to match design
+  const StyledInput = ({
+    label,
+    value,
+    onChange,
+    placeholder,
+    type = "text",
+  }) => (
+    <div>
+      <label className="block text-sm text-gray-700 mb-2 font-medium">
+        {label}
+      </label>
+      <input
+        type={type}
         value={value || ""}
         onChange={onChange}
-        className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
-      >
-        <option value="">{placeholder}</option>
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
-        <svg
-          className="w-4 h-4 text-gray-500"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
-      </div>
-    </div>
-  </div>
-);
-
-// Reusable File Upload Component matching the image design
-const StyledFileUpload = ({
-  label,
-  fileUrl,
-  onFileChange,
-  onViewFile,
-  id,
-  placeholder,
-}) => (
-  <div>
-    <label className="block text-sm text-gray-700 mb-2 font-medium">
-      {label}
-    </label>
-    <div className="flex bg-white border border-gray-100 rounded-lg p-1 items-center">
-      <label
-        htmlFor={id}
-        className="flex-1 px-4 py-2 text-sm text-gray-500 cursor-pointer truncate"
-      >
-        {fileUrl && typeof fileUrl === "string" && fileUrl.trim() !== ""
-          ? "File uploaded successfully"
-          : placeholder || "Upload file"}
-        <input
-          type="file"
-          id={id}
-          onChange={onFileChange}
-          className="hidden"
-          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-        />
-      </label>
-
-      {/* Upload/View Button - Dark blue with download icon */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          if (
-            fileUrl &&
-            typeof fileUrl === "string" &&
-            fileUrl.trim() !== ""
-          ) {
-            onViewFile(fileUrl);
-          } else {
-            document.getElementById(id).click();
-          }
-        }}
-        className="bg-[#00486D] text-white w-10 h-10 rounded-lg flex items-center justify-center hover:bg-[#01334C] transition-colors flex-shrink-0"
-      >
-        {fileUrl ? (
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 15L12 3M12 15L16 11M12 15L8 11"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M2 17L2 19C2 20.1046 2.89543 21 4 21L20 21C21.1046 21 22 20.1046 22 19L22 17"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-        ) : (
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 15L12 3M12 15L16 11M12 15L8 11"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M2 17L2 19C2 20.1046 2.89543 21 4 21L20 21C21.1046 21 22 20.1046 22 19L22 17"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-        )}
-      </button>
-    </div>
-  </div>
-);
-
-// Empty State Component
-const EmptySectionState = ({ title, buttonText, onAdd }) => (
-  <div className="bg-white rounded-xl py-8 px-8 flex flex-col items-center justify-center text-center">
-    <div className="mb-4">
-      <img
-        src="/empty.svg"
-        alt="No Items"
-        className="w-16 h-16 opacity-90 mx-auto"
+        className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        placeholder={placeholder}
       />
     </div>
-    <p className="text-gray-500 text-sm mb-4">{title}</p>
-    <button
-      type="button"
-      onClick={onAdd}
-      className="px-5 py-2.5 bg-[#01334C] text-white rounded-md hover:bg-[#01283a] transition-colors text-xs font-medium"
-    >
-      {buttonText}
-    </button>
-  </div>
-);
+  );
+
+  // Reusable Select Component
+  const StyledSelect = ({ label, value, onChange, options, placeholder }) => (
+    <div>
+      <label className="block text-sm text-gray-700 mb-2 font-medium">
+        {label}
+      </label>
+      <div className="relative">
+        <select
+          value={value || ""}
+          onChange={onChange}
+          className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
+        >
+          <option value="">{placeholder}</option>
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+          <svg
+            className="w-4 h-4 text-gray-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Reusable File Upload Component matching the image design
+  const StyledFileUpload = ({
+    label,
+    fileUrl,
+    onFileChange,
+    onViewFile,
+    id,
+    placeholder,
+  }) => (
+    <div>
+      <label className="block text-sm text-gray-700 mb-2 font-medium">
+        {label}
+      </label>
+      <div className="flex bg-white border border-gray-100 rounded-lg p-1 items-center">
+        <label
+          htmlFor={id}
+          className="flex-1 px-4 py-2 text-sm text-gray-500 cursor-pointer truncate"
+        >
+          {fileUrl && typeof fileUrl === "string" && fileUrl.trim() !== ""
+            ? "File uploaded successfully"
+            : placeholder || "Upload file"}
+          <input
+            type="file"
+            id={id}
+            onChange={onFileChange}
+            className="hidden"
+            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+          />
+        </label>
+
+        {/* Upload/View Button - Dark blue with download icon */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            if (
+              fileUrl &&
+              typeof fileUrl === "string" &&
+              fileUrl.trim() !== ""
+            ) {
+              onViewFile(fileUrl);
+            } else {
+              document.getElementById(id).click();
+            }
+          }}
+          className="bg-[#00486D] text-white w-10 h-10 rounded-lg flex items-center justify-center hover:bg-[#01334C] transition-colors flex-shrink-0"
+        >
+          {fileUrl ? (
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+              d="M12 15L12 3M12 15L16 11M12 15L8 11"
+              stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+              d="M2 17L2 19C2 20.1046 2.89543 21 4 21L20 21C21.1046 21 22 20.1046 22 19L22 17"
+              stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          ) : (
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+              d="M12 15L12 3M12 15L16 11M12 15L8 11"
+              stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+              d="M2 17L2 19C2 20.1046 2.89543 21 4 21L20 21C21.1046 21 22 20.1046 22 19L22 17"
+              stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+
+  // Empty State Component
+  const EmptySectionState = ({ title, buttonText, onAdd }) => (
+    <div className="bg-white rounded-xl py-8 px-8 flex flex-col items-center justify-center text-center">
+      <div className="mb-4">
+        <img
+          src="/empty.svg"
+          alt="No Items"
+          className="w-16 h-16 opacity-90 mx-auto"
+        />
+      </div>
+      <p className="text-gray-500 text-sm mb-4">{title}</p>
+      <button
+        type="button"
+        onClick={onAdd}
+        className="px-5 py-2.5 bg-[#01334C] text-white rounded-md hover:bg-[#01283a] transition-colors text-xs font-medium"
+      >
+        {buttonText}
+      </button>
+    </div>
+  );
 
 const OrganisationDetailsContent = ({
   organizations,
@@ -199,6 +199,7 @@ const OrganisationDetailsContent = ({
   updateDigitalSignature,
   addWebsite,
   updateWebsite,
+  removeWebsite,
   togglePasswordVisibility,
   handleViewFile,
   handleSaveOrganisation,
@@ -216,7 +217,7 @@ const OrganisationDetailsContent = ({
     <div className="px-6 pb-6 pt-6 animate-fadeIn">
       <div className="space-y-6">
         {/* Show table if no organization selected */}
-        {savedOrganizations.length > 0 && !selectedOrgId && (
+        {savedOrganizations.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">
@@ -242,6 +243,9 @@ const OrganisationDetailsContent = ({
                     </th>
                     <th className="px-6 py-3 font-medium border-b border-gray-200">
                       GSTIN
+                    </th>
+                    <th className="px-6 py-3 font-medium border-b border-gray-200 text-right">
+                      Action
                     </th>
                   </tr>
                 </thead>
@@ -413,6 +417,14 @@ const OrganisationDetailsContent = ({
                         updateOrganization(org.id, "gstin", e.target.value)
                       }
                       placeholder="Enter GSTIN"
+                    />
+                    <StyledInput
+                      label="PAN Number"
+                      value={org.panNumber}
+                      onChange={(e) =>
+                        updateOrganization(org.id, "panNumber", e.target.value)
+                      }
+                      placeholder="Enter PAN Number"
                     />
 
                     {/* Incorporation Date with Calendar Icon */}
@@ -878,7 +890,7 @@ const OrganisationDetailsContent = ({
                 <div className="bg-[#F8F9FA] rounded-xl p-4 mt-6 pb-6">
                   <div className="flex justify-between items-center mb-6">
                     <h4 className="text-[15px] font-medium text-gray-900">
-                      Credentials Details
+                      Credentials
                     </h4>
                     <button
                       type="button"
@@ -886,7 +898,6 @@ const OrganisationDetailsContent = ({
                       className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold flex items-center gap-2"
                     >
                       <AiOutlinePlus className="w-3 h-3" /> Add Credentials
-                      Details
                     </button>
                   </div>
 
@@ -897,13 +908,36 @@ const OrganisationDetailsContent = ({
                       onAdd={() => addWebsite(org.id)}
                     />
                   ) : (
-                    <div className="space-y-4">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-[#00486D] text-white">
+                          <tr>
+                            <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
+                              Type
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium text-xs">
+                              URL
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium text-xs">
+                              Login
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium text-xs">
+                              Password
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium text-xs">
+                              Remarks
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium text-xs rounded-tr-lg">
+                              Action
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-100">
                       {org.websites.map((website) => (
-                        <div key={website.id} className="relative">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                            <StyledSelect
-                              label="Credential Type"
-                              value={website.type}
+                            <tr key={website.id} className="hover:bg-gray-50">
+                              <td className="px-4 py-3 text-gray-900">
+                                <select
+                                  value={website.type || ""}
                               onChange={(e) =>
                                 updateWebsite(
                                   org.id,
@@ -912,17 +946,36 @@ const OrganisationDetailsContent = ({
                                   e.target.value
                                 )
                               }
-                              placeholder="Enter Website Type"
-                              options={[
-                                { value: "Income Tax", label: "Income Tax" },
-                                { value: "GST", label: "GST" },
-                                { value: "MCA", label: "MCA" },
-                                { value: "Bank", label: "Bank" },
-                              ]}
-                            />
-                            <StyledInput
-                              label="Credential URL"
-                              value={website.url}
+                                  className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#00486D]"
+                                >
+                                  <option value="">Select Type</option>
+                                  {[
+                                    "Income Tax",
+                                    "GST",
+                                    "Income Tax – TAN Based",
+                                    "Professional Tax",
+                                    "Provident Fund",
+                                    "ESIC",
+                                    "MCA",
+                                    "Labour license",
+                                    "TRACES",
+                                    "ICEGATE",
+                                    "Service Tax",
+                                    "VAT",
+                                    "Others 1",
+                                    "Others 2",
+                                    "Others 3",
+                                  ].map((t) => (
+                                    <option key={t} value={t}>
+                                      {t}
+                                    </option>
+                                  ))}
+                                </select>
+                              </td>
+                              <td className="px-4 py-3 text-gray-900">
+                                <input
+                                  type="text"
+                                  value={website.url || ""}
                               onChange={(e) =>
                                 updateWebsite(
                                   org.id,
@@ -931,11 +984,14 @@ const OrganisationDetailsContent = ({
                                   e.target.value
                                 )
                               }
-                              placeholder="Enter Website URL"
+                                  className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#00486D]"
+                                  placeholder="Enter URL"
                             />
-                            <StyledInput
-                              label="Login"
-                              value={website.login}
+                              </td>
+                              <td className="px-4 py-3 text-gray-900">
+                                <input
+                                  type="text"
+                                  value={website.login || ""}
                               onChange={(e) =>
                                 updateWebsite(
                                   org.id,
@@ -944,18 +1000,15 @@ const OrganisationDetailsContent = ({
                                   e.target.value
                                 )
                               }
+                                  className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#00486D]"
                               placeholder="Enter Login"
                             />
-                            <div className="relative">
-                              <label className="block text-sm text-gray-700 mb-2 font-medium">
-                                Password
-                              </label>
-                              <div className="relative">
+                              </td>
+                              <td className="px-4 py-3 text-gray-900">
+                                <div className="flex items-center gap-2">
                                 <input
-                                  type={
-                                    website.showPassword ? "text" : "password"
-                                  }
-                                  value={website.password}
+                                    type={website.showPassword ? "text" : "password"}
+                                    value={website.password || ""}
                                   onChange={(e) =>
                                     updateWebsite(
                                       org.id,
@@ -964,26 +1017,42 @@ const OrganisationDetailsContent = ({
                                       e.target.value
                                     )
                                   }
-                                  className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    className="flex-1 px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#00486D]"
                                   placeholder="Enter Password"
                                 />
+                                  {website.password && (
                                 <button
+                                      type="button"
                                   onClick={() =>
                                     togglePasswordVisibility(org.id, website.id)
                                   }
-                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                                      className="text-gray-500 hover:text-gray-700 focus:outline-none"
                                 >
                                   {website.showPassword ? (
-                                    <FiEyeOff />
+                                        <AiOutlineEyeInvisible className="w-4 h-4" />
                                   ) : (
-                                    <FiEye />
+                                        <AiOutlineEye className="w-4 h-4" />
                                   )}
                                 </button>
+                                  )}
                               </div>
-                            </div>
-                          </div>
-                        </div>
+                              </td>
+                              <td className="px-4 py-3 text-gray-900">
+                                {/* Remarks are admin-only; clients can view but not edit */}
+                                {website.remarks || "-"}
+                              </td>
+                              <td className="px-4 py-3">
+                                <button
+                                  onClick={() => removeWebsite(org.id, website.id)}
+                                  className="text-red-500 hover:text-red-700 text-sm font-medium"
+                                >
+                                  Remove
+                                </button>
+                              </td>
+                            </tr>
                       ))}
+                        </tbody>
+                      </table>
                     </div>
                   )}
                 </div>

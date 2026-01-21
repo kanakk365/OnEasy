@@ -9,6 +9,8 @@ function StartupIndiaForm() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const ticketId = searchParams.get('ticketId');
+  const [draftTicketId, setDraftTicketId] = useState(ticketId || null);
+  const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     step1: {},
@@ -25,6 +27,13 @@ function StartupIndiaForm() {
   const [isAdminOrSuperadmin, setIsAdminOrSuperadmin] = useState(false);
   const [isAdminFilling, setIsAdminFilling] = useState(false);
   
+  // Keep draftTicketId in sync when URL ticketId changes
+  useEffect(() => {
+    if (ticketId && ticketId !== draftTicketId) {
+      setDraftTicketId(ticketId);
+    }
+  }, [ticketId, draftTicketId]);
+
   // Check if user is admin or superadmin and if admin is filling
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
@@ -188,6 +197,78 @@ function StartupIndiaForm() {
     
     loadFormData();
   }, [navigate, ticketId]);
+
+  const buildSubmissionData = () => {
+    // Preserve package details from formData or use existing values
+    const packageName = formData.packageDetails?.name || formData.packageName;
+    const packagePrice =
+      formData.packageDetails?.priceValue ||
+      formData.packageDetails?.price ||
+      formData.packagePrice;
+
+    return {
+      ...formData,
+      // Explicitly include payment details
+      paymentId: formData.paymentDetails?.paymentId || formData.paymentDetails?.orderId,
+      orderId: formData.paymentDetails?.orderId || formData.paymentDetails?.paymentId,
+      paymentStatus: formData.paymentDetails?.payment_status || 'paid',
+      // Explicitly include package details - preserve existing if available
+      packageName: packageName,
+      packagePrice: packagePrice,
+      packageDetails: {
+        name: packageName,
+        price: packagePrice,
+        priceValue: packagePrice
+      },
+      // Include ticketId if editing existing draft
+      ticketId: draftTicketId || ticketId || null
+    };
+  };
+
+  const saveDraft = async ({ reason } = {}) => {
+    // Avoid draft saves while loading an existing draft, or while the final submit is in progress
+    if (loadingDraft) return;
+    if (isSubmitting) return;
+    if (isDraftSaving) return;
+
+    try {
+      setIsDraftSaving(true);
+      const submissionData = buildSubmissionData();
+      console.log(`💾 Autosaving Startup India draft (${reason || 'unknown'})...`, {
+        step,
+        ticketId: submissionData.ticketId || null
+      });
+
+      const response = await submitStartupIndiaRegistration(submissionData);
+      const newTicketId = response.ticketId || response.data?.ticket_id;
+
+      if (newTicketId) {
+        setDraftTicketId(newTicketId);
+        localStorage.setItem('editingTicketId', newTicketId);
+
+        // Ensure URL has ticketId so subsequent saves update (not create new)
+        if (!ticketId) {
+          const qs = new URLSearchParams(window.location.search);
+          qs.set('ticketId', newTicketId);
+          navigate(`/startup-india-form?${qs.toString()}`, { replace: true });
+        }
+      }
+    } catch (e) {
+      console.error('❌ Autosave Startup India draft failed:', e);
+      // Don't block user navigation on autosave failure
+    } finally {
+      setIsDraftSaving(false);
+    }
+  };
+
+  // Debounced autosave whenever formData changes
+  useEffect(() => {
+    const t = setTimeout(() => {
+      saveDraft({ reason: 'debounced-change' });
+    }, 900);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData]);
   
   // Show loading state while fetching draft
   if (loadingDraft && ticketId) {
@@ -211,6 +292,7 @@ function StartupIndiaForm() {
 
   const goNext = async () => {
     if (step < 5) {
+      await saveDraft({ reason: `next-step-${step}` });
       setStep((s) => s + 1);
       return;
     }
@@ -232,21 +314,9 @@ function StartupIndiaForm() {
       const packagePrice = formData.packageDetails?.priceValue || formData.packageDetails?.price || formData.packagePrice;
       
       const submissionData = {
-        ...formData,
-        // Explicitly include payment details
-        paymentId: formData.paymentDetails?.paymentId || formData.paymentDetails?.orderId,
-        orderId: formData.paymentDetails?.orderId || formData.paymentDetails?.paymentId,
-        paymentStatus: formData.paymentDetails?.payment_status || 'paid',
-        // Explicitly include package details - preserve existing if available
-        packageName: packageName,
-        packagePrice: packagePrice,
-        packageDetails: {
-          name: packageName,
-          price: packagePrice,
-          priceValue: packagePrice
-        },
-        // Include ticketId if editing existing draft
-        ticketId: ticketId || null
+        ...buildSubmissionData(),
+        // Ensure we use the latest draft ticket id when submitting
+        ticketId: draftTicketId || ticketId || null
       };
       
       console.log('📦 Package details in submission:', {

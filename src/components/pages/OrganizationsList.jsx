@@ -29,14 +29,21 @@ function OrganizationsList() {
             return hasLegalName || hasTradeName || hasGstin;
           });
           
-          setOrganizations(validOrgs.map(org => ({
-            id: org.id,
-            legalName: org.legal_name || '-',
-            tradeName: org.trade_name || '-',
-            gstin: org.gstin || '-',
-            organisationType: org.organisation_type || '-',
-            incorporationDate: org.incorporation_date || null
-          })));
+          setOrganizations(validOrgs.map(org => {
+            // Debug: Log GSTIN value to help identify random values
+            if (org.gstin && org.gstin.trim() !== '' && org.gstin !== '-') {
+              console.log(`Organization ${org.id} has GSTIN:`, org.gstin);
+            }
+            
+            return {
+              id: org.id,
+              legalName: org.legal_name || '-',
+              tradeName: org.trade_name || '-',
+              gstin: org.gstin || '-',
+              organisationType: org.organisation_type || '-',
+              incorporationDate: org.incorporation_date || null
+            };
+          }));
         } else {
           setOrganizations([]);
         }
