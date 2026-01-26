@@ -258,9 +258,15 @@ function GSTForm() {
       // Always navigate after submission
       if (shouldNavigate) {
         setTimeout(() => {
-          // If admin is filling, navigate back to client overview, otherwise to user dashboard
-          if (isAdminFilling && clientId) {
-            navigate(`/admin/client-overview/${clientId}`);
+          // If admin is filling, navigate back to admin clients page, otherwise to user dashboard
+          if (isAdminFilling && isAdminOrSuperadmin) {
+            const userData = JSON.parse(localStorage.getItem('user') || '{}');
+            const userRole = userData.role || userData.role_id;
+            if (userRole === 'superadmin' || userRole === 2) {
+              navigate('/superadmin/clients');
+            } else {
+              navigate('/admin/clients');
+            }
           } else {
             navigate('/gst-dashboard');
           }

@@ -45,8 +45,19 @@ function StartupIndiaForm() {
     const searchParams = new URLSearchParams(window.location.search);
     const adminParam = searchParams.get('admin');
     const clientIdParam = searchParams.get('clientId');
-    if (adminParam === 'true' && clientIdParam && isAdmin) {
-      setIsAdminFilling(true);
+    
+    // Check if admin is filling - either from URL params or if admin is on admin route
+    if (isAdmin) {
+      const isOnAdminRoute = window.location.pathname.includes('/admin/') || window.location.pathname.includes('/superadmin/');
+      const hasClientId = !!clientIdParam;
+      
+      // Admin is filling if:
+      // 1. URL has admin=true AND clientId, OR
+      // 2. Admin is on admin route AND has clientId (fallback for cases where admin param might be missing)
+      if ((adminParam === 'true' && hasClientId) || (isOnAdminRoute && hasClientId)) {
+        setIsAdminFilling(true);
+        console.log('✅ Admin filling detected:', { adminParam, clientIdParam, isOnAdminRoute });
+      }
     }
     
     // Check if user clicked "OnEasy Team Fill" button
@@ -380,7 +391,19 @@ function StartupIndiaForm() {
       // Empty forms are saved as drafts and should appear in the dashboard
       if (shouldNavigate) {
         setTimeout(() => {
-          navigate('/startup-india-dashboard');
+          // If admin is filling for a client, redirect to admin clients page
+          if (isAdminFilling && isAdminOrSuperadmin) {
+            const userData = JSON.parse(localStorage.getItem('user') || '{}');
+            const userRole = userData.role || userData.role_id;
+            if (userRole === 'superadmin' || userRole === 2) {
+              navigate('/superadmin/clients');
+            } else {
+              navigate('/admin/clients');
+            }
+          } else {
+            // Regular user navigation
+            navigate('/startup-india-dashboard');
+          }
         }, 2000);
       }
     }

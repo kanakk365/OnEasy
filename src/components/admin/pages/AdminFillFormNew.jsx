@@ -42,6 +42,20 @@ function AdminFillFormNew() {
     }
   }, [packageDetails, registrationType]);
 
+  // Navigate to Startup India form with admin params instead of rendering directly
+  // This ensures the form can detect admin filling from URL params
+  useEffect(() => {
+    if ((registrationType === 'startup-india' || registrationType === 'startup india') && userId) {
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      const userRole = userData.role || userData.role_id;
+      const adminPath = userRole === 'superadmin' || userRole === 2 ? '/superadmin' : '/admin';
+      
+      navigate(`${adminPath}/startup-india-form?admin=true&clientId=${userId}`, {
+        state: { userId, userName, userEmail, registrationType, packagePlan }
+      });
+    }
+  }, [userId, registrationType, navigate, userName, userEmail, packagePlan]);
+
   const handleFormSubmit = async (submittedFormData) => {
     try {
       console.log('📝 Form submitted with data:', submittedFormData);
@@ -156,8 +170,14 @@ function AdminFillFormNew() {
       </>
     );
   } else if (registrationType === 'startup-india' || registrationType === 'startup india') {
+    // Navigation is handled by useEffect at the top level
     return (
-      <StartupIndiaForm />
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading form...</p>
+        </div>
+      </div>
     );
   }
 

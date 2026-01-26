@@ -354,6 +354,17 @@ function ProprietorshipForm({
         setTimeout(() => {
           navigate('/proprietorship-dashboard');
         }, 2000);
+      } else if (isAdminFilling && isAdminOrSuperadmin) {
+        // If admin is filling, redirect to admin clients page
+        setTimeout(() => {
+          const userData = JSON.parse(localStorage.getItem('user') || '{}');
+          const userRole = userData.role || userData.role_id;
+          if (userRole === 'superadmin' || userRole === 2) {
+            navigate('/superadmin/clients');
+          } else {
+            navigate('/admin/clients');
+          }
+        }, 2000);
       }
     }
   };
