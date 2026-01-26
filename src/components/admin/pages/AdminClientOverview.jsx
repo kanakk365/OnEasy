@@ -5,6 +5,7 @@ import { updateUserDataByUserId } from "../../../utils/usersPageApi";
 import { viewFile, uploadFileDirect } from "../../../utils/s3Upload";
 import { AiOutlinePlus } from "react-icons/ai";
 import { FiEye, FiEyeOff, FiChevronLeft } from "react-icons/fi";
+import { lookupPincode } from "../../../utils/pincodeLookup";
 
 function AdminClientOverview() {
   const { userId } = useParams();
@@ -22,6 +23,7 @@ function AdminClientOverview() {
   const [savingNotes, setSavingNotes] = useState(false);
   const [expandedOrgId, setExpandedOrgId] = useState(null);
   const [editingOrgId, setEditingOrgId] = useState(null);
+  const [activeOrgTab, setActiveOrgTab] = useState("organization-details");
   const [documentUrls, setDocumentUrls] = useState({});
   const [showNotepad, setShowNotepad] = useState(false);
   const [clientPersonaList, setClientPersonaList] = useState([]);
@@ -326,6 +328,12 @@ function AdminClientOverview() {
                 tan: org.tan || "",
                 cin: org.cin || "",
                 registeredAddress: org.registered_address || "",
+                registeredAddressLine1: org.registered_address_line1 || org.registered_address?.split(',')[0]?.trim() || "",
+                registeredAddressLine2: org.registered_address_line2 || org.registered_address?.split(',').slice(1).join(',').trim() || "",
+                registeredAddressDistrict: org.registered_address_district || "",
+                registeredAddressState: org.registered_address_state || "",
+                registeredAddressCountry: org.registered_address_country || "India",
+                registeredAddressPincode: org.registered_address_pincode || "",
                 directorsPartners: directorsPartners.map((dp, index) => ({
                   id: dp.id || `dp-${Date.now()}-${index}`,
                   name: dp.name || "",
@@ -1163,6 +1171,12 @@ function AdminClientOverview() {
         tan: "",
         cin: "",
         registeredAddress: "",
+        registeredAddressLine1: "",
+        registeredAddressLine2: "",
+        registeredAddressDistrict: "",
+        registeredAddressState: "",
+        registeredAddressCountry: "India",
+        registeredAddressPincode: "",
         directorsPartners: [],
         digitalSignatures: [],
         optionalAttachment1: null,
@@ -1183,11 +1197,20 @@ function AdminClientOverview() {
   };
 
   const updateOrganization = (id, field, value) => {
-    setOrganisations(
-      organisations.map((org) =>
-        org.id === id ? { ...org, [field]: value } : org
-      )
-    );
+    // Use functional update to ensure we always have the latest state
+    setOrganisations((prevOrganisations) => {
+      return prevOrganisations.map((org) => {
+        if (org.id === id) {
+          // Special handling for PIN code to ensure it's always a string and max 6 digits
+          if (field === "registeredAddressPincode") {
+            const pincodeValue = String(value || "").replace(/\D/g, "").slice(0, 6);
+            return { ...org, [field]: pincodeValue };
+          }
+          return { ...org, [field]: value };
+        }
+        return org;
+      });
+    });
   };
 
   // Website handlers for organizations
@@ -1387,6 +1410,12 @@ function AdminClientOverview() {
           tan: org.tan,
           cin: org.cin,
           registeredAddress: org.registeredAddress,
+          registeredAddressLine1: org.registeredAddressLine1 || "",
+          registeredAddressLine2: org.registeredAddressLine2 || "",
+          registeredAddressDistrict: org.registeredAddressDistrict || "",
+          registeredAddressState: org.registeredAddressState || "",
+          registeredAddressCountry: org.registeredAddressCountry || "India",
+          registeredAddressPincode: org.registeredAddressPincode || "",
           directorsPartners: (org.directorsPartners || []).filter(
             (dp) => dp.name || dp.dinNumber || dp.contact || dp.email
           ),
@@ -2828,23 +2857,166 @@ function AdminClientOverview() {
                               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
                             />
                           </div>
+                          {/* Registered Office Address Section */}
                           <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Registered Address
-                            </label>
-                            <textarea
-                              value={org.registeredAddress}
-                              onChange={(e) =>
-                                updateOrganization(
-                                  org.id,
-                                  "registeredAddress",
-                                  e.target.value
-                                )
-                              }
-                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent resize-y"
-                              rows="3"
-                              placeholder="Registered office address"
-                            />
+                            <h5 className="text-sm font-semibold text-gray-900 mb-4">Registered Office Address</h5>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* Address Line 1 */}
+                              <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                  Address Line 1
+                                </label>
+                                <input
+                                  type="text"
+                                  value={org.registeredAddressLine1 || ""}
+                                  onChange={(e) =>
+                                    updateOrganization(
+                                      org.id,
+                                      "registeredAddressLine1",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                                  placeholder="Enter Address Line 1"
+                                />
+                              </div>
+
+                              {/* Address Line 2 */}
+                              <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                  Address Line 2
+                                </label>
+                                <input
+                                  type="text"
+                                  value={org.registeredAddressLine2 || ""}
+                                  onChange={(e) =>
+                                    updateOrganization(
+                                      org.id,
+                                      "registeredAddressLine2",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                                  placeholder="Enter Address Line 2 (Optional)"
+                                />
+                              </div>
+
+                              {/* District */}
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                  District
+                                </label>
+                                <input
+                                  type="text"
+                                  value={org.registeredAddressDistrict || ""}
+                                  onChange={(e) =>
+                                    updateOrganization(
+                                      org.id,
+                                      "registeredAddressDistrict",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                                  placeholder="Enter District"
+                                />
+                              </div>
+
+                              {/* State */}
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                  State
+                                </label>
+                                <input
+                                  type="text"
+                                  value={org.registeredAddressState || ""}
+                                  onChange={(e) =>
+                                    updateOrganization(
+                                      org.id,
+                                      "registeredAddressState",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                                  placeholder="Enter State"
+                                />
+                              </div>
+
+                              {/* Country */}
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                  Country
+                                </label>
+                                <input
+                                  type="text"
+                                  value={org.registeredAddressCountry || "India"}
+                                  onChange={(e) =>
+                                    updateOrganization(
+                                      org.id,
+                                      "registeredAddressCountry",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                                  placeholder="Enter Country"
+                                />
+                              </div>
+
+                              {/* PIN Code */}
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                  PIN Code
+                                </label>
+                                <div className="relative">
+                                  <input
+                                    type="tel"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    value={org.registeredAddressPincode || ""}
+                                    onChange={async (e) => {
+                                      // Get the raw input value
+                                      const inputValue = e.target.value;
+                                      
+                                      // Remove all non-digit characters and limit to 6 digits
+                                      const cleanedValue = inputValue.replace(/\D/g, "").slice(0, 6);
+                                      
+                                      // Update the field - this should allow all 6 digits
+                                      updateOrganization(org.id, "registeredAddressPincode", cleanedValue);
+                                      
+                                      // Auto-trigger lookup when exactly 6 digits are entered
+                                      if (cleanedValue.length === 6) {
+                                        // Store PIN code to preserve it
+                                        const pincodeToPreserve = cleanedValue;
+                                        
+                                        try {
+                                          const result = await lookupPincode(cleanedValue);
+                                          if (result.success) {
+                                            if (result.state) {
+                                              updateOrganization(org.id, "registeredAddressState", result.state);
+                                            }
+                                            if (result.district) {
+                                              updateOrganization(org.id, "registeredAddressDistrict", result.district);
+                                            }
+                                            
+                                            // Ensure PIN code is preserved after State/District updates
+                                            setTimeout(() => {
+                                              const currentOrg = organisations.find(o => o.id === org.id);
+                                              if (currentOrg && currentOrg.registeredAddressPincode !== pincodeToPreserve) {
+                                                updateOrganization(org.id, "registeredAddressPincode", pincodeToPreserve);
+                                              }
+                                            }, 200);
+                                          }
+                                        } catch (error) {
+                                          console.error("PIN code lookup error:", error);
+                                        }
+                                      }
+                                    }}
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                                    placeholder="Enter 6-digit PIN Code"
+                                    maxLength={6}
+                                  />
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
 
@@ -3647,7 +3819,7 @@ function AdminClientOverview() {
                                 ID
                               </th>
                               <th className="px-4 py-3 text-left font-semibold text-white text-sm">
-                                Type
+                                Category
                               </th>
                               <th className="px-4 py-3 text-left font-semibold text-white text-sm">
                                 Legal Name
@@ -3690,9 +3862,9 @@ function AdminClientOverview() {
                                     </td>
                                     <td
                                       className="px-4 py-3 text-gray-700 text-sm truncate"
-                                      title={org.organisation_type}
+                                      title={org.category}
                                     >
-                                      {org.organisation_type || "-"}
+                                      {org.category || "-"}
                                     </td>
                                     <td
                                       className="px-4 py-3 text-gray-700 font-medium text-sm truncate"
@@ -4048,6 +4220,50 @@ function AdminClientOverview() {
                                                   )}
                                               </div>
 
+                                              {/* Horizontal Tabs */}
+                                              <div className="border-b border-gray-200 mb-6">
+                                                <div className="flex space-x-8">
+                                                  {[
+                                                    {
+                                                      id: "organization-details",
+                                                      label: "Organization Details",
+                                                    },
+                                                    {
+                                                      id: "directors-partners",
+                                                      label: "Directors / Partners Details",
+                                                    },
+                                                    {
+                                                      id: "digital-signatures",
+                                                      label: "Digital Signature Details",
+                                                    },
+                                                    {
+                                                      id: "attachments",
+                                                      label: "Attachments",
+                                                    },
+                                                    {
+                                                      id: "credentials",
+                                                      label: "Credentials",
+                                                    },
+                                                  ].map((tab) => (
+                                                    <button
+                                                      key={tab.id}
+                                                      onClick={() =>
+                                                        setActiveOrgTab(tab.id)
+                                                      }
+                                                      className={`pb-3 px-1 text-sm font-medium transition-colors whitespace-nowrap ${
+                                                        activeOrgTab === tab.id
+                                                          ? "border-b-2 border-[#01334C] text-[#01334C]"
+                                                          : "text-gray-500 hover:text-gray-700"
+                                                      }`}
+                                                    >
+                                                      {tab.label}
+                                                    </button>
+                                                  ))}
+                                                </div>
+                                              </div>
+
+                                              {/* Organization Details Tab */}
+                                              {activeOrgTab === "organization-details" && (
                                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                                                 {/* Column 1 */}
                                                 <div className="space-y-4">
@@ -4440,38 +4656,210 @@ function AdminClientOverview() {
                                                       </div>
                                                     )}
                                                   </div>
-                                                  <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                      Registered Address
-                                                    </label>
-                                                    {isEditingThisOrg ? (
-                                                      <textarea
-                                                        rows={3}
-                                                        value={
-                                                          orgInState?.registeredAddress ||
-                                                          ""
-                                                        }
-                                                        onChange={(e) =>
-                                                          updateOrganization(
-                                                            orgInState.id,
-                                                            "registeredAddress",
-                                                            e.target.value
-                                                          )
-                                                        }
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-y"
-                                                      />
-                                                    ) : (
-                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                                        {org.registered_address ||
-                                                          "-"}
+                                                  {/* Registered Office Address Section */}
+                                                  <div className="md:col-span-2">
+                                                    <h5 className="text-sm font-semibold text-gray-900 mb-3">Registered Office Address</h5>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                      {/* Address Line 1 */}
+                                                      <div className="md:col-span-2">
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                          Address Line 1
+                                                        </label>
+                                                        {isEditingThisOrg ? (
+                                                          <input
+                                                            type="text"
+                                                            value={orgInState?.registeredAddressLine1 || ""}
+                                                            onChange={(e) =>
+                                                              updateOrganization(
+                                                                orgInState.id,
+                                                                "registeredAddressLine1",
+                                                                e.target.value
+                                                              )
+                                                            }
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                                            placeholder="Enter Address Line 1"
+                                                          />
+                                                        ) : (
+                                                          <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                            {org.registered_address_line1 || "-"}
+                                                          </div>
+                                                        )}
                                                       </div>
-                                                    )}
+
+                                                      {/* Address Line 2 */}
+                                                      <div className="md:col-span-2">
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                          Address Line 2
+                                                        </label>
+                                                        {isEditingThisOrg ? (
+                                                          <input
+                                                            type="text"
+                                                            value={orgInState?.registeredAddressLine2 || ""}
+                                                            onChange={(e) =>
+                                                              updateOrganization(
+                                                                orgInState.id,
+                                                                "registeredAddressLine2",
+                                                                e.target.value
+                                                              )
+                                                            }
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                                            placeholder="Enter Address Line 2 (Optional)"
+                                                          />
+                                                        ) : (
+                                                          <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                            {org.registered_address_line2 || "-"}
+                                                          </div>
+                                                        )}
+                                                      </div>
+
+                                                      {/* District */}
+                                                      <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                          District
+                                                        </label>
+                                                        {isEditingThisOrg ? (
+                                                          <input
+                                                            type="text"
+                                                            value={orgInState?.registeredAddressDistrict || ""}
+                                                            onChange={(e) =>
+                                                              updateOrganization(
+                                                                orgInState.id,
+                                                                "registeredAddressDistrict",
+                                                                e.target.value
+                                                              )
+                                                            }
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                                            placeholder="Enter District"
+                                                          />
+                                                        ) : (
+                                                          <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                            {org.registered_address_district || "-"}
+                                                          </div>
+                                                        )}
+                                                      </div>
+
+                                                      {/* State */}
+                                                      <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                          State
+                                                        </label>
+                                                        {isEditingThisOrg ? (
+                                                          <input
+                                                            type="text"
+                                                            value={orgInState?.registeredAddressState || ""}
+                                                            onChange={(e) =>
+                                                              updateOrganization(
+                                                                orgInState.id,
+                                                                "registeredAddressState",
+                                                                e.target.value
+                                                              )
+                                                            }
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                                            placeholder="Enter State"
+                                                          />
+                                                        ) : (
+                                                          <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                            {org.registered_address_state || "-"}
+                                                          </div>
+                                                        )}
+                                                      </div>
+
+                                                      {/* Country */}
+                                                      <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                          Country
+                                                        </label>
+                                                        {isEditingThisOrg ? (
+                                                          <input
+                                                            type="text"
+                                                            value={orgInState?.registeredAddressCountry || "India"}
+                                                            onChange={(e) =>
+                                                              updateOrganization(
+                                                                orgInState.id,
+                                                                "registeredAddressCountry",
+                                                                e.target.value
+                                                              )
+                                                            }
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                                            placeholder="Enter Country"
+                                                          />
+                                                        ) : (
+                                                          <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                            {org.registered_address_country || "India"}
+                                                          </div>
+                                                        )}
+                                                      </div>
+
+                                                      {/* PIN Code */}
+                                                      <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                          PIN Code
+                                                        </label>
+                                                        {isEditingThisOrg ? (
+                                                          <input
+                                                            type="tel"
+                                                            inputMode="numeric"
+                                                            pattern="[0-9]*"
+                                                            value={orgInState?.registeredAddressPincode || ""}
+                                                            onChange={async (e) => {
+                                                              // Get the raw input value
+                                                              const inputValue = e.target.value;
+                                                              
+                                                              // Remove all non-digit characters and limit to 6 digits
+                                                              const cleanedValue = inputValue.replace(/\D/g, "").slice(0, 6);
+                                                              
+                                                              // Update the field - this should allow all 6 digits
+                                                              updateOrganization(orgInState.id, "registeredAddressPincode", cleanedValue);
+                                                              
+                                                              // Auto-trigger lookup when exactly 6 digits are entered
+                                                              if (cleanedValue.length === 6) {
+                                                                // Store PIN code to preserve it
+                                                                const pincodeToPreserve = cleanedValue;
+                                                                
+                                                                try {
+                                                                  const result = await lookupPincode(cleanedValue);
+                                                                  if (result.success) {
+                                                                    if (result.state) {
+                                                                      updateOrganization(orgInState.id, "registeredAddressState", result.state);
+                                                                    }
+                                                                    if (result.district) {
+                                                                      updateOrganization(orgInState.id, "registeredAddressDistrict", result.district);
+                                                                    }
+                                                                    
+                                                                    // Ensure PIN code is preserved after State/District updates
+                                                                    setTimeout(() => {
+                                                                      const currentOrg = organisations.find(o => o.id === orgInState.id);
+                                                                      if (currentOrg && currentOrg.registeredAddressPincode !== pincodeToPreserve) {
+                                                                        updateOrganization(orgInState.id, "registeredAddressPincode", pincodeToPreserve);
+                                                                      }
+                                                                    }, 200);
+                                                                  }
+                                                                } catch (error) {
+                                                                  console.error("PIN code lookup error:", error);
+                                                                }
+                                                              }
+                                                            }}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                                            placeholder="Enter 6-digit PIN Code"
+                                                            maxLength={6}
+                                                          />
+                                                        ) : (
+                                                          <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                            {org.registered_address_pincode || "-"}
+                                                          </div>
+                                                        )}
+                                                      </div>
+                                                    </div>
                                                   </div>
                                                 </div>
                                               </div>
+                                              )}
 
+                                              {/* Directors/Partners Tab */}
+                                              {activeOrgTab === "directors-partners" && (
+                                              <div>
                                               {/* Director/Partners Details Section */}
-                                              <div className="mt-6 pt-6 border-t border-gray-200">
+                                              <div className="pt-6">
                                                 <div className="flex items-center justify-between mb-4">
                                                   <h5 className="text-md font-semibold text-gray-900">
                                                     Director/Partners Details
@@ -4766,9 +5154,14 @@ function AdminClientOverview() {
                                                   </div>
                                                 )}
                                               </div>
+                                              </div>
+                                              )}
 
+                                              {/* Digital Signatures Tab */}
+                                              {activeOrgTab === "digital-signatures" && (
+                                              <div>
                                               {/* Digital Signature Details Section */}
-                                              <div className="mt-6 pt-6 border-t border-gray-200">
+                                              <div className="pt-6">
                                                 <div className="flex items-center justify-between mb-4">
                                                   <h5 className="text-md font-semibold text-gray-900">
                                                     Digital Signature Details
@@ -5170,9 +5563,26 @@ function AdminClientOverview() {
                                                   </div>
                                                 </div>
                                               </div>
+                                              </div>
+                                              )}
 
+                                              {/* Attachments Tab */}
+                                              {activeOrgTab === "attachments" && (
+                                              <div className="pt-6">
+                                                <h5 className="text-md font-semibold text-gray-900 mb-4">
+                                                  Attachments
+                                                </h5>
+                                                <div className="text-sm text-gray-500">
+                                                  No attachments section implemented yet.
+                                                </div>
+                                              </div>
+                                              )}
+
+                                              {/* Credentials Tab */}
+                                              {activeOrgTab === "credentials" && (
+                                              <div>
                                               {/* Website Details Section */}
-                                              <div className="mt-6 pt-6 border-t border-gray-200">
+                                              <div className="pt-6">
                                                 <div className="flex items-center justify-between mb-4">
                                                   <h5 className="text-md font-semibold text-gray-900">
                                                     Credentials
@@ -5458,33 +5868,37 @@ function AdminClientOverview() {
                                                     No websites added yet.
                                                   </p>
                                                 )}
-
-                                                {isEditingThisOrg && (
-                                                  <div className="mt-4 flex justify-end gap-2">
-                                                    <button
-                                                      onClick={() => {
-                                                        setEditingOrgId(null);
-                                                        fetchClientProfile();
-                                                      }}
-                                                      className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
-                                                    >
-                                                      Cancel
-                                                    </button>
-                                                    <button
-                                                      onClick={async () => {
-                                                        await handleSaveOrganisations();
-                                                      }}
-                                                      disabled={savingOrg}
-                                                      className="px-4 py-2 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm disabled:opacity-50"
-                                                    >
-                                                      {savingOrg
-                                                        ? "Saving..."
-                                                        : "Save Changes"}
-                                                    </button>
-                                                  </div>
-                                                )}
                                               </div>
+                                              </div>
+                                              )}
+
+                                              {/* Action Buttons - Outside tabs */}
+                                              {isEditingThisOrg && (
+                                                <div className="mt-6 pt-4 border-t border-gray-200 flex justify-end gap-2">
+                                                  <button
+                                                    onClick={() => {
+                                                      setEditingOrgId(null);
+                                                      fetchClientProfile();
+                                                    }}
+                                                    className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                                                  >
+                                                    Cancel
+                                                  </button>
+                                                  <button
+                                                    onClick={async () => {
+                                                      await handleSaveOrganisations();
+                                                    }}
+                                                    disabled={savingOrg}
+                                                    className="px-4 py-2 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm disabled:opacity-50"
+                                                  >
+                                                    {savingOrg
+                                                      ? "Saving..."
+                                                      : "Save Changes"}
+                                                  </button>
+                                                </div>
+                                              )}
                                             </div>
+                                         
                                           </td>
                                         </tr>
                                       );

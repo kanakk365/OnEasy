@@ -141,6 +141,7 @@ import AdminClientOrganizations from "../admin/pages/AdminClientOrganizations";
 import AdminClientCompanyDocuments from "../admin/pages/AdminClientCompanyDocuments";
 import AdminOrganizations from "../admin/pages/AdminOrganizations";
 import AdminDirectors from "../admin/pages/AdminDirectors";
+import AdminCouponManagement from "../admin/pages/AdminCouponManagement";
 import SuperAdminLayout from "../superadmin/layout/SuperAdminLayout";
 import SuperAdminClients from "../superadmin/pages/SuperAdminClients";
 import SuperAdminProfile from "../superadmin/pages/SuperAdminProfile";
@@ -1221,6 +1222,7 @@ function Routers() {
         <Route path="notice-board" element={<AdminNoticeBoard />} />
         <Route path="notice-management" element={<AdminNoticeManagement />} />
         <Route path="coupon-generator" element={<CouponCodeGenerator />} />
+        <Route path="coupon-management" element={<AdminCouponManagement />} />
         <Route path="cms-package" element={<AdminCMSPackage />} />
         <Route path="profile" element={<AdminProfile />} />
         <Route

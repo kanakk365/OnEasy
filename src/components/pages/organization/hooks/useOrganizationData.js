@@ -73,10 +73,18 @@ export const useOrganizationData = () => {
                 tradeName: org.trade_name || "-",
                 category: org.category || "-",
                 gstin: org.gstin || "-",
+                panNumber: org.pan_number || "-",
                 incorporationDate: org.incorporation_date || "-",
                 tan: org.tan || "-",
                 cin: org.cin || "-",
+                // Legacy support: if new fields don't exist, try to parse from old registered_address
                 registeredAddress: org.registered_address || "-",
+                registeredAddressLine1: org.registered_address_line1 || org.registered_address?.split(',')[0]?.trim() || "-",
+                registeredAddressLine2: org.registered_address_line2 || org.registered_address?.split(',').slice(1).join(',').trim() || "-",
+                registeredAddressDistrict: org.registered_address_district || "-",
+                registeredAddressState: org.registered_address_state || "-",
+                registeredAddressCountry: org.registered_address_country || "India",
+                registeredAddressPincode: org.registered_address_pincode || "-",
                 panFile: org.pan_file || null,
                 directorsPartners: directorsPartners.map((dp, idx) => ({
                   id: dp.id || `dp-${Date.now()}-${idx}`,
@@ -312,12 +320,35 @@ export const useOrganizationData = () => {
   };
 
   const updateOrganizationField = (field, value) => {
-    if (!editingOrg) return;
-    const updatedOrg = {
-      ...editingOrg,
-      [field]: value,
-    };
-    setEditingOrg(updatedOrg);
+    if (!editingOrg) {
+      console.log("[UPDATE FIELD] No editingOrg, cannot update:", field, value);
+      return;
+    }
+    console.log("[UPDATE FIELD] Updating:", {
+      field,
+      value,
+      currentEditingOrg: editingOrg,
+      currentFieldValue: editingOrg[field]
+    });
+    // Use functional update to ensure we always have the latest state
+    setEditingOrg((prevEditingOrg) => {
+      if (!prevEditingOrg) {
+        console.log("[UPDATE FIELD] prevEditingOrg is null, cannot update");
+        return editingOrg; // Fallback to current editingOrg
+      }
+      const updatedOrg = {
+        ...prevEditingOrg,
+        [field]: value,
+      };
+      console.log("[UPDATE FIELD] New org object:", {
+        field,
+        newValue: updatedOrg[field],
+        registeredAddressState: updatedOrg.registeredAddressState,
+        registeredAddressPincode: updatedOrg.registeredAddressPincode
+      });
+      return updatedOrg;
+    });
+    console.log("[UPDATE FIELD] setEditingOrg called");
   };
 
   const handleSaveOrganization = async () => {
@@ -376,6 +407,7 @@ export const useOrganizationData = () => {
           tradeName: org.tradeName !== "-" ? org.tradeName : "",
           category: org.category !== "-" ? org.category : "",
           gstin: org.gstin !== "-" ? org.gstin : "",
+          panNumber: org.panNumber !== "-" ? org.panNumber : "",
           incorporationDate:
             org.incorporationDate !== "-" ? org.incorporationDate : "",
           panFile: org.panFile,
@@ -383,6 +415,12 @@ export const useOrganizationData = () => {
           cin: org.cin !== "-" ? org.cin : "",
           registeredAddress:
             org.registeredAddress !== "-" ? org.registeredAddress : "",
+          registeredAddressLine1: org.registeredAddressLine1 !== "-" ? org.registeredAddressLine1 : "",
+          registeredAddressLine2: org.registeredAddressLine2 !== "-" ? org.registeredAddressLine2 : "",
+          registeredAddressDistrict: org.registeredAddressDistrict !== "-" ? org.registeredAddressDistrict : "",
+          registeredAddressState: org.registeredAddressState !== "-" ? org.registeredAddressState : "",
+          registeredAddressCountry: org.registeredAddressCountry !== "-" ? org.registeredAddressCountry : "India",
+          registeredAddressPincode: org.registeredAddressPincode !== "-" ? org.registeredAddressPincode : "",
           directorsPartners: (org.directorsPartners || []).filter(
             (dp) => dp.name || dp.dinNumber || dp.contact || dp.email
           ),
@@ -447,11 +485,18 @@ export const useOrganizationData = () => {
       tradeName: "",
       category: "",
       gstin: "",
+      panNumber: "",
       incorporationDate: "",
       panFile: null,
       tan: "",
       cin: "",
       registeredAddress: "",
+      registeredAddressLine1: "",
+      registeredAddressLine2: "",
+      registeredAddressDistrict: "",
+      registeredAddressState: "",
+      registeredAddressCountry: "India",
+      registeredAddressPincode: "",
       directorsPartners: [],
       digitalSignatures: [],
       optionalAttachment1: null,

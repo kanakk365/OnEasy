@@ -20,7 +20,7 @@ function ClientServices() {
           return;
         }
 
-        const [pl, prop, si, gst, allServices] = await Promise.all([
+          const [pl, prop, si, gst, allServices] = await Promise.all([
           apiClient.get(`/private-limited/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
           apiClient.get(`/proprietorship/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
           apiClient.get(`/startup-india/user-registrations/${userId}`).catch(() => ({ success: false, data: [] })),
@@ -74,17 +74,37 @@ function ClientServices() {
           return;
         }
 
-        // Deduplicate services by ticket_id to avoid showing the same service multiple times
+        // Deduplicate services by ticket_id and payment_id to avoid showing the same service multiple times
         const uniqueServices = [];
         const seenTicketIds = new Set();
+        const seenPaymentIds = new Set();
         
         combined.forEach(service => {
           const ticketId = service.ticket_id || service.id;
-          if (ticketId && !seenTicketIds.has(ticketId)) {
-            seenTicketIds.add(ticketId);
-            uniqueServices.push(service);
-          } else if (!ticketId) {
-            // Services without ticket_id - include them (shouldn't happen, but handle gracefully)
+          const paymentId = service.razorpay_payment_id || service.payment_id;
+          
+          // Primary deduplication: by ticket_id
+          if (ticketId) {
+            const normalizedTicketId = String(ticketId).trim().toUpperCase();
+            if (!seenTicketIds.has(normalizedTicketId)) {
+              seenTicketIds.add(normalizedTicketId);
+              // Also track payment_id for additional deduplication
+              if (paymentId) {
+                seenPaymentIds.add(String(paymentId).trim());
+              }
+              uniqueServices.push(service);
+            }
+            // Skip if ticket_id already seen (duplicate)
+          } else if (paymentId) {
+            // Fallback: deduplicate by payment_id if no ticket_id
+            const normalizedPaymentId = String(paymentId).trim();
+            if (!seenPaymentIds.has(normalizedPaymentId)) {
+              seenPaymentIds.add(normalizedPaymentId);
+              uniqueServices.push(service);
+            }
+            // Skip if payment_id already seen (duplicate)
+          } else {
+            // Services without ticket_id or payment_id - include them (shouldn't happen, but handle gracefully)
             uniqueServices.push(service);
           }
         });

@@ -110,7 +110,7 @@ function AdminClientOrganizations() {
                     GSTIN
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
+                    Category
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Action
@@ -142,7 +142,7 @@ function AdminClientOrganizations() {
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-sm text-gray-900">
-                        {org.organisation_type || '-'}
+                        {org.category || "-"}
                       </p>
                     </td>
                     <td className="px-6 py-4">

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { RiTicketLine, RiCheckLine, RiMoneyDollarCircleLine, RiPercentLine } from 'react-icons/ri';
+import { useNavigate } from 'react-router-dom';
+import { RiTicketLine, RiCheckLine, RiMoneyDollarCircleLine, RiPercentLine, RiSettings3Line } from 'react-icons/ri';
 import { MdContentCopy } from 'react-icons/md';
 import { FiDownload, FiInfo, FiTag, FiHash } from 'react-icons/fi';
 import apiClient from '../../utils/api';
 
 function CouponCodeGenerator() {
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [prefix, setPrefix] = useState('ONEASY');
   const [length] = useState(8);
@@ -15,6 +17,7 @@ function CouponCodeGenerator() {
   const [discountType, setDiscountType] = useState('percentage');
   const [discountPercentage, setDiscountPercentage] = useState(10);
   const [discountAmount, setDiscountAmount] = useState(500);
+  const [usageLimit, setUsageLimit] = useState(1); // Number of times coupon can be used (instances)
   const [saving, setSaving] = useState(false);
 
   const generateCode = () => {
@@ -109,6 +112,7 @@ function CouponCodeGenerator() {
         discountType,
         prefix: prefix,
         codeLength: length,
+        usageLimit: usageLimit, // Add usage limit (instances)
         description:
           discountType === 'percentage'
             ? `${discount}% discount coupon code`
@@ -176,6 +180,13 @@ function CouponCodeGenerator() {
                 <p className="text-gray-500 italic ml-1">Create unique promotional codes</p>
              </div>
           </div>
+          <button
+            onClick={() => navigate('/admin/coupon-management')}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+          >
+            <RiSettings3Line className="w-4 h-4" />
+            Manage Coupons
+          </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -233,6 +244,41 @@ function CouponCodeGenerator() {
                                 <RiMoneyDollarCircleLine className="w-4 h-4" /> Fixed Amount
                              </button>
                           </div>
+                       </div>
+                    </div>
+
+                    {/* Usage Limit (Instances) */}
+                    <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Usage Limit (Instances)
+                          <span className="text-xs text-gray-500 ml-2">How many times can this coupon be used?</span>
+                       </label>
+                       <div className="relative mb-3">
+                          <input
+                             type="number"
+                             value={usageLimit}
+                             onChange={(e) => setUsageLimit(Math.max(1, parseInt(e.target.value) || 1))}
+                             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+                             min="1"
+                             placeholder="1"
+                          />
+                       </div>
+                       <div className="flex gap-2">
+                          {[1, 5, 10, 50, 100].map(val => (
+                             <button 
+                                key={val}
+                                onClick={() => setUsageLimit(val)}
+                                className="px-2 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-md transition-colors"
+                             >
+                                {val === 1 ? 'Single' : val}
+                             </button>
+                          ))}
+                          <button 
+                             onClick={() => setUsageLimit(null)}
+                             className="px-2 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-md transition-colors"
+                          >
+                             Unlimited
+                          </button>
                        </div>
                     </div>
 

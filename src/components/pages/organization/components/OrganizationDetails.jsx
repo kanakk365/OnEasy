@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import BasicDetailsSection from "./BasicDetailsSection";
 import DirectorsPartnersSection from "./DirectorsPartnersSection";
 import DigitalSignaturesSection from "./DigitalSignaturesSection";
@@ -12,6 +12,7 @@ const OrganizationDetails = ({
   setSelectedOrg,
   handleEditOrganization,
   handleSaveOrganization,
+  handleCancelEdit,
   updateOrganizationField,
   formatDate,
   handleViewFile,
@@ -31,6 +32,16 @@ const OrganizationDetails = ({
   togglePasswordVisibility,
   removeWebsite,
 }) => {
+  const [activeTab, setActiveTab] = useState("organization-details");
+
+  const tabs = [
+    { key: "organization-details", label: "Organization Details" },
+    { key: "directors-partners", label: "Directors / Partners Details" },
+    { key: "digital-signatures", label: "Digital Signature Details" },
+    { key: "attachments", label: "Attachments" },
+    { key: "credentials", label: "Credentials" },
+  ];
+
   return (
     <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
       {/* Back Button */}
@@ -54,8 +65,9 @@ const OrganizationDetails = ({
         Back to List
       </button>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <div className="flex justify-between items-center mb-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        {/* Header with Edit Button */}
+        <div className="flex justify-between items-center px-6 pt-6 pb-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">
             Organisation Details
           </h2>
@@ -69,88 +81,123 @@ const OrganizationDetails = ({
           )}
         </div>
 
-        {/* Basic Details Section */}
-        <BasicDetailsSection
-          editingOrg={editingOrg}
-          selectedOrg={selectedOrg}
-          updateOrganizationField={updateOrganizationField}
-          handlePanFileUpload={(e) => {
-            // Logic adapted from previous implementation
-            const file = e.target.files[0];
-            if (!file) return;
-            if (file.size > 10 * 1024 * 1024) {
-              alert("File size must be less than 10MB");
-              e.target.value = "";
-              return;
-            }
-            const currentUserId = getCurrentUserId();
-            if (!currentUserId) {
-              alert("User ID not found");
-              return;
-            }
-            const folder = `organizations/${currentUserId}/org-${
-              editingOrg.id || "new"
-            }`;
-            uploadFileDirect(file, folder, "pan-file").then(({ s3Url }) => {
-              updateOrganizationField("panFile", s3Url);
-            });
-          }}
-          handleViewFile={handleViewFile}
-          formatDate={formatDate}
-        />
-
-        {/* Directors / Partners Details */}
-        <DirectorsPartnersSection
-          editingOrg={editingOrg}
-          selectedOrg={selectedOrg}
-          addDirectorPartner={addDirectorPartner}
-          removeDirectorPartner={removeDirectorPartner}
-          updateDirectorPartner={updateDirectorPartner}
-          formatDate={formatDate}
-        />
-
-        {/* Digital Signature Details */}
-        <DigitalSignaturesSection
-          editingOrg={editingOrg}
-          selectedOrg={selectedOrg}
-          addDigitalSignature={addDigitalSignature}
-          removeDigitalSignature={removeDigitalSignature}
-          updateDigitalSignature={updateDigitalSignature}
-          formatDate={formatDate}
-        />
-
-        {/* Attachments */}
-        <AttachmentsSection
-          editingOrg={editingOrg}
-          selectedOrg={selectedOrg}
-          updateOrganizationField={updateOrganizationField}
-          handleViewFile={handleViewFile}
-          getCurrentUserId={getCurrentUserId}
-          uploadFileDirect={uploadFileDirect}
-        />
-
-        {/* Website Details */}
-        <CredentialsSection
-          editingOrg={editingOrg}
-          selectedOrg={selectedOrg}
-          addWebsite={addWebsite}
-          updateWebsite={updateWebsite}
-          togglePasswordVisibility={togglePasswordVisibility}
-          removeWebsite={removeWebsite}
-        />
-
-        {/* Save Changes Button */}
-        {editingOrg && (
-          <div className="flex justify-end mt-8">
-            <button
-              onClick={handleSaveOrganization}
-              disabled={saving}
-              className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium text-sm disabled:opacity-50"
-            >
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
+        {/* Tabs Navigation */}
+        <div className="border-b border-gray-200">
+          <div className="flex space-x-1 px-4 pt-4">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 ${
+                  activeTab === tab.key
+                    ? "bg-white text-[#00486D] border-b-2 border-[#00486D] -mb-px"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
+
+        {/* Tab Content */}
+        <div className="p-6 min-h-[400px]">
+          {activeTab === "organization-details" && (
+            <BasicDetailsSection
+              editingOrg={editingOrg}
+              selectedOrg={selectedOrg}
+              updateOrganizationField={updateOrganizationField}
+              handlePanFileUpload={(e) => {
+                // Logic adapted from previous implementation
+                const file = e.target.files[0];
+                if (!file) return;
+                if (file.size > 10 * 1024 * 1024) {
+                  alert("File size must be less than 10MB");
+                  e.target.value = "";
+                  return;
+                }
+                const currentUserId = getCurrentUserId();
+                if (!currentUserId) {
+                  alert("User ID not found");
+                  return;
+                }
+                const folder = `organizations/${currentUserId}/org-${
+                  editingOrg.id || "new"
+                }`;
+                uploadFileDirect(file, folder, "pan-file").then(({ s3Url }) => {
+                  updateOrganizationField("panFile", s3Url);
+                });
+              }}
+              handleViewFile={handleViewFile}
+              formatDate={formatDate}
+            />
+          )}
+
+          {activeTab === "directors-partners" && (
+            <DirectorsPartnersSection
+              editingOrg={editingOrg}
+              selectedOrg={selectedOrg}
+              addDirectorPartner={addDirectorPartner}
+              removeDirectorPartner={removeDirectorPartner}
+              updateDirectorPartner={updateDirectorPartner}
+              formatDate={formatDate}
+            />
+          )}
+
+          {activeTab === "digital-signatures" && (
+            <DigitalSignaturesSection
+              editingOrg={editingOrg}
+              selectedOrg={selectedOrg}
+              addDigitalSignature={addDigitalSignature}
+              removeDigitalSignature={removeDigitalSignature}
+              updateDigitalSignature={updateDigitalSignature}
+              formatDate={formatDate}
+            />
+          )}
+
+          {activeTab === "attachments" && (
+            <AttachmentsSection
+              editingOrg={editingOrg}
+              selectedOrg={selectedOrg}
+              updateOrganizationField={updateOrganizationField}
+              handleViewFile={handleViewFile}
+              getCurrentUserId={getCurrentUserId}
+              uploadFileDirect={uploadFileDirect}
+            />
+          )}
+
+          {activeTab === "credentials" && (
+            <CredentialsSection
+              editingOrg={editingOrg}
+              selectedOrg={selectedOrg}
+              addWebsite={addWebsite}
+              updateWebsite={updateWebsite}
+              togglePasswordVisibility={togglePasswordVisibility}
+              removeWebsite={removeWebsite}
+            />
+          )}
+
+          {/* Save Changes Button */}
+          {editingOrg && (
+            <div className="flex justify-end mt-8 pt-6 border-t border-gray-200">
+              <div className="flex gap-4">
+                <button
+                  onClick={handleCancelEdit}
+                  className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveOrganization}
+                  disabled={saving}
+                  className="px-8 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

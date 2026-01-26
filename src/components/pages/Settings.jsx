@@ -42,6 +42,12 @@ function Settings() {
       tan: "",
       cin: "",
       registeredAddress: "",
+      registeredAddressLine1: "",
+      registeredAddressLine2: "",
+      registeredAddressDistrict: "",
+      registeredAddressState: "",
+      registeredAddressCountry: "India",
+      registeredAddressPincode: "",
       directorsPartners: [],
       digitalSignatures: [],
       optionalAttachment1: null,
@@ -227,6 +233,23 @@ function Settings() {
                 tan: org.tan || "",
                 cin: org.cin || "",
                 registeredAddress: org.registered_address || "",
+                registeredAddressLine1: org.registered_address_line1 || org.registered_address?.split(',')[0]?.trim() || "",
+                registeredAddressLine2: org.registered_address_line2 || org.registered_address?.split(',').slice(1).join(',').trim() || "",
+                registeredAddressDistrict: org.registered_address_district || "",
+                registeredAddressState: org.registered_address_state || "",
+                registeredAddressCountry: org.registered_address_country || "India",
+                registeredAddressPincode: (() => {
+                  const pincode = org.registered_address_pincode 
+                    ? String(org.registered_address_pincode).replace(/\D/g, "").slice(0, 6)
+                    : "";
+                  console.log("[SETTINGS LOAD] Loading PIN code:", {
+                    orgId: org.id,
+                    originalValue: org.registered_address_pincode,
+                    processedValue: pincode,
+                    length: pincode.length
+                  });
+                  return pincode;
+                })(),
                 websites: websites,
               };
             })
@@ -261,6 +284,22 @@ function Settings() {
               tan: user.tan || "",
               cin: user.cin || "",
               registeredAddress: user.registered_address || "",
+              registeredAddressLine1: user.registered_address_line1 || user.registered_address?.split(',')[0]?.trim() || "",
+              registeredAddressLine2: user.registered_address_line2 || user.registered_address?.split(',').slice(1).join(',').trim() || "",
+              registeredAddressDistrict: user.registered_address_district || "",
+              registeredAddressState: user.registered_address_state || "",
+              registeredAddressCountry: user.registered_address_country || "India",
+              registeredAddressPincode: (() => {
+                const pincode = user.registered_address_pincode 
+                  ? String(user.registered_address_pincode).replace(/\D/g, "").slice(0, 6)
+                  : "";
+                console.log("[SETTINGS LOAD] Loading PIN code (single org):", {
+                  originalValue: user.registered_address_pincode,
+                  processedValue: pincode,
+                  length: pincode.length
+                });
+                return pincode;
+              })(),
               websites: websites,
             },
           ]);
@@ -451,6 +490,22 @@ function Settings() {
           tan: org.tan,
           cin: org.cin,
           registeredAddress: org.registeredAddress,
+          registeredAddressLine1: org.registeredAddressLine1 || "",
+          registeredAddressLine2: org.registeredAddressLine2 || "",
+          registeredAddressDistrict: org.registeredAddressDistrict || "",
+          registeredAddressState: org.registeredAddressState || "",
+          registeredAddressCountry: org.registeredAddressCountry || "India",
+          registeredAddressPincode: (() => {
+            const pincode = org.registeredAddressPincode || "";
+            const processedPincode = String(pincode).replace(/\D/g, "").slice(0, 6);
+            console.log("[SETTINGS SAVE] Saving PIN code:", {
+              orgId: org.id,
+              originalValue: pincode,
+              processedValue: processedPincode,
+              length: processedPincode.length
+            });
+            return processedPincode;
+          })(),
           directorsPartners: (org.directorsPartners || []).filter(
             (dp) => dp.name || dp.dinNumber || dp.contact || dp.email
           ),
@@ -750,6 +805,12 @@ function Settings() {
       tan: "",
       cin: "",
       registeredAddress: "",
+      registeredAddressLine1: "",
+      registeredAddressLine2: "",
+      registeredAddressDistrict: "",
+      registeredAddressState: "",
+      registeredAddressCountry: "India",
+      registeredAddressPincode: "",
       directorsPartners: [],
       digitalSignatures: [],
       optionalAttachment1: null,
@@ -870,11 +931,33 @@ function Settings() {
   };
 
   const updateOrganization = (id, field, value) => {
-    setOrganizations(
-      organizations.map((org) =>
-        org.id === id ? { ...org, [field]: value } : org
-      )
-    );
+    console.log("[SETTINGS UPDATE] updateOrganization called:", { id, field, value, valueType: typeof value, valueLength: String(value || "").length });
+    
+    // Use functional update to ensure we always have the latest state
+    setOrganizations((prevOrganizations) => {
+      return prevOrganizations.map((org) => {
+        if (org.id === id) {
+          // Special handling for PIN code to ensure it's always a string and max 6 digits
+          if (field === "registeredAddressPincode") {
+            const pincodeValue = String(value || "").replace(/\D/g, "").slice(0, 6);
+            console.log("[SETTINGS UPDATE] PIN code update:", {
+              originalValue: value,
+              cleanedValue: pincodeValue,
+              length: pincodeValue.length,
+              orgId: id,
+              currentOrgPincode: org.registeredAddressPincode
+            });
+            const updatedOrg = { ...org, [field]: pincodeValue };
+            console.log("[SETTINGS UPDATE] Updated org PIN code:", updatedOrg.registeredAddressPincode);
+            return updatedOrg;
+          }
+          console.log("[SETTINGS UPDATE] Regular field update:", { field, value, currentOrgPincode: org.registeredAddressPincode });
+          // For other fields, preserve the existing PIN code value
+          return { ...org, [field]: value };
+        }
+        return org;
+      });
+    });
   };
 
   const addWebsite = (orgId) => {

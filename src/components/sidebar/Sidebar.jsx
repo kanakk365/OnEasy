@@ -86,7 +86,7 @@ function Sidebar() {
     { icon: <TbCopy />, text: "Resources", path: "/resources" },
     { icon: <RiFileEditLine />, text: "My Documents", path: "/documents" },
 
-    { icon: <BsBuilding />, text: "My Companies", path: "/organization" },
+    { icon: <BsBuilding />, text: "My Organizations", path: "/organization" },
     {
       icon: <MdOutlineSubscriptions />,
       text: "Invoices",

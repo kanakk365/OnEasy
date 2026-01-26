@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import apiClient from "../../../utils/api";
 import { updateUserDataByUserId } from "../../../utils/usersPageApi";
 import { uploadFileDirect, viewFile } from "../../../utils/s3Upload";
+import { lookupPincode } from "../../../utils/pincodeLookup";
 import {
   FiBriefcase,
   FiGlobe,
@@ -40,6 +41,8 @@ function AdminOrganizations() {
   const [selectedClient, setSelectedClient] = useState(null);
   const [clients, setClients] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState("organization-details");
+  const [activeDetailTab, setActiveDetailTab] = useState("organization-details");
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,6 +61,12 @@ function AdminOrganizations() {
     tan: "",
     cin: "",
     registeredAddress: "",
+    registeredAddressLine1: "",
+    registeredAddressLine2: "",
+    registeredAddressDistrict: "",
+    registeredAddressState: "",
+    registeredAddressCountry: "India",
+    registeredAddressPincode: "",
     directorsPartners: [],
     digitalSignatures: [],
     optionalAttachment1: null,
@@ -279,6 +288,12 @@ function AdminOrganizations() {
               editingOrg.registeredAddress !== "-"
                 ? editingOrg.registeredAddress
                 : "",
+            registeredAddressLine1: editingOrg.registeredAddressLine1 !== "-" ? editingOrg.registeredAddressLine1 || "" : "",
+            registeredAddressLine2: editingOrg.registeredAddressLine2 !== "-" ? editingOrg.registeredAddressLine2 || "" : "",
+            registeredAddressDistrict: editingOrg.registeredAddressDistrict !== "-" ? editingOrg.registeredAddressDistrict || "" : "",
+            registeredAddressState: editingOrg.registeredAddressState !== "-" ? editingOrg.registeredAddressState || "" : "",
+            registeredAddressCountry: editingOrg.registeredAddressCountry !== "-" ? editingOrg.registeredAddressCountry || "India" : "India",
+            registeredAddressPincode: editingOrg.registeredAddressPincode !== "-" ? editingOrg.registeredAddressPincode || "" : "",
             directorsPartners: (editingOrg.directorsPartners || []).filter(
               (dp) => dp.name || dp.dinNumber || dp.contact || dp.email
             ),
@@ -319,6 +334,7 @@ function AdminOrganizations() {
       setSavingOrg(false);
     }
   };
+
 
   const formatDate = (dateString) => {
     if (!dateString || dateString === "-") return "-";
@@ -529,6 +545,12 @@ function AdminOrganizations() {
           cin: org.cin || "",
           registeredAddress:
             org.registered_address || org.registeredAddress || "",
+          registeredAddressLine1: org.registered_address_line1 || org.registeredAddressLine1 || org.registered_address?.split(',')[0]?.trim() || "",
+          registeredAddressLine2: org.registered_address_line2 || org.registeredAddressLine2 || org.registered_address?.split(',').slice(1).join(',').trim() || "",
+          registeredAddressDistrict: org.registered_address_district || org.registeredAddressDistrict || "",
+          registeredAddressState: org.registered_address_state || org.registeredAddressState || "",
+          registeredAddressCountry: org.registered_address_country || org.registeredAddressCountry || "India",
+          registeredAddressPincode: org.registered_address_pincode || org.registeredAddressPincode || "",
           directorsPartners:
             org.directors_partners_details || org.directorsPartners || [],
           digitalSignatures:
@@ -553,6 +575,12 @@ function AdminOrganizations() {
         tan: newOrganization.tan || "",
         cin: newOrganization.cin || "",
         registeredAddress: newOrganization.registeredAddress || "",
+        registeredAddressLine1: newOrganization.registeredAddressLine1 || "",
+        registeredAddressLine2: newOrganization.registeredAddressLine2 || "",
+        registeredAddressDistrict: newOrganization.registeredAddressDistrict || "",
+        registeredAddressState: newOrganization.registeredAddressState || "",
+        registeredAddressCountry: newOrganization.registeredAddressCountry || "India",
+        registeredAddressPincode: newOrganization.registeredAddressPincode || "",
         directorsPartners: (newOrganization.directorsPartners || []).filter(
           (dp) => dp.name || dp.dinNumber || dp.contact || dp.email
         ),
@@ -673,6 +701,12 @@ function AdminOrganizations() {
             tan: foundOrg.tan || "-",
             cin: foundOrg.cin || "-",
             registeredAddress: foundOrg.registered_address || "-",
+            registeredAddressLine1: foundOrg.registered_address_line1 || foundOrg.registered_address?.split(',')[0]?.trim() || "-",
+            registeredAddressLine2: foundOrg.registered_address_line2 || foundOrg.registered_address?.split(',').slice(1).join(',').trim() || "-",
+            registeredAddressDistrict: foundOrg.registered_address_district || "-",
+            registeredAddressState: foundOrg.registered_address_state || "-",
+            registeredAddressCountry: foundOrg.registered_address_country || "India",
+            registeredAddressPincode: foundOrg.registered_address_pincode || "-",
             directorsPartners: (Array.isArray(directorsPartners)
               ? directorsPartners
               : []
@@ -841,7 +875,35 @@ function AdminOrganizations() {
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            {/* Tabs Navigation */}
+            <div className="border-b border-gray-200">
+              <div className="flex space-x-1 px-4 pt-4">
+                {[
+                  { key: "organization-details", label: "Organization Details" },
+                  { key: "directors-partners", label: "Directors / Partners Details" },
+                  { key: "digital-signatures", label: "Digital Signature Details" },
+                  { key: "attachments", label: "Attachments" },
+                  { key: "credentials", label: "Credentials" },
+                ].map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 ${
+                      activeTab === tab.key
+                        ? "bg-white text-[#00486D] border-b-2 border-[#00486D] -mb-px"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-6 min-h-[400px]">
+              {activeTab === "organization-details" && (
+                <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1044,25 +1106,151 @@ function AdminOrganizations() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-6">
+              {/* Registered Office Address Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-2">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-4">Registered Office Address</h4>
+                </div>
+                
+                {/* Address Line 1 */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Address Line 1
+                  </label>
+                  <input
+                    type="text"
+                    value={newOrganization.registeredAddressLine1 || ""}
+                    onChange={(e) =>
+                      updateNewOrganizationField("registeredAddressLine1", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    placeholder="Enter Address Line 1"
+                  />
+                </div>
+
+                {/* Address Line 2 */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Address Line 2
+                  </label>
+                  <input
+                    type="text"
+                    value={newOrganization.registeredAddressLine2 || ""}
+                    onChange={(e) =>
+                      updateNewOrganizationField("registeredAddressLine2", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    placeholder="Enter Address Line 2 (Optional)"
+                  />
+                </div>
+
+                {/* District */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Registered Address
+                    District
                   </label>
-                  <textarea
-                    value={newOrganization.registeredAddress}
+                  <input
+                    type="text"
+                    value={newOrganization.registeredAddressDistrict || ""}
                     onChange={(e) =>
-                      updateNewOrganizationField("registeredAddress", e.target.value)
+                      updateNewOrganizationField("registeredAddressDistrict", e.target.value)
                     }
-                    rows={3}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                    placeholder="Enter registered address"
+                    placeholder="Enter District"
+                  />
+                </div>
+
+                {/* State */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    State
+                  </label>
+                  <input
+                    type="text"
+                    value={newOrganization.registeredAddressState || ""}
+                    onChange={(e) =>
+                      updateNewOrganizationField("registeredAddressState", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    placeholder="Enter State"
+                  />
+                </div>
+
+                {/* Country */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Country
+                  </label>
+                  <input
+                    type="text"
+                    value={newOrganization.registeredAddressCountry || "India"}
+                    onChange={(e) =>
+                      updateNewOrganizationField("registeredAddressCountry", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    placeholder="Enter Country"
+                  />
+                </div>
+
+                {/* PIN Code */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    PIN Code
+                  </label>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={newOrganization.registeredAddressPincode || ""}
+                    onChange={async (e) => {
+                      // Get the raw input value
+                      const inputValue = e.target.value;
+                      
+                      // Remove all non-digit characters and limit to 6 digits
+                      const cleanedValue = inputValue.replace(/\D/g, "").slice(0, 6);
+                      
+                      // Update the field - this should allow all 6 digits
+                      updateNewOrganizationField("registeredAddressPincode", cleanedValue);
+                      
+                      // Auto-trigger lookup when exactly 6 digits are entered
+                      if (cleanedValue.length === 6) {
+                        // Store PIN code to preserve it
+                        const pincodeToPreserve = cleanedValue;
+                        
+                        try {
+                          const result = await lookupPincode(cleanedValue);
+                          if (result.success) {
+                            if (result.state) {
+                              updateNewOrganizationField("registeredAddressState", result.state);
+                            }
+                            if (result.district) {
+                              updateNewOrganizationField("registeredAddressDistrict", result.district);
+                            }
+                            
+                            // Ensure PIN code is preserved after State/District updates
+                            setTimeout(() => {
+                              const currentPincode = newOrganization?.registeredAddressPincode;
+                              if (currentPincode !== pincodeToPreserve) {
+                                updateNewOrganizationField("registeredAddressPincode", pincodeToPreserve);
+                              }
+                            }, 200);
+                          }
+                        } catch (error) {
+                          console.error("PIN code lookup error:", error);
+                        }
+                      }
+                    }}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    placeholder="Enter 6-digit PIN Code"
+                    maxLength={6}
                   />
                 </div>
               </div>
+                </div>
+              )}
 
-              {/* Directors / Partners Section */}
-              <div className="border-t border-gray-200 pt-6">
+              {activeTab === "directors-partners" && (
+                <div>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">
                     Directors / Partners
@@ -1215,10 +1403,11 @@ function AdminOrganizations() {
                     </table>
                   </div>
                 )}
-              </div>
+                </div>
+              )}
 
-              {/* Digital Signatures Section */}
-              <div className="border-t border-gray-200 pt-6">
+              {activeTab === "digital-signatures" && (
+                <div>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">
                     Digital Signatures
@@ -1335,10 +1524,123 @@ function AdminOrganizations() {
                     </table>
                   </div>
                 )}
-              </div>
+                </div>
+              )}
 
-              {/* Credentials Section */}
-              <div className="border-t border-gray-200 pt-6">
+              {activeTab === "attachments" && (
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Attachments
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Optional Attachment 1
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="text"
+                          readOnly
+                          value={
+                            newOrganization.optionalAttachment1
+                              ? "File uploaded"
+                              : "No file chosen"
+                          }
+                          className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500"
+                        />
+                        <label className="cursor-pointer flex-shrink-0">
+                          <input
+                            type="file"
+                            onChange={async (e) => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                try {
+                                  if (file.size > 5 * 1024 * 1024) {
+                                    alert("File size must be less than 5MB");
+                                    e.target.value = "";
+                                    return;
+                                  }
+                                  const folder = `user-profiles/${selectedClient?.id || "new"}/organizations/org-new`;
+                                  const { s3Url } = await uploadFileDirect(
+                                    file,
+                                    folder,
+                                    "optional-attachment-1"
+                                  );
+                                  updateNewOrganizationField("optionalAttachment1", s3Url);
+                                } catch (error) {
+                                  console.error("Error uploading attachment:", error);
+                                  alert("Failed to upload file. Please try again.");
+                                  e.target.value = "";
+                                }
+                              }
+                            }}
+                            className="hidden"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                          />
+                          <span className="px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm whitespace-nowrap">
+                            {newOrganization.optionalAttachment1 ? "Change" : "Upload"}
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Optional Attachment 2
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="text"
+                          readOnly
+                          value={
+                            newOrganization.optionalAttachment2
+                              ? "File uploaded"
+                              : "No file chosen"
+                          }
+                          className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500"
+                        />
+                        <label className="cursor-pointer flex-shrink-0">
+                          <input
+                            type="file"
+                            onChange={async (e) => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                try {
+                                  if (file.size > 5 * 1024 * 1024) {
+                                    alert("File size must be less than 5MB");
+                                    e.target.value = "";
+                                    return;
+                                  }
+                                  const folder = `user-profiles/${selectedClient?.id || "new"}/organizations/org-new`;
+                                  const { s3Url } = await uploadFileDirect(
+                                    file,
+                                    folder,
+                                    "optional-attachment-2"
+                                  );
+                                  updateNewOrganizationField("optionalAttachment2", s3Url);
+                                } catch (error) {
+                                  console.error("Error uploading attachment:", error);
+                                  alert("Failed to upload file. Please try again.");
+                                  e.target.value = "";
+                                }
+                              }
+                            }}
+                            className="hidden"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                          />
+                          <span className="px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm whitespace-nowrap">
+                            {newOrganization.optionalAttachment2 ? "Change" : "Upload"}
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "credentials" && (
+                <div>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">
                     Credentials
@@ -1483,9 +1785,11 @@ function AdminOrganizations() {
                     </table>
                   </div>
                 )}
-              </div>
+                </div>
+              )}
 
-              <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+              {/* Save Button */}
+              <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-200">
                 <button
                   onClick={() => {
                     setIsAddingOrg(false);
@@ -1556,119 +1860,147 @@ function AdminOrganizations() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-6 space-y-8">
-            {/* Use same grid layout as Add Form for Read/Edit modes */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Legal Name
-                </label>
-                {editingOrg ? (
-                  <input
-                    type="text"
-                    value={editingOrg.legalName}
-                    onChange={(e) =>
-                      updateOrganizationField("legalName", e.target.value)
-                    }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                  />
-                ) : (
-                  <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
-                    {selectedOrg.legalName}
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Trade Name
-                </label>
-                {editingOrg ? (
-                  <input
-                    type="text"
-                    value={editingOrg.tradeName}
-                    onChange={(e) =>
-                      updateOrganizationField("tradeName", e.target.value)
-                    }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                  />
-                ) : (
-                  <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
-                    {selectedOrg.tradeName}
-                  </div>
-                )}
-              </div>
+          {/* Tabs Navigation */}
+          <div className="border-b border-gray-200">
+            <div className="flex space-x-1 px-4 pt-4">
+              {[
+                { key: "organization-details", label: "Organization Details" },
+                { key: "directors-partners", label: "Directors / Partners Details" },
+                { key: "digital-signatures", label: "Digital Signature Details" },
+                { key: "attachments", label: "Attachments" },
+                { key: "credentials", label: "Credentials" },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveDetailTab(tab.key)}
+                  className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 ${
+                    activeDetailTab === tab.key
+                      ? "bg-white text-[#00486D] border-b-2 border-[#00486D] -mb-px"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
+          </div>
 
-            {/* GSTIN, PAN Number & Incorporation Date */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  GSTIN
-                </label>
-                {editingOrg ? (
-                  <input
-                    type="text"
-                    value={editingOrg.gstin}
-                    onChange={(e) =>
-                      updateOrganizationField("gstin", e.target.value)
-                    }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                  />
-                ) : (
-                  <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
-                    {selectedOrg.gstin}
+          {/* Tab Content */}
+          <div className="px-6 py-6 min-h-[400px]">
+            {activeDetailTab === "organization-details" && (
+              <div className="space-y-8">
+                {/* Use same grid layout as Add Form for Read/Edit modes */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Legal Name
+                    </label>
+                    {editingOrg ? (
+                      <input
+                        type="text"
+                        value={editingOrg.legalName}
+                        onChange={(e) =>
+                          updateOrganizationField("legalName", e.target.value)
+                        }
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                      />
+                    ) : (
+                      <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                        {selectedOrg.legalName}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  PAN Number
-                </label>
-                {editingOrg ? (
-                  <input
-                    type="text"
-                    value={editingOrg.panNumber || ""}
-                    onChange={(e) =>
-                      updateOrganizationField("panNumber", e.target.value)
-                    }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                  />
-                ) : (
-                  <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
-                    {selectedOrg.panNumber || "-"}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Trade Name
+                    </label>
+                    {editingOrg ? (
+                      <input
+                        type="text"
+                        value={editingOrg.tradeName}
+                        onChange={(e) =>
+                          updateOrganizationField("tradeName", e.target.value)
+                        }
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                      />
+                    ) : (
+                      <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                        {selectedOrg.tradeName}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Incorporation Date
-                </label>
-                {editingOrg ? (
-                  <input
-                    type="date"
-                    value={editingOrg.incorporationDate}
-                    onChange={(e) =>
-                      updateOrganizationField(
-                        "incorporationDate",
-                        e.target.value
-                      )
-                    }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                  />
-                ) : (
-                  <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
-                    {formatDate(selectedOrg.incorporationDate)}
-                  </div>
-                )}
-              </div>
-            </div>
+                </div>
 
-            {/* PAN File Upload */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  PAN File
-                </label>
+                {/* GSTIN, PAN Number & Incorporation Date */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      GSTIN
+                    </label>
+                    {editingOrg ? (
+                      <input
+                        type="text"
+                        value={editingOrg.gstin}
+                        onChange={(e) =>
+                          updateOrganizationField("gstin", e.target.value)
+                        }
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                      />
+                    ) : (
+                      <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                        {selectedOrg.gstin}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      PAN Number
+                    </label>
+                    {editingOrg ? (
+                      <input
+                        type="text"
+                        value={editingOrg.panNumber || ""}
+                        onChange={(e) =>
+                          updateOrganizationField("panNumber", e.target.value)
+                        }
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                      />
+                    ) : (
+                      <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                        {selectedOrg.panNumber || "-"}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Incorporation Date
+                    </label>
+                    {editingOrg ? (
+                      <input
+                        type="date"
+                        value={editingOrg.incorporationDate}
+                        onChange={(e) =>
+                          updateOrganizationField(
+                            "incorporationDate",
+                            e.target.value
+                          )
+                        }
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                      />
+                    ) : (
+                      <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                        {formatDate(selectedOrg.incorporationDate)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* PAN File Upload */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      PAN File
+                    </label>
                 {editingOrg ? (
                   <div className="flex items-center gap-1.5">
                     <input
@@ -1734,132 +2066,292 @@ function AdminOrganizations() {
                     ) : (
                       "Not uploaded"
                     )}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
 
-            {/* Additional Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category
-                </label>
-                {editingOrg ? (
-                  <select
-                    value={editingOrg.category}
-                    onChange={(e) =>
-                      updateOrganizationField("category", e.target.value)
-                    }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                  >
-                    <option value="">Select Category</option>
-                    <option value="Private Limited Company">
-                      Private Limited Company
-                    </option>
-                    <option value="Partnership Firm">Partnership Firm</option>
-                    <option value="One Person Company">
-                      One Person Company
-                    </option>
-                    <option value="Limited Liability Partnership">
-                      Limited Liability Partnership
-                    </option>
-                    <option value="Individual">Individual</option>
-                  </select>
-                ) : (
-                  <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
-                    {selectedOrg.category || "-"}
+                {/* Additional Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Category
+                    </label>
+                    {editingOrg ? (
+                      <select
+                        value={editingOrg.category}
+                        onChange={(e) =>
+                          updateOrganizationField("category", e.target.value)
+                        }
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                      >
+                        <option value="">Select Category</option>
+                        <option value="Private Limited Company">
+                          Private Limited Company
+                        </option>
+                        <option value="Partnership Firm">Partnership Firm</option>
+                        <option value="One Person Company">
+                          One Person Company
+                        </option>
+                        <option value="Limited Liability Partnership">
+                          Limited Liability Partnership
+                        </option>
+                        <option value="Individual">Individual</option>
+                      </select>
+                    ) : (
+                      <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                        {selectedOrg.category || "-"}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  TAN
-                </label>
-                {editingOrg ? (
-                  <input
-                    type="text"
-                    value={editingOrg.tan}
-                    onChange={(e) =>
-                      updateOrganizationField("tan", e.target.value)
-                    }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                  />
-                ) : (
-                  <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
-                    {selectedOrg.tan || "-"}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      TAN
+                    </label>
+                    {editingOrg ? (
+                    <input
+                      type="text"
+                      value={editingOrg.tan}
+                      onChange={(e) =>
+                        updateOrganizationField("tan", e.target.value)
+                      }
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                      />
+                    ) : (
+                      <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                        {selectedOrg.tan || "-"}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  CIN
-                </label>
-                {editingOrg ? (
-                  <input
-                    type="text"
-                    value={editingOrg.cin}
-                    onChange={(e) =>
-                      updateOrganizationField("cin", e.target.value)
-                    }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                  />
-                ) : (
-                  <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
-                    {selectedOrg.cin || "-"}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      CIN
+                    </label>
+                    {editingOrg ? (
+                    <input
+                      type="text"
+                      value={editingOrg.cin}
+                      onChange={(e) =>
+                        updateOrganizationField("cin", e.target.value)
+                      }
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                      />
+                    ) : (
+                      <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                        {selectedOrg.cin || "-"}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Registered Address
-                </label>
-                {editingOrg ? (
-                  <textarea
-                    value={editingOrg.registeredAddress}
-                    onChange={(e) =>
-                      updateOrganizationField("registeredAddress", e.target.value)
-                    }
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                  />
-                ) : (
-                  <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
-                    {selectedOrg.registeredAddress || "-"}
+                  {/* Registered Office Address Section */}
+                  <div className="md:col-span-2">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-4">Registered Office Address</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Address Line 1 */}
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Address Line 1
+                      </label>
+                      {editingOrg ? (
+                        <input
+                          type="text"
+                          value={editingOrg.registeredAddressLine1 || ""}
+                          onChange={(e) =>
+                            updateOrganizationField("registeredAddressLine1", e.target.value)
+                          }
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                          placeholder="Enter Address Line 1"
+                        />
+                      ) : (
+                        <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                          {selectedOrg.registeredAddressLine1 || "-"}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Address Line 2 */}
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Address Line 2
+                      </label>
+                      {editingOrg ? (
+                        <input
+                          type="text"
+                          value={editingOrg.registeredAddressLine2 || ""}
+                          onChange={(e) =>
+                            updateOrganizationField("registeredAddressLine2", e.target.value)
+                          }
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                          placeholder="Enter Address Line 2 (Optional)"
+                        />
+                      ) : (
+                        <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                          {selectedOrg.registeredAddressLine2 || "-"}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* District */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        District
+                      </label>
+                      {editingOrg ? (
+                        <input
+                          type="text"
+                          value={editingOrg.registeredAddressDistrict || ""}
+                          onChange={(e) =>
+                            updateOrganizationField("registeredAddressDistrict", e.target.value)
+                          }
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                          placeholder="Enter District"
+                        />
+                      ) : (
+                        <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                          {selectedOrg.registeredAddressDistrict || "-"}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* State */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        State
+                      </label>
+                      {editingOrg ? (
+                        <input
+                          type="text"
+                          value={editingOrg.registeredAddressState || ""}
+                          onChange={(e) =>
+                            updateOrganizationField("registeredAddressState", e.target.value)
+                          }
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                          placeholder="Enter State"
+                        />
+                      ) : (
+                        <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                          {selectedOrg.registeredAddressState || "-"}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Country */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Country
+                      </label>
+                      {editingOrg ? (
+                        <input
+                          type="text"
+                          value={editingOrg.registeredAddressCountry || "India"}
+                          onChange={(e) =>
+                            updateOrganizationField("registeredAddressCountry", e.target.value)
+                          }
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                          placeholder="Enter Country"
+                        />
+                      ) : (
+                        <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                          {selectedOrg.registeredAddressCountry || "India"}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* PIN Code */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        PIN Code
+                      </label>
+                      {editingOrg ? (
+                        <div>
+                        <input
+                          type="tel"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          value={editingOrg.registeredAddressPincode || ""}
+                          onChange={async (e) => {
+                            // Get the raw input value
+                            const inputValue = e.target.value;
+                            
+                            // Remove all non-digit characters and limit to 6 digits
+                            const cleanedValue = inputValue.replace(/\D/g, "").slice(0, 6);
+                            
+                            // Update the field - this should allow all 6 digits
+                            updateOrganizationField("registeredAddressPincode", cleanedValue);
+                            
+                            // Auto-trigger lookup when exactly 6 digits are entered
+                            if (cleanedValue.length === 6) {
+                              // Store PIN code to preserve it
+                              const pincodeToPreserve = cleanedValue;
+                              
+                              try {
+                                const result = await lookupPincode(cleanedValue);
+                                if (result.success) {
+                                  if (result.state) {
+                                    updateOrganizationField("registeredAddressState", result.state);
+                                  }
+                                  if (result.district) {
+                                    updateOrganizationField("registeredAddressDistrict", result.district);
+                                  }
+                                  
+                                  // Ensure PIN code is preserved after State/District updates
+                                  setTimeout(() => {
+                                    const currentPincode = editingOrg?.registeredAddressPincode;
+                                    if (currentPincode !== pincodeToPreserve) {
+                                      updateOrganizationField("registeredAddressPincode", pincodeToPreserve);
+                                    }
+                                  }, 200);
+                                }
+                              } catch (error) {
+                                console.error("PIN code lookup error:", error);
+                              }
+                            }
+                          }}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                          placeholder="Enter 6-digit PIN Code"
+                          maxLength={6}
+                        />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                          {selectedOrg.registeredAddressPincode || "-"}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Directors / Partners Section */}
-            <div className="border-t border-gray-200 pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Directors / Partners
-                </h3>
-                {editingOrg && (
-                  <button
-                    onClick={addDirectorPartner}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
-                  >
-                    <FiPlus className="w-4 h-4" /> Add Director/Partner
-                  </button>
-                )}
-              </div>
+            {activeDetailTab === "directors-partners" && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Directors / Partners
+                  </h3>
+                  {editingOrg && (
+                    <button
+                      onClick={addDirectorPartner}
+                      className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
+                    >
+                      <FiPlus className="w-4 h-4" /> Add Director/Partner
+                    </button>
+                  )}
+                </div>
 
-              {(!selectedOrg.directorsPartners ||
+                {(!selectedOrg.directorsPartners ||
                 selectedOrg.directorsPartners.length === 0) &&
                 (!editingOrg ||
                   !editingOrg.directorsPartners ||
                   editingOrg.directorsPartners.length === 0) ? (
-                <div className="text-center py-8 text-gray-500">
-                  No Directors / Partners added yet
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
+                  <div className="text-center py-8 text-gray-500">
+                    No Directors / Partners added yet
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-[#00486D] text-white">
                       <tr>
@@ -2026,35 +2518,36 @@ function AdminOrganizations() {
                     </tbody>
                   </table>
                 </div>
-              )}
-            </div>
-
-            {/* Digital Signatures Section */}
-            <div className="border-t border-gray-200 pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Digital Signatures
-                </h3>
-                {editingOrg && (
-                  <button
-                    onClick={addDigitalSignature}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
-                  >
-                    <FiPlus className="w-4 h-4" /> Add Digital Signature
-                  </button>
                 )}
               </div>
+            )}
 
-              {(!selectedOrg.digitalSignatures ||
+            {activeDetailTab === "digital-signatures" && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Digital Signatures
+                  </h3>
+                  {editingOrg && (
+                    <button
+                      onClick={addDigitalSignature}
+                      className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
+                    >
+                      <FiPlus className="w-4 h-4" /> Add Digital Signature
+                    </button>
+                  )}
+                </div>
+
+                {(!selectedOrg.digitalSignatures ||
                 selectedOrg.digitalSignatures.length === 0) &&
                 (!editingOrg ||
                   !editingOrg.digitalSignatures ||
                   editingOrg.digitalSignatures.length === 0) ? (
-                <div className="text-center py-8 text-gray-500">
-                  No Digital Signatures added yet
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
+                  <div className="text-center py-8 text-gray-500">
+                    No Digital Signatures added yet
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-[#00486D] text-white">
                       <tr>
@@ -2175,49 +2668,192 @@ function AdminOrganizations() {
                     </tbody>
                   </table>
                 </div>
-              )}
-            </div>
-
-            {/* Credentials Section */}
-            <div className="border-t border-gray-200 pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Credentials
-                </h3>
-                {editingOrg && (
-                  <button
-                    onClick={() => {
-                      const newWebsite = {
-                        id: Date.now(),
-                        type: "",
-                        url: "",
-                        login: "",
-                        password: "",
-                        remarks: "",
-                        showPassword: false,
-                      };
-                      setEditingOrg({
-                        ...editingOrg,
-                        websites: [...(editingOrg.websites || []), newWebsite],
-                      });
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
-                  >
-                    <FiPlus className="w-4 h-4" /> Add Credential
-                  </button>
                 )}
               </div>
+            )}
 
-              {(!selectedOrg.websites ||
+            {activeDetailTab === "attachments" && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Attachments
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Optional Attachment 1
+                    </label>
+                    {editingOrg ? (
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="text"
+                          readOnly
+                          value={
+                            editingOrg.optionalAttachment1
+                              ? "File uploaded"
+                              : "No file chosen"
+                          }
+                          className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500"
+                        />
+                        <label className="cursor-pointer flex-shrink-0">
+                          <input
+                            type="file"
+                            onChange={async (e) => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                try {
+                                  if (file.size > 5 * 1024 * 1024) {
+                                    alert("File size must be less than 5MB");
+                                    e.target.value = "";
+                                    return;
+                                  }
+                                  const folder = `user-profiles/${selectedOrgUserId}/organizations/org-${editingOrg.id || "new"}`;
+                                  const { s3Url } = await uploadFileDirect(
+                                    file,
+                                    folder,
+                                    "optional-attachment-1"
+                                  );
+                                  updateOrganizationField("optionalAttachment1", s3Url);
+                                } catch (error) {
+                                  console.error("Error uploading attachment:", error);
+                                  alert("Failed to upload file. Please try again.");
+                                  e.target.value = "";
+                                }
+                              }
+                            }}
+                            className="hidden"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                          />
+                          <span className="px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm whitespace-nowrap">
+                            {editingOrg.optionalAttachment1 ? "Change" : "Upload"}
+                          </span>
+                        </label>
+                      </div>
+                    ) : (
+                      <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                        {selectedOrg.optionalAttachment1 ? (
+                          <button
+                            onClick={() => handleViewFile(selectedOrg.optionalAttachment1)}
+                            className="text-blue-600 hover:underline"
+                          >
+                            View File
+                          </button>
+                        ) : (
+                          "Not uploaded"
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Optional Attachment 2
+                    </label>
+                    {editingOrg ? (
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="text"
+                          readOnly
+                          value={
+                            editingOrg.optionalAttachment2
+                              ? "File uploaded"
+                              : "No file chosen"
+                          }
+                          className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500"
+                        />
+                        <label className="cursor-pointer flex-shrink-0">
+                          <input
+                            type="file"
+                            onChange={async (e) => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                try {
+                                  if (file.size > 5 * 1024 * 1024) {
+                                    alert("File size must be less than 5MB");
+                                    e.target.value = "";
+                                    return;
+                                  }
+                                  const folder = `user-profiles/${selectedOrgUserId}/organizations/org-${editingOrg.id || "new"}`;
+                                  const { s3Url } = await uploadFileDirect(
+                                    file,
+                                    folder,
+                                    "optional-attachment-2"
+                                  );
+                                  updateOrganizationField("optionalAttachment2", s3Url);
+                                } catch (error) {
+                                  console.error("Error uploading attachment:", error);
+                                  alert("Failed to upload file. Please try again.");
+                                  e.target.value = "";
+                                }
+                              }
+                            }}
+                            className="hidden"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                          />
+                          <span className="px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm whitespace-nowrap">
+                            {editingOrg.optionalAttachment2 ? "Change" : "Upload"}
+                          </span>
+                        </label>
+                      </div>
+                    ) : (
+                      <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
+                        {selectedOrg.optionalAttachment2 ? (
+                          <button
+                            onClick={() => handleViewFile(selectedOrg.optionalAttachment2)}
+                            className="text-blue-600 hover:underline"
+                          >
+                            View File
+                          </button>
+                        ) : (
+                          "Not uploaded"
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeDetailTab === "credentials" && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Credentials
+                  </h3>
+                  {editingOrg && (
+                    <button
+                      onClick={() => {
+                        const newWebsite = {
+                          id: Date.now(),
+                          type: "",
+                          url: "",
+                          login: "",
+                          password: "",
+                          remarks: "",
+                          showPassword: false,
+                        };
+                        setEditingOrg({
+                          ...editingOrg,
+                          websites: [...(editingOrg.websites || []), newWebsite],
+                        });
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
+                    >
+                      <FiPlus className="w-4 h-4" /> Add Credential
+                    </button>
+                  )}
+                </div>
+
+                {(!selectedOrg.websites ||
                 selectedOrg.websites.length === 0) &&
                 (!editingOrg ||
                   !editingOrg.websites ||
                   editingOrg.websites.length === 0) ? (
-                <div className="text-center py-8 text-gray-500">
-                  No Credentials added yet
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
+                  <div className="text-center py-8 text-gray-500">
+                    No Credentials added yet
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-[#00486D] text-white">
                       <tr>
@@ -2451,12 +3087,13 @@ function AdminOrganizations() {
                     </tbody>
                   </table>
                 </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             {/* Edit Actions */}
             {editingOrg && (
-              <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
+              <div className="flex justify-end gap-3 pt-6 mt-6 border-t border-gray-200">
                 <button
                   onClick={() => setEditingOrg(null)}
                   className="px-6 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
