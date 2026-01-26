@@ -208,10 +208,18 @@ function StartupIndiaForm() {
 
     return {
       ...formData,
-      // Explicitly include payment details
-      paymentId: formData.paymentDetails?.paymentId || formData.paymentDetails?.orderId,
-      orderId: formData.paymentDetails?.orderId || formData.paymentDetails?.paymentId,
-      paymentStatus: formData.paymentDetails?.payment_status || 'paid',
+      // Explicitly include payment details - check multiple possible field names
+      paymentId: formData.paymentId || 
+                 formData.paymentDetails?.razorpay_payment_id || 
+                 formData.paymentDetails?.paymentId || 
+                 formData.paymentDetails?.razorpay_order_id,
+      orderId: formData.orderId || 
+               formData.paymentDetails?.razorpay_order_id || 
+               formData.paymentDetails?.orderId || 
+               formData.paymentDetails?.razorpay_payment_id,
+      paymentStatus: formData.paymentStatus || 
+                     formData.paymentDetails?.payment_status || 
+                     'paid',
       // Explicitly include package details - preserve existing if available
       packageName: packageName,
       packagePrice: packagePrice,
