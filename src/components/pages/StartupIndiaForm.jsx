@@ -26,6 +26,7 @@ function StartupIndiaForm() {
   const [clientFillRequest, setClientFillRequest] = useState(false);
   const [isAdminOrSuperadmin, setIsAdminOrSuperadmin] = useState(false);
   const [isAdminFilling, setIsAdminFilling] = useState(false);
+  const [clientId, setClientId] = useState(null);
   
   // Keep draftTicketId in sync when URL ticketId changes
   useEffect(() => {
@@ -56,6 +57,7 @@ function StartupIndiaForm() {
       // 2. Admin is on admin route AND has clientId (fallback for cases where admin param might be missing)
       if ((adminParam === 'true' && hasClientId) || (isOnAdminRoute && hasClientId)) {
         setIsAdminFilling(true);
+        setClientId(clientIdParam);
         console.log('✅ Admin filling detected:', { adminParam, clientIdParam, isOnAdminRoute });
       }
     }
@@ -251,7 +253,9 @@ function StartupIndiaForm() {
         priceValue: packagePrice
       },
       // Include ticketId if editing existing draft
-      ticketId: draftTicketId || ticketId || null
+      ticketId: draftTicketId || ticketId || null,
+      // Include clientId if admin is filling
+      clientId: isAdminFilling && clientId ? clientId : null
     };
   };
 

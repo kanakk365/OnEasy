@@ -28,6 +28,7 @@ function ProprietorshipForm({
   const [clientFillRequest, setClientFillRequest] = useState(false);
   const [isAdminOrSuperadmin, setIsAdminOrSuperadmin] = useState(false);
   const [isFillingOnBehalf, setIsFillingOnBehalf] = useState(isAdminFilling);
+  const [clientId, setClientId] = useState(null);
 
   // Check if user is admin or superadmin
   useEffect(() => {
@@ -41,6 +42,7 @@ function ProprietorshipForm({
     const clientIdParam = searchParams.get('clientId');
     if (adminParam === 'true' && clientIdParam && isAdmin) {
       setIsFillingOnBehalf(true);
+      setClientId(clientIdParam);
     }
     
     // Check if user clicked "OnEasy Team Fill" button
@@ -316,7 +318,8 @@ function ProprietorshipForm({
         step2: formData.step2 || {},
         packageDetails: formData.packageDetails || packageDetails,
         paymentDetails: paymentDetails,
-        ticketId: draftTicketId || ticketId // Include ticketId for draft updates
+        ticketId: draftTicketId || ticketId, // Include ticketId for draft updates
+        clientId: isAdminFilling && clientId ? clientId : null // Include clientId if admin is filling
       };
 
       console.log('📤 Submitting proprietorship registration:', submissionData);
