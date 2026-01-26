@@ -170,6 +170,7 @@ function StartupIndiaForm() {
         // New registration - load from localStorage
         const selectedPackage = localStorage.getItem('selectedPackage');
         const paymentDetails = localStorage.getItem('paymentDetails');
+        const draftTicketIdFromStorage = localStorage.getItem('draftTicketId');
 
         if (!selectedPackage || !paymentDetails) {
           alert('Please complete payment before accessing the registration form.');
@@ -182,6 +183,16 @@ function StartupIndiaForm() {
         
         console.log('📦 Loaded package details:', packageDetails);
         console.log('💳 Loaded payment details:', paymentData);
+        
+        // If we have a draft ticket ID from payment verification, use it
+        if (draftTicketIdFromStorage) {
+          console.log('📋 Found draft ticket ID in localStorage:', draftTicketIdFromStorage);
+          setDraftTicketId(draftTicketIdFromStorage);
+          // Update URL to include ticketId so subsequent saves update (not create new)
+          const qs = new URLSearchParams(window.location.search);
+          qs.set('ticketId', draftTicketIdFromStorage);
+          navigate(`/startup-india-form?${qs.toString()}`, { replace: true });
+        }
         
         setFormData(prev => ({
           ...prev,
