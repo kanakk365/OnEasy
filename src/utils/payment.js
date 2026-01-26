@@ -181,6 +181,33 @@ export const initPayment = async (packageData) => {
             restoreScroll();
             
             // Payment successful - verify on backend
+            const paymentTimestamp = new Date().toISOString();
+            const paymentId = response.razorpay_payment_id;
+            const orderId = response.razorpay_order_id;
+            
+            console.log('🔵 ===== PAYMENT HANDLER CALLED =====');
+            console.log('🔵 Timestamp:', paymentTimestamp);
+            console.log('🔵 Payment ID:', paymentId);
+            console.log('🔵 Order ID:', orderId);
+            console.log('🔵 Stack trace:', new Error().stack);
+            console.log('🔵 ===================================');
+            
+            // Check if we've already processed this payment
+            const paymentKey = `payment_processed_${paymentId}`;
+            const alreadyProcessed = sessionStorage.getItem(paymentKey);
+            
+            if (alreadyProcessed) {
+              console.warn('⚠️ [DUPLICATE PREVENTION] Payment verification already in progress for:', paymentId);
+              console.warn('⚠️ [DUPLICATE PREVENTION] First call timestamp:', alreadyProcessed);
+              console.warn('⚠️ [DUPLICATE PREVENTION] Skipping duplicate verification call');
+              return; // Prevent duplicate call
+            }
+            
+            // Mark payment as being processed
+            sessionStorage.setItem(paymentKey, paymentTimestamp);
+            console.log('✅ [DUPLICATE PREVENTION] Marked payment as being processed:', paymentId);
+            
+            // Payment successful - verify on backend
             console.log('Payment successful, verifying...');
             
             // Get registration type from localStorage or fallback to detected type
@@ -289,7 +316,20 @@ export const initPayment = async (packageData) => {
               });
             }
 
+            console.log('📞 [FRONTEND] Calling /payment/verify API...');
+            console.log('📞 [FRONTEND] Payload:', JSON.stringify(verifyPayload, null, 2));
+            console.log('📞 [FRONTEND] Call timestamp:', new Date().toISOString());
+            
             apiClient.post('/payment/verify', verifyPayload).then(verifyResponse => {
+              console.log('✅ [FRONTEND] Payment verification response received:', {
+                success: verifyResponse.success,
+                ticketId: verifyResponse.data?.ticketId,
+                timestamp: new Date().toISOString()
+              });
+              
+              // Clear the processing flag on success
+              sessionStorage.removeItem(paymentKey);
+              
               if (verifyResponse.success) {
                 // Payment verified successfully - store package data
                 localStorage.setItem('selectedPackage', JSON.stringify(packageData));
@@ -430,6 +470,32 @@ export const initPaymentWithOrderId = async (orderId, amount, registrationData =
             color: '#01334C'
           },
           handler: function (response) {
+            const paymentTimestamp2 = new Date().toISOString();
+            const paymentId2 = response.razorpay_payment_id;
+            const orderId2 = response.razorpay_order_id;
+            
+            console.log('🔵 ===== PAYMENT HANDLER CALLED (initPaymentWithOrderId) =====');
+            console.log('🔵 Timestamp:', paymentTimestamp2);
+            console.log('🔵 Payment ID:', paymentId2);
+            console.log('🔵 Order ID:', orderId2);
+            console.log('🔵 Stack trace:', new Error().stack);
+            console.log('🔵 ============================================================');
+            
+            // Check if we've already processed this payment
+            const paymentKey2 = `payment_processed_${paymentId2}`;
+            const alreadyProcessed2 = sessionStorage.getItem(paymentKey2);
+            
+            if (alreadyProcessed2) {
+              console.warn('⚠️ [DUPLICATE PREVENTION] Payment verification already in progress (initPaymentWithOrderId):', paymentId2);
+              console.warn('⚠️ [DUPLICATE PREVENTION] First call timestamp:', alreadyProcessed2);
+              console.warn('⚠️ [DUPLICATE PREVENTION] Skipping duplicate verification call');
+              return; // Prevent duplicate call
+            }
+            
+            // Mark payment as being processed
+            sessionStorage.setItem(paymentKey2, paymentTimestamp2);
+            console.log('✅ [DUPLICATE PREVENTION] Marked payment as being processed (initPaymentWithOrderId):', paymentId2);
+            
             console.log('Payment successful:', response);
             restoreScroll();
             
@@ -441,8 +507,21 @@ export const initPaymentWithOrderId = async (orderId, amount, registrationData =
               ...(registrationData.ticket_id && { ticket_id: registrationData.ticket_id }),
               ...(registrationData.registration_type && { registration_type: registrationData.registration_type })
             };
-
+            
+            console.log('📞 [FRONTEND] Calling /payment/verify API (initPaymentWithOrderId)...');
+            console.log('📞 [FRONTEND] Payload:', JSON.stringify(verifyPayload, null, 2));
+            console.log('📞 [FRONTEND] Call timestamp:', new Date().toISOString());
+            
             apiClient.post('/payment/verify', verifyPayload).then(verifyResponse => {
+              console.log('✅ [FRONTEND] Payment verification response received (initPaymentWithOrderId):', {
+                success: verifyResponse.success,
+                ticketId: verifyResponse.data?.ticketId,
+                timestamp: new Date().toISOString()
+              });
+              
+              // Clear the processing flag on success
+              sessionStorage.removeItem(paymentKey2);
+              
               if (verifyResponse.success) {
                 resolve({
                   success: true,
@@ -466,7 +545,10 @@ export const initPaymentWithOrderId = async (orderId, amount, registrationData =
                 reject(new Error('Payment verification failed'));
               }
             }).catch(error => {
-              console.error('Payment verification error:', error);
+              console.error('❌ [FRONTEND] Payment verification error (initPaymentWithOrderId):', error);
+              console.error('❌ [FRONTEND] Error timestamp:', new Date().toISOString());
+              // Clear the processing flag on error
+              sessionStorage.removeItem(paymentKey2);
               reject(error);
             });
           },
