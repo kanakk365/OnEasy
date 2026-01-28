@@ -117,6 +117,8 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
         <CustomDropdown
           options={["Private Limited", "Public Limited", "LLP", "Partnership", "Sole Proprietorship"]}
           placeholder="Select your Business Type"
+          value={step1.businessType || ''}
+          onChange={(value) => updateStep1('businessType', value)}
           disabled={disabled}
         />
       </Field>
@@ -128,6 +130,8 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
             disabled={disabled}
             className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Write minimum 400 characters"
+            value={step1.natureOfBusiness || ''}
+            onChange={(e) => updateStep1('natureOfBusiness', e.target.value)}
           />
         </Field>
       </div>
@@ -137,6 +141,8 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
           disabled={disabled}
           className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Enter your Business Email"
+          value={step1.businessEmail || ''}
+          onChange={(e) => updateStep1('businessEmail', e.target.value)}
         />
       </Field>
 
@@ -151,6 +157,8 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
             disabled={disabled}
             className={`flex-1 px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Enter your Business Contact Number"
+            value={step1.businessContactNumber || ''}
+            onChange={(e) => updateStep1('businessContactNumber', e.target.value)}
           />
         </div>
       </Field>
@@ -160,6 +168,8 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
           disabled={disabled}
           className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Enter Number of Directors/Partners"
+          value={step1.numberOfDirectorsPartners || ''}
+          onChange={(e) => updateStep1('numberOfDirectorsPartners', e.target.value)}
         />
       </Field>
 
@@ -168,6 +178,8 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
           disabled={disabled}
           className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Enter Mobile App link"
+          value={step1.mobileAppLink || ''}
+          onChange={(e) => updateStep1('mobileAppLink', e.target.value)}
         />
       </Field>
 
@@ -176,6 +188,8 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
           disabled={disabled}
           className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Enter Website link"
+          value={step1.websiteLink || ''}
+          onChange={(e) => updateStep1('websiteLink', e.target.value)}
         />
       </Field>
 
@@ -184,6 +198,8 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
           disabled={disabled}
           className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Enter Number of Employees"
+          value={step1.numberOfEmployees || ''}
+          onChange={(e) => updateStep1('numberOfEmployees', e.target.value)}
         />
       </Field>
 
@@ -228,6 +244,8 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
         <CustomDropdown
           options={["Yes", "No"]}
           placeholder="Select Yes or No"
+          value={step1.recognitionOrAwards ? 'Yes' : (step1.recognitionOrAwards === false ? 'No' : '')}
+          onChange={(value) => updateStep1('recognitionOrAwards', value === 'Yes')}
           disabled={disabled}
         />
       </Field>
@@ -359,7 +377,9 @@ export function Step3Content({ formData, setFormData, disabled = false }) {
       ...formData,
       step3: {
         ...step3,
-        [field]: value
+        [field]: value,
+        // Always set country to India
+        registeredOfficeCountry: 'India'
       }
     });
   };
@@ -372,8 +392,8 @@ export function Step3Content({ formData, setFormData, disabled = false }) {
           disabled={disabled}
           className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Type your address here"
-          value={step3.address1 || ''}
-          onChange={(e) => updateStep3('address1', e.target.value)}
+          value={step3.registeredOfficeAddressLine1 || ''}
+          onChange={(e) => updateStep3('registeredOfficeAddressLine1', e.target.value)}
         />
       </Field>
 
@@ -383,8 +403,8 @@ export function Step3Content({ formData, setFormData, disabled = false }) {
           disabled={disabled}
           className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           placeholder="Type your address here"
-          value={step3.address2 || ''}
-          onChange={(e) => updateStep3('address2', e.target.value)}
+          value={step3.registeredOfficeAddressLine2 || ''}
+          onChange={(e) => updateStep3('registeredOfficeAddressLine2', e.target.value)}
         />
       </Field>
 
@@ -394,8 +414,8 @@ export function Step3Content({ formData, setFormData, disabled = false }) {
             options={["Maharashtra", "Karnataka", "Delhi", "Tamil Nadu", "Gujarat", "West Bengal", "Rajasthan", "Others"]}
             placeholder="Select your State"
             disabled={disabled}
-            value={step3.state || ''}
-            onChange={(value) => updateStep3('state', value)}
+            value={step3.registeredOfficeState || ''}
+            onChange={(value) => updateStep3('registeredOfficeState', value)}
           />
         </Field>
 
@@ -404,8 +424,8 @@ export function Step3Content({ formData, setFormData, disabled = false }) {
             disabled={disabled}
             className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Enter City Name"
-            value={step3.city || ''}
-            onChange={(e) => updateStep3('city', e.target.value)}
+            value={step3.registeredOfficeCity || ''}
+            onChange={(e) => updateStep3('registeredOfficeCity', e.target.value)}
           />
         </Field>
       </div>
@@ -414,7 +434,7 @@ export function Step3Content({ formData, setFormData, disabled = false }) {
         <Field label="Country" required>
           <input
             disabled
-            defaultValue="India"
+            value="India"
             className="w-full px-4 py-3 rounded-lg bg-white outline-none"
           />
         </Field>
@@ -424,8 +444,8 @@ export function Step3Content({ formData, setFormData, disabled = false }) {
             disabled={disabled}
             className={`w-full px-4 py-3 rounded-lg bg-white outline-none ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Enter Pincode"
-            value={step3.pincode || ''}
-            onChange={(e) => updateStep3('pincode', e.target.value)}
+            value={step3.registeredOfficePincode || ''}
+            onChange={(e) => updateStep3('registeredOfficePincode', e.target.value)}
           />
         </Field>
       </div>

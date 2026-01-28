@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import StepIndicator from "../forms/StepIndicator";
 import { Step1Content, Step2Content, Step3Content, Step4Content, Step5Content } from "../forms/FormSteps";
@@ -27,6 +27,7 @@ function StartupIndiaForm() {
   const [isAdminOrSuperadmin, setIsAdminOrSuperadmin] = useState(false);
   const [isAdminFilling, setIsAdminFilling] = useState(false);
   const [clientId, setClientId] = useState(null);
+  const justLoadedDataRef = useRef(false); // Track if we just loaded data to prevent immediate autosave
   
   // Keep draftTicketId in sync when URL ticketId changes
   useEffect(() => {
@@ -72,14 +73,67 @@ function StartupIndiaForm() {
     const loadFormData = async () => {
       setLoadingDraft(true);
       
+      // Safety timeout: if loading takes more than 10 seconds, stop loading
+      const loadingTimeout = setTimeout(() => {
+        console.warn('⚠️ Loading timeout - stopping loading state');
+        setLoadingDraft(false);
+      }, 10000);
+      
       if (ticketId) {
         // Loading existing draft to edit
         console.log('📝 Loading draft registration:', ticketId);
         try {
           const response = await getStartupIndiaByTicketId(ticketId);
-          if (response.success && response.data) {
-            const draftData = response.data;
-            console.log('✅ Draft data loaded:', draftData);
+          console.log('📥 Full API response:', response);
+          console.log('📥 Response type:', typeof response);
+          console.log('📥 Response keys:', Object.keys(response || {}));
+          
+          // API client returns parsed JSON directly: { success: true, data: {...} }
+          // Check if response has success and data properties
+          if (!response) {
+            console.error('❌ No response from API');
+            alert('Failed to load registration data. Please try again.');
+            return;
+          }
+          
+          if (!response.success) {
+            console.error('❌ API returned error:', response);
+            alert(response.message || 'Failed to load registration data. Please try again.');
+            return;
+          }
+          
+          if (!response.data) {
+            console.error('❌ No data in API response:', response);
+            alert('Registration data not found. Please try again.');
+            return;
+          }
+          
+          const draftData = response.data;
+          console.log('📥 API Response structure:', {
+            success: response.success,
+            hasData: !!response.data,
+            dataKeys: Object.keys(draftData || {}),
+            businessName: draftData.business_name,
+            businessType: draftData.business_type,
+            businessEmail: draftData.business_email,
+            businessContactNumber: draftData.business_contact_number,
+            natureOfBusiness: draftData.nature_of_business
+          });
+          
+          // Verify we have actual data
+          if (!draftData.business_name && !draftData.business_email && !draftData.business_contact_number) {
+            console.warn('⚠️ Warning: API returned empty or incomplete data');
+            console.warn('⚠️ Draft data object:', draftData);
+          }
+          
+          console.log('✅ Draft data loaded:', draftData);
+            console.log('📋 Draft data fields:', {
+              business_name: draftData.business_name,
+              business_type: draftData.business_type,
+              nature_of_business: draftData.nature_of_business,
+              business_email: draftData.business_email,
+              business_contact_number: draftData.business_contact_number
+            });
             
             // Parse directors_data if it's a string
             let directors = [];
@@ -94,7 +148,7 @@ function StartupIndiaForm() {
             }
             
             // Map database fields to form structure
-            setFormData({
+            const mappedFormData = {
               step1: {
                 businessName: draftData.business_name || '',
                 businessType: draftData.business_type || '',
@@ -144,11 +198,44 @@ function StartupIndiaForm() {
                 priceValue: draftData.package_price || ''
               },
               paymentDetails: {
-                paymentId: draftData.payment_id || '',
-                orderId: draftData.order_id || '',
+                // Preserve payment IDs - use empty string only if truly null/undefined, not if they exist
+                paymentId: draftData.razorpay_payment_id || draftData.payment_id || draftData.razorpay_order_id || '',
+                orderId: draftData.order_id || draftData.razorpay_order_id || draftData.razorpay_payment_id || '',
+                razorpay_payment_id: draftData.razorpay_payment_id || null,
+                razorpay_order_id: draftData.razorpay_order_id || null,
                 payment_status: draftData.payment_status || 'paid'
               }
-            });
+            };
+            
+            console.log('📝 Mapped form data:', mappedFormData);
+            console.log('📝 Step1 data:', mappedFormData.step1);
+            console.log('📝 Step1 businessName:', mappedFormData.step1.businessName);
+            console.log('📝 Step1 businessType:', mappedFormData.step1.businessType);
+            console.log('📝 Step1 businessEmail:', mappedFormData.step1.businessEmail);
+            console.log('📝 Step1 businessContactNumber:', mappedFormData.step1.businessContactNumber);
+            
+            // Verify we have actual data before setting
+            if (!mappedFormData.step1.businessName && !mappedFormData.step2.problemSolving && !mappedFormData.step3.registeredOfficeAddressLine1) {
+              console.warn('⚠️ Warning: Loaded form data appears to be empty');
+            }
+            
+            // Set formData with all loaded data - set directly (no merge needed on initial load)
+            // Mark that we just loaded data to prevent immediate autosave
+            justLoadedDataRef.current = true;
+            
+            setFormData(mappedFormData);
+            
+            // CRITICAL: Set draftTicketId so subsequent saves update (not create new records)
+            setDraftTicketId(ticketId);
+            localStorage.setItem('editingTicketId', ticketId);
+            localStorage.setItem('draftTicketId', ticketId);
+            
+            console.log('✅ Form data loaded and ticketId set:', ticketId);
+            
+            // Reset the flag after a short delay to allow autosave to work normally
+            setTimeout(() => {
+              justLoadedDataRef.current = false;
+            }, 2000);
 
             // Check if team fill request exists for this ticket
             try {
@@ -174,53 +261,109 @@ function StartupIndiaForm() {
             } catch (error) {
               console.error('❌ Error checking client fill status from DB:', error);
             }
-          }
         } catch (error) {
           console.error('❌ Error loading draft:', error);
+          console.error('❌ Error details:', error.message, error.stack);
           alert('Failed to load draft. Please try again.');
+        } finally {
+          // Always set loading to false, even if there was an error
+          clearTimeout(loadingTimeout);
+          setLoadingDraft(false);
         }
       } else {
         // New registration - load from localStorage
+        // Check if we have a ticketId from localStorage that should be loaded
+        const editingTicketId = localStorage.getItem('editingTicketId');
+        const draftTicketIdFromStorage = localStorage.getItem('draftTicketId');
+        const ticketIdToLoad = editingTicketId || draftTicketIdFromStorage;
+        
+        // If we have a ticketId in localStorage, try to load it (user clicked Edit)
+        if (ticketIdToLoad && !ticketId) {
+          console.log('📋 Found ticketId in localStorage, loading data:', ticketIdToLoad);
+          // Update URL to include ticketId and reload
+          const qs = new URLSearchParams(window.location.search);
+          qs.set('ticketId', ticketIdToLoad);
+          navigate(`/startup-india-form?${qs.toString()}`, { replace: true });
+          return; // Exit early, useEffect will re-run with ticketId in URL
+        }
+        
         const selectedPackage = localStorage.getItem('selectedPackage');
         const paymentDetails = localStorage.getItem('paymentDetails');
-        const draftTicketIdFromStorage = localStorage.getItem('draftTicketId');
 
+        // Allow admin to fill forms even without payment (for admin-initiated registrations)
         if (!selectedPackage || !paymentDetails) {
-          alert('Please complete payment before accessing the registration form.');
-          navigate('/registration-categories');
-          return;
+          // Check if admin is filling - need to check URL params directly since state might not be set yet
+          const searchParams = new URLSearchParams(window.location.search);
+          const adminParam = searchParams.get('admin');
+          const clientIdParam = searchParams.get('clientId');
+          const isAdminFillingCheck = adminParam === 'true' && clientIdParam;
+          
+          if (!isAdminFillingCheck) {
+            alert('Please complete payment before accessing the registration form.');
+            navigate('/registration-categories');
+            return;
+          } else {
+            // Admin filling - set default package/payment details
+            console.log('👤 Admin filling detected - allowing form access without payment');
+            const defaultPackage = { name: 'Startup India Registration', price: 0, priceValue: 0 };
+            const defaultPayment = { paymentId: null, orderId: null, payment_status: 'unpaid' };
+            setFormData(prev => ({
+              ...prev,
+              packageDetails: defaultPackage,
+              paymentDetails: defaultPayment
+            }));
+          }
+        } else {
+          const packageDetails = JSON.parse(selectedPackage);
+          const paymentData = JSON.parse(paymentDetails);
+          
+          console.log('📦 Loaded package details:', packageDetails);
+          console.log('💳 Loaded payment details:', paymentData);
+          
+          // If we have a draft ticket ID from payment verification, use it
+          if (draftTicketIdFromStorage) {
+            console.log('📋 Found draft ticket ID in localStorage:', draftTicketIdFromStorage);
+            setDraftTicketId(draftTicketIdFromStorage);
+            // Update URL to include ticketId so subsequent saves update (not create new)
+            const qs = new URLSearchParams(window.location.search);
+            qs.set('ticketId', draftTicketIdFromStorage);
+            navigate(`/startup-india-form?${qs.toString()}`, { replace: true });
+          }
+          
+          setFormData(prev => ({
+            ...prev,
+            packageDetails,
+            paymentDetails: paymentData
+          }));
         }
-
-        const packageDetails = JSON.parse(selectedPackage);
-        const paymentData = JSON.parse(paymentDetails);
-        
-        console.log('📦 Loaded package details:', packageDetails);
-        console.log('💳 Loaded payment details:', paymentData);
-        
-        // If we have a draft ticket ID from payment verification, use it
-        if (draftTicketIdFromStorage) {
-          console.log('📋 Found draft ticket ID in localStorage:', draftTicketIdFromStorage);
-          setDraftTicketId(draftTicketIdFromStorage);
-          // Update URL to include ticketId so subsequent saves update (not create new)
-          const qs = new URLSearchParams(window.location.search);
-          qs.set('ticketId', draftTicketIdFromStorage);
-          navigate(`/startup-india-form?${qs.toString()}`, { replace: true });
-        }
-        
-        setFormData(prev => ({
-          ...prev,
-          packageDetails,
-          paymentDetails: paymentData
-        }));
       }
       
-      setLoadingDraft(false);
-      
+      // Clear timeout and set loading to false (for new registration path)
+      clearTimeout(loadingTimeout);
       setLoadingDraft(false);
     };
     
     loadFormData();
+    
+    // Cleanup function to clear timeout if component unmounts
+    return () => {
+      // This will be handled by the clearTimeout calls in the function
+    };
   }, [navigate, ticketId]);
+
+  // Debug: Log formData changes to see if it's being reset
+  useEffect(() => {
+    if (ticketId && formData.step1) {
+      console.log('🔍 FormData state updated:', {
+        hasStep1: !!formData.step1,
+        step1Keys: Object.keys(formData.step1 || {}),
+        businessName: formData.step1.businessName,
+        businessType: formData.step1.businessType,
+        natureOfBusiness: formData.step1.natureOfBusiness,
+        businessEmail: formData.step1.businessEmail
+      });
+    }
+  }, [formData, ticketId]);
 
   const buildSubmissionData = () => {
     // Preserve package details from formData or use existing values
@@ -232,15 +375,30 @@ function StartupIndiaForm() {
 
     return {
       ...formData,
+      // Ensure step structure is preserved
+      step1: formData.step1 || {},
+      step2: formData.step2 || {},
+      step3: formData.step3 || {},
+      step4: formData.step4 || { directors: [] },
+      step5: formData.step5 || {},
       // Explicitly include payment details - check multiple possible field names
+      // CRITICAL: Preserve payment IDs - don't overwrite with empty strings
       paymentId: formData.paymentId || 
                  formData.paymentDetails?.razorpay_payment_id || 
                  formData.paymentDetails?.paymentId || 
-                 formData.paymentDetails?.razorpay_order_id,
+                 null, // Use null instead of empty string to preserve existing values
       orderId: formData.orderId || 
                formData.paymentDetails?.razorpay_order_id || 
                formData.paymentDetails?.orderId || 
-               formData.paymentDetails?.razorpay_payment_id,
+               null, // Use null instead of empty string to preserve existing values
+      // Also include the paymentDetails object to preserve all payment info
+      paymentDetails: formData.paymentDetails || {
+        paymentId: formData.paymentId || null,
+        orderId: formData.orderId || null,
+        razorpay_payment_id: formData.paymentDetails?.razorpay_payment_id || null,
+        razorpay_order_id: formData.paymentDetails?.razorpay_order_id || null,
+        payment_status: formData.paymentStatus || formData.paymentDetails?.payment_status || 'paid'
+      },
       paymentStatus: formData.paymentStatus || 
                      formData.paymentDetails?.payment_status || 
                      'paid',
@@ -261,31 +419,68 @@ function StartupIndiaForm() {
 
   const saveDraft = async ({ reason } = {}) => {
     // Avoid draft saves while loading an existing draft, or while the final submit is in progress
-    if (loadingDraft) return;
-    if (isSubmitting) return;
-    if (isDraftSaving) return;
+    if (loadingDraft) {
+      console.log('⏸️ Skipping autosave - draft is loading');
+      return;
+    }
+    if (isSubmitting) {
+      console.log('⏸️ Skipping autosave - final submission in progress');
+      return; // Don't autosave during final submission
+    }
+    if (isDraftSaving) {
+      console.log('⏸️ Skipping autosave - draft save already in progress');
+      return; // Prevent concurrent saves
+    }
+    if (justLoadedDataRef.current) {
+      console.log('⏸️ Skipping autosave - data just loaded, waiting for user input');
+      return; // Don't autosave immediately after loading data
+    }
 
     try {
       setIsDraftSaving(true);
+      
+      // Check for existing ticketId from multiple sources before creating new
+      const existingTicketId = draftTicketId || 
+                               ticketId || 
+                               localStorage.getItem('editingTicketId') ||
+                               localStorage.getItem('draftTicketId') ||
+                               null;
+      
       const submissionData = buildSubmissionData();
-      console.log(`💾 Autosaving Startup India draft (${reason || 'unknown'})...`, {
-        step,
-        ticketId: submissionData.ticketId || null
-      });
+      
+      // CRITICAL: Always use existing ticketId if we have one to prevent creating duplicates
+      if (existingTicketId) {
+        submissionData.ticketId = existingTicketId;
+        console.log(`💾 Using existing ticketId for draft save: ${existingTicketId}`);
+      }
+      
+      // Only log autosave if it's not a debounced change (to reduce console spam)
+      if (reason !== 'debounced-change') {
+        console.log(`💾 Autosaving Startup India draft (${reason || 'unknown'})...`, {
+          step,
+          ticketId: submissionData.ticketId || null,
+          existingTicketId
+        });
+      }
 
       const response = await submitStartupIndiaRegistration(submissionData);
       const newTicketId = response.ticketId || response.data?.ticket_id;
 
       if (newTicketId) {
+        // Store ticketId in multiple places to ensure it's always available
         setDraftTicketId(newTicketId);
         localStorage.setItem('editingTicketId', newTicketId);
+        localStorage.setItem('draftTicketId', newTicketId);
 
         // Ensure URL has ticketId so subsequent saves update (not create new)
-        if (!ticketId) {
+        const currentUrlTicketId = new URLSearchParams(window.location.search).get('ticketId');
+        if (!currentUrlTicketId) {
           const qs = new URLSearchParams(window.location.search);
           qs.set('ticketId', newTicketId);
           navigate(`/startup-india-form?${qs.toString()}`, { replace: true });
         }
+        
+        console.log('✅ TicketId stored and URL updated:', newTicketId);
       }
     } catch (e) {
       console.error('❌ Autosave Startup India draft failed:', e);
@@ -296,21 +491,46 @@ function StartupIndiaForm() {
   };
 
   // Debounced autosave whenever formData changes
+  // Skip autosave only if submitting, loading, or draft is currently saving
   useEffect(() => {
+    // Don't autosave if:
+    // 1. Currently loading draft data (prevent saving empty form during load)
+    // 2. Currently submitting (final submit in progress)
+    // 3. Draft is currently saving (prevent concurrent saves)
+    // 4. We just loaded data (prevent autosave loop after initial load)
+    if (loadingDraft || isSubmitting || isDraftSaving || justLoadedDataRef.current) {
+      return;
+    }
+    
+    // Only autosave if we have a ticketId (editing existing) or if form has actual data
+    const hasData = formData.step1?.businessName || 
+                    formData.step2?.problemSolving || 
+                    formData.step3?.registeredOfficeAddressLine1;
+    const hasTicketId = draftTicketId || ticketId;
+    
+    // Don't autosave empty forms unless we're editing (have ticketId)
+    if (!hasData && !hasTicketId) {
+      return;
+    }
+    
     const t = setTimeout(() => {
       saveDraft({ reason: 'debounced-change' });
-    }, 900);
+    }, 1500); // Increased debounce time to reduce frequency
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData]);
+  }, [formData, loadingDraft, isSubmitting, isDraftSaving]);
   
   // Show loading state while fetching draft
+  // Also show loading if we have ticketId but formData is empty (data not loaded yet)
+  // Show loading state only while actively fetching data
+  // Don't check formData content - it might be empty even after loading completes
   if (loadingDraft && ticketId) {
     return (
       <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading draft registration...</p>
+          <p className="mt-4 text-gray-600">Loading registration data...</p>
+          <p className="mt-2 text-sm text-gray-500">Ticket ID: {ticketId}</p>
         </div>
       </div>
     );
@@ -332,31 +552,58 @@ function StartupIndiaForm() {
     }
     
     // Step 5 - Submit the form
+    // Don't call saveDraft here - handleSubmit will handle the final save
+    // This prevents duplicate submissions
     await handleSubmit();
   };
   
   const handleSubmit = async () => {
+    // Prevent duplicate submissions
+    if (isSubmitting) {
+      console.log('⚠️ Already submitting, skipping duplicate call');
+      return;
+    }
+    
+    // Small delay to let any in-flight autosave complete
+    // This prevents race conditions where autosave and submit both try to create records
+    if (isDraftSaving) {
+      console.log('⏳ Waiting for autosave to complete before final submission...');
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    
     let shouldNavigate = true;
     
     try {
       setIsSubmitting(true);
       console.log('📤 Submitting Startup India registration...', formData);
       
-      // Ensure payment and package details are included in submission
-      // Preserve package details from formData or use existing values
-      const packageName = formData.packageDetails?.name || formData.packageName;
-      const packagePrice = formData.packageDetails?.priceValue || formData.packageDetails?.price || formData.packagePrice;
+      // Get the most up-to-date ticketId from all possible sources
+      const currentTicketId = draftTicketId || 
+                              ticketId || 
+                              localStorage.getItem('editingTicketId') ||
+                              localStorage.getItem('draftTicketId') ||
+                              null;
       
       const submissionData = {
         ...buildSubmissionData(),
-        // Ensure we use the latest draft ticket id when submitting
-        ticketId: draftTicketId || ticketId || null
+        // CRITICAL: Always use existing ticketId to UPDATE instead of creating new record
+        // This prevents duplicates when clicking submit
+        ticketId: currentTicketId
       };
       
-      console.log('📦 Package details in submission:', {
-        packageName,
-        packagePrice,
-        formDataPackageDetails: formData.packageDetails
+      console.log('🎫 Using ticketId for final submission:', currentTicketId);
+      
+      console.log('📦 Submission data structure:', {
+        hasStep1: !!submissionData.step1,
+        hasStep2: !!submissionData.step2,
+        hasStep3: !!submissionData.step3,
+        hasStep4: !!submissionData.step4,
+        hasStep5: !!submissionData.step5,
+        clientId: submissionData.clientId,
+        isAdminFilling,
+        step1Keys: submissionData.step1 ? Object.keys(submissionData.step1) : [],
+        step1Data: submissionData.step1,
+        allKeys: Object.keys(submissionData)
       });
       
       if (ticketId) {
