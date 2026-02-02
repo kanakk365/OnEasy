@@ -136,10 +136,10 @@ function Sidebar() {
         <div
           className={`${
             isCollapsed ? "px-3" : "px-6"
-          } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-[#26496a]/30 bg-white rounded-lg mx-2 mt-2`}
+          } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-[#26496a]/30`}
         >
           <img
-            src="/newlogo.PNG"
+            src="/logo.jpg"
             alt="OnEasy Logo"
             className={`${
               isCollapsed ? "h-8" : "h-10"
@@ -302,8 +302,8 @@ function Sidebar() {
             isMobileMenuOpen,
           )}
           {/* Mobile Sidebar Header */}
-          <div className="px-6 pt-4 pb-4 flex justify-between items-center border-b border-gray-200 bg-white">
-            <img src="/newlogo.PNG" alt="OnEasy Logo" className="h-10 w-auto" />
+          <div className="px-6 pt-4 pb-4 flex justify-between items-center border-b border-gray-200">
+            <img src="/logo.jpg" alt="OnEasy Logo" className="h-10 w-auto" />
             <button
               onClick={() => {
                 console.log("Close button clicked");

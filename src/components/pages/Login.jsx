@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
-const logo = "/newlogo.PNG";
+const logo = "/logo.jpg";
 import ChangePasswordModal from "../common/ChangePasswordModal";
 import SetEmailPasswordModal from "../common/SetEmailPasswordModal";
 
@@ -490,11 +490,7 @@ function Login() {
 
       {/* Logo */}
       <div className="z-10 mb-8">
-        <img
-          src={logo}
-          alt="OneEasy"
-          className="h-10 md:h-12 brightness-0 invert"
-        />
+        <img src={logo} alt="OneEasy" className="h-10 md:h-12" />
       </div>
 
       {/* Main Card */}
