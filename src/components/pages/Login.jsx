@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
-import logo from "../../assets/logo.png";
+const logo = "/newlogo.PNG";
 import ChangePasswordModal from "../common/ChangePasswordModal";
 import SetEmailPasswordModal from "../common/SetEmailPasswordModal";
 
@@ -86,7 +86,7 @@ function Login() {
           user.phone = data.user.phone;
           localStorage.setItem(
             AUTH_CONFIG.STORAGE_KEYS.USER,
-            JSON.stringify(user)
+            JSON.stringify(user),
           );
         }
       }
@@ -139,11 +139,11 @@ function Login() {
       if (userData && userData.user) {
         console.log(
           "🔄 Refreshed user data after password change:",
-          userData.user
+          userData.user,
         );
         console.log(
           "🔒 Updated must_change_password:",
-          userData.user.must_change_password
+          userData.user.must_change_password,
         );
         navigateToDashboard(userData.user);
       } else if (userDataAfterLogin) {
@@ -327,7 +327,7 @@ function Login() {
       // 1) Admin-created user with email/password → must change password
       if (mustChangePassword && hasEmail) {
         console.log(
-          "⚠️ Admin-created user must change password, showing change password modal"
+          "⚠️ Admin-created user must change password, showing change password modal",
         );
         setUserDataAfterLogin(result.user);
         setShowChangePasswordModal(true);
@@ -338,7 +338,7 @@ function Login() {
       // 2) Phone-only user without email → must set email/password
       if (!hasEmail) {
         console.log(
-          "⚠️ User missing email, showing email/password setup modal"
+          "⚠️ User missing email, showing email/password setup modal",
         );
         setUserDataAfterOTP(result.user);
         setShowEmailPasswordModal(true);

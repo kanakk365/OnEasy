@@ -2,10 +2,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { RiUser3Line } from "react-icons/ri";
 import { HiOutlineUsers } from "react-icons/hi";
-import {
-  MdMenu,
-  MdClose,
-} from "react-icons/md";
+import { MdMenu, MdClose } from "react-icons/md";
 import {
   IoLogOutOutline,
   IoChevronBackOutline,
@@ -22,7 +19,12 @@ function SuperAdminSidebar() {
   const { isCollapsed, setIsCollapsed } = useSidebarStore();
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const [userData, setUserData] = React.useState(null);
-  const { showLogoutModal, setShowLogoutModal, closeLogoutModal, handleLogout } = useLogoutModalStore();
+  const {
+    showLogoutModal,
+    setShowLogoutModal,
+    closeLogoutModal,
+    handleLogout,
+  } = useLogoutModalStore();
 
   // Load user data from localStorage
   const loadUserData = React.useCallback(() => {
@@ -31,7 +33,7 @@ function SuperAdminSidebar() {
       try {
         setUserData(JSON.parse(storedUser));
       } catch (e) {
-        console.error('Error parsing user data:', e);
+        console.error("Error parsing user data:", e);
       }
     }
   }, []);
@@ -43,10 +45,10 @@ function SuperAdminSidebar() {
       loadUserData();
     };
 
-    window.addEventListener('profileUpdated', handleProfileUpdate);
-    
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+
     return () => {
-      window.removeEventListener('profileUpdated', handleProfileUpdate);
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
     };
   }, [loadUserData]);
 
@@ -93,7 +95,7 @@ function SuperAdminSidebar() {
           } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-gray-100`}
         >
           <img
-            src="/logo.jpg"
+            src="/newlogo.PNG"
             alt="OnEasy Logo"
             className={`${
               isCollapsed ? "h-8" : "h-10"
@@ -196,7 +198,9 @@ function SuperAdminSidebar() {
                       isCollapsed ? "w-8 h-8" : "w-6 h-6"
                     } bg-[#01334C] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
                   >
-                    {userData?.name ? userData.name.charAt(0).toUpperCase() : 'S'}
+                    {userData?.name
+                      ? userData.name.charAt(0).toUpperCase()
+                      : "S"}
                   </div>
                 )}
                 {!isCollapsed && (
@@ -206,7 +210,7 @@ function SuperAdminSidebar() {
                         Welcome 👋
                       </div>
                       <div className="text-[13px] text-gray-700">
-                        {userData?.name || 'SuperAdmin'}
+                        {userData?.name || "SuperAdmin"}
                       </div>
                     </div>
                     <span className="text-base text-gray-400 ml-auto transform transition-transform duration-200 group-hover:rotate-90">
@@ -249,7 +253,7 @@ function SuperAdminSidebar() {
       >
         {/* Mobile Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <img src="/logo.jpg" alt="OnEasy Logo" className="h-10 w-auto" />
+          <img src="/newlogo.PNG" alt="OnEasy Logo" className="h-10 w-auto" />
           <button
             onClick={() => setIsMobileMenuOpen(false)}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -296,14 +300,13 @@ function SuperAdminSidebar() {
       </div>
 
       {/* Logout Modal */}
-      <LogoutModal isOpen={showLogoutModal} onClose={closeLogoutModal} onConfirm={handleLogout} />
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onClose={closeLogoutModal}
+        onConfirm={handleLogout}
+      />
     </>
   );
 }
 
 export default SuperAdminSidebar;
-
-
-
-
-

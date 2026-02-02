@@ -102,7 +102,7 @@ function Sidebar() {
           onClick={() => {
             console.log(
               "Mobile menu button clicked, current state:",
-              isMobileMenuOpen
+              isMobileMenuOpen,
             );
             setIsMobileMenuOpen(true);
           }}
@@ -136,16 +136,16 @@ function Sidebar() {
         <div
           className={`${
             isCollapsed ? "px-3" : "px-6"
-          } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-[#26496a]/30`}
+          } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-[#26496a]/30 bg-white rounded-lg mx-2 mt-2`}
         >
           <img
-            src="/logo.jpg"
+            src="/newlogo.PNG"
             alt="OnEasy Logo"
             className={`${
               isCollapsed ? "h-8" : "h-10"
             } w-auto transition-all duration-300 ${
               isCollapsed ? "mx-auto" : ""
-            } brightness-0 invert`}
+            }`}
           />
           {!isCollapsed && (
             <button
@@ -299,11 +299,11 @@ function Sidebar() {
           {/* Debug info */}
           {console.log(
             "Mobile sidebar rendering, isMobileMenuOpen:",
-            isMobileMenuOpen
+            isMobileMenuOpen,
           )}
           {/* Mobile Sidebar Header */}
-          <div className="px-6 pt-4 pb-4 flex justify-between items-center border-b border-gray-200">
-            <img src="/logo.jpg" alt="OnEasy Logo" className="h-10 w-auto" />
+          <div className="px-6 pt-4 pb-4 flex justify-between items-center border-b border-gray-200 bg-white">
+            <img src="/newlogo.PNG" alt="OnEasy Logo" className="h-10 w-auto" />
             <button
               onClick={() => {
                 console.log("Close button clicked");
@@ -326,8 +326,8 @@ function Sidebar() {
                     item.path === "/client"
                       ? location.pathname === "/client"
                       : item.text === "Registrations"
-                      ? isRegistrationsActive
-                      : location.pathname === item.path
+                        ? isRegistrationsActive
+                        : location.pathname === item.path
                   )
                     ? "bg-slate-800 text-white"
                     : "text-gray-700 hover:bg-gray-100"
