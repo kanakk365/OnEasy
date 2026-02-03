@@ -12,6 +12,7 @@ const Layout = () => {
   const isAuthPage =
     location.pathname === "/" ||
     location.pathname === "/login" ||
+    location.pathname === "/reset-password" ||
     location.pathname === "/verify-otp" ||
     location.pathname === "/referral" ||
     location.pathname === "/payment-success";

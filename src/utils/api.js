@@ -262,6 +262,14 @@ class APIClient {
     });
   }
 
+  async forgotPassword(email) {
+    return this.post('/auth/forgot-password', { email }, { includeAuth: false });
+  }
+
+  async resetPassword(token, newPassword) {
+    return this.post('/auth/reset-password', { token, newPassword }, { includeAuth: false });
+  }
+
   // Company methods
   async getCompanies(params = {}) {
     const queryString = new URLSearchParams(params).toString();

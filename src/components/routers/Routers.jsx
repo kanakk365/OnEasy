@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Login from "../pages/Login";
+import ResetPassword from "../pages/ResetPassword";
 import OTPVerification from "../pages/OTPVerification";
 import ReferralCode from "../pages/ReferralCode";
 import Client from "../pages/Client";
@@ -154,6 +155,7 @@ function Routers() {
       {/* Public Routes */}
       <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify-otp" element={<OTPVerification />} />
       <Route path="/referral" element={<ReferralCode />} />
       <Route path="/payment-success" element={<PaymentSuccess />} />

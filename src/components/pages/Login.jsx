@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
 const logo = "/logo.jpg";
 import ChangePasswordModal from "../common/ChangePasswordModal";
 import SetEmailPasswordModal from "../common/SetEmailPasswordModal";
+import ForgotPasswordModal from "../common/ForgotPasswordModal";
+import ResetPasswordModal from "../common/ResetPasswordModal";
 
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isSignupMode, setIsSignupMode] = useState(false); // Toggle between login and signup
   const [loginMethod, setLoginMethod] = useState("phone"); // 'phone' or 'email'
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -32,6 +35,20 @@ function Login() {
   const otpInputRefs = useRef([]);
   const [showEmailPasswordModal, setShowEmailPasswordModal] = useState(false);
   const [userDataAfterOTP, setUserDataAfterOTP] = useState(null);
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+  const [resetToken, setResetToken] = useState(null);
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+
+  // Check for reset token in URL (from email link)
+  useEffect(() => {
+    const token = searchParams.get('resetToken');
+    if (token) {
+      setResetToken(token);
+      setShowResetPasswordModal(true);
+      // Clear token from URL without full navigation
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Check for payment success message from location state
   useEffect(() => {
@@ -761,6 +778,15 @@ function Login() {
                     className="w-full h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#01334C] placeholder-gray-400 text-sm transition-all"
                     disabled={isLoading}
                   />
+                  <div className="text-right mt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPasswordModal(true)}
+                      className="text-sm text-[#01334C] font-medium hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                 </div>
 
                 <button
@@ -850,6 +876,26 @@ function Login() {
           }}
           onSuccess={handlePasswordChangeSuccess}
           required={userDataAfterLogin?.must_change_password || false}
+        />
+      )}
+
+      {/* Forgot Password Modal */}
+      {showForgotPasswordModal && (
+        <ForgotPasswordModal
+          isOpen={showForgotPasswordModal}
+          onClose={() => setShowForgotPasswordModal(false)}
+        />
+      )}
+
+      {/* Reset Password Modal - shown when user clicks link in email */}
+      {showResetPasswordModal && (
+        <ResetPasswordModal
+          isOpen={showResetPasswordModal}
+          onClose={() => {
+            setShowResetPasswordModal(false);
+            setResetToken(null);
+          }}
+          token={resetToken}
         />
       )}
 
