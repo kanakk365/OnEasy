@@ -28,7 +28,7 @@ function Compliance() {
     subCategory: "",
     subSubCategory: "",
     description: "",
-    file: null
+    file: null,
   });
 
   // Compliance structure based on the diagram
@@ -39,8 +39,8 @@ function Compliance() {
         gst_returns: "GST Returns",
         gstr_2a: "GSTR-2A",
         gtr_2b: "GTR-2B",
-        gst_working_excel: "GST Working Excel"
-      }
+        gst_working_excel: "GST Working Excel",
+      },
     },
     tds: {
       label: "TDS",
@@ -49,39 +49,39 @@ function Compliance() {
           label: "Q1",
           subSubCategories: {
             challans: "Challans",
-            other_client_data: "Any other client data"
-          }
+            other_client_data: "Any other client data",
+          },
         },
         q2: {
           label: "Q2",
           subSubCategories: {
             challans: "Challans",
-            other_client_data: "Any other client data"
-          }
+            other_client_data: "Any other client data",
+          },
         },
         q3: {
           label: "Q3",
           subSubCategories: {
             challans: "Challans",
-            other_client_data: "Any other client data"
-          }
+            other_client_data: "Any other client data",
+          },
         },
         q4: {
           label: "Q4",
           subSubCategories: {
             challans: "Challans",
-            other_client_data: "Any other client data"
-          }
+            other_client_data: "Any other client data",
+          },
         },
-        tds_working_excel: "TDS Working Excel"
-      }
+        tds_working_excel: "TDS Working Excel",
+      },
     },
     pf: {
       label: "PF",
       subCategories: {
         pf_returns: "PF Returns",
-        pf_challans: "PF Challans"
-      }
+        pf_challans: "PF Challans",
+      },
     },
     payroll: {
       label: "Payroll",
@@ -89,17 +89,17 @@ function Compliance() {
         pay_month: {
           label: "Pay Month",
           subSubCategories: {
-            salary_workings: "Salary Workings"
-          }
-        }
-      }
+            salary_workings: "Salary Workings",
+          },
+        },
+      },
     },
     pt: {
       label: "PT",
       subCategories: {
         pt_returns: "PT Returns",
-        pt_challans: "PT Challans"
-      }
+        pt_challans: "PT Challans",
+      },
     },
     income_tax: {
       label: "Income Tax",
@@ -109,8 +109,8 @@ function Compliance() {
           subSubCategories: {
             all_from_non_audit: "All from Non Audit",
             form_3cb_ca_3cd: "Form 3cb/ca & 3cd",
-            workings_if_any: "Workings if any"
-          }
+            workings_if_any: "Workings if any",
+          },
         },
         non_audit: {
           label: "Non Audit",
@@ -119,11 +119,11 @@ function Compliance() {
             form_26as: "form 26AS",
             computation: "Computation",
             ais_tis: "AIS/TIS",
-            other_docs_if_any: "Other docs if any"
-          }
-        }
-      }
-    }
+            other_docs_if_any: "Other docs if any",
+          },
+        },
+      },
+    },
   };
 
   useEffect(() => {
@@ -136,24 +136,32 @@ function Compliance() {
   const loadOrganization = async () => {
     try {
       let orgResponse;
-      
+
       if (isAdmin && userIdFromParams) {
-        orgResponse = await apiClient.get(`/users-page/user-data/${userIdFromParams}`).catch(() => ({
-          success: false,
-          data: { organisations: [] }
-        }));
+        orgResponse = await apiClient
+          .get(`/users-page/user-data/${userIdFromParams}`)
+          .catch(() => ({
+            success: false,
+            data: { organisations: [] },
+          }));
       } else {
         orgResponse = await getUsersPageData();
       }
 
-      if (orgResponse.success && orgResponse.data && orgResponse.data.organisations) {
-        const org = orgResponse.data.organisations.find(o => o.id === parseInt(currentOrgId));
+      if (
+        orgResponse.success &&
+        orgResponse.data &&
+        orgResponse.data.organisations
+      ) {
+        const org = orgResponse.data.organisations.find(
+          (o) => o.id === parseInt(currentOrgId),
+        );
         if (org) {
           setOrganization({
             id: org.id,
-            legalName: org.legal_name || '-',
-            tradeName: org.trade_name || '-',
-            gstin: org.gstin || '-'
+            legalName: org.legal_name || "-",
+            tradeName: org.trade_name || "-",
+            gstin: org.gstin || "-",
           });
         }
       }
@@ -165,13 +173,13 @@ function Compliance() {
   const loadDocuments = async () => {
     try {
       setLoading(true);
-      
+
       let currentUserId;
       if (isAdmin && userIdFromParams) {
         currentUserId = userIdFromParams;
       } else {
         const storedUser = JSON.parse(
-          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}",
         );
         currentUserId = storedUser.id;
       }
@@ -188,7 +196,7 @@ function Compliance() {
 
       const response = await apiClient.get(endpoint).catch(() => ({
         success: false,
-        data: {}
+        data: {},
       }));
 
       if (response.success && response.data) {
@@ -205,7 +213,9 @@ function Compliance() {
     setStatus({ type, message });
     if (message) {
       setTimeout(() => {
-        setStatus((current) => (current.message === message ? { type: null, message: "" } : current));
+        setStatus((current) =>
+          current.message === message ? { type: null, message: "" } : current,
+        );
       }, 4000);
     }
   };
@@ -216,7 +226,7 @@ function Compliance() {
       subCategory: "",
       subSubCategory: "",
       description: "",
-      file: null
+      file: null,
     });
     setShowUploadModal(true);
   };
@@ -228,7 +238,7 @@ function Compliance() {
       subCategory: "",
       subSubCategory: "",
       description: "",
-      file: null
+      file: null,
     });
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -241,7 +251,7 @@ function Compliance() {
       ...formData,
       category,
       subCategory: "",
-      subSubCategory: ""
+      subSubCategory: "",
     });
   };
 
@@ -250,14 +260,14 @@ function Compliance() {
     setFormData({
       ...formData,
       subCategory,
-      subSubCategory: ""
+      subSubCategory: "",
     });
   };
 
   const handleSubSubCategoryChange = (e) => {
     setFormData({
       ...formData,
-      subSubCategory: e.target.value
+      subSubCategory: e.target.value,
     });
   };
 
@@ -270,7 +280,7 @@ function Compliance() {
       return;
     }
 
-    setFormData(prev => ({ ...prev, file }));
+    setFormData((prev) => ({ ...prev, file }));
   };
 
   const handleUpload = async () => {
@@ -294,9 +304,16 @@ function Compliance() {
 
     // Check if sub-sub-category is required
     const selectedSubCat = subCategories[formData.subCategory];
-    if (selectedSubCat && typeof selectedSubCat === 'object' && selectedSubCat.subSubCategories) {
+    if (
+      selectedSubCat &&
+      typeof selectedSubCat === "object" &&
+      selectedSubCat.subSubCategories
+    ) {
       const subSubCategories = selectedSubCat.subSubCategories;
-      if (Object.keys(subSubCategories).length > 0 && !formData.subSubCategory) {
+      if (
+        Object.keys(subSubCategories).length > 0 &&
+        !formData.subSubCategory
+      ) {
         showStatus("error", "Please select a sub-sub-category");
         return;
       }
@@ -314,7 +331,7 @@ function Compliance() {
         currentUserId = userIdFromParams;
       } else {
         const storedUser = JSON.parse(
-          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}",
         );
         currentUserId = storedUser.id;
       }
@@ -325,11 +342,11 @@ function Compliance() {
       }
 
       // Upload directly to S3
-      const folder = `user-profiles/${currentUserId}/organizations/${currentOrgId}/business/compliance/${formData.category}${formData.subCategory ? `/${formData.subCategory}` : ''}${formData.subSubCategory ? `/${formData.subSubCategory}` : ''}`;
+      const folder = `user-profiles/${currentUserId}/organizations/${currentOrgId}/business/compliance/${formData.category}${formData.subCategory ? `/${formData.subCategory}` : ""}${formData.subSubCategory ? `/${formData.subSubCategory}` : ""}`;
       const { s3Url } = await uploadFileDirect(
         formData.file,
         folder,
-        formData.file.name
+        formData.file.name,
       );
 
       // Save S3 URL to database
@@ -345,7 +362,7 @@ function Compliance() {
         fileUrl: s3Url,
         fileName: formData.file.name,
         organizationId: currentOrgId,
-        description: formData.description.trim() || null
+        description: formData.description.trim() || null,
       });
 
       if (response.success) {
@@ -357,7 +374,10 @@ function Compliance() {
       }
     } catch (error) {
       console.error("Upload error:", error);
-      showStatus("error", error.message || "Failed to upload document. Please try again.");
+      showStatus(
+        "error",
+        error.message || "Failed to upload document. Please try again.",
+      );
     } finally {
       setUploading(false);
     }
@@ -365,7 +385,7 @@ function Compliance() {
 
   const handleViewDocument = async (doc) => {
     const url = doc.document_url;
-    if (url && typeof url === 'string' && url.trim().length > 0) {
+    if (url && typeof url === "string" && url.trim().length > 0) {
       await viewFile(url);
     } else {
       showStatus("error", "Document URL not available");
@@ -374,8 +394,8 @@ function Compliance() {
 
   const handleDownloadDocument = async (doc) => {
     const url = doc.document_url;
-    const fileName = doc.document_name || 'document';
-    if (url && typeof url === 'string' && url.trim().length > 0) {
+    const fileName = doc.document_name || "document";
+    if (url && typeof url === "string" && url.trim().length > 0) {
       await downloadFile(url, fileName);
     } else {
       showStatus("error", "Document URL not available");
@@ -393,7 +413,7 @@ function Compliance() {
         currentUserId = userIdFromParams;
       } else {
         const storedUser = JSON.parse(
-          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}",
         );
         currentUserId = storedUser.id;
       }
@@ -417,17 +437,20 @@ function Compliance() {
       }
     } catch (error) {
       console.error("Delete error:", error);
-      showStatus("error", error.message || "Failed to delete document. Please try again.");
+      showStatus(
+        "error",
+        error.message || "Failed to delete document. Please try again.",
+      );
     }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return '-';
+    if (!dateString) return "-";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return date.toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -435,7 +458,7 @@ function Compliance() {
     const categoryData = complianceStructure[category];
     if (!categoryData) return subCategoryKey;
     const subCat = categoryData.subCategories[subCategoryKey];
-    if (typeof subCat === 'string') {
+    if (typeof subCat === "string") {
       return subCat;
     } else if (subCat && subCat.label) {
       return subCat.label;
@@ -443,11 +466,15 @@ function Compliance() {
     return subCategoryKey;
   };
 
-  const getSubSubCategoryLabel = (category, subCategoryKey, subSubCategoryKey) => {
+  const getSubSubCategoryLabel = (
+    category,
+    subCategoryKey,
+    subSubCategoryKey,
+  ) => {
     const categoryData = complianceStructure[category];
     if (!categoryData) return subSubCategoryKey;
     const subCat = categoryData.subCategories[subCategoryKey];
-    if (subCat && typeof subCat === 'object' && subCat.subSubCategories) {
+    if (subCat && typeof subCat === "object" && subCat.subSubCategories) {
       return subCat.subSubCategories[subSubCategoryKey] || subSubCategoryKey;
     }
     return subSubCategoryKey;
@@ -495,13 +522,19 @@ function Compliance() {
           <button
             onClick={() => {
               if (isAdmin && userIdFromParams) {
-                navigate(`/admin/client-company-documents/${userIdFromParams}/${currentOrgId}/business/company-master-data`, { 
-                  state: { orgId: currentOrgId, userId: userIdFromParams } 
-                });
+                navigate(
+                  `/admin/client-company-documents/${userIdFromParams}/${currentOrgId}/business/company-master-data`,
+                  {
+                    state: { orgId: currentOrgId, userId: userIdFromParams },
+                  },
+                );
               } else {
                 const orgIdFromState = location.state?.orgId || currentOrgId;
                 if (orgIdFromState) {
-                  navigate(`/company-documents/${orgIdFromState}/business/company-master-data`, { state: { orgId: orgIdFromState } });
+                  navigate(
+                    `/company-documents/${orgIdFromState}/business/company-master-data`,
+                    { state: { orgId: orgIdFromState } },
+                  );
                 } else {
                   navigate("/organizations-list");
                 }
@@ -509,8 +542,18 @@ function Compliance() {
             }}
             className="text-[#01334C] hover:text-[#00486D] mb-4 flex items-center gap-2"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             Back to Company Master Data
           </button>
@@ -518,19 +561,27 @@ function Compliance() {
           {organization && (
             <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
               <h1 className="text-2xl font-semibold text-gray-900">
-                {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
+                {organization.legalName !== "-"
+                  ? organization.legalName
+                  : organization.tradeName}
               </h1>
-              {organization.tradeName !== '-' && organization.legalName !== '-' && organization.tradeName !== organization.legalName && (
-                <p className="text-gray-600 mt-1">{organization.tradeName}</p>
-              )}
-              {organization.gstin !== '-' && (
-                <p className="text-sm text-gray-500 mt-1 font-mono">GSTIN: {organization.gstin}</p>
+              {organization.tradeName !== "-" &&
+                organization.legalName !== "-" &&
+                organization.tradeName !== organization.legalName && (
+                  <p className="text-gray-600 mt-1">{organization.tradeName}</p>
+                )}
+              {organization.gstin !== "-" && (
+                <p className="text-sm text-gray-500 mt-1 font-mono">
+                  GSTIN: {organization.gstin}
+                </p>
               )}
             </div>
           )}
 
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Compliance Documents</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Compliance Documents
+            </h2>
             <button
               onClick={handleOpenUploadModal}
               className="px-4 py-2 text-sm font-medium text-white bg-[#01334C] rounded-md hover:bg-[#00486D] transition-colors"
@@ -544,106 +595,157 @@ function Compliance() {
         {Object.keys(complianceStructure).map((categoryKey) => {
           const categoryData = complianceStructure[categoryKey];
           const categoryDocs = documents[categoryKey] || {};
-          
+
           return (
-            <div key={categoryKey} className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">{categoryData.label}</h3>
-              
+            <div
+              key={categoryKey}
+              className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {categoryData.label}
+              </h3>
+
               {Object.keys(categoryDocs).length === 0 ? (
-                <p className="text-gray-500 text-sm">No documents uploaded yet</p>
+                <p className="text-gray-500 text-sm">
+                  No documents uploaded yet
+                </p>
               ) : (
                 <div className="space-y-4">
-                  {Object.entries(categoryDocs).map(([subCatKey, subCatDocs]) => {
-                    if (typeof subCatDocs === 'object' && !Array.isArray(subCatDocs)) {
-                      // Has sub-sub-categories
-                      return Object.entries(subCatDocs).map(([subSubCatKey, docs]) => (
-                        <div key={`${subCatKey}-${subSubCatKey}`} className="border-l-4 border-blue-500 pl-4">
-                          <h4 className="text-md font-medium text-gray-800 mb-2">
-                            {getSubCategoryLabel(categoryKey, subCatKey)} - {getSubSubCategoryLabel(categoryKey, subCatKey, subSubCatKey)}
-                          </h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {docs.map((doc) => (
-                              <div key={doc.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                <div className="flex items-start justify-between mb-2">
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate">{doc.document_name || 'Document'}</p>
-                                    <p className="text-xs text-gray-500 mt-1">{formatDate(doc.uploaded_at)}</p>
-                                    {doc.description && (
-                                      <p className="text-xs text-gray-600 mt-1">{doc.description}</p>
-                                    )}
+                  {Object.entries(categoryDocs).map(
+                    ([subCatKey, subCatDocs]) => {
+                      if (
+                        typeof subCatDocs === "object" &&
+                        !Array.isArray(subCatDocs)
+                      ) {
+                        // Has sub-sub-categories
+                        return Object.entries(subCatDocs).map(
+                          ([subSubCatKey, docs]) => (
+                            <div
+                              key={`${subCatKey}-${subSubCatKey}`}
+                              className="border-l-4 border-blue-500 pl-4"
+                            >
+                              <h4 className="text-md font-medium text-gray-800 mb-2">
+                                {getSubCategoryLabel(categoryKey, subCatKey)} -{" "}
+                                {getSubSubCategoryLabel(
+                                  categoryKey,
+                                  subCatKey,
+                                  subSubCatKey,
+                                )}
+                              </h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {docs.map((doc) => (
+                                  <div
+                                    key={doc.id}
+                                    className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                                  >
+                                    <div className="flex items-start justify-between mb-2">
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-gray-900 truncate">
+                                          {doc.document_name || "Document"}
+                                        </p>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                          {formatDate(doc.uploaded_at)}
+                                        </p>
+                                        {doc.description && (
+                                          <p className="text-xs text-gray-600 mt-1">
+                                            {doc.description}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="flex gap-2 mt-3">
+                                      <button
+                                        onClick={() => handleViewDocument(doc)}
+                                        className="flex-1 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
+                                      >
+                                        View
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          handleDownloadDocument(doc)
+                                        }
+                                        className="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-50 rounded hover:bg-green-100 transition-colors"
+                                      >
+                                        Download
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          handleDeleteDocument(doc.id)
+                                        }
+                                        className="flex-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded hover:bg-red-100 transition-colors"
+                                      >
+                                        Delete
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ),
+                        );
+                      } else {
+                        // Direct documents under sub-category
+                        return (
+                          <div
+                            key={subCatKey}
+                            className="border-l-4 border-blue-500 pl-4"
+                          >
+                            <h4 className="text-md font-medium text-gray-800 mb-2">
+                              {getSubCategoryLabel(categoryKey, subCatKey)}
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {subCatDocs.map((doc) => (
+                                <div
+                                  key={doc.id}
+                                  className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                                >
+                                  <div className="flex items-start justify-between mb-2">
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-medium text-gray-900 truncate">
+                                        {doc.document_name || "Document"}
+                                      </p>
+                                      <p className="text-xs text-gray-500 mt-1">
+                                        {formatDate(doc.uploaded_at)}
+                                      </p>
+                                      {doc.description && (
+                                        <p className="text-xs text-gray-600 mt-1">
+                                          {doc.description}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2 mt-3">
+                                    <button
+                                      onClick={() => handleViewDocument(doc)}
+                                      className="flex-1 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
+                                    >
+                                      View
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleDownloadDocument(doc)
+                                      }
+                                      className="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-50 rounded hover:bg-green-100 transition-colors"
+                                    >
+                                      Download
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleDeleteDocument(doc.id)
+                                      }
+                                      className="flex-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded hover:bg-red-100 transition-colors"
+                                    >
+                                      Delete
+                                    </button>
                                   </div>
                                 </div>
-                                <div className="flex gap-2 mt-3">
-                                  <button
-                                    onClick={() => handleViewDocument(doc)}
-                                    className="flex-1 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
-                                  >
-                                    View
-                                  </button>
-                                  <button
-                                    onClick={() => handleDownloadDocument(doc)}
-                                    className="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-50 rounded hover:bg-green-100 transition-colors"
-                                  >
-                                    Download
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteDocument(doc.id)}
-                                    className="flex-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded hover:bg-red-100 transition-colors"
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      ));
-                    } else {
-                      // Direct documents under sub-category
-                      return (
-                        <div key={subCatKey} className="border-l-4 border-blue-500 pl-4">
-                          <h4 className="text-md font-medium text-gray-800 mb-2">
-                            {getSubCategoryLabel(categoryKey, subCatKey)}
-                          </h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {subCatDocs.map((doc) => (
-                              <div key={doc.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                <div className="flex items-start justify-between mb-2">
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate">{doc.document_name || 'Document'}</p>
-                                    <p className="text-xs text-gray-500 mt-1">{formatDate(doc.uploaded_at)}</p>
-                                    {doc.description && (
-                                      <p className="text-xs text-gray-600 mt-1">{doc.description}</p>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="flex gap-2 mt-3">
-                                  <button
-                                    onClick={() => handleViewDocument(doc)}
-                                    className="flex-1 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
-                                  >
-                                    View
-                                  </button>
-                                  <button
-                                    onClick={() => handleDownloadDocument(doc)}
-                                    className="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-50 rounded hover:bg-green-100 transition-colors"
-                                  >
-                                    Download
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteDocument(doc.id)}
-                                    className="flex-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded hover:bg-red-100 transition-colors"
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    }
-                  })}
+                        );
+                      }
+                    },
+                  )}
                 </div>
               )}
             </div>
@@ -655,13 +757,25 @@ function Compliance() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md">
             <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Upload Compliance Document</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Upload Compliance Document
+                </h3>
                 <button
                   onClick={handleCloseUploadModal}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -678,51 +792,68 @@ function Compliance() {
                   >
                     <option value="">Select Category</option>
                     {Object.entries(complianceStructure).map(([key, data]) => (
-                      <option key={key} value={key}>{data.label}</option>
+                      <option key={key} value={key}>
+                        {data.label}
+                      </option>
                     ))}
                   </select>
                 </div>
 
-                {formData.category && complianceStructure[formData.category]?.subCategories && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Sub-Category <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={formData.subCategory}
-                      onChange={handleSubCategoryChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                    >
-                      <option value="">Select Sub-Category</option>
-                      {Object.entries(complianceStructure[formData.category].subCategories).map(([key, data]) => (
-                        <option key={key} value={key}>
-                          {typeof data === 'string' ? data : data.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
+                {formData.category &&
+                  complianceStructure[formData.category]?.subCategories && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Sub-Category <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={formData.subCategory}
+                        onChange={handleSubCategoryChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                      >
+                        <option value="">Select Sub-Category</option>
+                        {Object.entries(
+                          complianceStructure[formData.category].subCategories,
+                        ).map(([key, data]) => (
+                          <option key={key} value={key}>
+                            {typeof data === "string" ? data : data.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
-                {formData.subCategory && 
-                 complianceStructure[formData.category]?.subCategories[formData.subCategory] &&
-                 typeof complianceStructure[formData.category].subCategories[formData.subCategory] === 'object' &&
-                 complianceStructure[formData.category].subCategories[formData.subCategory].subSubCategories && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Sub-Sub-Category <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={formData.subSubCategory}
-                      onChange={handleSubSubCategoryChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                    >
-                      <option value="">Select Sub-Sub-Category</option>
-                      {Object.entries(complianceStructure[formData.category].subCategories[formData.subCategory].subSubCategories).map(([key, label]) => (
-                        <option key={key} value={key}>{label}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
+                {formData.subCategory &&
+                  complianceStructure[formData.category]?.subCategories[
+                    formData.subCategory
+                  ] &&
+                  typeof complianceStructure[formData.category].subCategories[
+                    formData.subCategory
+                  ] === "object" &&
+                  complianceStructure[formData.category].subCategories[
+                    formData.subCategory
+                  ].subSubCategories && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Sub-Sub-Category <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={formData.subSubCategory}
+                        onChange={handleSubSubCategoryChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                      >
+                        <option value="">Select Sub-Sub-Category</option>
+                        {Object.entries(
+                          complianceStructure[formData.category].subCategories[
+                            formData.subCategory
+                          ].subSubCategories,
+                        ).map(([key, label]) => (
+                          <option key={key} value={key}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -731,7 +862,12 @@ function Compliance() {
                   <input
                     type="text"
                     value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
                     placeholder="Enter description..."
                   />
@@ -749,7 +885,9 @@ function Compliance() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
                   />
                   {formData.file && (
-                    <p className="text-xs text-gray-500 mt-1">{formData.file.name}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formData.file.name}
+                    </p>
                   )}
                 </div>
               </div>
@@ -779,4 +917,3 @@ function Compliance() {
 }
 
 export default Compliance;
-
