@@ -4,7 +4,7 @@ import apiClient from "../../../utils/api";
 import { updateUserDataByUserId } from "../../../utils/usersPageApi";
 import { viewFile, uploadFileDirect } from "../../../utils/s3Upload";
 import { AiOutlinePlus } from "react-icons/ai";
-import { FiEye, FiEyeOff, FiChevronLeft } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiChevronLeft, FiTrash2 } from "react-icons/fi";
 import { lookupPincode } from "../../../utils/pincodeLookup";
 
 function AdminClientOverview() {
@@ -40,6 +40,7 @@ function AdminClientOverview() {
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [editingNoteIndex, setEditingNoteIndex] = useState(null);
   const [currentNote, setCurrentNote] = useState({
+    organizationId: "",
     date: "",
     description: "",
     attachments: [],
@@ -104,6 +105,39 @@ function AdminClientOverview() {
   // Document upload state
   const [uploadingDocument, setUploadingDocument] = useState(false);
   const [uploadDocumentType, setUploadDocumentType] = useState(null);
+
+  const handleDeleteService = async (registration) => {
+    if (!registration.ticket_id) return;
+    const serviceName =
+      registration.package_name ||
+      registration.business_name ||
+      registration.ticket_id;
+
+    if (
+      !window.confirm(
+        `Are you sure you want to permanently delete this service?\n\nService: ${serviceName}\nTicket ID: ${registration.ticket_id}\n\nThis action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await apiClient.delete("/admin/delete-service", {
+        body: JSON.stringify({ ticketId: registration.ticket_id }),
+      });
+
+      if (response.success) {
+        setAllRegistrations((prev) =>
+          prev.filter((r) => r.ticket_id !== registration.ticket_id)
+        );
+      } else {
+        throw new Error(response.message || "Failed to delete service");
+      }
+    } catch (error) {
+      console.error("Error deleting service:", error);
+      alert("Failed to delete service");
+    }
+  };
 
   useEffect(() => {
     fetchClientDetails();
@@ -1083,6 +1117,12 @@ function AdminClientOverview() {
     try {
       setSavingNotes(true);
 
+      if (!currentNote.organizationId) {
+        alert("Please select an organization for this note.");
+        setSavingNotes(false);
+        return;
+      }
+
       let updatedNotesList;
 
       const cleanedAdmin = (currentNote.adminActionItems || []).filter(
@@ -1098,6 +1138,7 @@ function AdminClientOverview() {
           idx === editingNoteIndex
             ? {
                 ...note,
+                organizationId: currentNote.organizationId || note.organizationId || null,
                 date: currentNote.date,
                 description: currentNote.description,
                 attachments: currentNote.attachments,
@@ -1113,6 +1154,7 @@ function AdminClientOverview() {
           ...adminNotesList,
           {
             id: Date.now(),
+            organizationId: currentNote.organizationId || null,
             date: currentNote.date,
             description: currentNote.description,
             attachments: currentNote.attachments,
@@ -1132,6 +1174,7 @@ function AdminClientOverview() {
       if (response.success) {
         setAdminNotesList(updatedNotesList);
         setCurrentNote({
+          organizationId: "",
           date: "",
           description: "",
           attachments: [],
@@ -5568,14 +5611,27 @@ function AdminClientOverview() {
 
                                               {/* Attachments Tab */}
                                               {activeOrgTab === "attachments" && (
-                                              <div className="pt-6">
-                                                <h5 className="text-md font-semibold text-gray-900 mb-4">
-                                                  Attachments
-                                                </h5>
-                                                <div className="text-sm text-gray-500">
-                                                  No attachments section implemented yet.
+                                                <div className="pt-6">
+                                                  <h5 className="text-md font-semibold text-gray-900 mb-2">
+                                                    Attachments
+                                                  </h5>
+                                                  <p className="text-sm text-gray-600 mb-4 max-w-xl">
+                                                    Upload and manage all company documents for this organization in the
+                                                    dedicated Company Documents section.
+                                                  </p>
+                                                  <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                      navigate(
+                                                        `/admin/client-company-documents/${userId}/${orgInState.id}`,
+                                                        { state: { orgId: orgInState.id, userId } },
+                                                      )
+                                                    }
+                                                    className="px-6 py-2 bg-[#00486D] text-white rounded-lg text-sm font-semibold hover:bg-[#01334C] transition-colors"
+                                                  >
+                                                    Go to Company Documents
+                                                  </button>
                                                 </div>
-                                              </div>
                                               )}
 
                                               {/* Credentials Tab */}
@@ -6072,8 +6128,8 @@ function AdminClientOverview() {
                       </p>
                     </div>
 
-                    {/* Service Status Dropdown */}
-                    <div className="relative">
+                    {/* Service Status Dropdown + Delete */}
+                    <div className="relative flex items-center gap-3">
                       {(() => {
                         const serviceStatusOptions = [
                           "Payment pending",
@@ -6193,6 +6249,20 @@ function AdminClientOverview() {
                           </>
                         );
                       })()}
+
+                      {registration.ticket_id && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteService(registration);
+                          }}
+                          className="p-2 rounded-full hover:bg-red-50 text-red-600 transition-colors"
+                          title="Delete Service"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -7000,6 +7070,28 @@ function AdminClientOverview() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                     <div>
                       <label className="block text-sm text-gray-900 mb-2 font-medium">
+                        Organization
+                      </label>
+                      <select
+                        value={currentNote.organizationId || ""}
+                        onChange={(e) =>
+                          setCurrentNote({
+                            ...currentNote,
+                            organizationId: e.target.value || "",
+                          })
+                        }
+                        className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option value="">Select organization</option>
+                        {organisations.map((org, idx) => (
+                          <option key={org.id || idx} value={org.id}>
+                            {org.legalName || org.tradeName || `Organization ${idx + 1}`}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-900 mb-2 font-medium">
                         Date
                       </label>
                       <input
@@ -7226,6 +7318,9 @@ function AdminClientOverview() {
                           Date
                         </th>
                         <th className="px-4 py-3 text-left font-medium text-xs">
+                          Organization
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
                           Description
                         </th>
                         <th className="px-4 py-3 text-left font-medium text-xs">
@@ -7244,6 +7339,18 @@ function AdminClientOverview() {
                           if (words.length <= 5) return text;
                           return words.slice(0, 5).join(" ") + "...";
                         };
+                        const getOrgName = (orgId) => {
+                          if (!orgId) return "-";
+                          const match = organisations.find(
+                            (o) => String(o.id) === String(orgId)
+                          );
+                          return (
+                            match?.legalName ||
+                            match?.tradeName ||
+                            `Org ${match?.id || ""}` ||
+                            "-"
+                          );
+                        };
                         return (
                           <tr
                             key={note.id || idx}
@@ -7253,6 +7360,11 @@ function AdminClientOverview() {
                             <td className="p-3">
                               <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700">
                                 {note.date || "-"}
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700 truncate max-w-[200px]">
+                                {getOrgName(note.organizationId)}
                               </div>
                             </td>
                             <td className="p-3">
@@ -7303,6 +7415,9 @@ function AdminClientOverview() {
                           Date
                         </th>
                         <th className="px-4 py-3 text-left font-medium text-xs">
+                          Organization
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
                           Description
                         </th>
                         <th className="px-4 py-3 text-left font-medium text-xs">
@@ -7321,6 +7436,18 @@ function AdminClientOverview() {
                           if (words.length <= 5) return text;
                           return words.slice(0, 5).join(" ") + "...";
                         };
+                        const getOrgName = (orgId) => {
+                          if (!orgId) return "-";
+                          const match = organisations.find(
+                            (o) => String(o.id) === String(orgId)
+                          );
+                          return (
+                            match?.legalName ||
+                            match?.tradeName ||
+                            `Org ${match?.id || ""}` ||
+                            "-"
+                          );
+                        };
                         return (
                           <tr
                             key={note.id || idx}
@@ -7330,6 +7457,11 @@ function AdminClientOverview() {
                             <td className="p-3">
                               <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700">
                                 {note.date || "-"}
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700 truncate max-w-[200px]">
+                                {getOrgName(note.organizationId)}
                               </div>
                             </td>
                             <td className="p-3">
@@ -7391,6 +7523,27 @@ function AdminClientOverview() {
                     </div>
                     <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800">
                       {selectedAdminNote.date || "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      Organization
+                    </div>
+                    <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800">
+                      {(() => {
+                        if (!selectedAdminNote.organizationId) return "-";
+                        const match = organisations.find(
+                          (o) =>
+                            String(o.id) ===
+                            String(selectedAdminNote.organizationId)
+                        );
+                        return (
+                          match?.legalName ||
+                          match?.tradeName ||
+                          `Org ${match?.id || ""}` ||
+                          "-"
+                        );
+                      })()}
                     </div>
                   </div>
                   <div>

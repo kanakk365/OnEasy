@@ -47,6 +47,25 @@ export const initPayment = async (packageData) => {
         packageName: packageData.name
       };
 
+      // If user came from "Suggested Compliances", attach metadata to the order notes
+      // so backend can persist + admin can filter strictly.
+      try {
+        const raw = localStorage.getItem('suggestedComplianceMeta');
+        if (raw) {
+          const meta = JSON.parse(raw);
+          if (meta && meta.source === 'compliance_chat_suggested') {
+            orderPayload.notes = {
+              source: 'compliance_chat_suggested',
+              suggested_compliance_code: meta.code || null,
+              suggested_compliance_name: meta.name || null,
+              suggested_compliance_category: meta.category || null
+            };
+          }
+        }
+      } catch {
+        // ignore
+      }
+
       // Add coupon info if available
       if (packageData.couponCode) {
         orderPayload.couponCode = packageData.couponCode;
@@ -331,6 +350,12 @@ export const initPayment = async (packageData) => {
               sessionStorage.removeItem(paymentKey);
               
               if (verifyResponse.success) {
+                // Clear suggested-compliance marker once we successfully verified payment
+                try {
+                  localStorage.removeItem('suggestedComplianceMeta');
+                } catch {
+                  // ignore
+                }
                 // Payment verified successfully - store package data
                 localStorage.setItem('selectedPackage', JSON.stringify(packageData));
                 localStorage.setItem('paymentDetails', JSON.stringify({

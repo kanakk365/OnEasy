@@ -8,6 +8,7 @@ import {
   RiAlertLine,
   RiFolderSettingsLine,
   RiMoneyDollarCircleLine,
+  RiFileList3Line,
 } from "react-icons/ri";
 import { BsBuilding } from "react-icons/bs";
 import { HiOutlineUsers } from "react-icons/hi";
@@ -89,6 +90,11 @@ function AdminSidebar() {
       path: "/admin/custom-payment",
     },
     { icon: <RiSettings3Line />, text: "Services", path: "/admin/services" },
+    {
+      icon: <RiFileList3Line />,
+      text: "Compliance Requests",
+      path: "/admin/compliance-requests",
+    },
     {
       icon: <BsBuilding />,
       text: "Organizations",

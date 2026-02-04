@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import apiClient from "../../../utils/api";
 import { updateUserDataByUserId } from "../../../utils/usersPageApi";
 import { uploadFileDirect, viewFile } from "../../../utils/s3Upload";
@@ -28,6 +29,7 @@ import {
 import { BsBuilding, BsCalendar3 } from "react-icons/bs";
 
 function AdminOrganizations() {
+  const navigate = useNavigate();
   const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -1528,114 +1530,28 @@ function AdminOrganizations() {
               )}
 
               {activeTab === "attachments" && (
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Attachments
-                    </h3>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Optional Attachment 1
-                      </label>
-                      <div className="flex items-center gap-1.5">
-                        <input
-                          type="text"
-                          readOnly
-                          value={
-                            newOrganization.optionalAttachment1
-                              ? "File uploaded"
-                              : "No file chosen"
-                          }
-                          className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500"
-                        />
-                        <label className="cursor-pointer flex-shrink-0">
-                          <input
-                            type="file"
-                            onChange={async (e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                try {
-                                  if (file.size > 5 * 1024 * 1024) {
-                                    alert("File size must be less than 5MB");
-                                    e.target.value = "";
-                                    return;
-                                  }
-                                  const folder = `user-profiles/${selectedClient?.id || "new"}/organizations/org-new`;
-                                  const { s3Url } = await uploadFileDirect(
-                                    file,
-                                    folder,
-                                    "optional-attachment-1"
-                                  );
-                                  updateNewOrganizationField("optionalAttachment1", s3Url);
-                                } catch (error) {
-                                  console.error("Error uploading attachment:", error);
-                                  alert("Failed to upload file. Please try again.");
-                                  e.target.value = "";
-                                }
-                              }
-                            }}
-                            className="hidden"
-                            accept=".pdf,.jpg,.jpeg,.png"
-                          />
-                          <span className="px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm whitespace-nowrap">
-                            {newOrganization.optionalAttachment1 ? "Change" : "Upload"}
-                          </span>
-                        </label>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Optional Attachment 2
-                      </label>
-                      <div className="flex items-center gap-1.5">
-                        <input
-                          type="text"
-                          readOnly
-                          value={
-                            newOrganization.optionalAttachment2
-                              ? "File uploaded"
-                              : "No file chosen"
-                          }
-                          className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500"
-                        />
-                        <label className="cursor-pointer flex-shrink-0">
-                          <input
-                            type="file"
-                            onChange={async (e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                try {
-                                  if (file.size > 5 * 1024 * 1024) {
-                                    alert("File size must be less than 5MB");
-                                    e.target.value = "";
-                                    return;
-                                  }
-                                  const folder = `user-profiles/${selectedClient?.id || "new"}/organizations/org-new`;
-                                  const { s3Url } = await uploadFileDirect(
-                                    file,
-                                    folder,
-                                    "optional-attachment-2"
-                                  );
-                                  updateNewOrganizationField("optionalAttachment2", s3Url);
-                                } catch (error) {
-                                  console.error("Error uploading attachment:", error);
-                                  alert("Failed to upload file. Please try again.");
-                                  e.target.value = "";
-                                }
-                              }
-                            }}
-                            className="hidden"
-                            accept=".pdf,.jpg,.jpeg,.png"
-                          />
-                          <span className="px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm whitespace-nowrap">
-                            {newOrganization.optionalAttachment2 ? "Change" : "Upload"}
-                          </span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
+                <div className="bg-[#F8F9FA] rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Attachments
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4 max-w-xl">
+                    Upload and manage all company documents for this organization in the
+                    Company Documents section.
+                  </p>
+                  {selectedClient && selectedOrg && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(
+                          `/admin/client-company-documents/${selectedClient.user_id}/${selectedOrg.id}`,
+                          { state: { orgId: selectedOrg.id, userId: selectedClient.user_id } }
+                        )
+                      }
+                      className="px-6 py-2 bg-[#01334C] text-white rounded-lg text-sm font-semibold hover:bg-[#00486D] transition-colors"
+                    >
+                      Go to Company Documents
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -2673,144 +2589,28 @@ function AdminOrganizations() {
             )}
 
             {activeDetailTab === "attachments" && (
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Attachments
-                  </h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Optional Attachment 1
-                    </label>
-                    {editingOrg ? (
-                      <div className="flex items-center gap-1.5">
-                        <input
-                          type="text"
-                          readOnly
-                          value={
-                            editingOrg.optionalAttachment1
-                              ? "File uploaded"
-                              : "No file chosen"
-                          }
-                          className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500"
-                        />
-                        <label className="cursor-pointer flex-shrink-0">
-                          <input
-                            type="file"
-                            onChange={async (e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                try {
-                                  if (file.size > 5 * 1024 * 1024) {
-                                    alert("File size must be less than 5MB");
-                                    e.target.value = "";
-                                    return;
-                                  }
-                                  const folder = `user-profiles/${selectedOrgUserId}/organizations/org-${editingOrg.id || "new"}`;
-                                  const { s3Url } = await uploadFileDirect(
-                                    file,
-                                    folder,
-                                    "optional-attachment-1"
-                                  );
-                                  updateOrganizationField("optionalAttachment1", s3Url);
-                                } catch (error) {
-                                  console.error("Error uploading attachment:", error);
-                                  alert("Failed to upload file. Please try again.");
-                                  e.target.value = "";
-                                }
-                              }
-                            }}
-                            className="hidden"
-                            accept=".pdf,.jpg,.jpeg,.png"
-                          />
-                          <span className="px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm whitespace-nowrap">
-                            {editingOrg.optionalAttachment1 ? "Change" : "Upload"}
-                          </span>
-                        </label>
-                      </div>
-                    ) : (
-                      <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
-                        {selectedOrg.optionalAttachment1 ? (
-                          <button
-                            onClick={() => handleViewFile(selectedOrg.optionalAttachment1)}
-                            className="text-blue-600 hover:underline"
-                          >
-                            View File
-                          </button>
-                        ) : (
-                          "Not uploaded"
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Optional Attachment 2
-                    </label>
-                    {editingOrg ? (
-                      <div className="flex items-center gap-1.5">
-                        <input
-                          type="text"
-                          readOnly
-                          value={
-                            editingOrg.optionalAttachment2
-                              ? "File uploaded"
-                              : "No file chosen"
-                          }
-                          className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500"
-                        />
-                        <label className="cursor-pointer flex-shrink-0">
-                          <input
-                            type="file"
-                            onChange={async (e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                try {
-                                  if (file.size > 5 * 1024 * 1024) {
-                                    alert("File size must be less than 5MB");
-                                    e.target.value = "";
-                                    return;
-                                  }
-                                  const folder = `user-profiles/${selectedOrgUserId}/organizations/org-${editingOrg.id || "new"}`;
-                                  const { s3Url } = await uploadFileDirect(
-                                    file,
-                                    folder,
-                                    "optional-attachment-2"
-                                  );
-                                  updateOrganizationField("optionalAttachment2", s3Url);
-                                } catch (error) {
-                                  console.error("Error uploading attachment:", error);
-                                  alert("Failed to upload file. Please try again.");
-                                  e.target.value = "";
-                                }
-                              }
-                            }}
-                            className="hidden"
-                            accept=".pdf,.jpg,.jpeg,.png"
-                          />
-                          <span className="px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm whitespace-nowrap">
-                            {editingOrg.optionalAttachment2 ? "Change" : "Upload"}
-                          </span>
-                        </label>
-                      </div>
-                    ) : (
-                      <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
-                        {selectedOrg.optionalAttachment2 ? (
-                          <button
-                            onClick={() => handleViewFile(selectedOrg.optionalAttachment2)}
-                            className="text-blue-600 hover:underline"
-                          >
-                            View File
-                          </button>
-                        ) : (
-                          "Not uploaded"
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
+              <div className="bg-[#F8F9FA] rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Attachments
+                </h3>
+                <p className="text-sm text-gray-600 mb-4 max-w-xl">
+                  Upload and manage all company documents for this organization in the
+                  Company Documents section.
+                </p>
+                {selectedOrgUserId && selectedOrg && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(
+                        `/admin/client-company-documents/${selectedOrgUserId}/${selectedOrg.id}`,
+                        { state: { orgId: selectedOrg.id, userId: selectedOrgUserId } }
+                      )
+                    }
+                    className="px-6 py-2 bg-[#01334C] text-white rounded-lg text-sm font-semibold hover:bg-[#00486D] transition-colors"
+                  >
+                    Go to Company Documents
+                  </button>
+                )}
               </div>
             )}
 

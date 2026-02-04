@@ -128,6 +128,7 @@ import AdminNewRegistration from "../admin/pages/AdminNewRegistration";
 import AdminFillFormNew from "../admin/pages/AdminFillFormNew";
 import RegistrationDetailsRouter from "../admin/pages/RegistrationDetailsRouter";
 import AdminServices from "../admin/pages/AdminServices";
+import AdminComplianceRequests from "../admin/pages/AdminComplianceRequests";
 import AdminNoticeBoard from "../admin/pages/AdminNoticeBoard";
 import AdminNoticeManagement from "../admin/pages/AdminNoticeManagement";
 import AdminCMSPackage from "../admin/pages/AdminCMSPackage";
@@ -1157,6 +1158,7 @@ function Routers() {
         <Route path="custom-payment" element={<AdminCustomPayment />} />
         <Route path="fill-form-new" element={<AdminFillFormNew />} />
         <Route path="services" element={<AdminServices />} />
+        <Route path="compliance-requests" element={<AdminComplianceRequests />} />
         <Route path="organizations" element={<AdminOrganizations />} />
         <Route path="directors" element={<AdminDirectors />} />
         <Route path="documents-vault" element={<AdminDocumentsVault />} />

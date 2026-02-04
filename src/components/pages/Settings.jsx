@@ -84,6 +84,7 @@ function Settings() {
   const [expandedUserNoteId, setExpandedUserNoteId] = useState(null);
   const [isAddingUserNote, setIsAddingUserNote] = useState(false);
   const [currentUserNote, setCurrentUserNote] = useState({
+    organizationId: null,
     date: "",
     description: "",
     attachments: [],
@@ -611,11 +612,18 @@ function Settings() {
     try {
       setSaving(true);
 
+      if (!currentUserNote.organizationId) {
+        alert("Please select an organization for this note.");
+        setSaving(false);
+        return;
+      }
+
       // Add new note to list
       const updatedNotesList = [
         ...userNotesList,
         {
           id: Date.now(),
+          organizationId: currentUserNote.organizationId,
           date: currentUserNote.date,
           description: currentUserNote.description,
           attachments: currentUserNote.attachments,
@@ -631,7 +639,12 @@ function Settings() {
 
       if (response.success) {
         setUserNotesList(updatedNotesList);
-        setCurrentUserNote({ date: "", description: "", attachments: [] });
+        setCurrentUserNote({
+          organizationId: null,
+          date: "",
+          description: "",
+          attachments: [],
+        });
         setIsAddingUserNote(false);
         alert("Note saved successfully!");
         await loadUserData();
@@ -1287,6 +1300,7 @@ function Settings() {
               removeUserNote={removeUserNote}
               updateUserNote={updateUserNote}
               handleViewFile={handleViewFile}
+              organizations={organizations}
             />
           )}
           

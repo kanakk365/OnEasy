@@ -66,12 +66,21 @@ const NotesContent = ({
   removeUserNote,
   handleViewFile,
   updateUserNote,
+  organizations = [],
 }) => {
   const fileInputRef = useRef(null);
   const [selectedAdminNote, setSelectedAdminNote] = useState(null);
   const [selectedUserNote, setSelectedUserNote] = useState(null);
   const [isEditingUserNote, setIsEditingUserNote] = useState(false);
   const [editedUserNote, setEditedUserNote] = useState(null);
+
+  const getOrgName = (orgId) => {
+    if (!orgId || !Array.isArray(organizations)) return "-";
+    const match = organizations.find(
+      (o) => String(o.id) === String(orgId),
+    );
+    return match?.legalName || match?.tradeName || "-";
+  };
 
   // File Upload Component
   const FileUploadInput = ({ label }) => (
@@ -145,6 +154,9 @@ const NotesContent = ({
                       Date
                     </th>
                     <th className="px-4 py-3 text-left font-medium text-xs">
+                      Organization
+                    </th>
+                    <th className="px-4 py-3 text-left font-medium text-xs">
                       Description
                     </th>
                     <th className="px-4 py-3 text-left font-medium text-xs rounded-tr-lg">
@@ -162,6 +174,11 @@ const NotesContent = ({
                       <td className="p-3">
                         <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700">
                           {note.date || "-"}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700 truncate max-w-[200px]">
+                          {getOrgName(note.organizationId)}
                         </div>
                       </td>
                       <td className="p-3">
@@ -349,6 +366,9 @@ const NotesContent = ({
                           Date
                         </th>
                         <th className="px-4 py-3 text-left font-medium text-xs">
+                          Organization
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
                           Description
                         </th>
                         <th className="px-4 py-3 text-left font-medium text-xs">
@@ -369,6 +389,11 @@ const NotesContent = ({
                           <td className="p-3">
                             <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700">
                               {note.date || "-"}
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700 truncate">
+                              {getOrgName(note.organizationId)}
                             </div>
                           </td>
                           <td className="p-3">
@@ -411,6 +436,28 @@ const NotesContent = ({
               {isAddingUserNote && (
                 <div className="pt-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <div>
+                      <label className="block text-sm text-gray-900 mb-2 font-medium">
+                        Organization
+                      </label>
+                      <select
+                        value={currentUserNote.organizationId || ""}
+                        onChange={(e) =>
+                          setCurrentUserNote({
+                            ...currentUserNote,
+                            organizationId: e.target.value || null,
+                          })
+                        }
+                        className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option value="">Select organization</option>
+                        {organizations.map((org, idx) => (
+                          <option key={org.id || idx} value={org.id}>
+                            {org.legalName || org.tradeName || `Organization ${idx + 1}`}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                     <StyledInput
                       label="Date"
                       type="date"

@@ -1,17 +1,137 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { IoSearchOutline, IoChevronForwardOutline } from "react-icons/io5";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
 import { initPaymentWithOrderId } from "../../utils/payment";
 
+const COMPLIANCE_API_BASE = "https://oneasycompliance.oneasy.ai";
+
+// Map compliance item name/code to service route
+const complianceToRoute = (name, code) => {
+  const n = (name || "").toLowerCase();
+  const c = (code || "").toLowerCase();
+  const match = (patterns, route) => {
+    if (patterns.some((p) => n.includes(p) || c.includes(p))) return route;
+    return null;
+  };
+  return (
+    match(["trademark"], "/compliance/trademark-details") ||
+    match(["msme", "udyam", "udyog"], "/registration/udyam") ||
+    match(["labour license", "labor license"], "/registration/labour-license") ||
+    match(["professional tax"], "/registration/professional-tax") ||
+    match(["trade license"], "/registration/trade-license") ||
+    match(["provident fund", "pf registration"], "/registration/provident-fund") ||
+    match(["gst registration"], "/gst-details") ||
+    match(["gst returns", "gst return"], "/gst-returns-details") ||
+    match(["gst annual"], "/gst-annual-return-details") ||
+    match(["gst amendment"], "/gst-amendment-details") ||
+    match(["gst notice"], "/gst-notice-details") ||
+    match(["fssai", "food license"], "/registration/fssai") ||
+    match(["iec", "import export"], "/registration/iec") ||
+    match(["esi"], "/registration/esi") ||
+    match(["dsc", "digital signature"], "/registration/dsc") ||
+    match(["startup india"], "/startup-india-details") ||
+    match(["income tax return", "itr"], "/tax-accounting/salary-itr-details") ||
+    match(["professional tax return"], "/compliance/professional-tax-return-details") ||
+    match(["fssai renewal"], "/compliance/fssai-renewal-details") ||
+    match(["fssai return"], "/compliance/fssai-return-filing-details") ||
+    match(["business plan"], "/compliance/business-plan-details") ||
+    match(["hr payroll", "hr & payroll"], "/compliance/hr-payroll-details") ||
+    match(["pf return"], "/compliance/pf-return-filing-details") ||
+    match(["esi return"], "/compliance/esi-return-filing-details") ||
+    match(["partnership compliance"], "/compliance/partnership-compliance-details") ||
+    match(["proprietorship compliance"], "/compliance/proprietorship-compliance-details") ||
+    match(["company compliance"], "/compliance/company-compliance-details") ||
+    null
+  );
+};
+
 function Registrations() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [view, setView] = React.useState("services");
+
+  React.useEffect(() => {
+    if (!location.state?.tab) return;
+    if (location.state.tab === "suggested") {
+      // Backward compatibility with older links – default to compliances view
+      setView("suggested-compliances");
+    } else if (location.state.tab === "suggested-registrations") {
+      setView("suggested-registrations");
+    } else if (location.state.tab === "suggested-compliances") {
+      setView("suggested-compliances");
+    }
+  }, [location.state]);
   const [allServices, setAllServices] = React.useState([]);
   const [search, setSearch] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [showComingSoon, setShowComingSoon] = React.useState(false);
+  const [suggestedRegistrations, setSuggestedRegistrations] = React.useState([]);
+  const [suggestedCompliances, setSuggestedCompliances] = React.useState([]);
+  const [suggestedLoading, setSuggestedLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    if (view !== "suggested-registrations" && view !== "suggested-compliances") {
+      return;
+    }
+    const loadSuggested = async () => {
+      setSuggestedLoading(true);
+      try {
+        const token = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.TOKEN);
+        const [responsesRes, flowRes] = await Promise.all([
+          fetch(`${COMPLIANCE_API_BASE}/compliance/responses`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${COMPLIANCE_API_BASE}/compliance/flow/complete`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+        const responses = responsesRes.ok
+          ? (await responsesRes.json()).responses || []
+          : [];
+        const flowData = flowRes.ok ? await flowRes.json() : {};
+        const flow = (flowData.flow || []).sort((a, b) => a.order - b.order);
+        const registrationItems = [];
+        const complianceItems = [];
+        responses.forEach((resp) => {
+          if (resp.answer?.type === "option" && resp.answer?.optionId) {
+            const q = flow.find((f) => f.key === resp.questionKey);
+            const opt = q?.options?.find((o) => o.id === resp.answer.optionId);
+            if (opt?.compliances) {
+              (opt.compliances.registration || []).forEach((r) => {
+                if (
+                  !registrationItems.find(
+                    (i) => i.code === r.code && i.name === r.name,
+                  )
+                ) {
+                  registrationItems.push({ ...r, category: "registration" });
+                }
+              });
+              (opt.compliances.compliance || []).forEach((c) => {
+                if (
+                  !complianceItems.find(
+                    (i) => i.code === c.code && i.name === c.name,
+                  )
+                ) {
+                  complianceItems.push({ ...c, category: "compliance" });
+                }
+              });
+            }
+          }
+        });
+        setSuggestedRegistrations(registrationItems);
+        setSuggestedCompliances(complianceItems);
+      } catch (err) {
+        console.error("Failed to load suggested compliances:", err);
+        setSuggestedRegistrations([]);
+        setSuggestedCompliances([]);
+      } finally {
+        setSuggestedLoading(false);
+      }
+    };
+    loadSuggested();
+  }, [view]);
 
   React.useEffect(() => {
     if (view !== "my") return;
@@ -660,11 +780,171 @@ function Registrations() {
               >
                 My Registrations
               </button>
+              <button
+                onClick={() => setView("suggested-registrations")}
+                className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
+                  view === "suggested-registrations"
+                    ? "bg-[#01466a] text-white"
+                    : "text-gray-500 hover:text-gray-900"
+                }`}
+              >
+                Suggested Registrations
+              </button>
+              <button
+                onClick={() => setView("suggested-compliances")}
+                className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
+                  view === "suggested-compliances"
+                    ? "bg-[#01466a] text-white"
+                    : "text-gray-500 hover:text-gray-900"
+                }`}
+              >
+                Suggested Compliances
+              </button>
             </div>
           </div>
         </div>
 
-        {view === "services" ? (
+        {view === "suggested-registrations" ? (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            {suggestedLoading ? (
+              <div className="text-sm text-gray-500 p-8 text-center">
+                Loading suggested registrations...
+              </div>
+            ) : suggestedRegistrations.length > 0 ? (
+              <div className="grid gap-4">
+                {suggestedRegistrations
+                  .filter((item) => {
+                    if (!search) return true;
+                    return item.name
+                      ?.toLowerCase()
+                      .includes(search.toLowerCase());
+                  })
+                  .map((item, idx) => {
+                    const route = complianceToRoute(item.name, item.code);
+                    return (
+                      <div
+                        key={`${item.code}-${idx}`}
+                        onClick={() => {
+                          try {
+                            localStorage.setItem(
+                              "suggestedComplianceMeta",
+                              JSON.stringify({
+                                source: "compliance_chat_suggested",
+                                code: item.code || null,
+                                name: item.name || null,
+                                category: item.category || null,
+                                ts: Date.now(),
+                              }),
+                            );
+                          } catch {
+                            // ignore storage issues
+                          }
+                          route ? navigate(route) : navigate("/registrations");
+                        }}
+                        className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#01334C] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-gray-100"
+                      >
+                        <div>
+                          <h3 className="text-lg font-semibold text-[#00486D] mb-1 group-hover:text-white">
+                            {item.name}
+                          </h3>
+                          <p className="text-sm text-gray-400 group-hover:text-gray-200">
+                            Registration required
+                          </p>
+                        </div>
+                        <div className="w-10 h-10 rounded-full bg-[#F5F7FA] group-hover:bg-[#246181] flex items-center justify-center transition-colors">
+                          <IoChevronForwardOutline className="text-[#00486D] text-xl group-hover:text-white" />
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500 mb-4">
+                  No suggested registrations yet. Complete the compliance
+                  questionnaire to get personalized recommendations.
+                </p>
+                <button
+                  onClick={() => navigate("/compliance")}
+                  className="px-6 py-2 bg-[#01466a] text-white rounded-lg text-sm font-medium hover:bg-[#01334C] transition-colors"
+                >
+                  Go to Compliance
+                </button>
+              </div>
+            )}
+          </div>
+        ) : view === "suggested-compliances" ? (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            {suggestedLoading ? (
+              <div className="text-sm text-gray-500 p-8 text-center">
+                Loading suggested compliances...
+              </div>
+            ) : suggestedCompliances.length > 0 ? (
+              <div className="grid gap-4">
+                {suggestedCompliances
+                  .filter((item) => {
+                    if (!search) return true;
+                    return item.name?.toLowerCase().includes(search.toLowerCase());
+                  })
+                  .map((item, idx) => {
+                    const route = complianceToRoute(item.name, item.code);
+                    return (
+                      <div
+                        key={`${item.code}-${idx}`}
+                        onClick={() => {
+                          try {
+                            // Mark that the next purchase (if any) came from Compliance Chat suggestions.
+                            // This is consumed by the payment flow to attach order notes for admin filtering.
+                            localStorage.setItem(
+                              "suggestedComplianceMeta",
+                              JSON.stringify({
+                                source: "compliance_chat_suggested",
+                                code: item.code || null,
+                                name: item.name || null,
+                                category: item.category || null,
+                                ts: Date.now(),
+                              }),
+                            );
+                          } catch {
+                            // ignore storage issues
+                          }
+                          route ? navigate(route) : navigate("/compliance");
+                        }}
+                        className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#01334C] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-gray-100"
+                      >
+                        <div>
+                          <h3 className="text-lg font-semibold text-[#00486D] mb-1 group-hover:text-white">
+                            {item.name}
+                          </h3>
+                          <p className="text-sm text-gray-400 group-hover:text-gray-200">
+                            {item.category === "registration"
+                              ? "Registration required"
+                              : "Compliance filing"}
+                          </p>
+                        </div>
+                        <div className="w-10 h-10 rounded-full bg-[#F5F7FA] group-hover:bg-[#246181] flex items-center justify-center transition-colors">
+                          <IoChevronForwardOutline className="text-[#00486D] text-xl group-hover:text-white" />
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500 mb-4">
+                  No suggested compliances yet. Complete the compliance
+                  questionnaire to get personalized recommendations.
+                </p>
+                <button
+                  onClick={() => navigate("/compliance")}
+                  className="px-6 py-2 bg-[#01466a] text-white rounded-lg text-sm font-medium hover:bg-[#01334C] transition-colors"
+                >
+                  Go to Compliance
+                </button>
+              </div>
+            )}
+          </div>
+        ) : view === "services" ? (
           <>
             <div className="grid gap-4">
               {[

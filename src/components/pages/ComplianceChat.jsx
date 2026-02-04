@@ -575,7 +575,7 @@ const ComplianceChat = () => {
         window.open("https://wa.me/919876543210", "_blank");
         break;
       case "services":
-        navigate("/services");
+        navigate("/registrations", { state: { tab: "suggested-compliances" } });
         break;
       case "view_recommendations":
         // Extract compliances from saved responses and show

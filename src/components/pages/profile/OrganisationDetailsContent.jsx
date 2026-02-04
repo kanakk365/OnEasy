@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FiEyeOff, FiEye } from "react-icons/fi";
 import { BsCalendar3 } from "react-icons/bs";
 import { AiOutlinePlus, AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
@@ -358,6 +359,7 @@ const OrganizationFormWithTabs = ({
   organizations,
 }) => {
   const [activeTab, setActiveTab] = useState("organization-details");
+  const navigate = useNavigate();
 
   const tabs = [
     { key: "organization-details", label: "Organization Details" },
@@ -1063,94 +1065,23 @@ const OrganizationFormWithTabs = ({
         )}
 
         {activeTab === "attachments" && (
-          <div className="bg-[#F8F9FA] rounded-xl p-4">
-                  <h4 className="text-[15px] font-medium text-gray-900 mb-4">
-                    Attachments
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <StyledFileUpload
-                      label="Optional Attachment 1"
-                      fileUrl={org.optionalAttachment1}
-                      id={`opt-att-1-${org.id}`}
-                      placeholder="Upload file"
-                      onFileChange={async (e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          try {
-                            if (file.size > 5 * 1024 * 1024)
-                              return alert("File size must be less than 5MB");
-                            const userData = JSON.parse(
-                              localStorage.getItem(
-                                AUTH_CONFIG.STORAGE_KEYS.USER
-                              ) || "{}"
-                            );
-                            const currentUserId = userData.id || userId;
-                            if (!currentUserId)
-                              return alert("User ID not found");
-
-                            const folder = `organizations/${currentUserId}/org-${
-                              org.id || "new"
-                            }`;
-                            const { s3Url } = await uploadFileDirect(
-                              file,
-                              folder,
-                              "optional-attachment-1"
-                            );
-                            updateOrganization(
-                              org.id,
-                              "optionalAttachment1",
-                              s3Url
-                            );
-                          } catch (error) {
-                            console.error(error);
-                            alert("Upload failed");
-                          }
-                        }
-                      }}
-                      onViewFile={handleViewFile}
-                    />
-                    <StyledFileUpload
-                      label="Optional Attachment 2"
-                      fileUrl={org.optionalAttachment2}
-                      id={`opt-att-2-${org.id}`}
-                      placeholder="Upload file"
-                      onFileChange={async (e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          try {
-                            if (file.size > 5 * 1024 * 1024)
-                              return alert("File size must be less than 5MB");
-                            const userData = JSON.parse(
-                              localStorage.getItem(
-                                AUTH_CONFIG.STORAGE_KEYS.USER
-                              ) || "{}"
-                            );
-                            const currentUserId = userData.id || userId;
-                            if (!currentUserId)
-                              return alert("User ID not found");
-
-                            const folder = `organizations/${currentUserId}/org-${
-                              org.id || "new"
-                            }`;
-                            const { s3Url } = await uploadFileDirect(
-                              file,
-                              folder,
-                              "optional-attachment-2"
-                            );
-                            updateOrganization(
-                              org.id,
-                              "optionalAttachment2",
-                              s3Url
-                            );
-                          } catch (error) {
-                            console.error(error);
-                            alert("Upload failed");
-                          }
-                        }
-                      }}
-                      onViewFile={handleViewFile}
-                    />
-                  </div>
+          <div className="bg-[#F8F9FA] rounded-xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <h4 className="text-[15px] font-medium text-gray-900 mb-1">
+                Attachments
+              </h4>
+              <p className="text-sm text-gray-600 max-w-xl">
+                Upload and manage all company documents from the dedicated
+                documents section for this organization.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate(`/company-documents/${org.id}`)}
+              className="px-6 py-2 bg-[#00486D] text-white rounded-lg text-sm font-semibold hover:bg-[#01334C] transition-colors"
+            >
+              Go to Company Documents
+            </button>
           </div>
         )}
 
