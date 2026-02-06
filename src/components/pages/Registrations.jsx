@@ -23,7 +23,26 @@ const complianceToRoute = (name, code) => {
     match(["trade license"], "/registration/trade-license") ||
     match(["provident fund", "pf registration"], "/registration/provident-fund") ||
     match(["gst registration"], "/gst-details") ||
-    match(["gst returns", "gst return"], "/gst-returns-details") ||
+    match(
+      ["letter of undertaking", "lut"],
+      "/registration/gst-lut"
+    ) ||
+    match(
+      [
+        "gst returns",
+        "gst return",
+        "gstr-1",
+        "gstr 1",
+        "gstr1",
+        "gstr-3b",
+        "gstr 3b",
+        "gstr3b",
+        "gstr-9",
+        "gstr 9",
+        "gstr9",
+      ],
+      "/gst-returns-details"
+    ) ||
     match(["gst annual"], "/gst-annual-return-details") ||
     match(["gst amendment"], "/gst-amendment-details") ||
     match(["gst notice"], "/gst-notice-details") ||
