@@ -148,6 +148,7 @@ import SuperAdminLayout from "../superadmin/layout/SuperAdminLayout";
 import SuperAdminClients from "../superadmin/pages/SuperAdminClients";
 import SuperAdminProfile from "../superadmin/pages/SuperAdminProfile";
 import SuperAdminFillForm from "../superadmin/pages/SuperAdminFillForm";
+import AIAgent from "../pages/AIAgent";
 import ProtectedRoute from "../common/ProtectedRoute";
 
 function Routers() {
@@ -247,6 +248,14 @@ function Routers() {
         element={
           <ProtectedRoute>
             <Resources />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ai-agent"
+        element={
+          <ProtectedRoute>
+            <AIAgent />
           </ProtectedRoute>
         }
       />
@@ -1158,7 +1167,10 @@ function Routers() {
         <Route path="custom-payment" element={<AdminCustomPayment />} />
         <Route path="fill-form-new" element={<AdminFillFormNew />} />
         <Route path="services" element={<AdminServices />} />
-        <Route path="compliance-requests" element={<AdminComplianceRequests />} />
+        <Route
+          path="compliance-requests"
+          element={<AdminComplianceRequests />}
+        />
         <Route path="organizations" element={<AdminOrganizations />} />
         <Route path="directors" element={<AdminDirectors />} />
         <Route path="documents-vault" element={<AdminDocumentsVault />} />
