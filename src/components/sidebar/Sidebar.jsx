@@ -136,7 +136,7 @@ function Sidebar() {
       <div
         className={`${
           isCollapsed ? "w-[70px]" : "w-[240px]"
-        } h-screen bg-[#022b51] fixed left-0 top-0 flex flex-col hidden lg:flex transition-all duration-300 border-r border-[#022b51]`}
+        } h-screen bg-[#022b51] fixed left-0 top-0 hidden lg:flex flex-col transition-all duration-300 border-r border-[#022b51]`}
       >
         {/* Logo Section with Toggle Button */}
         <div

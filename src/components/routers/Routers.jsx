@@ -18,6 +18,7 @@ import ComplianceChat from "../pages/ComplianceChat";
 import Resources from "../pages/Resources";
 import TaxAccountingCategories from "../pages/TaxAccountingCategories";
 import AssignedCompliances from "../pages/AssignedCompliances";
+import AssignedComplianceDetails from "../pages/AssignedComplianceDetails";
 import RegistrationPackageSelection from "../pages/RegistrationPackageSelection";
 import RegistrationForm from "../forms/RegistrationForm";
 import CompanyCategories from "../pages/CompanyCategories";
@@ -248,6 +249,14 @@ function Routers() {
         element={
           <ProtectedRoute>
             <AssignedCompliances />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/assigned-compliances/:id"
+        element={
+          <ProtectedRoute>
+            <AssignedComplianceDetails />
           </ProtectedRoute>
         }
       />
