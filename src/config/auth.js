@@ -6,7 +6,7 @@ export const AUTH_CONFIG = {
 
   // API endpoints (replace with your actual backend URLs)
   API_BASE_URL:
-    import.meta.env.VITE_API_BASE_URL || "https://apioneeasy.oneasy.ai/api/v1",
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api",
 
   // Login endpoints
   ENDPOINTS: {
