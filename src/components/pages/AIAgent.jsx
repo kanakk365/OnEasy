@@ -22,7 +22,7 @@ const AIAgent = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl w-full">
           {/* Profile Builder Card */}
-          <a href="https://profile-builder-five-mocha.vercel.app ">
+          <a href="https://profile.oneasy.ai">
             <button
               className="group relative bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 flex flex-col items-start text-left w-full min-h-[160px] hover:scale-105 active:scale-100"
               onClick={() => console.log("Start New Session")}
@@ -53,7 +53,7 @@ const AIAgent = () => {
           </a>
 
           {/* LegalPick Card */}
-          <a href="https://oneasy-chat-design.vercel.app/">
+          <a href="https://startup.oneasy.ai">
             <button
               className="group relative bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 flex flex-col items-start text-left w-full min-h-[160px] hover:scale-105 active:scale-100"
               onClick={() => console.log("View History")}
@@ -83,7 +83,7 @@ const AIAgent = () => {
           </a>
 
           {/* Proposal Flow */}
-          <a href="https://proposalflow.chalkframe.com">
+          <a href="https://proposal.oneasy.ai">
             <button className="group relative bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 flex flex-col items-start text-left w-full min-h-[160px] hover:scale-105 active:scale-100">
               <div className="flex justify-between items-start w-full mb-2">
                 <div className="flex items-center gap-3">
