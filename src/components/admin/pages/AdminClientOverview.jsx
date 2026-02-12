@@ -11,6 +11,8 @@ import ClientSubscriptionsTab from "./client-overview/ClientSubscriptionsTab";
 import ClientTasksTab from "./client-overview/ClientTasksTab";
 import ClientNotesTab from "./client-overview/ClientNotesTab";
 import ClientPersonaNotepad from "./client-overview/ClientPersonaNotepad";
+import ClientComplianceAssignmentTab from "./client-overview/ClientComplianceAssignmentTab";
+import ClientAssignedComplianceTab from "./client-overview/ClientAssignedComplianceTab";
 import PaymentMethodDialog from "./client-overview/PaymentMethodDialog";
 
 function AdminClientOverview() {
@@ -159,6 +161,7 @@ function AdminClientOverview() {
         "profile",
         "services",
         "compliance",
+        "compliance-assignment",
         "subscriptions",
         "organizations",
         "tasks",
@@ -2084,6 +2087,8 @@ function AdminClientOverview() {
               count: allRegistrations.length,
             },
             { key: "compliance", label: "Compliance" },
+            { key: "compliance-assignment", label: "Add/Assign Compliance" },
+            { key: "assigned-compliance", label: "Assigned Compliance" },
             { key: "subscriptions", label: "Subscriptions" },
             { key: "tasks", label: "Tasks" },
             { key: "notes", label: "Notes" },
@@ -2192,6 +2197,16 @@ function AdminClientOverview() {
 
       {/* Compliance Tab */}
       {activeTab === "compliance" && <ClientComplianceTab />}
+
+      {/* Compliance Assignment Tab */}
+      {activeTab === "compliance-assignment" && (
+        <ClientComplianceAssignmentTab userId={userId} />
+      )}
+
+      {/* Assigned Compliance Tab */}
+      {activeTab === "assigned-compliance" && (
+        <ClientAssignedComplianceTab userId={userId} />
+      )}
 
       {/* Subscriptions Tab */}
       {activeTab === "subscriptions" && (
