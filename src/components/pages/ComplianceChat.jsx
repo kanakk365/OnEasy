@@ -1,11 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { IoSend } from "react-icons/io5";
 import { RiRobot2Line } from "react-icons/ri";
+import { FiSearch, FiCheck, FiX, FiFilter, FiArrowLeft } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { AUTH_CONFIG } from "../../config/auth";
 
 // Compliance API base URL
 const COMPLIANCE_API_BASE = "https://oneasycompliance.oneasy.ai";
+
+// 1A APIs
+const API_1A_GET =
+  "https://oneasycompliance.oneasy.ai/compliance/annexure-1a/available";
+const API_1A_POST =
+  "https://oneasycompliance.oneasy.ai/compliance/annexure-1a/my-compliances";
 
 const ComplianceChat = () => {
   const navigate = useNavigate();
@@ -27,6 +34,16 @@ const ComplianceChat = () => {
     compliance: [],
   });
 
+  // Manual Selection State
+  const [showSelectionGrid, setShowSelectionGrid] = useState(false);
+
+  const [groupedCompliances, setGroupedCompliances] = useState({});
+  const [categories, setCategories] = useState([]);
+  const [selectedCodes, setSelectedCodes] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [isSubmittingSelection, setIsSubmittingSelection] = useState(false);
+
   // Get auth token
   const getAuthToken = () => {
     try {
@@ -42,10 +59,15 @@ const ComplianceChat = () => {
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isTyping]);
+    if (!showSelectionGrid) {
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [messages, isTyping, showSelectionGrid]);
 
-  // Initialize on mount - check for existing responses first
+  // Initialize on mount
   useEffect(() => {
     initializeChat();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -63,11 +85,25 @@ const ComplianceChat = () => {
       setHasSavedResponses(true);
       await showExistingResponses(existingResponses);
     } else {
-      // No existing responses - start fresh questionnaire
-      await fetchCompleteFlow();
+      // Start Custom Flow instead of immediate questionnaire
+      startCustomFlow();
     }
 
     setIsLoading(false);
+  };
+
+  const startCustomFlow = () => {
+    setMessages([
+      {
+        id: Date.now(),
+        type: "bot",
+        text: "👋 Welcome! Are you setting up for a New or Existing Business?",
+        actionButtons: [
+          { label: "New Business", action: "flow_new_business" },
+          { label: "Existing Business", action: "flow_existing_business" },
+        ],
+      },
+    ]);
   };
 
   // Fetch saved responses
@@ -227,14 +263,14 @@ const ComplianceChat = () => {
         const sortedFlow = data.flow.sort((a, b) => a.order - b.order);
         setFlowQuestions(sortedFlow);
 
-        // Add welcome message and first question
-        const welcomeMsg = {
+        // Add intro message
+        const introMsg = {
           id: Date.now(),
           type: "bot",
-          text: "👋 Hi! Let's set up your compliance requirements. I'll ask you a few questions to understand your business better.",
+          text: "Let's set up your compliance requirements. I'll ask you a few questions to understand your business better.",
         };
 
-        setMessages([welcomeMsg]);
+        setMessages((prev) => [...prev, introMsg]);
 
         // Show first question after a delay
         setTimeout(() => {
@@ -245,7 +281,8 @@ const ComplianceChat = () => {
       }
     } catch (error) {
       console.error("Error fetching compliance flow:", error);
-      setMessages([
+      setMessages((prev) => [
+        ...prev,
         {
           id: Date.now(),
           type: "bot",
@@ -309,7 +346,7 @@ const ComplianceChat = () => {
   };
 
   const handleSendMessage = async (text) => {
-    if (!text.trim() || isCompleted) return;
+    if (!text.trim() || isCompleted || showSelectionGrid) return;
 
     const currentQuestion = flowQuestions[currentQuestionIndex];
     if (!currentQuestion) return;
@@ -337,7 +374,7 @@ const ComplianceChat = () => {
   };
 
   const handleOptionClick = async (option) => {
-    if (isCompleted) return;
+    if (isCompleted || showSelectionGrid) return;
 
     const currentQuestion = flowQuestions[currentQuestionIndex];
     if (!currentQuestion) return;
@@ -456,12 +493,10 @@ const ComplianceChat = () => {
         throw new Error("Failed to submit responses");
       }
 
-      // Parse the API response
       const data = await response.json();
 
       // Show success message with saved count
       if (data.success) {
-        console.log("Responses saved successfully:", data);
         setMessages((prev) => [
           ...prev,
           {
@@ -569,53 +604,92 @@ const ComplianceChat = () => {
   };
 
   const handleActionButton = async (action) => {
+    // Record user click as message
+    if (
+      action !== "view_recommendations" &&
+      action !== "select_compliance_type"
+    ) {
+      // optional: don't double log some
+      // logic to find label is tricky here without passing it, but handled in specific cases below or simplified
+    }
+
     switch (action) {
+      // --- Custom Flow Actions ---
+      case "flow_new_business":
+        setMessages((prev) => [
+          ...prev,
+          { id: Date.now(), type: "user", text: "New Business" },
+        ]);
+        await fetchCompleteFlow();
+        break;
+
+      case "flow_existing_business":
+        setMessages((prev) => [
+          ...prev,
+          { id: Date.now(), type: "user", text: "Existing Business" },
+          {
+            id: Date.now() + 1,
+            type: "bot",
+            text: "Do you know the applicable compliances for your business?",
+            actionButtons: [
+              { label: "Yes", action: "existing_knows_compliance" },
+              { label: "No", action: "existing_no_compliance" },
+            ],
+          },
+        ]);
+        break;
+
+      case "existing_knows_compliance":
+        setMessages((prev) => [
+          ...prev,
+          { id: Date.now(), type: "user", text: "Yes" },
+        ]);
+        // Show selection UI
+        await fetchAvailableCompliances();
+        break;
+
+      case "existing_no_compliance":
+        setMessages((prev) => [
+          ...prev,
+          { id: Date.now(), type: "user", text: "No" },
+          {
+            id: Date.now() + 1,
+            type: "bot",
+            text: "Do you want to know the applicable compliances for your business?",
+            actionButtons: [
+              { label: "Yes", action: "flow_new_business" }, // Re-use flow logic
+            ],
+          },
+        ]);
+        break;
+
       case "expert":
-        // Navigate to contact or support page
         window.open("https://wa.me/919876543210", "_blank");
         break;
       case "services":
         navigate("/registrations", { state: { tab: "suggested-compliances" } });
         break;
       case "view_recommendations":
-        // Extract compliances from saved responses and show
         extractCompliancesFromSavedResponses(savedResponses);
         setMessages((prev) => [
           ...prev,
-          {
-            id: Date.now(),
-            type: "user",
-            text: "View Recommendations",
-          },
+          { id: Date.now(), type: "user", text: "View Recommendations" },
         ]);
-        setTimeout(() => {
-          showRecommendations();
-        }, 500);
+        setTimeout(() => showRecommendations(), 500);
         break;
       case "update":
-        // Start fresh but keep context
         setMessages((prev) => [
           ...prev,
-          {
-            id: Date.now(),
-            type: "user",
-            text: "Update Responses",
-          },
+          { id: Date.now(), type: "user", text: "Update Responses" },
         ]);
         await resetAndStartFresh(false);
         break;
       case "delete_and_restart": {
-        // Delete responses and start fresh
         setMessages((prev) => [
           ...prev,
-          {
-            id: Date.now(),
-            type: "user",
-            text: "Start Fresh",
-          },
+          { id: Date.now(), type: "user", text: "Start Fresh" },
         ]);
         setIsTyping(true);
-
         const deleted = await deleteResponses();
         if (deleted) {
           setMessages((prev) => [
@@ -627,15 +701,24 @@ const ComplianceChat = () => {
             },
           ]);
         }
-
-        setTimeout(() => {
-          resetAndStartFresh(true);
-        }, 1000);
+        setTimeout(() => resetAndStartFresh(true), 1000);
         break;
       }
       case "restart":
-        // Just restart the questionnaire
         await resetAndStartFresh(true);
+        break;
+      case "exit_selection":
+        setShowSelectionGrid(false);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            type: "bot",
+            text: "You exited the manual selection.",
+          },
+        ]);
+        // maybe offer to restart?
+        startCustomFlow();
         break;
       default:
         break;
@@ -654,21 +737,291 @@ const ComplianceChat = () => {
     setSavedResponses([]);
     setRecommendedCompliances({ registration: [], compliance: [] });
     setIsTyping(false);
-    await fetchCompleteFlow();
+    setShowSelectionGrid(false);
+
+    // Always start with custom flow
+    startCustomFlow();
   };
+
+  // --- Manual Selection Logic ---
+
+  const fetchAvailableCompliances = async () => {
+    setIsLoading(true);
+    try {
+      const token = getAuthToken();
+      const response = await fetch(API_1A_GET, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const items = data.items || [];
+
+        // Group
+        const grouped = {};
+        const cats = new Set();
+        items.forEach((item) => {
+          const cat = item.category || "General";
+          cats.add(cat);
+          if (!grouped[cat]) grouped[cat] = [];
+          grouped[cat].push(item);
+        });
+        setGroupedCompliances(grouped);
+        setCategories(["all", ...Array.from(cats)]);
+        setActiveCategory("all");
+
+        setShowSelectionGrid(true); // Switch view
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            type: "bot",
+            text: "❌ Failed to load compliance list. Please try again.",
+          },
+        ]);
+      }
+    } catch (err) {
+      console.error(err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          type: "bot",
+          text: "❌ Error loading compliance list.",
+        },
+      ]);
+    }
+    setIsLoading(false);
+  };
+
+  const toggleSelection = (code) => {
+    setSelectedCodes((prev) =>
+      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code],
+    );
+  };
+
+  const toggleCategory = (cat) => {
+    const items = groupedCompliances[cat] || [];
+    const codes = items.map((i) => i.code);
+    const allSelected = codes.every((c) => selectedCodes.includes(c));
+
+    if (allSelected) {
+      setSelectedCodes((prev) => prev.filter((c) => !codes.includes(c)));
+    } else {
+      setSelectedCodes((prev) => {
+        const newSel = [...prev];
+        codes.forEach((c) => {
+          if (!newSel.includes(c)) newSel.push(c);
+        });
+        return newSel;
+      });
+    }
+  };
+
+  const submitManualSelection = async () => {
+    if (selectedCodes.length === 0) return;
+    setIsSubmittingSelection(true);
+    try {
+      const token = getAuthToken();
+      const payload = { complianceCodes: selectedCodes };
+
+      const response = await fetch(API_1A_POST, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        // Success
+        setShowSelectionGrid(false);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            type: "bot",
+            text: `✅ Successfully assigned ${selectedCodes.length} compliances to your business dashboard!`,
+          },
+        ]);
+      } else {
+        alert("Failed to submit compliances.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error submitting compliances");
+    }
+    setIsSubmittingSelection(false);
+  };
+
+  // --- JSX ---
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
-          <p className="mt-4 text-gray-600">
-            Loading compliance questionnaire...
-          </p>
+          <p className="mt-4 text-gray-600">Loading compliance data...</p>
         </div>
       </div>
     );
   }
+
+  // --- Manual Selection View ---
+  if (showSelectionGrid) {
+    const filteredCats = categories.filter(
+      (c) => c !== "all" && (activeCategory === "all" || activeCategory === c),
+    );
+
+    return (
+      <div className="h-[calc(100vh-4rem)] bg-white flex flex-col animate-in fade-in duration-300">
+        {/* Header */}
+        <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white shadow-sm z-10">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowSelectionGrid(false)}
+              className="p-2 hover:bg-gray-100 rounded-full"
+            >
+              <FiArrowLeft size={20} />
+            </button>
+            <h2 className="font-bold text-gray-800">
+              Select Applicable Compliances
+            </h2>
+          </div>
+          <span className="text-sm font-semibold text-[#00486D] bg-blue-50 px-3 py-1 rounded-full">
+            {selectedCodes.length} Selected
+          </span>
+        </div>
+
+        {/* Filters */}
+        <div className="p-4 border-b border-gray-100 bg-gray-50 flex gap-3 flex-wrap">
+          <div className="relative flex-1 min-w-[200px]">
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D]"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="relative">
+            <select
+              className="pl-3 pr-8 py-2 border border-gray-200 rounded-lg text-sm appearance-none bg-white focus:outline-none focus:border-[#00486D]"
+              value={activeCategory}
+              onChange={(e) => setActiveCategory(e.target.value)}
+            >
+              <option value="all">All Categories</option>
+              {categories
+                .filter((c) => c !== "all")
+                .map((c) => (
+                  <option key={c} value={c}>
+                    {c.replace(/_/g, " ")}
+                  </option>
+                ))}
+            </select>
+            <FiFilter
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+              size={14}
+            />
+          </div>
+        </div>
+
+        {/* List */}
+        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-gray-50/30">
+          {filteredCats.map((cat) => {
+            const catItems = groupedCompliances[cat].filter(
+              (i) =>
+                i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (i.description &&
+                  i.description
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase())),
+            );
+            if (catItems.length === 0) return null;
+
+            const sectionCodes = catItems.map((i) => i.code);
+            const allSelected = sectionCodes.every((c) =>
+              selectedCodes.includes(c),
+            );
+
+            return (
+              <div key={cat} className="mb-6">
+                <div className="flex items-center justify-between mb-2 px-1">
+                  <h3 className="font-bold text-gray-700 uppercase text-xs tracking-wider">
+                    {cat.replace(/_/g, " ")}
+                  </h3>
+                  <button
+                    onClick={() => toggleCategory(cat)}
+                    className="text-xs text-[#00486D] hover:underline"
+                  >
+                    {allSelected ? "Deselect All" : "Select All"}
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {catItems.map((item) => {
+                    const isSel = selectedCodes.includes(item.code);
+                    return (
+                      <div
+                        key={item.code}
+                        onClick={() => toggleSelection(item.code)}
+                        className={`
+                                                relative p-3 rounded-xl border cursor-pointer transition-all
+                                                ${isSel ? "bg-[#00486D]/5 border-[#00486D]" : "bg-white border-gray-200 hover:border-gray-300"}
+                                            `}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 ${isSel ? "bg-[#00486D] border-[#00486D]" : "bg-white border-gray-300"}`}
+                          >
+                            {isSel && (
+                              <FiCheck className="text-white w-3.5 h-3.5" />
+                            )}
+                          </div>
+                          <div>
+                            <p
+                              className={`text-sm font-semibold ${isSel ? "text-[#00486D]" : "text-gray-900"}`}
+                            >
+                              {item.name}
+                            </p>
+                            {item.description && (
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                {item.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 bg-white border-t border-gray-100 flex justify-end gap-3">
+          <button
+            onClick={() => setShowSelectionGrid(false)}
+            className="px-6 py-2.5 rounded-lg border border-gray-200 text-gray-600 font-medium hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={submitManualSelection}
+            disabled={selectedCodes.length === 0 || isSubmittingSelection}
+            className="px-8 py-2.5 rounded-lg bg-[#00486D] text-white font-medium hover:bg-[#003855] disabled:opacity-50 shadow-lg shadow-blue-900/10"
+          >
+            {isSubmittingSelection ? "Saving..." : "Confirm Selection"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Normal Chat View ---
 
   return (
     <div className="h-[calc(100vh-4rem)] bg-white flex flex-col overflow-hidden">
@@ -686,7 +1039,7 @@ const ComplianceChat = () => {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 md:px-20 py-8 space-y-6">
+      <div className="flex-1 overflow-y-auto px-4 md:px-20 py-8 space-y-6 custom-scrollbar">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -740,7 +1093,7 @@ const ComplianceChat = () => {
             </div>
 
             {/* Option buttons for single_select questions */}
-            {msg.options && !isCompleted && (
+            {msg.options && !isCompleted && !showSelectionGrid && (
               <div className="flex flex-wrap gap-3 mt-3">
                 {msg.options.map((option) => (
                   <button
@@ -765,7 +1118,11 @@ const ComplianceChat = () => {
                       btn.action === "restart" ||
                       btn.action === "delete_and_restart"
                         ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        : btn.action === "view_recommendations"
+                        : btn.action === "view_recommendations" ||
+                            btn.action === "flow_new_business" ||
+                            btn.action === "flow_existing_business" ||
+                            btn.action === "existing_knows_compliance" ||
+                            btn.action === "existing_no_compliance"
                           ? "bg-[#00486D] text-white hover:bg-[#01334C]"
                           : "bg-white border border-[#00486D] text-[#00486D] hover:bg-[#E3F2F9]"
                     }`}
@@ -803,37 +1160,28 @@ const ComplianceChat = () => {
             </div>
           </div>
         )}
-
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="flex-shrink-0 p-4 md:px-20 md:py-6 bg-white border-t border-gray-100">
-        <div className="relative flex items-center">
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={(e) =>
-              e.key === "Enter" && handleSendMessage(inputValue)
-            }
-            placeholder={
-              isCompleted
-                ? "Questionnaire completed - use the buttons above"
-                : flowQuestions[currentQuestionIndex]?.type === "text"
-                  ? "Type your answer..."
-                  : "Select an option above or type your response..."
-            }
-            disabled={isCompleted}
-            className="w-full pl-6 pr-14 py-4 bg-white border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent shadow-sm text-gray-700 placeholder-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed"
-          />
-          <button
-            onClick={() => handleSendMessage(inputValue)}
-            disabled={!inputValue.trim() || isCompleted}
-            className="absolute right-2 p-2 bg-[#00486D] text-white rounded-full hover:bg-[#01334C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <IoSend className="w-5 h-5 ml-0.5" />
-          </button>
-        </div>
+      <div className="bg-white p-4 border-t border-gray-100 flex gap-2">
+        <input
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSendMessage(inputValue)}
+          placeholder="Type your answer..."
+          className="flex-1 bg-gray-50 border border-gray-200 rounded-full px-6 py-3 text-sm focus:outline-none focus:border-[#00486D] transition-colors disabled:opacity-50"
+          disabled={isCompleted || isTyping || showSelectionGrid}
+        />
+        <button
+          onClick={() => handleSendMessage(inputValue)}
+          disabled={
+            !inputValue.trim() || isCompleted || isTyping || showSelectionGrid
+          }
+          className="w-12 h-12 rounded-full bg-[#00486D] text-white flex items-center justify-center hover:bg-[#003855] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <IoSend className="text-lg" />
+        </button>
       </div>
     </div>
   );
