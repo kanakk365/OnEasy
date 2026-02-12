@@ -5,6 +5,7 @@ import {
   RiRobot2Line,
   RiFileEditLine,
   RiUser3Line,
+  RiTaskLine,
 } from "react-icons/ri";
 import {
   MdOutlineSubscriptions,
@@ -82,6 +83,11 @@ function Sidebar() {
       path: "/registrations",
     },
     { icon: <MdOutlineArticle />, text: "Compliance", path: "/compliance" },
+    {
+      icon: <RiTaskLine />,
+      text: "Assigned Compliances",
+      path: "/assigned-compliances",
+    },
     { icon: <RiRobot2Line />, text: "AI Agent", path: "/ai-agent" },
     { icon: <TbCopy />, text: "Resources", path: "/resources" },
     { icon: <RiFileEditLine />, text: "My Documents", path: "/documents" },
