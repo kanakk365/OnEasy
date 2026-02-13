@@ -103,10 +103,10 @@ const ComplianceChat = () => {
       {
         id: Date.now(),
         type: "bot",
-        text: "👋 Welcome! Are you setting up for a New or Existing Business?",
+        text: "👋 Welcome! Are you setting up for an Existing Business or Starting Something New?",
         actionButtons: [
-          { label: "New Business", action: "flow_new_business" },
           { label: "Existing Business", action: "flow_existing_business" },
+          { label: "Starting Something New", action: "flow_new_business" },
         ],
       },
     ]);
@@ -624,7 +624,7 @@ const ComplianceChat = () => {
       case "flow_new_business":
         setMessages((prev) => [
           ...prev,
-          { id: Date.now(), type: "user", text: "New Business" },
+          { id: Date.now(), type: "user", text: "Starting Something New" },
         ]);
         await fetchCompleteFlow();
         break;
