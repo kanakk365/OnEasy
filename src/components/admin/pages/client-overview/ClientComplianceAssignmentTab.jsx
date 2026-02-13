@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiX, FiCheck, FiChevronRight, FiChevronDown } from "react-icons/fi";
+import { FiX, FiCheck, FiChevronRight } from "react-icons/fi";
 import apiClient from "../../../../utils/api";
 import ConfirmationModal from "../../../common/ConfirmationModal";
 import SuccessModal from "../../../common/SuccessModal";
@@ -9,11 +9,15 @@ const API_FLOW_URL =
 const API_POST_URL =
   "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/user-compliances";
 
-function ClientComplianceAssignmentTab({ userId }) {
+function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [successfulSave, setSuccessfulSave] = useState(false);
+
+  // Org selection state
+  const [selectedOrg, setSelectedOrg] = useState(null);
+  const userOrgs = orgsProp || [];
 
   // Data derived from API
   const [complianceSections, setComplianceSections] = useState([]);
@@ -189,6 +193,7 @@ function ClientComplianceAssignmentTab({ userId }) {
 
       const payload = {
         userId: userId,
+        orgId: String(selectedOrg.id),
         complianceCodes: selectedCodes,
       };
 
@@ -242,145 +247,311 @@ function ClientComplianceAssignmentTab({ userId }) {
     );
   }
 
-  return (
-    <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-200px)]">
-      {/* Left Column: Compliance Selection */}
-      <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
-        <div className="p-6 pb-4 border-b border-gray-100">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Assign Compliance
-          </h2>
-        </div>
+  // Step 1: Show org selection if no org is selected yet
+  if (!selectedOrg) {
+    return (
+      <div className="bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)] p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          Select Organisation
+        </h2>
+        <p className="text-sm text-gray-500 mb-6">
+          Choose an organisation to assign compliance to
+        </p>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
-          {complianceSections.map((section) => {
-            const allCodes = section.items.map((i) => i.code);
-            const allSelected = allCodes.every((code) =>
-              selectedCodes.includes(code),
-            );
-
-            return (
-              <div
-                key={section.id}
-                className="rounded-lg border border-gray-200 bg-gray-50/30 overflow-hidden"
+        {userOrgs.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+            <svg
+              className="w-12 h-12 text-gray-300 mb-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              />
+            </svg>
+            <p className="text-gray-400 text-sm font-medium">
+              No organisations found for this user
+            </p>
+            <p className="text-gray-400 text-xs mt-1">
+              Please add an organisation in the Organisations tab first
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {userOrgs.map((org) => (
+              <button
+                key={org.id}
+                onClick={() => setSelectedOrg(org)}
+                className="group text-left p-5 rounded-xl border border-gray-200 bg-white hover:border-[#00486D] hover:shadow-md transition-all duration-200"
               >
-                {/* Section Header */}
-                <div className="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-                  <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide">
-                    {section.title}
-                  </h3>
-                  <button
-                    onClick={() => toggleSectionAll(section)}
-                    className="text-xs font-medium text-[#00486D] hover:underline"
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0 group-hover:scale-105 transition-transform"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, #022B51 0%, #015079 100%)",
+                    }}
                   >
-                    {allSelected ? "Deselect All" : "Select All"}
-                  </button>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#00486D] transition-colors">
+                      {org.legal_name ||
+                        org.legalName ||
+                        "Unnamed Organisation"}
+                    </h3>
+                    {(org.trade_name || org.tradeName) && (
+                      <p className="text-xs text-gray-500 mt-0.5 truncate">
+                        Trade: {org.trade_name || org.tradeName}
+                      </p>
+                    )}
+                    {org.gstin && (
+                      <p className="text-xs text-gray-400 mt-0.5 truncate">
+                        GSTIN: {org.gstin}
+                      </p>
+                    )}
+                    {org.organisation_type && (
+                      <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] uppercase font-semibold bg-blue-50 text-blue-600 border border-blue-100">
+                        {org.organisation_type}
+                      </span>
+                    )}
+                  </div>
+                  <FiChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#00486D] flex-shrink-0 mt-1 transition-colors" />
                 </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
 
-                {/* Items Grid */}
-                <div className="divide-y divide-gray-100">
-                  {section.items.map((item) => {
-                    const isSelected = selectedCodes.includes(item.code);
-                    return (
-                      <div
-                        key={item.code}
-                        onClick={() => toggleItem(item)}
-                        className={`
-                            flex items-center justify-between p-3 cursor-pointer transition-colors
-                            ${isSelected ? "bg-[#F0F7FA]" : "hover:bg-gray-50"}
-                        `}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`
-                             flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors
-                             ${isSelected ? "bg-[#00486D] border-[#00486D]" : "bg-white border-gray-300"}
-                          `}
-                          >
-                            {isSelected && (
-                              <FiCheck className="text-white w-3.5 h-3.5" />
-                            )}
-                          </div>
-                          <div>
-                            <p
-                              className={`text-sm font-medium ${isSelected ? "text-[#00486D]" : "text-gray-700"}`}
-                            >
-                              {item.label}
-                            </p>
-                            {item.description && (
-                              <p className="text-xs text-gray-400 mt-0.5">
-                                {item.description}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <span className="px-2 py-1 rounded text-[10px] uppercase font-semibold bg-white border border-gray-200 text-gray-500">
-                          {formatBadge(item.category)}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
+  // Step 2: Show compliance assignment (with selected org context)
+  return (
+    <div className="flex flex-col gap-4 h-[calc(100vh-200px)]">
+      {/* Selected Org Header */}
+      <div className="flex items-center gap-3 bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)] px-5 py-3">
+        <button
+          onClick={() => {
+            setSelectedOrg(null);
+            setSelectedCodes([]);
+            setSelectedItemsMap({});
+          }}
+          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
+          title="Change organisation"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </button>
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0"
+          style={{
+            background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
+          }}
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+            />
+          </svg>
         </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">
+            Assigning to
+          </p>
+          <p className="text-sm font-semibold text-gray-900 truncate">
+            {selectedOrg.legal_name || selectedOrg.legalName || "Organisation"}
+            {(selectedOrg.trade_name || selectedOrg.tradeName) &&
+              ` (${selectedOrg.trade_name || selectedOrg.tradeName})`}
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            setSelectedOrg(null);
+            setSelectedCodes([]);
+            setSelectedItemsMap({});
+          }}
+          className="text-xs font-medium text-[#00486D] hover:underline px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors"
+        >
+          Change
+        </button>
       </div>
 
-      {/* Right Column: Selection Preview */}
-      <div className="w-full lg:w-96 flex-shrink-0 flex flex-col min-h-0 bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
-        <div className="p-6 pb-4 border-b border-gray-100 flex justify-between items-center">
-          <h3 className="text-base font-semibold text-gray-900">
-            Selection Preview
-          </h3>
-          <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-            {selectedCodes.length}
-          </span>
-        </div>
+      {/* Main Content */}
+      <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
+        {/* Left Column: Compliance Selection */}
+        <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
+          <div className="p-6 pb-4 border-b border-gray-100">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Assign Compliance
+            </h2>
+          </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
-          {selectedCodes.length === 0 ? (
-            <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200 p-8">
-              <p className="text-gray-400 text-sm text-center">
-                No compliance selected
-              </p>
-            </div>
-          ) : (
-            Object.values(selectedItemsMap).map((item) => (
-              <div
-                key={item.code}
-                className="flex items-start justify-between p-3 rounded-lg bg-gray-50 border border-gray-200 group transition-all hover:border-gray-300"
-              >
-                <div className="flex-1 min-w-0 pr-2">
-                  <p
-                    className="text-sm font-semibold text-gray-900 truncate"
-                    title={item.label}
-                  >
-                    {item.label}
-                  </p>
-                  <p className="text-xs text-blue-600 font-medium mt-0.5 capitalize">
-                    {formatBadge(item.category)}
-                  </p>
-                </div>
-                <button
-                  onClick={() => removeItem(item.code)}
-                  className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors flex-shrink-0"
+          <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+            {complianceSections.map((section) => {
+              const allCodes = section.items.map((i) => i.code);
+              const allSelected = allCodes.every((code) =>
+                selectedCodes.includes(code),
+              );
+
+              return (
+                <div
+                  key={section.id}
+                  className="rounded-lg border border-gray-200 bg-gray-50/30 overflow-hidden"
                 >
-                  <FiX size={16} />
-                </button>
-              </div>
-            ))
-          )}
+                  {/* Section Header */}
+                  <div className="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                    <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide">
+                      {section.title}
+                    </h3>
+                    <button
+                      onClick={() => toggleSectionAll(section)}
+                      className="text-xs font-medium text-[#00486D] hover:underline"
+                    >
+                      {allSelected ? "Deselect All" : "Select All"}
+                    </button>
+                  </div>
+
+                  {/* Items Grid */}
+                  <div className="divide-y divide-gray-100">
+                    {section.items.map((item) => {
+                      const isSelected = selectedCodes.includes(item.code);
+                      return (
+                        <div
+                          key={item.code}
+                          onClick={() => toggleItem(item)}
+                          className={`
+                              flex items-center justify-between p-3 cursor-pointer transition-colors
+                              ${isSelected ? "bg-[#F0F7FA]" : "hover:bg-gray-50"}
+                          `}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`
+                               flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors
+                               ${isSelected ? "bg-[#00486D] border-[#00486D]" : "bg-white border-gray-300"}
+                            `}
+                            >
+                              {isSelected && (
+                                <FiCheck className="text-white w-3.5 h-3.5" />
+                              )}
+                            </div>
+                            <div>
+                              <p
+                                className={`text-sm font-medium ${isSelected ? "text-[#00486D]" : "text-gray-700"}`}
+                              >
+                                {item.label}
+                              </p>
+                              {item.description && (
+                                <p className="text-xs text-gray-400 mt-0.5">
+                                  {item.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <span className="px-2 py-1 rounded text-[10px] uppercase font-semibold bg-white border border-gray-200 text-gray-500">
+                            {formatBadge(item.category)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
-          <button
-            className="w-full py-2.5 px-4 bg-[#00486D] text-white text-sm font-medium rounded-lg hover:bg-[#003855] transition-colors focus:ring-4 focus:ring-[#00486D]/20 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-            disabled={selectedCodes.length === 0}
-            onClick={handleSaveClick}
-          >
-            Configure Reminders
-          </button>
+        {/* Right Column: Selection Preview */}
+        <div className="w-full lg:w-96 flex-shrink-0 flex flex-col min-h-0 bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
+          <div className="p-6 pb-4 border-b border-gray-100 flex justify-between items-center">
+            <h3 className="text-base font-semibold text-gray-900">
+              Selection Preview
+            </h3>
+            <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+              {selectedCodes.length}
+            </span>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
+            {selectedCodes.length === 0 ? (
+              <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200 p-8">
+                <p className="text-gray-400 text-sm text-center">
+                  No compliance selected
+                </p>
+              </div>
+            ) : (
+              Object.values(selectedItemsMap).map((item) => (
+                <div
+                  key={item.code}
+                  className="flex items-start justify-between p-3 rounded-lg bg-gray-50 border border-gray-200 group transition-all hover:border-gray-300"
+                >
+                  <div className="flex-1 min-w-0 pr-2">
+                    <p
+                      className="text-sm font-semibold text-gray-900 truncate"
+                      title={item.label}
+                    >
+                      {item.label}
+                    </p>
+                    <p className="text-xs text-blue-600 font-medium mt-0.5 capitalize">
+                      {formatBadge(item.category)}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => removeItem(item.code)}
+                    className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors flex-shrink-0"
+                  >
+                    <FiX size={16} />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+            <button
+              className="w-full py-2.5 px-4 bg-[#00486D] text-white text-sm font-medium rounded-lg hover:bg-[#003855] transition-colors focus:ring-4 focus:ring-[#00486D]/20 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              disabled={selectedCodes.length === 0}
+              onClick={handleSaveClick}
+            >
+              Configure Reminders
+            </button>
+          </div>
         </div>
       </div>
 
@@ -389,7 +560,7 @@ function ClientComplianceAssignmentTab({ userId }) {
         onClose={() => setShowConfirmModal(false)}
         onConfirm={handleConfirmSave}
         title="Confirm Assignment"
-        message={`Are you sure you want to assign ${selectedCodes.length} compliance(s) to this client?`}
+        message={`Are you sure you want to assign ${selectedCodes.length} compliance(s) to "${selectedOrg.legal_name || selectedOrg.legalName || "this organisation"}"?`}
       />
 
       <SuccessModal
