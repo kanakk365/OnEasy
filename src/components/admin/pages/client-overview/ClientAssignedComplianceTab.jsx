@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiChevronLeft, FiCheck } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import apiClient from "../../../../utils/api";
 import SuccessModal from "../../../common/SuccessModal";
 
@@ -8,6 +8,7 @@ const ClientAssignedComplianceTab = ({ userId }) => {
   const [error, setError] = useState(null);
   const [assignments, setAssignments] = useState([]);
   const [selectedCompliance, setSelectedCompliance] = useState(null);
+  const [selectedOrg, setSelectedOrg] = useState(null);
 
   // States for the details view
   const [instances, setInstances] = useState([]);
@@ -53,6 +54,37 @@ const ClientAssignedComplianceTab = ({ userId }) => {
     }
   };
 
+  // Group assignments by organisation
+  const getOrgGroups = () => {
+    const orgMap = {};
+
+    assignments.forEach((assignment) => {
+      const org = assignment.organisation;
+      const orgKey = org ? org.id : "unassigned";
+
+      if (!orgMap[orgKey]) {
+        orgMap[orgKey] = {
+          id: orgKey,
+          legalName: org?.legalName || org?.legal_name || null,
+          tradeName: org?.tradeName || org?.trade_name || null,
+          gstin: org?.gstin || null,
+          assignments: [],
+          totalInstances: 0,
+          completedInstances: 0,
+        };
+      }
+
+      orgMap[orgKey].assignments.push(assignment);
+      const total = assignment.instances?.length || 0;
+      const completed =
+        assignment.instances?.filter((i) => i.isDone).length || 0;
+      orgMap[orgKey].totalInstances += total;
+      orgMap[orgKey].completedInstances += completed;
+    });
+
+    return Object.values(orgMap);
+  };
+
   const handleComplianceClick = (assignment) => {
     setSelectedCompliance(assignment);
     // Sort instances by due date
@@ -64,22 +96,18 @@ const ClientAssignedComplianceTab = ({ userId }) => {
   };
 
   const handleBack = () => {
-    setSelectedCompliance(null);
-    setInstances([]);
-    setPendingUpdates({});
+    if (selectedCompliance) {
+      setSelectedCompliance(null);
+      setInstances([]);
+      setPendingUpdates({});
+    } else if (selectedOrg) {
+      setSelectedOrg(null);
+    }
   };
 
   const toggleInstanceStatus = (instanceId, currentStatus) => {
     setPendingUpdates((prev) => {
-      // If currently pending update exists, toggle back to original or new state
-      // Logic: If in pendingUpdates, use that. Else use currentStatus.
-      // We store the NEW state in pendingUpdates.
-      // However, if we toggle it back to original state, we could remove it from pendingUpdates.
-
       const newStatus = !currentStatus;
-
-      // Check if we are reverting to original state from props?
-      // Simplified: Just store the desired state in map.
       return {
         ...prev,
         [instanceId]: newStatus,
@@ -91,13 +119,6 @@ const ClientAssignedComplianceTab = ({ userId }) => {
     setSaving(true);
     try {
       const token = apiClient.getToken();
-
-      // Identify instances that are currently checked (either from props or pendingUpdates)
-      // The API is 'mark-instances-done', suggest it only marks done.
-      // We will send IDs of all instances that are effectively 'done' in the current view.
-      // Or cleaner: Sending the list of IDs that need to be MARKED DONE.
-      // If an item was already done, it's fine to send again (idempotent).
-      // If an item was unchecked, we don't send it. (Note: this API might not support unmarking).
 
       const doneInstanceIds = instances
         .filter((inst) => {
@@ -139,13 +160,6 @@ const ClientAssignedComplianceTab = ({ userId }) => {
       // Show success modal
       setSuccessfulSave(true);
       setPendingUpdates({});
-
-      // Delay back navigation slightly so user sees success if they close modal
-      // But modal is auto-closing or handled by user.
-      // We will let the user close the modal, then navigate back?
-      // Or auto navigate back after modal close.
-      // The SuccessModal has an auto-close timer.
-      // Let's rely on onClose prop.
     } catch (err) {
       console.error("Save failed", err);
       alert("Failed to save changes");
@@ -273,7 +287,6 @@ const ClientAssignedComplianceTab = ({ userId }) => {
                           {label}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600">
-                          {/* Showing Month derived from dueDate, typically month before dueDate for filing */}
                           {monthName}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600">
@@ -331,90 +344,245 @@ const ClientAssignedComplianceTab = ({ userId }) => {
     );
   }
 
-  // --- Main List View ---
+  // --- Org Compliance List View ---
+  if (selectedOrg) {
+    const orgAssignments = selectedOrg.assignments || [];
+    const orgName =
+      selectedOrg.legalName ||
+      selectedOrg.tradeName ||
+      "General (No Organisation)";
+
+    return (
+      <div className="space-y-6">
+        {/* Header with Back Button and Org Context */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleBack}
+            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
+          >
+            <FiChevronLeft className="w-5 h-5" />
+          </button>
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0"
+            style={{
+              background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
+            }}
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              />
+            </svg>
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">{orgName}</h2>
+            <p className="text-xs text-gray-500">
+              {orgAssignments.length} compliance(s) assigned
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {orgAssignments.length === 0 ? (
+            <div className="text-center py-12 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
+              No compliances assigned to this organisation.
+            </div>
+          ) : (
+            orgAssignments.map((assignment) => {
+              const completedCount = assignment.instances.filter(
+                (i) => i.isDone,
+              ).length;
+              const totalCount = assignment.instances.length;
+              const category = formatCategory(assignment.compliance?.category);
+
+              return (
+                <div
+                  key={assignment.id}
+                  className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow"
+                >
+                  {/* Top Row: Title, Badge, Status */}
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-lg font-bold text-gray-900">
+                        {assignment.compliance?.name}
+                      </h3>
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 capitalize border border-gray-200">
+                        {category}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">
+                        Status
+                      </p>
+                      <p className="text-sm font-bold text-gray-900">
+                        {completedCount} of {totalCount} completed
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-gray-500 mb-6">
+                    {assignment.compliance?.description ||
+                      `${category} Compliance`}
+                  </p>
+
+                  {/* Instances Pills/Buttons */}
+                  <div className="flex flex-wrap gap-3">
+                    {assignment.instances.slice(0, 12).map((instance, i) => {
+                      const label = getPillLabel(instance, i, category);
+
+                      return (
+                        <button
+                          key={instance.id}
+                          onClick={() => handleComplianceClick(assignment)}
+                          className={`
+                            h-9 px-4 rounded-full text-sm font-medium border transition-all
+                            ${
+                              instance.isDone
+                                ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                                : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+                            }
+                          `}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+
+                    {/* View Details Button as a pill */}
+                    <button
+                      onClick={() => handleComplianceClick(assignment)}
+                      className="h-9 px-4 rounded-full text-sm font-medium bg-[#00486D]/5 text-[#00486D] border border-[#00486D]/10 hover:bg-[#00486D]/10 transition-colors"
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // --- Organisation Cards View (Step 1) ---
+  const orgGroups = getOrgGroups();
+
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-bold text-gray-900">Assigned Compliance</h2>
+      <p className="text-sm text-gray-500 -mt-4">
+        Select an organisation to view its assigned compliances
+      </p>
 
-      <div className="space-y-4">
-        {assignments.length === 0 ? (
-          <div className="text-center py-12 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
-            No compliances assigned yet.
-          </div>
-        ) : (
-          assignments.map((assignment) => {
-            const completedCount = assignment.instances.filter(
-              (i) => i.isDone,
-            ).length;
-            const totalCount = assignment.instances.length;
-            const category = formatCategory(assignment.compliance?.category);
+      {assignments.length === 0 ? (
+        <div className="text-center py-12 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
+          No compliances assigned yet.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {orgGroups.map((orgGroup) => {
+            const progressPercent =
+              orgGroup.totalInstances > 0
+                ? Math.round(
+                    (orgGroup.completedInstances / orgGroup.totalInstances) *
+                      100,
+                  )
+                : 0;
 
             return (
-              <div
-                key={assignment.id}
-                className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow"
+              <button
+                key={orgGroup.id}
+                onClick={() => setSelectedOrg(orgGroup)}
+                className="group text-left p-5 rounded-xl border border-gray-200 bg-white hover:border-[#00486D] hover:shadow-md transition-all duration-200"
               >
-                {/* Top Row: Title, Badge, Status */}
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-lg font-bold text-gray-900">
-                      {assignment.compliance?.name}
-                    </h3>
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 capitalize border border-gray-200">
-                      {category}
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">
-                      Status
-                    </p>
-                    <p className="text-sm font-bold text-gray-900">
-                      {completedCount} of {totalCount} completed
-                    </p>
-                  </div>
-                </div>
-
-                <p className="text-sm text-gray-500 mb-6">
-                  {assignment.compliance?.description ||
-                    `${category} Compliance`}
-                </p>
-
-                {/* Instances Pills/Buttons */}
-                <div className="flex flex-wrap gap-3">
-                  {assignment.instances.slice(0, 12).map((instance, i) => {
-                    const label = getPillLabel(instance, i, category);
-
-                    return (
-                      <button
-                        key={instance.id}
-                        onClick={() => handleComplianceClick(assignment)}
-                        className={`
-                                        h-9 px-4 rounded-full text-sm font-medium border transition-all
-                                        ${
-                                          instance.isDone
-                                            ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
-                                            : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
-                                        }
-                                    `}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-
-                  {/* View Details Button as a pill */}
-                  <button
-                    onClick={() => handleComplianceClick(assignment)}
-                    className="h-9 px-4 rounded-full text-sm font-medium bg-[#00486D]/5 text-[#00486D] border border-[#00486D]/10 hover:bg-[#00486D]/10 transition-colors"
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0 group-hover:scale-105 transition-transform"
+                    style={{
+                      background:
+                        orgGroup.id === "unassigned"
+                          ? "linear-gradient(180deg, #6B7280 0%, #9CA3AF 100%)"
+                          : "linear-gradient(180deg, #022B51 0%, #015079 100%)",
+                    }}
                   >
-                    View Details
-                  </button>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#00486D] transition-colors">
+                      {orgGroup.legalName || "General (No Organisation)"}
+                    </h3>
+                    {orgGroup.tradeName &&
+                      orgGroup.tradeName !== orgGroup.legalName && (
+                        <p className="text-xs text-gray-500 mt-0.5 truncate">
+                          Trade: {orgGroup.tradeName}
+                        </p>
+                      )}
+                    {orgGroup.gstin && (
+                      <p className="text-xs text-gray-400 mt-0.5 truncate">
+                        GSTIN: {orgGroup.gstin}
+                      </p>
+                    )}
+
+                    {/* Stats */}
+                    <div className="mt-3 flex items-center gap-3">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                        {orgGroup.assignments.length} compliance(s)
+                      </span>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="mt-2.5">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-[10px] text-gray-400 uppercase tracking-wide font-medium">
+                          Progress
+                        </span>
+                        <span className="text-[10px] text-gray-500 font-semibold">
+                          {orgGroup.completedInstances}/
+                          {orgGroup.totalInstances}
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${progressPercent}%`,
+                            background:
+                              progressPercent === 100
+                                ? "#16a34a"
+                                : "linear-gradient(90deg, #022B51, #015079)",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <FiChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#00486D] flex-shrink-0 mt-1 transition-colors" />
                 </div>
-              </div>
+              </button>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      )}
     </div>
   );
 };
