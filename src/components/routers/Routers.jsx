@@ -151,6 +151,7 @@ import SuperAdminLayout from "../superadmin/layout/SuperAdminLayout";
 import SuperAdminClients from "../superadmin/pages/SuperAdminClients";
 import SuperAdminProfile from "../superadmin/pages/SuperAdminProfile";
 import SuperAdminFillForm from "../superadmin/pages/SuperAdminFillForm";
+import AIAgent from "../pages/AIAgent";
 import ProtectedRoute from "../common/ProtectedRoute";
 
 function Routers() {
@@ -274,6 +275,14 @@ function Routers() {
         element={
           <ProtectedRoute>
             <Resources />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ai-agent"
+        element={
+          <ProtectedRoute>
+            <AIAgent />
           </ProtectedRoute>
         }
       />
