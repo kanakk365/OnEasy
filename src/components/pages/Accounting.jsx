@@ -21,7 +21,7 @@ function Accounting() {
 
   const [formData, setFormData] = useState({
     description: "",
-    file: null
+    file: null,
   });
 
   // Determine if this is admin view
@@ -41,23 +41,31 @@ function Accounting() {
       let orgResponse;
       if (isAdmin) {
         // Admin view - fetch organization by userId and orgId
-        orgResponse = await apiClient.get(`/users-page/user-data/${userId}`).catch(() => ({
-          success: false,
-          data: { organisations: [] }
-        }));
+        orgResponse = await apiClient
+          .get(`/users-page/user-data/${userId}`)
+          .catch(() => ({
+            success: false,
+            data: { organisations: [] },
+          }));
       } else {
         // User view
         orgResponse = await getUsersPageData();
       }
 
-      if (orgResponse.success && orgResponse.data && orgResponse.data.organisations) {
-        const org = orgResponse.data.organisations.find(o => o.id === parseInt(currentOrgId));
+      if (
+        orgResponse.success &&
+        orgResponse.data &&
+        orgResponse.data.organisations
+      ) {
+        const org = orgResponse.data.organisations.find(
+          (o) => o.id === parseInt(currentOrgId),
+        );
         if (org) {
           setOrganization({
             id: org.id,
-            legalName: org.legal_name || '-',
-            tradeName: org.trade_name || '-',
-            gstin: org.gstin || '-'
+            legalName: org.legal_name || "-",
+            tradeName: org.trade_name || "-",
+            gstin: org.gstin || "-",
           });
         }
       }
@@ -70,12 +78,12 @@ function Accounting() {
     try {
       setLoading(true);
       let currentUserId;
-      
+
       if (isAdmin) {
         currentUserId = userId;
       } else {
         const storedUser = JSON.parse(
-          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}",
         );
         currentUserId = storedUser.id;
       }
@@ -85,7 +93,7 @@ function Accounting() {
         return;
       }
 
-      const endpoint = isAdmin 
+      const endpoint = isAdmin
         ? `/users-page/accounting-documents/${currentUserId}?organizationId=${currentOrgId}`
         : `/users-page/accounting-documents?organizationId=${currentOrgId}`;
 
@@ -93,8 +101,8 @@ function Accounting() {
         success: false,
         data: {
           tally_data: [],
-          workings: []
-        }
+          workings: [],
+        },
       }));
 
       if (response.success && response.data) {
@@ -112,7 +120,9 @@ function Accounting() {
     setStatus({ type, message });
     if (message) {
       setTimeout(() => {
-        setStatus((current) => (current.message === message ? { type: null, message: "" } : current));
+        setStatus((current) =>
+          current.message === message ? { type: null, message: "" } : current,
+        );
       }, 4000);
     }
   };
@@ -121,7 +131,7 @@ function Accounting() {
     setUploadType(type);
     setFormData({
       description: "",
-      file: null
+      file: null,
     });
     setShowUploadModal(true);
   };
@@ -131,7 +141,7 @@ function Accounting() {
     setUploadType(null);
     setFormData({
       description: "",
-      file: null
+      file: null,
     });
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -147,7 +157,7 @@ function Accounting() {
       return;
     }
 
-    setFormData(prev => ({ ...prev, file }));
+    setFormData((prev) => ({ ...prev, file }));
   };
 
   const handleUpload = async () => {
@@ -159,12 +169,12 @@ function Accounting() {
     setUploading(true);
     try {
       let currentUserId;
-      
+
       if (isAdmin) {
         currentUserId = userId;
       } else {
         const storedUser = JSON.parse(
-          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}",
         );
         currentUserId = storedUser.id;
       }
@@ -179,7 +189,7 @@ function Accounting() {
       const { s3Url } = await uploadFileDirect(
         formData.file,
         folder,
-        formData.file.name
+        formData.file.name,
       );
 
       // Save S3 URL to database
@@ -192,7 +202,7 @@ function Accounting() {
         fileUrl: s3Url,
         fileName: formData.file.name,
         organizationId: currentOrgId,
-        description: formData.description.trim() || null
+        description: formData.description.trim() || null,
       });
 
       if (response.success) {
@@ -204,7 +214,10 @@ function Accounting() {
       }
     } catch (error) {
       console.error("Upload error:", error);
-      showStatus("error", error.message || "Failed to upload document. Please try again.");
+      showStatus(
+        "error",
+        error.message || "Failed to upload document. Please try again.",
+      );
     } finally {
       setUploading(false);
     }
@@ -218,17 +231,20 @@ function Accounting() {
 
     try {
       // If we have a URL, use it directly (prefer this over docId to avoid 404s)
-      if (url && typeof url === 'string' && url.trim().length > 0) {
+      if (url && typeof url === "string" && url.trim().length > 0) {
         // Use viewFile utility which handles S3 URLs, base64, and regular URLs
         await viewFile(url);
         return;
       }
-      
+
       // Only try to get signed URL if we have a valid docId (numeric ID, not userId)
-      if (docId && typeof docId === 'number' && docId > 0) {
+      if (docId && typeof docId === "number" && docId > 0) {
         try {
           if (!currentOrgId) {
-            showStatus("error", "Organization ID is required to view document.");
+            showStatus(
+              "error",
+              "Organization ID is required to view document.",
+            );
             return;
           }
           const endpoint = isAdmin
@@ -236,17 +252,24 @@ function Accounting() {
             : `/users-page/accounting-documents/${docId}/view-url?organizationId=${currentOrgId}`;
           const response = await apiClient.get(endpoint);
           if (response.success && response.data && response.data.signedUrl) {
-            window.open(response.data.signedUrl, "_blank", "noopener,noreferrer");
+            window.open(
+              response.data.signedUrl,
+              "_blank",
+              "noopener,noreferrer",
+            );
             return;
           }
         } catch {
           // If API call fails, fall back to direct URL if available
-          console.warn('Failed to get signed URL, docId might be invalid:', docId);
+          console.warn(
+            "Failed to get signed URL, docId might be invalid:",
+            docId,
+          );
         }
       }
-      
+
       // Fallback: if we still have a URL, try to open it directly
-      if (url && typeof url === 'string' && url.trim().length > 0) {
+      if (url && typeof url === "string" && url.trim().length > 0) {
         window.open(url, "_blank", "noopener,noreferrer");
       } else {
         showStatus("error", "Document URL not available");
@@ -265,28 +288,31 @@ function Accounting() {
 
     try {
       // If we have a URL, use it directly (prefer this over docId to avoid 404s)
-      if (url && typeof url === 'string' && url.trim().length > 0) {
+      if (url && typeof url === "string" && url.trim().length > 0) {
         // Use downloadFile utility which handles S3 URLs and regular URLs
         await downloadFile(url, fileName);
         return;
       }
-      
+
       // Only try to use API endpoint if we have a valid docId (numeric ID, not userId)
-      if (docId && typeof docId === 'number' && docId > 0) {
+      if (docId && typeof docId === "number" && docId > 0) {
         try {
           if (!currentOrgId) {
-            showStatus("error", "Organization ID is required to download document.");
+            showStatus(
+              "error",
+              "Organization ID is required to download document.",
+            );
             return;
           }
-          const apiBaseUrl = apiClient.baseURL || '';
+          const apiBaseUrl = apiClient.baseURL || "";
           const token = apiClient.getToken();
           const endpoint = isAdmin
             ? `${apiBaseUrl}/users-page/accounting-documents/${docId}/download/${userId}?organizationId=${currentOrgId}`
             : `${apiBaseUrl}/users-page/accounting-documents/${docId}/download?organizationId=${currentOrgId}`;
-          
+
           const response = await fetch(endpoint, {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${token}` },
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
           });
 
           if (!response.ok) {
@@ -294,12 +320,16 @@ function Accounting() {
             throw new Error(errorData.message || "Failed to download file");
           }
 
-          const contentDisposition = response.headers.get('Content-Disposition');
+          const contentDisposition = response.headers.get(
+            "Content-Disposition",
+          );
           let downloadFileName = fileName || "document";
           if (contentDisposition) {
-            const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+            const fileNameMatch = contentDisposition.match(
+              /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/,
+            );
             if (fileNameMatch && fileNameMatch[1]) {
-              downloadFileName = fileNameMatch[1].replace(/['"]/g, '');
+              downloadFileName = fileNameMatch[1].replace(/['"]/g, "");
               try {
                 downloadFileName = decodeURIComponent(downloadFileName);
               } catch {
@@ -319,8 +349,11 @@ function Accounting() {
           window.URL.revokeObjectURL(blobUrl);
         } catch (apiError) {
           // If API call fails, fall back to direct URL if available
-          console.warn('Failed to download via API, docId might be invalid:', docId);
-          if (url && typeof url === 'string' && url.trim().length > 0) {
+          console.warn(
+            "Failed to download via API, docId might be invalid:",
+            docId,
+          );
+          if (url && typeof url === "string" && url.trim().length > 0) {
             await downloadFile(url, fileName);
           } else {
             throw apiError;
@@ -328,7 +361,7 @@ function Accounting() {
         }
       } else {
         // No valid docId, try URL if available
-        if (url && typeof url === 'string' && url.trim().length > 0) {
+        if (url && typeof url === "string" && url.trim().length > 0) {
           await downloadFile(url, fileName);
         } else {
           showStatus("error", "Document URL not available");
@@ -336,7 +369,10 @@ function Accounting() {
       }
     } catch (error) {
       console.error("Download error:", error);
-      showStatus("error", error.message || "Failed to download document. Please try again.");
+      showStatus(
+        "error",
+        error.message || "Failed to download document. Please try again.",
+      );
     }
   };
 
@@ -347,12 +383,12 @@ function Accounting() {
 
     try {
       let currentUserId;
-      
+
       if (isAdmin) {
         currentUserId = userId;
       } else {
         const storedUser = JSON.parse(
-          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}",
         );
         currentUserId = storedUser.id;
       }
@@ -376,18 +412,21 @@ function Accounting() {
       }
     } catch (error) {
       console.error("Delete error:", error);
-      showStatus("error", error.message || "Failed to delete document. Please try again.");
+      showStatus(
+        "error",
+        error.message || "Failed to delete document. Please try again.",
+      );
     }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return '-';
+    if (!dateString) return "-";
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString('en-IN', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
+      return date.toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
       });
     } catch {
       return dateString;
@@ -423,22 +462,38 @@ function Accounting() {
             onClick={() => navigate(getBackPath())}
             className="text-[#01334C] hover:text-[#00486D] mb-4 flex items-center gap-2"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
-            Back to {isAdmin ? 'Company Documents' : 'Company Master Data'}
+            Back to {isAdmin ? "Company Documents" : "Company Master Data"}
           </button>
 
           {organization && (
             <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
               <h1 className="text-2xl font-semibold text-gray-900">
-                {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
+                {organization.legalName !== "-"
+                  ? organization.legalName
+                  : organization.tradeName}
               </h1>
-              {organization.tradeName !== '-' && organization.legalName !== '-' && organization.tradeName !== organization.legalName && (
-                <p className="text-gray-600 mt-1">{organization.tradeName}</p>
-              )}
-              {organization.gstin !== '-' && (
-                <p className="text-sm text-gray-500 mt-1 font-mono">GSTIN: {organization.gstin}</p>
+              {organization.tradeName !== "-" &&
+                organization.legalName !== "-" &&
+                organization.tradeName !== organization.legalName && (
+                  <p className="text-gray-600 mt-1">{organization.tradeName}</p>
+                )}
+              {organization.gstin !== "-" && (
+                <p className="text-sm text-gray-500 mt-1 font-mono">
+                  GSTIN: {organization.gstin}
+                </p>
               )}
             </div>
           )}
@@ -447,13 +502,13 @@ function Accounting() {
             <h2 className="text-xl font-semibold text-gray-900">Accounting</h2>
             <div className="flex gap-2">
               <button
-                onClick={() => handleOpenUploadModal('tally_data')}
+                onClick={() => handleOpenUploadModal("tally_data")}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
               >
                 + Upload Tally Data
               </button>
               <button
-                onClick={() => handleOpenUploadModal('workings')}
+                onClick={() => handleOpenUploadModal("workings")}
                 className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors"
               >
                 + Upload Workings
@@ -464,40 +519,63 @@ function Accounting() {
 
         {/* Status Message */}
         {status.message && (
-          <div className={`mb-4 p-4 rounded-md ${
-            status.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-          }`}>
+          <div
+            className={`mb-4 p-4 rounded-md ${
+              status.type === "success"
+                ? "bg-green-50 text-green-800"
+                : "bg-red-50 text-red-800"
+            }`}
+          >
             {status.message}
           </div>
         )}
 
         {/* Tally Data Section */}
         <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Tally Data</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Tally Data
+          </h3>
           {tallyData.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {tallyData.map((doc) => (
-                <div key={doc.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div
+                  key={doc.id}
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900">{doc.document_name || 'Tally Data'}</p>
+                      <p className="font-semibold text-gray-900">
+                        {doc.document_name || "Tally Data"}
+                      </p>
                       {doc.description && (
-                        <p className="text-xs text-gray-500 mt-1">{doc.description}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {doc.description}
+                        </p>
                       )}
                       {doc.uploaded_at && (
-                        <p className="text-xs text-gray-400 mt-1">Uploaded: {formatDate(doc.uploaded_at)}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Uploaded: {formatDate(doc.uploaded_at)}
+                        </p>
                       )}
                     </div>
                   </div>
                   <div className="flex gap-2 mt-3">
                     <button
-                      onClick={() => handleViewDocument(doc.id, doc.document_url || doc.url)}
+                      onClick={() =>
+                        handleViewDocument(doc.id, doc.document_url || doc.url)
+                      }
                       className="flex-1 px-3 py-1.5 text-xs font-medium text-[#01334C] border border-[#01334C] rounded-md hover:bg-[#01334C] hover:text-white transition-colors"
                     >
                       View
                     </button>
                     <button
-                      onClick={() => handleDownloadDocument(doc.id, doc.document_name, doc.document_url || doc.url)}
+                      onClick={() =>
+                        handleDownloadDocument(
+                          doc.id,
+                          doc.document_name,
+                          doc.document_url || doc.url,
+                        )
+                      }
                       className="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 border border-green-600 rounded-md hover:bg-green-600 hover:text-white transition-colors"
                     >
                       Download
@@ -514,10 +592,22 @@ function Accounting() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <svg
+                className="w-16 h-16 text-gray-400 mx-auto mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
               </svg>
-              <p className="text-gray-500 text-sm">No tally data uploaded yet</p>
+              <p className="text-gray-500 text-sm">
+                No tally data uploaded yet
+              </p>
             </div>
           )}
         </div>
@@ -528,27 +618,44 @@ function Accounting() {
           {workings.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {workings.map((doc) => (
-                <div key={doc.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div
+                  key={doc.id}
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900">{doc.document_name || 'Workings'}</p>
+                      <p className="font-semibold text-gray-900">
+                        {doc.document_name || "Workings"}
+                      </p>
                       {doc.description && (
-                        <p className="text-xs text-gray-500 mt-1">{doc.description}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {doc.description}
+                        </p>
                       )}
                       {doc.uploaded_at && (
-                        <p className="text-xs text-gray-400 mt-1">Uploaded: {formatDate(doc.uploaded_at)}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Uploaded: {formatDate(doc.uploaded_at)}
+                        </p>
                       )}
                     </div>
                   </div>
                   <div className="flex gap-2 mt-3">
                     <button
-                      onClick={() => handleViewDocument(doc.id, doc.document_url || doc.url)}
+                      onClick={() =>
+                        handleViewDocument(doc.id, doc.document_url || doc.url)
+                      }
                       className="flex-1 px-3 py-1.5 text-xs font-medium text-[#01334C] border border-[#01334C] rounded-md hover:bg-[#01334C] hover:text-white transition-colors"
                     >
                       View
                     </button>
                     <button
-                      onClick={() => handleDownloadDocument(doc.id, doc.document_name, doc.document_url || doc.url)}
+                      onClick={() =>
+                        handleDownloadDocument(
+                          doc.id,
+                          doc.document_name,
+                          doc.document_url || doc.url,
+                        )
+                      }
                       className="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 border border-green-600 rounded-md hover:bg-green-600 hover:text-white transition-colors"
                     >
                       Download
@@ -565,8 +672,18 @@ function Accounting() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <svg
+                className="w-16 h-16 text-gray-400 mx-auto mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
               </svg>
               <p className="text-gray-500 text-sm">No workings uploaded yet</p>
             </div>
@@ -579,14 +696,25 @@ function Accounting() {
             <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Upload {uploadType === 'tally_data' ? 'Tally Data' : 'Workings'}
+                  Upload{" "}
+                  {uploadType === "tally_data" ? "Tally Data" : "Workings"}
                 </h3>
                 <button
                   onClick={handleCloseUploadModal}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -599,7 +727,12 @@ function Accounting() {
                   <input
                     type="text"
                     value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
                     placeholder="Enter description..."
                   />
@@ -617,7 +750,9 @@ function Accounting() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
                   />
                   {formData.file && (
-                    <p className="text-xs text-gray-500 mt-1">{formData.file.name}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formData.file.name}
+                    </p>
                   )}
                 </div>
               </div>
@@ -647,4 +782,3 @@ function Accounting() {
 }
 
 export default Accounting;
-
