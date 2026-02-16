@@ -15,6 +15,10 @@ export const useOrganizationData = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [adminNotesList, setAdminNotesList] = useState([]);
+  const [userNotesList, setUserNotesList] = useState([]);
+  const [adminTasksList, setAdminTasksList] = useState([]);
+  const [userTasksList, setUserTasksList] = useState([]);
 
   const loadOrganizationData = useCallback(async () => {
     try {
@@ -116,6 +120,73 @@ export const useOrganizationData = () => {
               };
             })
           );
+        }
+
+        // Load notes and tasks
+        const user = response.data.user || {};
+        
+        // Parse admin notes
+        const adminNotesRaw = user.admin_notes || "";
+        try {
+          const notesList = JSON.parse(adminNotesRaw);
+          if (Array.isArray(notesList)) {
+            setAdminNotesList(notesList);
+          } else if (notesList.note !== undefined) {
+            setAdminNotesList([notesList]);
+          } else if (adminNotesRaw) {
+            setAdminNotesList([{ date: "", description: adminNotesRaw, attachments: [], adminActionItems: [], clientActionItems: [] }]);
+          }
+        } catch {
+          if (adminNotesRaw) {
+            setAdminNotesList([{ date: "", description: adminNotesRaw, attachments: [], adminActionItems: [], clientActionItems: [] }]);
+          }
+        }
+
+        // Parse user notes
+        const userNotesRaw = user.user_notes || "";
+        try {
+          const notesList = JSON.parse(userNotesRaw);
+          if (Array.isArray(notesList)) {
+            setUserNotesList(notesList);
+          } else if (notesList.note !== undefined) {
+            setUserNotesList([notesList]);
+          } else if (userNotesRaw) {
+            setUserNotesList([{ date: "", description: userNotesRaw, attachments: [] }]);
+          }
+        } catch {
+          if (userNotesRaw) {
+            setUserNotesList([{ date: "", description: userNotesRaw, attachments: [] }]);
+          }
+        }
+
+        // Parse admin tasks
+        const adminTasksRaw = user.admin_tasks || "";
+        try {
+          const tasksList = JSON.parse(adminTasksRaw);
+          if (Array.isArray(tasksList)) {
+            setAdminTasksList(tasksList);
+          } else if (adminTasksRaw) {
+            setAdminTasksList([{ date: "", title: adminTasksRaw, description: "", type: "" }]);
+          }
+        } catch {
+          if (adminTasksRaw) {
+            setAdminTasksList([{ date: "", title: adminTasksRaw, description: "", type: "" }]);
+          }
+        }
+
+        // Parse user tasks
+        const userTasksRaw = user.user_tasks || "";
+        try {
+          const tasksList = JSON.parse(userTasksRaw);
+          if (Array.isArray(tasksList)) {
+            setUserTasksList(tasksList);
+          } else if (userTasksRaw) {
+            setUserTasksList([{ date: "", title: userTasksRaw, description: "", type: "" }]);
+          }
+        } catch {
+          if (userTasksRaw) {
+            setUserTasksList([{ date: "", title: userTasksRaw, description: "", type: "" }]);
+          }
         }
       }
     } catch (error) {
@@ -525,6 +596,45 @@ export const useOrganizationData = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  const handleSaveUserNoteInline = async (editedNote, noteIndex) => {
+    try {
+      if (!editedNote.organizationId) {
+        alert("Please select an organization for this note.");
+        return;
+      }
+
+      const updatedNotesList = userNotesList.map((note, idx) =>
+        idx === noteIndex
+          ? {
+              ...note,
+              organizationId: editedNote.organizationId || note.organizationId || null,
+              date: editedNote.date,
+              description: editedNote.description,
+              attachments: editedNote.attachments,
+              updatedAt: new Date().toISOString(),
+            }
+          : note,
+      );
+
+      const payload = {
+        userNotes: JSON.stringify(updatedNotesList),
+      };
+
+      const response = await updateUsersPageData(payload);
+
+      if (response.success) {
+        setUserNotesList(updatedNotesList);
+        alert("Note updated successfully!");
+        await loadOrganizationData();
+      } else {
+        alert("Failed to save note");
+      }
+    } catch (error) {
+      console.error("Error saving user note:", error);
+      alert("Failed to save note");
+    }
+  };
+
   return {
     // State
     loading,
@@ -568,6 +678,12 @@ export const useOrganizationData = () => {
     addOrganization,
     paginate,
     uploadFileDirect,
+    adminNotesList,
+    userNotesList,
+    adminTasksList,
+    userTasksList,
+    handleSaveUserNoteInline,
+    updateUsersPageData,
   };
 };
 

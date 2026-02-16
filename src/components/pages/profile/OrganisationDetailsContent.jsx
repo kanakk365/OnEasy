@@ -6,6 +6,8 @@ import { AiOutlinePlus, AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/
 import { uploadFileDirect } from "../../../utils/s3Upload";
 import { AUTH_CONFIG } from "../../../config/auth";
 import { lookupPincode } from "../../../utils/pincodeLookup";
+import OrganizationNotesSection from "../organization/components/OrganizationNotesSection";
+import OrganizationTasksSection from "../organization/components/OrganizationTasksSection";
 
   // Reusable Input Component to match design
   const StyledInput = ({
@@ -205,8 +207,12 @@ const OrganisationDetailsContent = ({
   togglePasswordVisibility,
   handleViewFile,
   handleSaveOrganisation,
+  adminNotesList = [],
+  userNotesList = [],
+  adminTasksList = [],
+  userTasksList = [],
+  updateUserNote,
 }) => {
-
   // Filter out empty organizations for table display
   const savedOrganizations = organizations.filter(
     (org) =>
@@ -316,6 +322,7 @@ const OrganisationDetailsContent = ({
               isAddingNewOrg={isAddingNewOrg}
               setSelectedOrgId={setSelectedOrgId}
               setIsAddingNewOrg={setIsAddingNewOrg}
+              updateUserNote={updateUserNote}
               updateOrganization={updateOrganization}
               addDirectorPartner={addDirectorPartner}
               updateDirectorPartner={updateDirectorPartner}
@@ -330,6 +337,10 @@ const OrganisationDetailsContent = ({
               saving={saving}
               userId={userId}
               organizations={organizations}
+              adminNotesList={adminNotesList}
+              userNotesList={userNotesList}
+              adminTasksList={adminTasksList}
+              userTasksList={userTasksList}
             />;
           })}
       </div>
@@ -357,9 +368,18 @@ const OrganizationFormWithTabs = ({
   saving,
   userId,
   organizations,
+  adminNotesList = [],
+  userNotesList = [],
+  adminTasksList = [],
+  userTasksList = [],
+  updateUserNote,
 }) => {
   const [activeTab, setActiveTab] = useState("organization-details");
   const navigate = useNavigate();
+
+  const handleTabClick = (tabKey) => {
+    setActiveTab(tabKey);
+  };
 
   const tabs = [
     { key: "organization-details", label: "Organization Details" },
@@ -367,6 +387,8 @@ const OrganizationFormWithTabs = ({
     { key: "digital-signatures", label: "Digital Signature Details" },
     { key: "attachments", label: "Attachments" },
     { key: "credentials", label: "Credentials" },
+    { key: "notes", label: "Notes" },
+    { key: "tasks", label: "Tasks" },
   ];
 
   return (
@@ -406,7 +428,7 @@ const OrganizationFormWithTabs = ({
           {tabs.map((tab) => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => handleTabClick(tab.key)}
               className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 ${
                 activeTab === tab.key
                   ? "bg-white text-[#00486D] border-b-2 border-[#00486D] -mb-px"
@@ -1256,6 +1278,45 @@ const OrganizationFormWithTabs = ({
                   )}
           </div>
         )}
+
+        {activeTab === "notes" && (
+          <OrganizationNotesSection
+            adminNotesList={adminNotesList}
+            userNotesList={userNotesList}
+            organizationId={org?.id}
+            handleViewFile={handleViewFile}
+            organisations={organizations}
+            userId={userId}
+            onAddNote={() => {
+              // Redirect to Settings Notes tab to add note
+              navigate(`/settings?tab=notes&orgId=${org?.id}`);
+            }}
+            onSaveUserNote={updateUserNote ? async (editedNote, noteIndex) => {
+              // Find the original note
+              const originalNote = userNotesList[noteIndex];
+              if (originalNote) {
+                await updateUserNote(editedNote, originalNote);
+              }
+            } : undefined}
+            onDeleteUserNote={(index, note) => {
+              // Redirect to Settings Notes tab for deletion
+              navigate(`/settings?tab=notes&orgId=${org?.id}&deleteNoteId=${note.id || index}`);
+            }}
+          />
+        )}
+
+        {activeTab === "tasks" && (
+          <OrganizationTasksSection
+            adminTasksList={adminTasksList}
+            userTasksList={userTasksList}
+            organizationId={org?.id}
+            onAddTask={() => {
+              // Redirect to Settings Tasks tab to add task
+              navigate(`/settings?tab=tasks&orgId=${org?.id}`);
+            }}
+          />
+        )}
+
 
         {/* Save Button */}
         <div className="flex justify-end pt-6 mt-6 border-t border-gray-200">

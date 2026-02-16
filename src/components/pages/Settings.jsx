@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 import {
   getUsersPageData,
@@ -16,7 +17,9 @@ import {
 } from "./profile";
 
 function Settings() {
-  const [activeTab, setActiveTab] = useState("profile"); // profile, organizations, notes, tasks
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "profile"); // profile, organizations, notes, tasks
+  const orgIdFromUrl = searchParams.get("orgId");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -69,12 +72,14 @@ function Settings() {
     title: "",
     description: "",
     type: "",
+    organizationId: null,
   });
   const [currentAdminTask, setCurrentAdminTask] = useState({
     date: "",
     title: "",
     description: "",
     type: "",
+    organizationId: null,
   });
   const [isUserAdmin, setIsUserAdmin] = useState(false);
   const [, setNotes] = useState("");
@@ -732,6 +737,13 @@ function Settings() {
   // Handle tab change
   const handleTabChange = (tabKey) => {
     setActiveTab(tabKey);
+    // Update URL params
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("tab", tabKey);
+    if (orgIdFromUrl) {
+      newParams.set("orgId", orgIdFromUrl);
+    }
+    setSearchParams(newParams);
   };
 
   const handleViewFile = async (fileData) => {
@@ -1060,6 +1072,7 @@ function Settings() {
           title: currentUserTask.title,
           description: currentUserTask.description,
           type: currentUserTask.type,
+          organizationId: currentUserTask.organizationId || null,
           createdAt: new Date().toISOString(),
         },
       ];
@@ -1072,7 +1085,7 @@ function Settings() {
 
       if (response.success) {
         setUserTasksList(updatedTasksList);
-        setCurrentUserTask({ date: "", title: "", description: "", type: "" });
+        setCurrentUserTask({ date: "", title: "", description: "", type: "", organizationId: null });
         setIsAddingUserTask(false);
         alert("Task saved successfully!");
         await loadUserData();
@@ -1101,6 +1114,7 @@ function Settings() {
           title: currentAdminTask.title,
           description: currentAdminTask.description,
           type: currentAdminTask.type,
+          organizationId: currentAdminTask.organizationId || null,
           createdAt: new Date().toISOString(),
         },
       ];
@@ -1113,7 +1127,7 @@ function Settings() {
 
       if (response.success) {
         setAdminTasksList(updatedTasksList);
-        setCurrentAdminTask({ date: "", title: "", description: "", type: "" });
+        setCurrentAdminTask({ date: "", title: "", description: "", type: "", organizationId: null });
         setIsAddingAdminTask(false);
         alert("Task saved successfully!");
         await loadUserData();
@@ -1186,6 +1200,43 @@ function Settings() {
       setSaving(false);
     }
   };
+
+  // Filter notes and tasks by organization if orgId is in URL
+  const filteredAdminNotes = useMemo(() => {
+    if (!orgIdFromUrl) return adminNotesList;
+    return adminNotesList.filter(
+      (note) => String(note.organizationId) === String(orgIdFromUrl)
+    );
+  }, [adminNotesList, orgIdFromUrl]);
+
+  const filteredUserNotes = useMemo(() => {
+    if (!orgIdFromUrl) return userNotesList;
+    return userNotesList.filter(
+      (note) => String(note.organizationId) === String(orgIdFromUrl)
+    );
+  }, [userNotesList, orgIdFromUrl]);
+
+  const filteredAdminTasks = useMemo(() => {
+    if (!orgIdFromUrl) return adminTasksList;
+    return adminTasksList.filter(
+      (task) => String(task.organizationId) === String(orgIdFromUrl)
+    );
+  }, [adminTasksList, orgIdFromUrl]);
+
+  const filteredUserTasks = useMemo(() => {
+    if (!orgIdFromUrl) return userTasksList;
+    return userTasksList.filter(
+      (task) => String(task.organizationId) === String(orgIdFromUrl)
+    );
+  }, [userTasksList, orgIdFromUrl]);
+
+  // Update activeTab when URL param changes
+  useEffect(() => {
+    const tabFromUrl = searchParams.get("tab");
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
 
   // Tab definitions
   const tabs = [
@@ -1278,13 +1329,18 @@ function Settings() {
               togglePasswordVisibility={togglePasswordVisibility}
               handleViewFile={handleViewFile}
               handleSaveOrganisation={handleSaveOrganisation}
+              adminNotesList={adminNotesList}
+              userNotesList={userNotesList}
+              adminTasksList={adminTasksList}
+              userTasksList={userTasksList}
+              updateUserNote={updateUserNote}
             />
           )}
           
           {activeTab === "notes" && (
             <NotesContent
-              adminNotesList={adminNotesList}
-              userNotesList={userNotesList}
+              adminNotesList={filteredAdminNotes}
+              userNotesList={filteredUserNotes}
               expandedAdminNoteId={expandedAdminNoteId}
               setExpandedAdminNoteId={setExpandedAdminNoteId}
               expandedUserNoteId={expandedUserNoteId}
@@ -1301,13 +1357,14 @@ function Settings() {
               updateUserNote={updateUserNote}
               handleViewFile={handleViewFile}
               organizations={organizations}
+              userId={userId}
             />
           )}
           
           {activeTab === "tasks" && (
             <TasksContent
-              adminTasksList={adminTasksList}
-              userTasksList={userTasksList}
+              adminTasksList={filteredAdminTasks}
+              userTasksList={filteredUserTasks}
               expandedAdminTaskId={expandedAdminTaskId}
               setExpandedAdminTaskId={setExpandedAdminTaskId}
               expandedUserTaskId={expandedUserTaskId}
@@ -1326,6 +1383,7 @@ function Settings() {
               addUserTask={addUserTask}
               updateUserTask={updateUserTask}
               handleSaveTasks={handleSaveTasks}
+              organizations={organizations}
             />
           )}
         </div>

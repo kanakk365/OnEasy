@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { AiOutlinePlus, AiOutlineDownload } from "react-icons/ai";
 import { BsCalendar3 } from "react-icons/bs";
 import { AiOutlineEye } from "react-icons/ai";
+import { uploadFileDirect } from "../../../utils/s3Upload";
 
 // Reusable Input Component - moved outside to prevent recreation
   const StyledInput = ({
@@ -67,6 +68,7 @@ const NotesContent = ({
   handleViewFile,
   updateUserNote,
   organizations = [],
+  userId,
 }) => {
   const fileInputRef = useRef(null);
   const [selectedAdminNote, setSelectedAdminNote] = useState(null);
@@ -532,6 +534,31 @@ const NotesContent = ({
                 </button>
               </div>
               <div className="px-6 py-4 space-y-3 text-sm">
+                {/* Organization */}
+                <div>
+                  <div className="text-xs font-medium text-gray-500 mb-1">
+                    Organization
+                  </div>
+                  {isEditingUserNote ? (
+                    <select
+                      value={editedUserNote?.organizationId || selectedUserNote.organizationId || ""}
+                      onChange={(e) => setEditedUserNote({ ...editedUserNote, organizationId: e.target.value || null })}
+                      className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#00486D]"
+                    >
+                      <option value="">Select organization</option>
+                      {organizations.map((org, idx) => (
+                        <option key={org.id || idx} value={org.id}>
+                          {org.legalName || org.tradeName || `Organization ${idx + 1}`}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800">
+                      {getOrgName(selectedUserNote.organizationId) || "-"}
+                    </div>
+                  )}
+                </div>
+
                 {/* Date */}
                 <div>
                   <div className="text-xs font-medium text-gray-500 mb-1">
@@ -571,20 +598,21 @@ const NotesContent = ({
                 </div>
 
                 {/* Files/Attachments */}
-                {selectedUserNote.attachments && selectedUserNote.attachments.length > 0 && (
-                  <div>
-                    <div className="text-xs font-medium text-gray-500 mb-1">
-                      Attachments
-                    </div>
+                <div>
+                  <div className="text-xs font-medium text-gray-500 mb-1">
+                    Attachments
+                  </div>
+                  {isEditingUserNote ? (
                     <div className="space-y-2">
-                      {selectedUserNote.attachments.map((file, idx) => (
+                      {/* Existing attachments */}
+                      {(editedUserNote?.attachments || selectedUserNote.attachments || []).map((file, idx) => (
                         <div
                           key={idx}
                           className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-md border border-gray-100"
                         >
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
                             <svg
-                              className="w-4 h-4 text-gray-500"
+                              className="w-4 h-4 text-gray-500 flex-shrink-0"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -596,31 +624,176 @@ const NotesContent = ({
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                               />
                             </svg>
-                            <span className="text-xs text-gray-800">
-                              {file.name || `Attachment ${idx + 1}`}
+                            <span className="text-xs text-gray-800 truncate">
+                              {file.name || file.file_name || `Attachment ${idx + 1}`}
                             </span>
                           </div>
-                          {(file.url || file.data) && (
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {(file.url || file.data) && (
+                              <button
+                                onClick={() => {
+                                  const fileUrl = file.url || file.data;
+                                  if (fileUrl) {
+                                    handleViewFile(fileUrl);
+                                  }
+                                }}
+                                className="p-1 text-[#00486D] hover:text-[#01334C] transition-colors"
+                                title="View file"
+                              >
+                                <AiOutlineEye className="w-4 h-4" />
+                              </button>
+                            )}
                             <button
                               onClick={() => {
-                                if (file.url) {
-                                  handleViewFile(file.url);
-                                } else if (file.data) {
-                                  // Open base64 data in new tab
-                                  const newWindow = window.open();
-                                  newWindow.document.write(`<iframe src="${file.data}" width="100%" height="100%"></iframe>`);
-                                }
+                                const updatedAttachments = (editedUserNote?.attachments || selectedUserNote.attachments || []).filter((_, i) => i !== idx);
+                                setEditedUserNote({ ...editedUserNote, attachments: updatedAttachments });
                               }}
-                              className="p-1 text-[#00486D] hover:text-[#01334C] transition-colors"
+                              className="p-1 text-red-600 hover:text-red-700 transition-colors"
+                              title="Remove file"
                             >
-                              <AiOutlineEye className="w-4 h-4" />
+                              ✕
                             </button>
-                          )}
+                          </div>
                         </div>
                       ))}
+                      {/* File upload input */}
+                      <div className="mt-2">
+                        <label className="block text-xs font-medium text-gray-500 mb-1">
+                          Add Attachment
+                        </label>
+                        <div className="flex bg-white border border-gray-200 rounded-lg p-1 items-center">
+                          <div
+                            className="flex-1 px-3 py-2 text-xs text-gray-400 cursor-pointer truncate"
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                            Click to upload files
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="bg-[#00486D] hover:bg-[#01334C] text-white w-8 h-8 rounded-lg flex items-center justify-center transition-colors flex-shrink-0"
+                          >
+                            <AiOutlineDownload className="w-4 h-4" />
+                          </button>
+                          <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={async (e) => {
+                              const files = Array.from(e.target.files);
+                              if (files.length === 0) return;
+
+                              try {
+                                // Get user ID
+                                let currentUserId = userId;
+                                if (!currentUserId) {
+                                  const userData = JSON.parse(
+                                    localStorage.getItem("user") || "{}"
+                                  );
+                                  currentUserId = userData.id || userData.user_id;
+                                }
+
+                                if (!currentUserId) {
+                                  alert("User ID not found. Please refresh the page.");
+                                  return;
+                                }
+
+                                // Upload each file to S3
+                                const uploadedFiles = [];
+                                for (const file of files) {
+                                  try {
+                                    if (file.size > 5 * 1024 * 1024) {
+                                      alert(`File ${file.name} is too large. Maximum size is 5MB.`);
+                                      continue;
+                                    }
+
+                                    const folder = `user-notes/${currentUserId}`;
+                                    const { s3Url } = await uploadFileDirect(file, folder, file.name);
+
+                                    uploadedFiles.push({
+                                      name: file.name,
+                                      url: s3Url,
+                                      type: file.type,
+                                      size: file.size,
+                                    });
+                                  } catch (error) {
+                                    console.error(`Error uploading ${file.name}:`, error);
+                                    alert(`Failed to upload ${file.name}. Please try again.`);
+                                  }
+                                }
+
+                                // Update editedUserNote with new attachments
+                                if (uploadedFiles.length > 0) {
+                                  setEditedUserNote({
+                                    ...editedUserNote,
+                                    attachments: [
+                                      ...(editedUserNote?.attachments || selectedUserNote.attachments || []),
+                                      ...uploadedFiles,
+                                    ],
+                                  });
+                                }
+
+                                // Reset file input
+                                e.target.value = "";
+                              } catch (error) {
+                                console.error("Error in file upload:", error);
+                                alert("Failed to upload files. Please try again.");
+                              }
+                            }}
+                            className="hidden"
+                            multiple
+                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="space-y-2">
+                      {selectedUserNote.attachments && selectedUserNote.attachments.length > 0 ? (
+                        selectedUserNote.attachments.map((file, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-md border border-gray-100"
+                          >
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <svg
+                                className="w-4 h-4 text-gray-500 flex-shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                              </svg>
+                              <span className="text-xs text-gray-800 truncate">
+                                {file.name || file.file_name || `Attachment ${idx + 1}`}
+                              </span>
+                            </div>
+                            {(file.url || file.data) && (
+                              <button
+                                onClick={() => {
+                                  const fileUrl = file.url || file.data;
+                                  if (fileUrl) {
+                                    handleViewFile(fileUrl);
+                                  }
+                                }}
+                                className="p-1 text-[#00486D] hover:text-[#01334C] transition-colors"
+                                title="View file"
+                              >
+                                <AiOutlineEye className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-xs text-gray-500 px-3 py-2">No files</div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Action Buttons */}
@@ -682,7 +855,12 @@ const NotesContent = ({
                       type="button"
                       onClick={() => {
                         setIsEditingUserNote(true);
-                        setEditedUserNote({ ...selectedUserNote });
+                        setEditedUserNote({
+                          organizationId: selectedUserNote.organizationId || null,
+                          date: selectedUserNote.date || "",
+                          description: selectedUserNote.description || "",
+                          attachments: selectedUserNote.attachments || [],
+                        });
                       }}
                       className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg"
                       style={{

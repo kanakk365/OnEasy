@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import apiClient from "../../../utils/api";
 import { updateUserDataByUserId } from "../../../utils/usersPageApi";
@@ -928,8 +928,9 @@ function AdminClientOverview() {
 
   const handleEditNote = (note, index) => {
     setCurrentNote({
-      date: note.date,
-      description: note.description,
+      organizationId: note.organizationId || "",
+      date: note.date || "",
+      description: note.description || "",
       attachments: note.attachments || [],
       adminActionItems:
         note.adminActionItems && note.adminActionItems.length
@@ -976,6 +977,7 @@ function AdminClientOverview() {
       title: task.title || "",
       description: task.description || "",
       type: task.type || "",
+      organizationId: task.organizationId || null,
     });
     setEditingAdminTaskIndex(index);
     setIsAddingAdminTask(true);
@@ -1029,6 +1031,7 @@ function AdminClientOverview() {
                 title: currentAdminTask.title,
                 description: currentAdminTask.description,
                 type: currentAdminTask.type,
+                organizationId: currentAdminTask.organizationId || null,
               }
             : task,
         );
@@ -1042,6 +1045,7 @@ function AdminClientOverview() {
             title: currentAdminTask.title,
             description: currentAdminTask.description,
             type: currentAdminTask.type,
+            organizationId: currentAdminTask.organizationId || null,
             createdAt: new Date().toISOString(),
           },
         ];
@@ -1056,7 +1060,7 @@ function AdminClientOverview() {
 
       if (response.success) {
         setAdminTasksList(updatedTasksList);
-        setCurrentAdminTask({ date: "", title: "", description: "", type: "" });
+        setCurrentAdminTask({ date: "", title: "", description: "", type: "", organizationId: null });
         setEditingAdminTaskIndex(null);
         setIsAddingAdminTask(false);
         alert("Task saved successfully!");
@@ -1211,6 +1215,58 @@ function AdminClientOverview() {
             ? "Note updated successfully!"
             : "Note saved successfully!",
         );
+      }
+    } catch (error) {
+      console.error("Error saving admin note:", error);
+      alert("Failed to save note");
+    } finally {
+      setSavingNotes(false);
+    }
+  };
+
+  const handleSaveAdminNoteInline = async (editedNote, noteIndex) => {
+    try {
+      setSavingNotes(true);
+
+      if (!editedNote.organizationId) {
+        alert("Please select an organization for this note.");
+        setSavingNotes(false);
+        return;
+      }
+
+      const cleanedAdmin = (editedNote.adminActionItems || []).filter(
+        (t) => t && t.trim() !== "",
+      );
+      const cleanedClient = (editedNote.clientActionItems || []).filter(
+        (t) => t && t.trim() !== "",
+      );
+
+      const updatedNotesList = adminNotesList.map((note, idx) =>
+        idx === noteIndex
+          ? {
+              ...note,
+              organizationId: editedNote.organizationId || note.organizationId || null,
+              date: editedNote.date,
+              description: editedNote.description,
+              attachments: editedNote.attachments,
+              adminActionItems: cleanedAdmin,
+              clientActionItems: cleanedClient,
+              updatedAt: new Date().toISOString(),
+            }
+          : note,
+      );
+
+      const response = await apiClient.post("/admin/update-client-notes", {
+        userId,
+        adminNotes: JSON.stringify(updatedNotesList),
+        userNotes: JSON.stringify(userNotesList),
+      });
+
+      if (response.success) {
+        setAdminNotesList(updatedNotesList);
+        alert("Note updated successfully!");
+      } else {
+        alert("Failed to save note");
       }
     } catch (error) {
       console.error("Error saving admin note:", error);
@@ -2030,6 +2086,35 @@ function AdminClientOverview() {
     }
   };
 
+  // Filter notes and tasks by organization if orgId is in URL
+  const filteredAdminNotes = useMemo(() => {
+    if (!orgIdFromQuery) return adminNotesList;
+    return adminNotesList.filter(
+      (note) => String(note.organizationId) === String(orgIdFromQuery)
+    );
+  }, [adminNotesList, orgIdFromQuery]);
+
+  const filteredUserNotes = useMemo(() => {
+    if (!orgIdFromQuery) return userNotesList;
+    return userNotesList.filter(
+      (note) => String(note.organizationId) === String(orgIdFromQuery)
+    );
+  }, [userNotesList, orgIdFromQuery]);
+
+  const filteredAdminTasks = useMemo(() => {
+    if (!orgIdFromQuery) return adminTasksList;
+    return adminTasksList.filter(
+      (task) => String(task.organizationId) === String(orgIdFromQuery)
+    );
+  }, [adminTasksList, orgIdFromQuery]);
+
+  const filteredUserTasks = useMemo(() => {
+    if (!orgIdFromQuery) return userTasksList;
+    return userTasksList.filter(
+      (task) => String(task.organizationId) === String(orgIdFromQuery)
+    );
+  }, [userTasksList, orgIdFromQuery]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
@@ -2097,7 +2182,16 @@ function AdminClientOverview() {
           ].map((tab) => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => {
+                setActiveTab(tab.key);
+                // Update URL params
+                const newParams = new URLSearchParams(searchParams);
+                newParams.set("tab", tab.key);
+                if (orgIdFromQuery) {
+                  newParams.set("orgId", orgIdFromQuery);
+                }
+                navigate(`/admin/client-overview/${userId}?${newParams.toString()}`, { replace: true });
+              }}
               className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
                 activeTab === tab.key
                   ? "text-white"
@@ -2188,6 +2282,12 @@ function AdminClientOverview() {
           handleViewFile={handleViewFile}
           expandedSection={expandedSection}
           setExpandedSection={setExpandedSection}
+          adminNotesList={adminNotesList}
+          userNotesList={userNotesList}
+          adminTasksList={adminTasksList}
+          userTasksList={userTasksList}
+          handleDeleteNote={handleDeleteNote}
+          handleSaveAdminNoteInline={handleSaveAdminNoteInline}
         />
       )}
 
@@ -2232,8 +2332,8 @@ function AdminClientOverview() {
       {/* Tasks Tab */}
       {activeTab === "tasks" && (
         <ClientTasksTab
-          adminTasksList={adminTasksList}
-          userTasksList={userTasksList}
+          adminTasksList={filteredAdminTasks}
+          userTasksList={filteredUserTasks}
           isAddingAdminTask={isAddingAdminTask}
           setIsAddingAdminTask={setIsAddingAdminTask}
           editingAdminTaskIndex={editingAdminTaskIndex}
@@ -2249,14 +2349,15 @@ function AdminClientOverview() {
           setSelectedAdminTask={setSelectedAdminTask}
           selectedUserTask={selectedUserTask}
           setSelectedUserTask={setSelectedUserTask}
+          organisations={organisations}
         />
       )}
 
       {/* Notes Tab */}
       {activeTab === "notes" && (
         <ClientNotesTab
-          adminNotesList={adminNotesList}
-          userNotesList={userNotesList}
+          adminNotesList={filteredAdminNotes}
+          userNotesList={filteredUserNotes}
           isAddingNote={isAddingNote}
           setIsAddingNote={setIsAddingNote}
           editingNoteIndex={editingNoteIndex}

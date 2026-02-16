@@ -1,9 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BasicDetailsSection from "./BasicDetailsSection";
 import DirectorsPartnersSection from "./DirectorsPartnersSection";
 import DigitalSignaturesSection from "./DigitalSignaturesSection";
 import AttachmentsSection from "./AttachmentsSection";
 import CredentialsSection from "./CredentialsSection";
+import OrganizationNotesSection from "./OrganizationNotesSection";
+import OrganizationTasksSection from "./OrganizationTasksSection";
 
 const OrganizationDetails = ({
   selectedOrg,
@@ -31,8 +34,21 @@ const OrganizationDetails = ({
   updateWebsite,
   togglePasswordVisibility,
   removeWebsite,
+  // Notes and Tasks
+  adminNotesList = [],
+  userNotesList = [],
+  adminTasksList = [],
+  userTasksList = [],
+  handleSaveUserNoteInline,
+  updateUsersPageData,
+  organisations = [],
 }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("organization-details");
+
+  const handleTabClick = (tabKey) => {
+    setActiveTab(tabKey);
+  };
 
   const tabs = [
     { key: "organization-details", label: "Organization Details" },
@@ -40,6 +56,8 @@ const OrganizationDetails = ({
     { key: "digital-signatures", label: "Digital Signature Details" },
     { key: "attachments", label: "Attachments" },
     { key: "credentials", label: "Credentials" },
+    { key: "notes", label: "Notes" },
+    { key: "tasks", label: "Tasks" },
   ];
 
   return (
@@ -87,7 +105,7 @@ const OrganizationDetails = ({
             {tabs.map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => handleTabClick(tab.key)}
                 className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 ${
                   activeTab === tab.key
                     ? "bg-white text-[#00486D] border-b-2 border-[#00486D] -mb-px"
@@ -176,6 +194,42 @@ const OrganizationDetails = ({
               removeWebsite={removeWebsite}
             />
           )}
+
+          {activeTab === "notes" && (
+            <OrganizationNotesSection
+              adminNotesList={adminNotesList}
+              userNotesList={userNotesList}
+              organizationId={selectedOrg?.id}
+              handleViewFile={handleViewFile}
+              organisations={organisations}
+              userId={getCurrentUserId()}
+              updateUsersPageData={updateUsersPageData}
+              onAddNote={() => {
+                // Redirect to Settings Notes tab to add note
+                navigate(`/settings?tab=notes&orgId=${selectedOrg?.id}`);
+              }}
+              onSaveUserNote={handleSaveUserNoteInline ? async (editedNote, noteIndex) => {
+                await handleSaveUserNoteInline(editedNote, noteIndex);
+              } : undefined}
+              onDeleteUserNote={(index, note) => {
+                // Redirect to Settings Notes tab for deletion (or handle inline if needed)
+                navigate(`/settings?tab=notes&orgId=${selectedOrg?.id}&deleteNoteId=${note.id || index}`);
+              }}
+            />
+          )}
+
+          {activeTab === "tasks" && (
+            <OrganizationTasksSection
+              adminTasksList={adminTasksList}
+              userTasksList={userTasksList}
+              organizationId={selectedOrg?.id}
+              onAddTask={() => {
+                // Redirect to Settings Tasks tab to add task
+                navigate(`/settings?tab=tasks&orgId=${selectedOrg?.id}`);
+              }}
+            />
+          )}
+
 
           {/* Save Changes Button */}
           {editingOrg && (

@@ -3,6 +3,8 @@ import { AiOutlinePlus } from "react-icons/ai";
 import { FiEye, FiEyeOff, FiTrash2 } from "react-icons/fi";
 import { lookupPincode } from "../../../../utils/pincodeLookup";
 import { uploadFileDirect } from "../../../../utils/s3Upload";
+import OrganizationNotesSection from "../../../pages/organization/components/OrganizationNotesSection";
+import OrganizationTasksSection from "../../../pages/organization/components/OrganizationTasksSection";
 
 function ClientOrganisationTab({
   clientProfile,
@@ -39,6 +41,12 @@ function ClientOrganisationTab({
   handleViewFile,
   expandedSection,
   setExpandedSection,
+  adminNotesList = [],
+  userNotesList = [],
+  adminTasksList = [],
+  userTasksList = [],
+  handleDeleteNote,
+  handleSaveAdminNoteInline,
 }) {
   return (
     <div className="space-y-6">
@@ -1626,12 +1634,20 @@ function ClientOrganisationTab({
                                                 id: "credentials",
                                                 label: "Credentials",
                                               },
+                                              {
+                                                id: "notes",
+                                                label: "Notes",
+                                              },
+                                              {
+                                                id: "tasks",
+                                                label: "Tasks",
+                                              },
                                             ].map((tab) => (
                                               <button
                                                 key={tab.id}
-                                                onClick={() =>
-                                                  setActiveOrgTab(tab.id)
-                                                }
+                                                onClick={() => {
+                                                  setActiveOrgTab(tab.id);
+                                                }}
                                                 className={`pb-3 px-1 text-sm font-medium transition-colors whitespace-nowrap ${
                                                   activeOrgTab === tab.id
                                                     ? "border-b-2 border-[#01334C] text-[#01334C]"
@@ -3328,6 +3344,55 @@ function ClientOrganisationTab({
                                             </div>
                                           </div>
                                         )}
+
+                                        {activeOrgTab === "notes" && (
+                                          <div className="mt-6">
+                                            <OrganizationNotesSection
+                                              adminNotesList={adminNotesList || []}
+                                              userNotesList={userNotesList || []}
+                                              organizationId={org?.id}
+                                              handleViewFile={handleViewFile}
+                                              organisations={organisations}
+                                              userId={userId}
+                                              onAddNote={() => {
+                                                // Redirect to Admin Client Overview Notes tab to add note
+                                                navigate(`/admin/client-overview/${userId}?tab=notes&orgId=${org?.id}`);
+                                              }}
+                                              onSaveAdminNote={handleSaveAdminNoteInline ? async (editedNote, noteIndex) => {
+                                                // noteIndex is already the index in the full adminNotesList
+                                                if (noteIndex !== -1) {
+                                                  await handleSaveAdminNoteInline(editedNote, noteIndex);
+                                                } else {
+                                                  console.error("Could not find note in adminNotesList");
+                                                }
+                                              } : undefined}
+                                              onDeleteNote={handleDeleteNote ? (index, note) => {
+                                                // Find the note in the full adminNotesList
+                                                const fullIndex = adminNotesList.findIndex(
+                                                  (n) => (n.id && note.id && n.id === note.id) || n === note
+                                                );
+                                                if (fullIndex !== -1) {
+                                                  handleDeleteNote(fullIndex);
+                                                }
+                                              } : undefined}
+                                            />
+                                          </div>
+                                        )}
+
+                                        {activeOrgTab === "tasks" && (
+                                          <div className="mt-6">
+                                            <OrganizationTasksSection
+                                              adminTasksList={adminTasksList || []}
+                                              userTasksList={userTasksList || []}
+                                              organizationId={org?.id}
+                                              onAddTask={() => {
+                                                // Redirect to Admin Client Overview Tasks tab to add task
+                                                navigate(`/admin/client-overview/${userId}?tab=tasks&orgId=${org?.id}`);
+                                              }}
+                                            />
+                                          </div>
+                                        )}
+
 
                                         {/* Action Buttons - Outside tabs */}
                                         {isEditingThisOrg && (

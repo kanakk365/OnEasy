@@ -7,6 +7,7 @@ function Organization() {
   const {
     // State
     loading,
+    organizations,
     selectedOrg,
     setSelectedOrg,
     editingOrg,
@@ -20,6 +21,12 @@ function Organization() {
     currentItems,
     totalPages,
     indexOfFirstItem,
+
+    // Notes and Tasks
+    adminNotesList,
+    userNotesList,
+    adminTasksList,
+    userTasksList,
 
     // Actions
     formatDate,
@@ -42,6 +49,8 @@ function Organization() {
     addOrganization,
     paginate,
     uploadFileDirect,
+    handleSaveUserNoteInline,
+    updateUsersPageData,
   } = useOrganizationData();
 
   // Loading state
@@ -85,6 +94,14 @@ function Organization() {
         updateWebsite={updateWebsite}
         togglePasswordVisibility={togglePasswordVisibility}
         removeWebsite={removeWebsite}
+        // Notes and Tasks
+        adminNotesList={adminNotesList}
+        userNotesList={userNotesList}
+        adminTasksList={adminTasksList}
+        userTasksList={userTasksList}
+        handleSaveUserNoteInline={handleSaveUserNoteInline}
+        updateUsersPageData={updateUsersPageData}
+        organisations={organizations}
       />
     );
   }

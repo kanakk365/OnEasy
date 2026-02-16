@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { FiEye } from "react-icons/fi";
 
@@ -384,10 +384,10 @@ function ClientNotesTab({
               )}
             </div>
 
-            {/* User Notes Section */}
+            {/* Client Notes Section */}
             <div className="bg-[#F8F9FA] rounded-xl p-6">
               <h3 className="text-[15px] font-medium text-gray-900 mb-4">
-                User Notes (Read Only)
+                Client Notes (Read Only)
               </h3>
               {userNotesList.length > 0 ? (
                 <div className="overflow-x-auto rounded-lg">
@@ -476,7 +476,7 @@ function ClientNotesTab({
                   <div className="mb-4">
                     <img src="/empty.svg" alt="No Items" className="w-16 h-16 opacity-90 mx-auto" />
                   </div>
-                  <p className="text-gray-500 text-sm">No User Notes Yet</p>
+                  <p className="text-gray-500 text-sm">No Client Notes Yet</p>
                 </div>
               )}
             </div>

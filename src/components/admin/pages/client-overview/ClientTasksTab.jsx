@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { FiEye } from "react-icons/fi";
 
@@ -20,7 +20,15 @@ function ClientTasksTab({
   setSelectedAdminTask,
   selectedUserTask,
   setSelectedUserTask,
+  organisations = [],
 }) {
+  const getOrgName = (orgId) => {
+    if (!orgId || !Array.isArray(organisations)) return "-";
+    const match = organisations.find(
+      (o) => String(o.id) === String(orgId),
+    );
+    return match?.legalName || match?.tradeName || "-";
+  };
   return (
         <div className="px-6 pb-6 pt-6">
           <div className="space-y-6">
@@ -47,6 +55,28 @@ function ClientTasksTab({
                     {editingAdminTaskIndex !== null ? "Edit Task" : "New Task"}
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                    <div>
+                      <label className="block text-sm text-gray-900 mb-2 font-medium">
+                        Organization
+                      </label>
+                      <select
+                        value={currentAdminTask.organizationId || ""}
+                        onChange={(e) =>
+                          setCurrentAdminTask({
+                            ...currentAdminTask,
+                            organizationId: e.target.value || null,
+                          })
+                        }
+                        className="w-full px-4 py-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option value="">Select organization</option>
+                        {organisations.map((org, idx) => (
+                          <option key={org.id || idx} value={org.id}>
+                            {org.legalName || org.tradeName || `Organization ${idx + 1}`}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                     <div>
                       <label className="block text-sm text-gray-900 mb-2 font-medium">
                         Date
@@ -131,6 +161,7 @@ function ClientTasksTab({
                           title: "",
                           description: "",
                           type: "",
+                          organizationId: null,
                         });
                       }}
                       className="text-[#FF3B30] hover:text-red-700 text-xs font-semibold"
@@ -161,6 +192,9 @@ function ClientTasksTab({
                           Date
                         </th>
                         <th className="px-4 py-3 text-left font-medium text-xs">
+                          Organization
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
                           Title
                         </th>
                         <th className="px-4 py-3 text-left font-medium text-xs">
@@ -186,6 +220,11 @@ function ClientTasksTab({
                               {task.date
                                 ? new Date(task.date).toLocaleDateString("en-IN")
                                 : "-"}
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700 truncate max-w-[200px]">
+                              {getOrgName(task.organizationId)}
                             </div>
                           </td>
                           <td className="p-3">
@@ -240,6 +279,9 @@ function ClientTasksTab({
                           Date
                         </th>
                         <th className="px-4 py-3 text-left font-medium text-xs">
+                          Organization
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-xs">
                           Title
                         </th>
                         <th className="px-4 py-3 text-left font-medium text-xs">
@@ -265,6 +307,11 @@ function ClientTasksTab({
                               {task.date
                                 ? new Date(task.date).toLocaleDateString("en-IN")
                                 : "-"}
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-gray-700 truncate max-w-[200px]">
+                              {getOrgName(task.organizationId)}
                             </div>
                           </td>
                           <td className="p-3">
@@ -345,6 +392,14 @@ function ClientTasksTab({
                       {selectedAdminTask.date
                         ? new Date(selectedAdminTask.date).toLocaleDateString("en-IN")
                         : "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      Organization
+                    </div>
+                    <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800">
+                      {getOrgName(selectedAdminTask.organizationId)}
                     </div>
                   </div>
                   <div>
@@ -450,6 +505,14 @@ function ClientTasksTab({
                       {selectedUserTask.date
                         ? new Date(selectedUserTask.date).toLocaleDateString("en-IN")
                         : "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 mb-1">
+                      Organization
+                    </div>
+                    <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800">
+                      {getOrgName(selectedUserTask.organizationId)}
                     </div>
                   </div>
                   <div>
