@@ -14,8 +14,7 @@ function PersonalDocumentsUploadModal({ isOpen, onClose, onUploadSuccess }) {
     { value: "aadhar_card", label: "Aadhaar Card" },
     { value: "pan_card", label: "PAN Card" },
     { value: "passport", label: "Passport" },
-    { value: "profile_image", label: "Profile Photo" },
-    { value: "signature", label: "Signature" },
+    { value: "profile_image", label: "Professional Photo" },
   ];
 
   const handleFileSelect = (e) => {

@@ -11,7 +11,10 @@ function BusinessDirectorsDocumentDetail() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState({ type: null, message: "" });
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [attachmentName, setAttachmentName] = useState("");
   const fileInputRef = useRef(null);
+  const attachmentFileInputRef = useRef(null);
 
   const documentTypes = {
     aadhar_card: { 
@@ -27,12 +30,12 @@ function BusinessDirectorsDocumentDetail() {
       description: "Upload your Passport documents (Max 3 documents)"
     },
     profile_image: { 
-      label: "Profile Photo", 
-      description: "Upload your profile photos (Max 3 documents)"
+      label: "Professional Photo", 
+      description: "Upload your professional photos (Max 3 documents)"
     },
-    signature: { 
-      label: "Signature", 
-      description: "Upload your signature documents (Max 3 documents)"
+    attachment: { 
+      label: "Attachments", 
+      description: "Add attachments with custom names"
     },
   };
 
@@ -80,26 +83,30 @@ function BusinessDirectorsDocumentDetail() {
     }
   };
 
-  const handleFileSelect = (e) => {
+  const handleFileSelect = (e, customName = null) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       showStatus("error", "File size must be less than 5MB");
       return;
     }
 
-    // Check if already 3 documents uploaded
-    if (documents.length >= 3) {
-      showStatus("error", `Maximum 3 documents allowed for ${docConfig.label}`);
+    if (documentType === "attachment" && (!customName || !customName.trim())) {
+      showStatus("error", "Please enter attachment name");
       return;
     }
 
-    handleUpload(file);
+    const maxDocs = documentType === "attachment" ? 20 : 3;
+    if (documents.length >= maxDocs) {
+      showStatus("error", documentType === "attachment" ? "Maximum 20 attachments allowed" : `Maximum 3 documents allowed for ${docConfig.label}`);
+      return;
+    }
+
+    handleUpload(file, customName);
   };
 
-  const handleUpload = async (file) => {
+  const handleUpload = async (file, attachmentNameVal = null) => {
     setUploading(true);
     try {
       // Get user ID
@@ -121,11 +128,11 @@ function BusinessDirectorsDocumentDetail() {
         file.name
       );
 
-      // Save S3 URL to database
+      const displayName = documentType === "attachment" && attachmentNameVal?.trim() ? attachmentNameVal.trim() : file.name;
       const response = await apiClient.post("/users-page/upload-directors-partners-document", {
         documentType: documentType,
-        fileUrl: s3Url, // Use fileUrl instead of fileData
-        fileName: file.name,
+        fileUrl: s3Url,
+        fileName: displayName,
         organizationId: orgId,
       });
 
@@ -314,12 +321,11 @@ function BusinessDirectorsDocumentDetail() {
             </svg>
           </div>
         );
-      case "signature":
+      case "attachment":
         return (
-          <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-lg flex items-center justify-center shadow-sm">
-            <svg className="w-10 h-10 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12c2-3 4-4 6-3s2 2 1 4" strokeWidth="1.5" fill="none"/>
+          <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center shadow-sm">
+            <svg className="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
           </div>
         );
@@ -390,13 +396,13 @@ function BusinessDirectorsDocumentDetail() {
                 <p className="text-gray-600 mt-1">{docConfig.description}</p>
               </div>
               <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-                documents.length >= 3 
+                (documentType === "attachment" ? documents.length >= 20 : documents.length >= 3)
                   ? "bg-red-100 text-red-800" 
                   : documents.length > 0 
                   ? "bg-yellow-100 text-yellow-800" 
                   : "bg-gray-100 text-gray-800"
               }`}>
-                {documents.length}/3
+                {documents.length}/{documentType === "attachment" ? 20 : 3}
               </span>
             </div>
           </div>
@@ -499,18 +505,67 @@ function BusinessDirectorsDocumentDetail() {
         </div>
 
         {/* Upload Section */}
-        {documents.length < 3 && (
+        {(documentType === "attachment" ? documents.length < 20 : documents.length < 3) && (
           <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Upload Document</h2>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileSelect}
-              accept="image/*,.pdf"
-              className="hidden"
-              disabled={uploading}
-            />
-            <button
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">{documentType === "attachment" ? "Add Attachment" : "Upload Document"}</h2>
+            {documentType === "attachment" ? (
+              showAddForm ? (
+                <div className="border-2 border-dashed border-blue-200 rounded-xl p-6 space-y-4 bg-blue-50/30">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Attachment Name *</label>
+                    <input
+                      type="text"
+                      value={attachmentName}
+                      onChange={(e) => setAttachmentName(e.target.value)}
+                      placeholder="Enter attachment name"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
+                      disabled={uploading}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Select File *</label>
+                    <input
+                      type="file"
+                      ref={attachmentFileInputRef}
+                      onChange={(e) => {
+                        handleFileSelect(e, attachmentName);
+                        setShowAddForm(false);
+                        setAttachmentName("");
+                        if (attachmentFileInputRef.current) attachmentFileInputRef.current.value = "";
+                      }}
+                      accept="image/*,.pdf,.doc,.docx"
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#00486D] file:text-white hover:file:bg-[#01334C]"
+                      disabled={uploading}
+                    />
+                  </div>
+                  <button
+                    onClick={() => { setShowAddForm(false); setAttachmentName(""); }}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  disabled={uploading}
+                  className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-blue-200 rounded-xl hover:border-[#00486D] hover:bg-blue-50/30 transition-colors disabled:opacity-50"
+                >
+                  <span className="w-10 h-10 rounded-full bg-[#00486D] text-white flex items-center justify-center text-xl font-bold">+</span>
+                  <span className="text-gray-700 font-medium">Add Attachment</span>
+                </button>
+              )
+            ) : (
+              <>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileSelect}
+                  accept="image/*,.pdf"
+                  className="hidden"
+                  disabled={uploading}
+                />
+                <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
               className="w-full px-6 py-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#01334C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
@@ -563,13 +618,15 @@ function BusinessDirectorsDocumentDetail() {
             <p className="text-xs text-gray-500 text-center mt-3">
               PNG, JPG, PDF up to 5MB
             </p>
+              </>
+            )}
           </div>
         )}
 
-        {documents.length >= 3 && (
+        {(documentType === "attachment" ? documents.length >= 20 : documents.length >= 3) && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
             <p className="text-sm text-yellow-800">
-              Maximum 3 documents reached for {docConfig.label}. Delete a document to upload a new one.
+              Maximum {documentType === "attachment" ? "20" : "3"} documents reached for {docConfig.label}. Delete a document to upload a new one.
             </p>
           </div>
         )}

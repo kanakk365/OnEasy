@@ -12,7 +12,7 @@ function BusinessDirectorsKYC() {
     pan_card: [],
     passport: [],
     profile_image: [],
-    signature: []
+    attachment: []
   });
   const [loading, setLoading] = useState(true);
 
@@ -89,12 +89,11 @@ function BusinessDirectorsKYC() {
             </svg>
           </div>
         );
-      case "signature":
+      case "attachment":
         return (
-          <div className="w-14 h-14 bg-gradient-to-br from-amber-100 to-amber-200 rounded-lg flex items-center justify-center shadow-sm">
-            <svg className="w-8 h-8 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12c2-3 4-4 6-3s2 2 1 4" strokeWidth="1.5" fill="none"/>
+          <div className="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center shadow-sm">
+            <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
           </div>
         );
@@ -121,13 +120,13 @@ function BusinessDirectorsKYC() {
     },
     { 
       value: "profile_image", 
-      label: "Profile Photo", 
-      description: "Upload and view profile photos"
+      label: "Professional Photo", 
+      description: "Upload and view professional photos"
     },
     { 
-      value: "signature", 
-      label: "Signature", 
-      description: "Upload and view signature documents"
+      value: "attachment", 
+      label: "Attachments", 
+      description: "Add attachments with custom names"
     },
   ];
 
@@ -151,7 +150,7 @@ function BusinessDirectorsKYC() {
           pan_card: [],
           passport: [],
           profile_image: [],
-          signature: []
+          attachment: []
         }
       }));
       
@@ -161,7 +160,7 @@ function BusinessDirectorsKYC() {
           pan_card: response.data.pan_card || [],
           passport: response.data.passport || [],
           profile_image: response.data.profile_image || [],
-          signature: response.data.signature || []
+          attachment: response.data.attachment || []
         });
       } else {
         setDocuments({
@@ -169,7 +168,7 @@ function BusinessDirectorsKYC() {
           pan_card: [],
           passport: [],
           profile_image: [],
-          signature: []
+          attachment: []
         });
       }
     } catch (error) {

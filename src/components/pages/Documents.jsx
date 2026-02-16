@@ -73,7 +73,7 @@ function Documents() {
             pan_card: [],
             passport: [],
             profile_image: [],
-            signature: [],
+            attachment: [],
           },
         }));
 
@@ -156,7 +156,7 @@ function Documents() {
             pan_card: [],
             passport: [],
             profile_image: [],
-            signature: [],
+            attachment: [],
           },
         }));
 

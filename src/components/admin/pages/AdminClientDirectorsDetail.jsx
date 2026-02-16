@@ -28,12 +28,12 @@ function AdminClientDirectorsDetail() {
       description: "Upload Passport documents (Max 3 documents)"
     },
     profile_image: { 
-      label: "Profile Photo", 
-      description: "Upload profile photos (Max 3 documents)"
+      label: "Professional Photo", 
+      description: "Upload professional photos (Max 3 documents)"
     },
-    signature: { 
-      label: "Signature", 
-      description: "Upload signature documents (Max 3 documents)"
+    attachment: { 
+      label: "Attachments", 
+      description: "Add attachments with custom names"
     },
   };
 
