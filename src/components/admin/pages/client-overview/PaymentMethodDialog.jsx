@@ -1,9 +1,7 @@
-﻿import React from "react";
+import React from "react";
 
 function PaymentMethodDialog({
-  showPaymentMethodDialog,
   setShowPaymentMethodDialog,
-  pendingStatusUpdate,
   setPendingStatusUpdate,
   selectedPaymentMethod,
   setSelectedPaymentMethod,
