@@ -1,12 +1,13 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { IoChevronBackOutline } from "react-icons/io5";
-import { FiCheckCircle, FiClock } from "react-icons/fi";
+import { FiCheckCircle, FiClock, FiFileText } from "react-icons/fi";
+import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 import { AUTH_CONFIG } from "../../config/auth";
 
 const AssignedCompliances = () => {
   const navigate = useNavigate();
-  const [compliances, setCompliances] = React.useState([]);
+  const [orgGroups, setOrgGroups] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
 
@@ -32,57 +33,47 @@ const AssignedCompliances = () => {
         }
 
         const data = await response.json();
+        const items = data.items || [];
 
-        // Transform API data to match UI component structure
-        const transformedData = (data.items || []).map((item) => {
-          const instances = item.instances || [];
-          const doneCount = instances.filter((i) => i.isDone).length;
-          const pendingCount = instances.length - doneCount;
+        // Group items by organisation
+        const orgMap = {};
+        items.forEach((item) => {
+          const orgId = item.organisation?.id || "unassigned";
+          if (!orgMap[orgId]) {
+            orgMap[orgId] = {
+              orgId,
+              legalName: item.organisation?.legalName || null,
+              tradeName: item.organisation?.tradeName || null,
+              gstin: item.organisation?.gstin || null,
+              compliances: [],
+            };
+          }
+          orgMap[orgId].compliances.push(item);
+        });
 
-          // Sort instances by dueDate
-          const sortedInstances = [...instances].sort(
-            (a, b) => new Date(a.dueDate) - new Date(b.dueDate),
-          );
+        // Convert map to array and compute stats
+        const groups = Object.values(orgMap).map((group) => {
+          let totalInstances = 0;
+          let doneInstances = 0;
+          let pendingInstances = 0;
+
+          group.compliances.forEach((comp) => {
+            const instances = comp.instances || [];
+            totalInstances += instances.length;
+            doneInstances += instances.filter((i) => i.isDone).length;
+            pendingInstances += instances.filter((i) => !i.isDone).length;
+          });
 
           return {
-            id: item.id,
-            name: item.compliance.name,
-            type:
-              item.compliance.category === "return"
-                ? "Monthly"
-                : item.compliance.category === "payment"
-                  ? "Monthly"
-                  : "Yearly", // Approximate based on data
-            stats: {
-              done: doneCount,
-              pending: pendingCount,
-            },
-            totalItems: instances.length,
-            // Create boolean array for progress dots, pad with false if needed, or limit
-            progress: sortedInstances.map((i) => i.isDone),
-            // Store raw details for the details page
-            details: sortedInstances.map((instance) => {
-              const date = new Date(instance.dueDate);
-              return {
-                period: instance.yearMonth
-                  ? instance.yearMonth.split("-")[1] > 0
-                    ? instance.yearMonth.split("-")[1]
-                    : "Q1"
-                  : "Q1",
-                year: instance.yearMonth
-                  ? instance.yearMonth.split("-")[0]
-                  : "2026",
-                dueDate: date.toLocaleDateString("en-US", {
-                  day: "numeric",
-                  month: "short",
-                }),
-                status: instance.isDone ? "Done" : "Pending",
-              };
-            }),
+            ...group,
+            totalCompliances: group.compliances.length,
+            totalInstances,
+            doneInstances,
+            pendingInstances,
           };
         });
 
-        setCompliances(transformedData);
+        setOrgGroups(groups);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching compliances:", err);
@@ -124,66 +115,93 @@ const AssignedCompliances = () => {
           Assigned Compliances
         </h1>
         <p className="text-gray-500 italic">
-          View and manage all assigned compliances for this client
+          Select an organisation to view its assigned compliances
         </p>
       </div>
 
-      {/* Cards Grid */}
+      {/* Organisation Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {compliances.length > 0 ? (
-          compliances.map((item) => (
+        {orgGroups.length > 0 ? (
+          orgGroups.map((group) => (
             <div
-              key={item.id}
+              key={group.orgId}
               onClick={() =>
-                navigate(`/assigned-compliances/${item.id}`, { state: item })
+                navigate(`/assigned-compliances/org/${group.orgId}`, {
+                  state: { orgData: group },
+                })
               }
-              className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+              className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-[#023752]/20 transition-all duration-200 cursor-pointer group"
             >
-              {/* Card Header */}
-              <div className="flex justify-between items-start mb-6">
-                <h3
-                  className="text-lg font-bold text-gray-900 line-clamp-2"
-                  title={item.name}
-                >
-                  {item.name}
-                </h3>
-                <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full border border-gray-200 whitespace-nowrap ml-2">
-                  {item.type}
-                </span>
+              {/* Org Icon & Name */}
+              <div className="flex items-start gap-4 mb-5">
+                <div className="w-12 h-12 rounded-xl bg-[#023752]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#023752]/20 transition-colors">
+                  <HiOutlineBuildingOffice2 className="w-6 h-6 text-[#023752]" />
+                </div>
+                <div className="min-w-0">
+                  <h3
+                    className="text-lg font-bold text-gray-900 truncate"
+                    title={group.legalName || "Unassigned"}
+                  >
+                    {group.legalName || "Unassigned"}
+                  </h3>
+                  {group.tradeName && (
+                    <p
+                      className="text-sm text-gray-500 truncate"
+                      title={group.tradeName}
+                    >
+                      {group.tradeName}
+                    </p>
+                  )}
+                  {group.gstin && (
+                    <p className="text-xs text-gray-400 mt-0.5 font-mono">
+                      GSTIN: {group.gstin}
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* Stats */}
-              <div className="space-y-4 mb-6">
+              <div className="space-y-3 mb-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <FiCheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700 font-medium">Done</span>
+                    <FiFileText className="w-4 h-4 text-[#023752]" />
+                    <span className="text-gray-600 text-sm">Compliances</span>
                   </div>
                   <span className="font-bold text-gray-900">
-                    {item.stats.done}
+                    {String(group.totalCompliances).padStart(2, "0")}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <FiClock className="w-5 h-5 text-orange-500" />
-                    <span className="text-gray-700 font-medium">Pending</span>
+                    <FiCheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-gray-600 text-sm">Done</span>
                   </div>
                   <span className="font-bold text-gray-900">
-                    {String(item.stats.pending).padStart(2, "0")}
+                    {String(group.doneInstances).padStart(2, "0")}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <FiClock className="w-4 h-4 text-orange-500" />
+                    <span className="text-gray-600 text-sm">Pending</span>
+                  </div>
+                  <span className="font-bold text-gray-900">
+                    {String(group.pendingInstances).padStart(2, "0")}
                   </span>
                 </div>
               </div>
 
-              {/* Progress Dots */}
-              <div className="flex items-center space-x-1 mt-auto flex-wrap gap-y-1">
-                {item.progress.map((isDone, index) => (
-                  <div
-                    key={index}
-                    className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                      isDone ? "bg-[#023752]" : "bg-gray-200"
-                    }`}
-                  />
-                ))}
+              {/* Bottom progress bar */}
+              <div className="w-full bg-gray-100 rounded-full h-1.5">
+                <div
+                  className="bg-[#023752] h-1.5 rounded-full transition-all duration-300"
+                  style={{
+                    width:
+                      group.totalInstances > 0
+                        ? `${(group.doneInstances / group.totalInstances) * 100}%`
+                        : "0%",
+                  }}
+                />
               </div>
             </div>
           ))

@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { IoSend } from "react-icons/io5";
 import { RiRobot2Line } from "react-icons/ri";
 import { FiSearch, FiCheck, FiX, FiFilter, FiArrowLeft } from "react-icons/fi";
+import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 import { useNavigate } from "react-router-dom";
 import { AUTH_CONFIG } from "../../config/auth";
+import { getUsersPageData } from "../../utils/usersPageApi";
 
 // Compliance API base URL
 const COMPLIANCE_API_BASE = "https://oneasycompliance.oneasy.ai";
@@ -36,6 +38,10 @@ const ComplianceChat = () => {
 
   // Manual Selection State
   const [showSelectionGrid, setShowSelectionGrid] = useState(false);
+  const [showOrgSelection, setShowOrgSelection] = useState(false);
+  const [organisations, setOrganisations] = useState([]);
+  const [selectedOrg, setSelectedOrg] = useState(null);
+  const [orgLoading, setOrgLoading] = useState(false);
 
   const [groupedCompliances, setGroupedCompliances] = useState({});
   const [categories, setCategories] = useState([]);
@@ -97,10 +103,10 @@ const ComplianceChat = () => {
       {
         id: Date.now(),
         type: "bot",
-        text: "👋 Welcome! Are you setting up for a New or Existing Business?",
+        text: "👋 Welcome! Are you setting up for an Existing Business or Starting Something New?",
         actionButtons: [
-          { label: "New Business", action: "flow_new_business" },
           { label: "Existing Business", action: "flow_existing_business" },
+          { label: "Starting Something New", action: "flow_new_business" },
         ],
       },
     ]);
@@ -618,7 +624,7 @@ const ComplianceChat = () => {
       case "flow_new_business":
         setMessages((prev) => [
           ...prev,
-          { id: Date.now(), type: "user", text: "New Business" },
+          { id: Date.now(), type: "user", text: "Starting Something New" },
         ]);
         await fetchCompleteFlow();
         break;
@@ -644,8 +650,8 @@ const ComplianceChat = () => {
           ...prev,
           { id: Date.now(), type: "user", text: "Yes" },
         ]);
-        // Show selection UI
-        await fetchAvailableCompliances();
+        // First show org selection, then compliance selection
+        await fetchOrganisations();
         break;
 
       case "existing_no_compliance":
@@ -738,12 +744,63 @@ const ComplianceChat = () => {
     setRecommendedCompliances({ registration: [], compliance: [] });
     setIsTyping(false);
     setShowSelectionGrid(false);
+    setShowOrgSelection(false);
+    setSelectedOrg(null);
+    setOrganisations([]);
 
     // Always start with custom flow
     startCustomFlow();
   };
 
   // --- Manual Selection Logic ---
+
+  const fetchOrganisations = async () => {
+    setOrgLoading(true);
+    try {
+      const data = await getUsersPageData();
+      const orgs =
+        data?.data?.organisations || data?.data?.user?.organisations || [];
+      if (orgs.length > 0) {
+        setOrganisations(orgs);
+        setShowOrgSelection(true);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            type: "bot",
+            text: "❌ No organisations found. Please add an organisation in Settings first.",
+          },
+        ]);
+      }
+    } catch (err) {
+      console.error("Error fetching organisations:", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          type: "bot",
+          text: "❌ Error loading organisations. Please try again.",
+        },
+      ]);
+    }
+    setOrgLoading(false);
+  };
+
+  const handleOrgSelect = async (org) => {
+    setSelectedOrg(org);
+    setShowOrgSelection(false);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        type: "user",
+        text: `Selected: ${org.legal_name}${org.trade_name ? ` (${org.trade_name})` : ""}`,
+      },
+    ]);
+    // Now fetch available compliances
+    await fetchAvailableCompliances();
+  };
 
   const fetchAvailableCompliances = async () => {
     setIsLoading(true);
@@ -823,7 +880,10 @@ const ComplianceChat = () => {
     setIsSubmittingSelection(true);
     try {
       const token = getAuthToken();
-      const payload = { complianceCodes: selectedCodes };
+      const payload = {
+        complianceCodes: selectedCodes,
+        ...(selectedOrg ? { orgId: String(selectedOrg.id) } : {}),
+      };
 
       const response = await fetch(API_1A_POST, {
         method: "POST",
@@ -837,14 +897,16 @@ const ComplianceChat = () => {
       if (response.ok) {
         // Success
         setShowSelectionGrid(false);
+        const orgName = selectedOrg?.legal_name || "your business";
         setMessages((prev) => [
           ...prev,
           {
             id: Date.now(),
             type: "bot",
-            text: `✅ Successfully assigned ${selectedCodes.length} compliances to your business dashboard!`,
+            text: `✅ Successfully assigned ${selectedCodes.length} compliance(s) to **${orgName}** dashboard!`,
           },
         ]);
+        setSelectedOrg(null);
       } else {
         alert("Failed to submit compliances.");
       }
@@ -868,6 +930,88 @@ const ComplianceChat = () => {
     );
   }
 
+  // --- Organisation Selection View ---
+  if (showOrgSelection) {
+    return (
+      <div className="h-[calc(100vh-4rem)] bg-white flex flex-col animate-in fade-in duration-300">
+        {/* Header */}
+        <div className="p-4 border-b border-gray-100 flex items-center gap-3 bg-white shadow-sm z-10">
+          <button
+            onClick={() => {
+              setShowOrgSelection(false);
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: Date.now(),
+                  type: "bot",
+                  text: "Organisation selection cancelled.",
+                },
+              ]);
+              startCustomFlow();
+            }}
+            className="p-2 hover:bg-gray-100 rounded-full"
+          >
+            <FiArrowLeft size={20} />
+          </button>
+          <h2 className="font-bold text-gray-800">Select Organisation</h2>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+          <p className="text-gray-500 text-sm mb-6">
+            Choose the organisation you want to assign compliances to:
+          </p>
+          {orgLoading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00486D]"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {organisations.map((org) => (
+                <div
+                  key={org.id}
+                  onClick={() => handleOrgSelect(org)}
+                  className="bg-white rounded-xl p-5 border border-gray-200 hover:border-[#00486D] hover:shadow-lg transition-all duration-200 cursor-pointer group"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-11 h-11 rounded-xl bg-[#023752]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#023752]/20 transition-colors">
+                      <HiOutlineBuildingOffice2 className="w-5 h-5 text-[#023752]" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3
+                        className="font-bold text-gray-900 truncate"
+                        title={org.legal_name}
+                      >
+                        {org.legal_name}
+                      </h3>
+                      {org.trade_name && (
+                        <p
+                          className="text-sm text-gray-500 truncate mt-0.5"
+                          title={org.trade_name}
+                        >
+                          {org.trade_name}
+                        </p>
+                      )}
+                      {org.gstin && (
+                        <p className="text-xs text-gray-400 mt-1 font-mono">
+                          GSTIN: {org.gstin}
+                        </p>
+                      )}
+                      {org.category && (
+                        <span className="inline-block mt-2 px-2 py-0.5 bg-blue-50 text-[#00486D] text-xs rounded-full">
+                          {org.category}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   // --- Manual Selection View ---
   if (showSelectionGrid) {
     const filteredCats = categories.filter(
@@ -880,14 +1024,28 @@ const ComplianceChat = () => {
         <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white shadow-sm z-10">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setShowSelectionGrid(false)}
+              onClick={() => {
+                setShowSelectionGrid(false);
+                setSelectedOrg(null);
+              }}
               className="p-2 hover:bg-gray-100 rounded-full"
             >
               <FiArrowLeft size={20} />
             </button>
-            <h2 className="font-bold text-gray-800">
-              Select Applicable Compliances
-            </h2>
+            <div>
+              <h2 className="font-bold text-gray-800">
+                Select Applicable Compliances
+              </h2>
+              {selectedOrg && (
+                <p className="text-xs text-gray-500 mt-0.5">
+                  For:{" "}
+                  <span className="font-medium text-[#00486D]">
+                    {selectedOrg.legal_name}
+                  </span>
+                  {selectedOrg.trade_name ? ` (${selectedOrg.trade_name})` : ""}
+                </p>
+              )}
+            </div>
           </div>
           <span className="text-sm font-semibold text-[#00486D] bg-blue-50 px-3 py-1 rounded-full">
             {selectedCodes.length} Selected

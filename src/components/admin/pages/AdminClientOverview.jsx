@@ -5,6 +5,7 @@ import { updateUserDataByUserId } from "../../../utils/usersPageApi";
 import { viewFile, uploadFileDirect } from "../../../utils/s3Upload";
 import { FiChevronLeft } from "react-icons/fi";
 import ClientProfileTab from "./client-overview/ClientProfileTab";
+import ClientOrganisationTab from "./client-overview/ClientOrganisationTab";
 import ClientServicesTab from "./client-overview/ClientServicesTab";
 import ClientComplianceTab from "./client-overview/ClientComplianceTab";
 import ClientSubscriptionsTab from "./client-overview/ClientSubscriptionsTab";
@@ -2081,6 +2082,7 @@ function AdminClientOverview() {
         <div className="flex gap-3 overflow-x-auto scrollbar-hide">
           {[
             { key: "profile", label: "Profile" },
+            { key: "organisations", label: "Organisations" },
             {
               key: "services",
               label: "Services",
@@ -2146,6 +2148,14 @@ function AdminClientOverview() {
           handleFileInputChange={handleFileInputChange}
           uploadingDocument={uploadingDocument}
           uploadDocumentType={uploadDocumentType}
+        />
+      )}
+
+      {/* Organisation Tab */}
+      {activeTab === "organisations" && clientProfile && (
+        <ClientOrganisationTab
+          clientProfile={clientProfile}
+          userId={userId}
           organisations={organisations}
           setOrganisations={setOrganisations}
           isEditingOrganisations={isEditingOrganisations}
@@ -2175,6 +2185,9 @@ function AdminClientOverview() {
           navigate={navigate}
           formatDateOnly={formatDateOnly}
           fetchClientProfile={fetchClientProfile}
+          handleViewFile={handleViewFile}
+          expandedSection={expandedSection}
+          setExpandedSection={setExpandedSection}
         />
       )}
 
@@ -2200,7 +2213,10 @@ function AdminClientOverview() {
 
       {/* Compliance Assignment Tab */}
       {activeTab === "compliance-assignment" && (
-        <ClientComplianceAssignmentTab userId={userId} />
+        <ClientComplianceAssignmentTab
+          userId={userId}
+          organisations={organisations}
+        />
       )}
 
       {/* Assigned Compliance Tab */}
