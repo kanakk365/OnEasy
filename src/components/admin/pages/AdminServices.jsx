@@ -29,9 +29,14 @@ function AdminServices() {
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [clientFilter, setClientFilter] = useState("");
-  const [serviceFilter, setServiceFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [progressFilter, setProgressFilter] = useState("");
+  const [serviceFilters, setServiceFilters] = useState([]);
+  const [statusFilters, setStatusFilters] = useState([]);
+  const [progressFilters, setProgressFilters] = useState([]);
+
+  // Filter dropdown visibility
+  const [showServiceFilterMenu, setShowServiceFilterMenu] = useState(false);
+  const [showStatusFilterMenu, setShowStatusFilterMenu] = useState(false);
+  const [showProgressFilterMenu, setShowProgressFilterMenu] = useState(false);
 
   const [showPaymentMethodDialog, setShowPaymentMethodDialog] = useState(false);
   const [pendingStatusUpdate, setPendingStatusUpdate] = useState(null);
@@ -73,7 +78,13 @@ function AdminServices() {
   // Reset pagination when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, clientFilter, serviceFilter, statusFilter, progressFilter]);
+  }, [
+    searchTerm,
+    clientFilter,
+    serviceFilters,
+    statusFilters,
+    progressFilters,
+  ]);
 
   const fetchServices = async () => {
     try {
@@ -490,6 +501,12 @@ function AdminServices() {
     "Payment pending",
   ];
 
+  const toggleFromArray = (value, listSetter) => {
+    listSetter((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value],
+    );
+  };
+
   const handleStatusUpdate = async (svc, newStatus) => {
     try {
       if (!svc.ticket_id) {
@@ -750,25 +767,36 @@ function AdminServices() {
         (svc.ticket_id && svc.ticket_id.toLowerCase().includes(searchLower));
 
       // Status filter: match against both the derived status label and the actual service_status
-      const matchesStatus = !statusFilter || 
-        status === statusFilter || 
-        actualStatus.toLowerCase() === statusFilter.toLowerCase();
+      const matchesStatus =
+        statusFilters.length === 0 ||
+        statusFilters.some(
+          (f) =>
+            status === f ||
+            actualStatus.toLowerCase() === (f || "").toLowerCase(),
+        );
+
+      const matchesService =
+        serviceFilters.length === 0 ||
+        serviceFilters.includes(serviceName);
+
+      const matchesProgress =
+        progressFilters.length === 0 || progressFilters.includes(progress);
 
       return (
         matchesSearch &&
         (clientFilter ? clientName === clientFilter : true) &&
-        (serviceFilter ? serviceName === serviceFilter : true) &&
+        matchesService &&
         matchesStatus &&
-        (progressFilter ? progress === progressFilter : true)
+        matchesProgress
       );
     });
   }, [
     services,
     searchTerm,
     clientFilter,
-    serviceFilter,
-    statusFilter,
-    progressFilter,
+    serviceFilters,
+    statusFilters,
+    progressFilters,
     getServiceLabel,
     getStatusLabel,
     getProgressLabel,
@@ -856,48 +884,137 @@ function AdminServices() {
           </select>
           <FiFilter className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
         </div>
+        {/* Services multi-select */}
         <div className="relative">
-          <select
-            value={serviceFilter}
-            onChange={(e) => setServiceFilter(e.target.value)}
-            className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] appearance-none cursor-pointer"
+          <button
+            type="button"
+            onClick={() => setShowServiceFilterMenu((v) => !v)}
+            className="w-full flex items-center justify-between pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D]"
           >
-            <option value="">All Services</option>
-            {servicesList.map((s, i) => (
-              <option key={`${s}-${i}`} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-          <FiFilter className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+            <span className="truncate">
+              {serviceFilters.length === 0
+                ? "All Services"
+                : `${serviceFilters.length} service${
+                    serviceFilters.length > 1 ? "s" : ""
+                  } selected`}
+            </span>
+            <FiFilter className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+          </button>
+          {showServiceFilterMenu && (
+            <div className="absolute z-20 mt-2 w-full max-h-64 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg p-3 text-sm">
+              <button
+                type="button"
+                onClick={() => setServiceFilters([])}
+                className="mb-2 text-xs text-blue-600 hover:underline"
+              >
+                Clear selection
+              </button>
+              <div className="space-y-1 max-h-52 overflow-y-auto">
+                {servicesList.map((s, i) => (
+                  <label
+                    key={`${s}-${i}`}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300 text-[#00486D] focus:ring-[#00486D]"
+                      checked={serviceFilters.includes(s)}
+                      onChange={() => toggleFromArray(s, setServiceFilters)}
+                    />
+                    <span className="truncate">{s}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Status multi-select */}
         <div className="relative">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] appearance-none cursor-pointer"
+          <button
+            type="button"
+            onClick={() => setShowStatusFilterMenu((v) => !v)}
+            className="w-full flex items-center justify-between pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D]"
           >
-            <option value="">All Statuses</option>
-            {adminStatusOptions.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-          <FiFilter className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+            <span className="truncate">
+              {statusFilters.length === 0
+                ? "All Statuses"
+                : `${statusFilters.length} status${
+                    statusFilters.length > 1 ? "es" : ""
+                  } selected`}
+            </span>
+            <FiFilter className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+          </button>
+          {showStatusFilterMenu && (
+            <div className="absolute z-20 mt-2 w-full max-h-64 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg p-3 text-sm">
+              <button
+                type="button"
+                onClick={() => setStatusFilters([])}
+                className="mb-2 text-xs text-blue-600 hover:underline"
+              >
+                Clear selection
+              </button>
+              <div className="space-y-1">
+                {adminStatusOptions.map((s) => (
+                  <label
+                    key={s}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300 text-[#00486D] focus:ring-[#00486D]"
+                      checked={statusFilters.includes(s)}
+                      onChange={() => toggleFromArray(s, setStatusFilters)}
+                    />
+                    <span className="truncate">{s}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Progress multi-select */}
         <div className="relative">
-          <select
-            value={progressFilter}
-            onChange={(e) => setProgressFilter(e.target.value)}
-            className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] appearance-none cursor-pointer"
+          <button
+            type="button"
+            onClick={() => setShowProgressFilterMenu((v) => !v)}
+            className="w-full flex items-center justify-between pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D]"
           >
-            <option value="">All Progress</option>
-            <option value="Open">Open</option>
-            <option value="Ongoing">Ongoing</option>
-            <option value="Resolved">Resolved</option>
-          </select>
-          <FiFilter className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+            <span className="truncate">
+              {progressFilters.length === 0
+                ? "All Progress"
+                : `${progressFilters.length} selected`}
+            </span>
+            <FiFilter className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+          </button>
+          {showProgressFilterMenu && (
+            <div className="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg p-3 text-sm">
+              <button
+                type="button"
+                onClick={() => setProgressFilters([])}
+                className="mb-2 text-xs text-blue-600 hover:underline"
+              >
+                Clear selection
+              </button>
+              <div className="space-y-1">
+                {["Open", "Ongoing", "Resolved"].map((p) => (
+                  <label
+                    key={p}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300 text-[#00486D] focus:ring-[#00486D]"
+                      checked={progressFilters.includes(p)}
+                      onChange={() => toggleFromArray(p, setProgressFilters)}
+                    />
+                    <span>{p}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
