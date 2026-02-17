@@ -6,6 +6,7 @@ import OTPVerification from "../pages/OTPVerification";
 import ReferralCode from "../pages/ReferralCode";
 import Client from "../pages/Client";
 import ClientServices from "../pages/ClientServices";
+import AIAgent from "../pages/AIAgent";
 import NoticeBoard from "../pages/NoticeBoard";
 import Admin from "../pages/Admin";
 import Partner from "../pages/Partner";
@@ -178,6 +179,14 @@ function Routers() {
         element={
           <ProtectedRoute allowedRoles={["user", 5]}>
             <ClientServices />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ai-agent"
+        element={
+          <ProtectedRoute allowedRoles={["user", 5]}>
+            <AIAgent />
           </ProtectedRoute>
         }
       />
