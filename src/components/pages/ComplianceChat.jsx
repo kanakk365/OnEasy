@@ -5,9 +5,9 @@ import {
   FiSearch,
   FiCheck,
   FiX,
-  FiFilter,
   FiArrowLeft,
   FiChevronRight,
+  FiChevronDown,
 } from "react-icons/fi";
 import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 import { useNavigate } from "react-router-dom";
@@ -51,7 +51,7 @@ const ComplianceChat = () => {
   const [orgLoading, setOrgLoading] = useState(false);
 
   const [flowBranches, setFlowBranches] = useState([]);
-  const [navigationPath, setNavigationPath] = useState([]);
+  const [expandedBranches, setExpandedBranches] = useState(new Set());
   const [selectedCodes, setSelectedCodes] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSubmittingSelection, setIsSubmittingSelection] = useState(false);
@@ -753,7 +753,7 @@ const ComplianceChat = () => {
     setShowOrgSelection(false);
     setSelectedOrg(null);
     setOrganisations([]);
-    setNavigationPath([]);
+    setExpandedBranches(new Set());
     setFlowBranches([]);
 
     // Always start with custom flow
@@ -821,7 +821,7 @@ const ComplianceChat = () => {
         const data = await response.json();
         const branches = data.branches || [];
         setFlowBranches(branches);
-        setNavigationPath([]);
+        setExpandedBranches(new Set());
         setShowSelectionGrid(true);
       } else {
         setMessages((prev) => [
@@ -861,38 +861,22 @@ const ComplianceChat = () => {
     return items;
   };
 
-  // Get current level data based on navigation path
-  const getCurrentLevel = () => {
-    if (navigationPath.length === 0) {
-      return { branches: flowBranches, items: [] };
-    }
-    let current = flowBranches;
-    let node = null;
-    for (let i = 0; i < navigationPath.length; i++) {
-      node = current.find((b) => b.heading === navigationPath[i]);
-      if (!node) return { branches: [], items: [] };
-      current = node.subBranches || [];
-    }
-    return {
-      branches: node?.subBranches || [],
-      items: node?.items || [],
-    };
-  };
-
-  const handleBranchSelect = (branch) => {
-    // If branch has subBranches, drill down
-    if (branch.subBranches && branch.subBranches.length > 0) {
-      setNavigationPath((prev) => [...prev, branch.heading]);
-    } else if (branch.items && branch.items.length > 0) {
-      // If branch only has items, drill down to show items
-      setNavigationPath((prev) => [...prev, branch.heading]);
-    }
-    setSearchQuery("");
-  };
-
-  const handleNavigateBack = () => {
-    setNavigationPath((prev) => prev.slice(0, -1));
-    setSearchQuery("");
+  // Toggle expand/collapse for a branch path
+  const toggleBranchExpand = (path) => {
+    setExpandedBranches((prev) => {
+      const next = new Set(prev);
+      if (next.has(path)) {
+        // Collapse this and all children
+        for (const p of prev) {
+          if (p === path || p.startsWith(path + " > ")) {
+            next.delete(p);
+          }
+        }
+      } else {
+        next.add(path);
+      }
+      return next;
+    });
   };
 
   const toggleSelection = (code) => {
@@ -901,7 +885,7 @@ const ComplianceChat = () => {
     );
   };
 
-  const toggleAllCurrentItems = (items) => {
+  const toggleAllItems = (items) => {
     const codes = items.map((i) => i.code);
     const allSelected = codes.every((c) => selectedCodes.includes(c));
 
@@ -916,6 +900,150 @@ const ComplianceChat = () => {
         return newSel;
       });
     }
+  };
+
+  // Recursive render for accordion tree
+  const renderBranch = (branch, parentPath = "", depth = 0) => {
+    const path = parentPath
+      ? `${parentPath} > ${branch.heading}`
+      : branch.heading;
+    const isExpanded = expandedBranches.has(path);
+    const allItems = collectAllItems(branch);
+    const selCount = allItems.filter((i) =>
+      selectedCodes.includes(i.code),
+    ).length;
+    const totalCount = allItems.length;
+    const hasChildren =
+      (branch.subBranches && branch.subBranches.length > 0) ||
+      (branch.items && branch.items.length > 0);
+
+    return (
+      <div key={path} className={`${depth === 0 ? "mb-2" : ""}`}>
+        {/* Branch Header */}
+        <button
+          onClick={() => hasChildren && toggleBranchExpand(path)}
+          className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all text-left ${
+            isExpanded
+              ? "bg-[#00486D]/5 border border-[#00486D]/20"
+              : "bg-white border border-gray-200 hover:border-[#00486D]/30 hover:bg-gray-50"
+          } ${depth > 0 ? "ml-" + Math.min(depth * 4, 12) : ""}`}
+          style={depth > 0 ? { marginLeft: `${depth * 16}px` } : {}}
+        >
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {hasChildren &&
+              (isExpanded ? (
+                <FiChevronDown
+                  className="text-[#00486D] flex-shrink-0"
+                  size={16}
+                />
+              ) : (
+                <FiChevronRight
+                  className="text-gray-400 flex-shrink-0"
+                  size={16}
+                />
+              ))}
+            <span
+              className={`text-sm font-semibold truncate ${
+                isExpanded ? "text-[#00486D]" : "text-gray-800"
+              }`}
+            >
+              {branch.heading}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {selCount > 0 && (
+              <span className="text-xs font-semibold text-[#00486D] bg-[#00486D]/10 px-2 py-0.5 rounded-full">
+                {selCount}/{totalCount}
+              </span>
+            )}
+            {selCount === 0 && (
+              <span className="text-xs text-gray-400">{totalCount}</span>
+            )}
+          </div>
+        </button>
+
+        {/* Expanded Content */}
+        {isExpanded && (
+          <div className={`mt-1 space-y-1`}>
+            {/* Sub-branches */}
+            {branch.subBranches &&
+              branch.subBranches.map((sub) =>
+                renderBranch(sub, path, depth + 1),
+              )}
+
+            {/* Items */}
+            {branch.items && branch.items.length > 0 && (
+              <div
+                className="mt-1"
+                style={{ marginLeft: `${(depth + 1) * 16}px` }}
+              >
+                {/* Select All for this group */}
+                <div className="flex items-center justify-between px-3 py-1.5 mb-1">
+                  <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                    {branch.items.length} item
+                    {branch.items.length !== 1 ? "s" : ""}
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleAllItems(branch.items);
+                    }}
+                    className="text-xs text-[#00486D] hover:underline font-medium"
+                  >
+                    {branch.items.every((i) => selectedCodes.includes(i.code))
+                      ? "Deselect All"
+                      : "Select All"}
+                  </button>
+                </div>
+                {branch.items.map((item) => {
+                  const isSel = selectedCodes.includes(item.code);
+                  return (
+                    <div
+                      key={item.code}
+                      onClick={() => toggleSelection(item.code)}
+                      className={`flex items-start gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all mb-1 ${
+                        isSel
+                          ? "bg-[#00486D]/5 border border-[#00486D]/30"
+                          : "bg-white border border-gray-100 hover:border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      <div
+                        className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
+                          isSel
+                            ? "bg-[#00486D] border-[#00486D]"
+                            : "bg-white border-gray-300"
+                        }`}
+                      >
+                        {isSel && <FiCheck className="text-white w-3 h-3" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className={`text-sm font-medium ${
+                            isSel ? "text-[#00486D]" : "text-gray-800"
+                          }`}
+                        >
+                          {item.name}
+                        </p>
+                        {item.dueDate && (
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Due: {item.dueDate}
+                          </p>
+                        )}
+                        {item.reminders && (
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {item.reminders}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
   };
 
   const submitManualSelection = async () => {
@@ -1055,43 +1183,48 @@ const ComplianceChat = () => {
     );
   }
 
-  // --- Manual Selection View (Hierarchical Drill-Down) ---
+  // --- Manual Selection View (Expandable Accordion) ---
   if (showSelectionGrid) {
-    const { branches: currentBranches, items: currentItems } =
-      getCurrentLevel();
-    const isAtRoot = navigationPath.length === 0;
-
-    // Filter items by search
-    const filteredItems = currentItems.filter(
-      (i) =>
-        i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (i.code && i.code.toLowerCase().includes(searchQuery.toLowerCase())),
-    );
-
-    // Filter branches by search (show branch if heading matches or any nested item matches)
-    const filteredBranches = currentBranches.filter((b) => {
-      if (!searchQuery) return true;
+    // Filter branches by search
+    const filterBranches = (branches) => {
+      if (!searchQuery) return branches;
       const q = searchQuery.toLowerCase();
-      if (b.heading.toLowerCase().includes(q)) return true;
-      const allItems = collectAllItems(b);
-      return allItems.some(
-        (item) =>
-          item.name.toLowerCase().includes(q) ||
-          (item.code && item.code.toLowerCase().includes(q)),
-      );
-    });
-
-    // Count selected items in a branch
-    const getSelectedCount = (branch) => {
-      const allItems = collectAllItems(branch);
-      return allItems.filter((item) => selectedCodes.includes(item.code))
-        .length;
+      return branches.filter((b) => {
+        if (b.heading.toLowerCase().includes(q)) return true;
+        const allItems = collectAllItems(b);
+        return allItems.some(
+          (item) =>
+            item.name.toLowerCase().includes(q) ||
+            (item.code && item.code.toLowerCase().includes(q)),
+        );
+      });
     };
 
-    // Get total items count in a branch
-    const getTotalCount = (branch) => {
-      return collectAllItems(branch).length;
+    const filteredBranches = filterBranches(flowBranches);
+
+    // Build a name map for selected items preview
+    const getSelectedItemDetails = () => {
+      const details = [];
+      const findItems = (branches, path = "") => {
+        branches.forEach((branch) => {
+          const currentPath = path ? `${path} > ${branch.heading}` : branch.heading;
+          if (branch.items) {
+            branch.items.forEach((item) => {
+              if (selectedCodes.includes(item.code)) {
+                details.push({ code: item.code, name: item.name, category: branch.heading });
+              }
+            });
+          }
+          if (branch.subBranches) {
+            findItems(branch.subBranches, currentPath);
+          }
+        });
+      };
+      findItems(flowBranches);
+      return details;
     };
+
+    const selectedDetails = getSelectedItemDetails();
 
     return (
       <div className="h-[calc(100vh-4rem)] bg-white flex flex-col animate-in fade-in duration-300">
@@ -1100,12 +1233,9 @@ const ComplianceChat = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
-                if (isAtRoot) {
-                  setShowSelectionGrid(false);
-                  setSelectedOrg(null);
-                } else {
-                  handleNavigateBack();
-                }
+                setShowSelectionGrid(false);
+                setSelectedOrg(null);
+                setExpandedBranches(new Set());
               }}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
@@ -1113,9 +1243,7 @@ const ComplianceChat = () => {
             </button>
             <div>
               <h2 className="font-bold text-gray-800">
-                {isAtRoot
-                  ? "Select Compliance Category"
-                  : navigationPath[navigationPath.length - 1]}
+                Select Applicable Compliances
               </h2>
               {selectedOrg && (
                 <p className="text-xs text-gray-500 mt-0.5">
@@ -1133,212 +1261,108 @@ const ComplianceChat = () => {
           </span>
         </div>
 
-        {/* Breadcrumb Navigation */}
-        {navigationPath.length > 0 && (
-          <div className="px-4 py-2 border-b border-gray-100 bg-gray-50/50 flex items-center gap-1 text-sm overflow-x-auto">
-            <button
-              onClick={() => setNavigationPath([])}
-              className="text-[#00486D] hover:underline font-medium flex-shrink-0"
-            >
-              All Categories
-            </button>
-            {navigationPath.map((path, idx) => (
-              <React.Fragment key={idx}>
-                <FiChevronRight
-                  className="text-gray-400 flex-shrink-0"
-                  size={14}
+        {/* Main Content - Two Column */}
+        <div className="flex-1 flex flex-col lg:flex-row min-h-0">
+          {/* Left Column: Accordion Tree */}
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Search */}
+            <div className="p-4 border-b border-gray-100 bg-gray-50">
+              <div className="relative">
+                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search compliances or categories..."
+                  className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D]"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                {idx === navigationPath.length - 1 ? (
-                  <span className="text-gray-700 font-medium flex-shrink-0">
-                    {path}
-                  </span>
-                ) : (
-                  <button
-                    onClick={() =>
-                      setNavigationPath((prev) => prev.slice(0, idx + 1))
-                    }
-                    className="text-[#00486D] hover:underline font-medium flex-shrink-0"
-                  >
-                    {path}
-                  </button>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        )}
-
-        {/* Search (show when there are items to search) */}
-        {(currentItems.length > 0 || currentBranches.length > 3) && (
-          <div className="p-4 border-b border-gray-100 bg-gray-50">
-            <div className="relative">
-              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder={
-                  currentItems.length > 0
-                    ? "Search compliances..."
-                    : "Search categories..."
-                }
-                className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D]"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+              </div>
             </div>
-          </div>
-        )}
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-gray-50/30">
-          {/* Sub-branches (category cards) */}
-          {filteredBranches.length > 0 && (
-            <div className="mb-6">
-              {currentItems.length > 0 && (
-                <h3 className="font-bold text-gray-700 uppercase text-xs tracking-wider mb-3 px-1">
-                  Sub-Categories
-                </h3>
+            {/* Accordion Content */}
+            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-gray-50/30 space-y-1">
+              {filteredBranches.length > 0 ? (
+                filteredBranches.map((branch) => renderBranch(branch))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+                  <FiSearch size={40} className="mb-3" />
+                  <p className="text-sm">
+                    No compliances found matching your search.
+                  </p>
+                </div>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {filteredBranches.map((branch) => {
-                  const selCount = getSelectedCount(branch);
-                  const totalCount = getTotalCount(branch);
-                  return (
-                    <div
-                      key={branch.heading}
-                      onClick={() => handleBranchSelect(branch)}
-                      className={`relative p-4 rounded-xl border cursor-pointer transition-all hover:shadow-md group ${
-                        selCount > 0
-                          ? "bg-[#00486D]/5 border-[#00486D]/30"
-                          : "bg-white border-gray-200 hover:border-[#00486D]/40"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-bold text-gray-900 group-hover:text-[#00486D] transition-colors">
-                            {branch.heading}
-                          </h4>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {totalCount} compliance{totalCount !== 1 ? "s" : ""}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {selCount > 0 && (
-                            <span className="text-xs font-semibold text-[#00486D] bg-[#00486D]/10 px-2 py-0.5 rounded-full">
-                              {selCount}/{totalCount}
-                            </span>
-                          )}
-                          <FiChevronRight
-                            className="text-gray-400 group-hover:text-[#00486D] transition-colors flex-shrink-0"
-                            size={18}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
-          )}
+          </div>
 
-          {/* Items (selectable compliance items) */}
-          {filteredItems.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-3 px-1">
-                <h3 className="font-bold text-gray-700 uppercase text-xs tracking-wider">
-                  Compliances
-                </h3>
-                <button
-                  onClick={() => toggleAllCurrentItems(filteredItems)}
-                  className="text-xs text-[#00486D] hover:underline font-medium"
-                >
-                  {filteredItems.every((i) => selectedCodes.includes(i.code))
-                    ? "Deselect All"
-                    : "Select All"}
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {filteredItems.map((item) => {
-                  const isSel = selectedCodes.includes(item.code);
-                  return (
-                    <div
-                      key={item.code}
+          {/* Right Column: Selection Preview */}
+          <div className="w-full lg:w-80 flex-shrink-0 flex flex-col min-h-0 border-l border-gray-100 bg-white">
+            <div className="p-4 pb-3 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="text-sm font-semibold text-gray-900">
+                Selection Preview
+              </h3>
+              <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                {selectedCodes.length}
+              </span>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
+              {selectedDetails.length === 0 ? (
+                <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200 p-6">
+                  <p className="text-gray-400 text-sm text-center">
+                    No compliance selected
+                  </p>
+                </div>
+              ) : (
+                selectedDetails.map((item) => (
+                  <div
+                    key={item.code}
+                    className="flex items-start justify-between p-2.5 rounded-lg bg-gray-50 border border-gray-200 group transition-all hover:border-gray-300"
+                  >
+                    <div className="flex-1 min-w-0 pr-2">
+                      <p
+                        className="text-xs font-semibold text-gray-900 truncate"
+                        title={item.name}
+                      >
+                        {item.name}
+                      </p>
+                      <p className="text-[10px] text-blue-600 font-medium mt-0.5">
+                        {item.category}
+                      </p>
+                    </div>
+                    <button
                       onClick={() => toggleSelection(item.code)}
-                      className={`relative p-4 rounded-xl border cursor-pointer transition-all ${
-                        isSel
-                          ? "bg-[#00486D]/5 border-[#00486D]"
-                          : "bg-white border-gray-200 hover:border-gray-300"
-                      }`}
+                      className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors flex-shrink-0"
                     >
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
-                            isSel
-                              ? "bg-[#00486D] border-[#00486D]"
-                              : "bg-white border-gray-300"
-                          }`}
-                        >
-                          {isSel && (
-                            <FiCheck className="text-white w-3.5 h-3.5" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={`text-sm font-semibold ${
-                              isSel ? "text-[#00486D]" : "text-gray-900"
-                            }`}
-                          >
-                            {item.name}
-                          </p>
-                          {item.dueDate && (
-                            <p className="text-xs text-gray-500 mt-1">
-                              📅 Due: {item.dueDate}
-                            </p>
-                          )}
-                          {item.reminders && (
-                            <p className="text-xs text-gray-400 mt-0.5">
-                              🔔 {item.reminders}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                      <FiX size={14} />
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
-          )}
 
-          {/* Empty state */}
-          {filteredBranches.length === 0 && filteredItems.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-              <FiSearch size={40} className="mb-3" />
-              <p className="text-sm">
-                No compliances found matching your search.
-              </p>
+            {/* Footer Actions */}
+            <div className="p-4 border-t border-gray-100 bg-gray-50 space-y-2">
+              <button
+                onClick={submitManualSelection}
+                disabled={selectedCodes.length === 0 || isSubmittingSelection}
+                className="w-full py-2.5 rounded-lg bg-[#00486D] text-white text-sm font-medium hover:bg-[#003855] disabled:opacity-50 shadow-lg shadow-blue-900/10"
+              >
+                {isSubmittingSelection
+                  ? "Saving..."
+                  : `Confirm (${selectedCodes.length})`}
+              </button>
+              <button
+                onClick={() => {
+                  setShowSelectionGrid(false);
+                  setSelectedOrg(null);
+                  setExpandedBranches(new Set());
+                }}
+                className="w-full py-2 rounded-lg border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-100"
+              >
+                Cancel
+              </button>
             </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 bg-white border-t border-gray-100 flex justify-end gap-3">
-          <button
-            onClick={() => {
-              setShowSelectionGrid(false);
-              setSelectedOrg(null);
-              setNavigationPath([]);
-            }}
-            className="px-6 py-2.5 rounded-lg border border-gray-200 text-gray-600 font-medium hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={submitManualSelection}
-            disabled={selectedCodes.length === 0 || isSubmittingSelection}
-            className="px-8 py-2.5 rounded-lg bg-[#00486D] text-white font-medium hover:bg-[#003855] disabled:opacity-50 shadow-lg shadow-blue-900/10"
-          >
-            {isSubmittingSelection
-              ? "Saving..."
-              : `Confirm (${selectedCodes.length})`}
-          </button>
+          </div>
         </div>
       </div>
     );

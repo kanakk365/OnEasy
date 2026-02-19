@@ -3,6 +3,7 @@ import {
   FiX,
   FiCheck,
   FiChevronRight,
+  FiChevronDown,
   FiArrowLeft,
   FiSearch,
 } from "react-icons/fi";
@@ -27,7 +28,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
 
   // Hierarchical data from API
   const [flowBranches, setFlowBranches] = useState([]);
-  const [navigationPath, setNavigationPath] = useState([]);
+  const [expandedBranches, setExpandedBranches] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState("");
 
   // Selected IDs (Using Code as ID)
@@ -82,48 +83,22 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
     return items;
   };
 
-  // Get current level data based on navigation path
-  const getCurrentLevel = () => {
-    if (navigationPath.length === 0) {
-      return { branches: flowBranches, items: [] };
-    }
-    let current = flowBranches;
-    let node = null;
-    for (let i = 0; i < navigationPath.length; i++) {
-      node = current.find((b) => b.heading === navigationPath[i]);
-      if (!node) return { branches: [], items: [] };
-      current = node.subBranches || [];
-    }
-    return {
-      branches: node?.subBranches || [],
-      items: node?.items || [],
-    };
-  };
-
-  const handleBranchSelect = (branch) => {
-    if (
-      (branch.subBranches && branch.subBranches.length > 0) ||
-      (branch.items && branch.items.length > 0)
-    ) {
-      setNavigationPath((prev) => [...prev, branch.heading]);
-    }
-    setSearchQuery("");
-  };
-
-  const handleNavigateBack = () => {
-    setNavigationPath((prev) => prev.slice(0, -1));
-    setSearchQuery("");
-  };
-
-  // Count selected items in a branch
-  const getSelectedCount = (branch) => {
-    const allItems = collectAllItems(branch);
-    return allItems.filter((item) => selectedCodes.includes(item.code)).length;
-  };
-
-  // Get total items count in a branch
-  const getTotalCount = (branch) => {
-    return collectAllItems(branch).length;
+  // Toggle expand/collapse for a branch path
+  const toggleBranchExpand = (path) => {
+    setExpandedBranches((prev) => {
+      const next = new Set(prev);
+      if (next.has(path)) {
+        // Collapse this and all children
+        for (const p of prev) {
+          if (p === path || p.startsWith(path + " > ")) {
+            next.delete(p);
+          }
+        }
+      } else {
+        next.add(path);
+      }
+      return next;
+    });
   };
 
   const toggleItem = (item) => {
@@ -142,13 +117,13 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
           label: item.name,
           dueDate: item.dueDate,
           reminders: item.reminders,
-          category: navigationPath.length > 0 ? navigationPath[0] : "General",
+          category: "Compliance",
         },
       }));
     }
   };
 
-  const toggleAllCurrentItems = (items) => {
+  const toggleAllItems = (items) => {
     const codes = items.map((i) => i.code);
     const allSelected = codes.every((c) => selectedCodes.includes(c));
 
@@ -162,8 +137,6 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
       // Select all
       const newCodes = [...selectedCodes];
       const newMap = { ...selectedItemsMap };
-      const category =
-        navigationPath.length > 0 ? navigationPath[0] : "General";
 
       items.forEach((item) => {
         if (!newCodes.includes(item.code)) {
@@ -173,7 +146,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
             label: item.name,
             dueDate: item.dueDate,
             reminders: item.reminders,
-            category,
+            category: "Compliance",
           };
         }
       });
@@ -232,6 +205,150 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
       console.error("Error saving compliances:", err);
       alert(`❌ Failed to save: ${err.message}`);
     }
+  };
+
+  // Recursive render for accordion tree
+  const renderBranch = (branch, parentPath = "", depth = 0) => {
+    const path = parentPath
+      ? `${parentPath} > ${branch.heading}`
+      : branch.heading;
+    const isExpanded = expandedBranches.has(path);
+    const allItems = collectAllItems(branch);
+    const selCount = allItems.filter((i) =>
+      selectedCodes.includes(i.code),
+    ).length;
+    const totalCount = allItems.length;
+    const hasChildren =
+      (branch.subBranches && branch.subBranches.length > 0) ||
+      (branch.items && branch.items.length > 0);
+
+    return (
+      <div key={path} className={`${depth === 0 ? "mb-2" : ""}`}>
+        {/* Branch Header */}
+        <button
+          onClick={() => hasChildren && toggleBranchExpand(path)}
+          className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all text-left ${
+            isExpanded
+              ? "bg-[#00486D]/5 border border-[#00486D]/20"
+              : "bg-white border border-gray-200 hover:border-[#00486D]/30 hover:bg-gray-50"
+          }`}
+          style={depth > 0 ? { marginLeft: `${depth * 16}px` } : {}}
+        >
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {hasChildren &&
+              (isExpanded ? (
+                <FiChevronDown
+                  className="text-[#00486D] flex-shrink-0"
+                  size={16}
+                />
+              ) : (
+                <FiChevronRight
+                  className="text-gray-400 flex-shrink-0"
+                  size={16}
+                />
+              ))}
+            <span
+              className={`text-sm font-semibold truncate ${
+                isExpanded ? "text-[#00486D]" : "text-gray-800"
+              }`}
+            >
+              {branch.heading}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {selCount > 0 && (
+              <span className="text-xs font-semibold text-[#00486D] bg-[#00486D]/10 px-2 py-0.5 rounded-full">
+                {selCount}/{totalCount}
+              </span>
+            )}
+            {selCount === 0 && (
+              <span className="text-xs text-gray-400">{totalCount}</span>
+            )}
+          </div>
+        </button>
+
+        {/* Expanded Content */}
+        {isExpanded && (
+          <div className="mt-1 space-y-1">
+            {/* Sub-branches */}
+            {branch.subBranches &&
+              branch.subBranches.map((sub) =>
+                renderBranch(sub, path, depth + 1),
+              )}
+
+            {/* Items */}
+            {branch.items && branch.items.length > 0 && (
+              <div
+                className="mt-1"
+                style={{ marginLeft: `${(depth + 1) * 16}px` }}
+              >
+                {/* Select All for this group */}
+                <div className="flex items-center justify-between px-3 py-1.5 mb-1">
+                  <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                    {branch.items.length} item
+                    {branch.items.length !== 1 ? "s" : ""}
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleAllItems(branch.items);
+                    }}
+                    className="text-xs text-[#00486D] hover:underline font-medium"
+                  >
+                    {branch.items.every((i) => selectedCodes.includes(i.code))
+                      ? "Deselect All"
+                      : "Select All"}
+                  </button>
+                </div>
+                {branch.items.map((item) => {
+                  const isSel = selectedCodes.includes(item.code);
+                  return (
+                    <div
+                      key={item.code}
+                      onClick={() => toggleItem(item)}
+                      className={`flex items-start gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all mb-1 ${
+                        isSel
+                          ? "bg-[#00486D]/5 border border-[#00486D]/30"
+                          : "bg-white border border-gray-100 hover:border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      <div
+                        className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
+                          isSel
+                            ? "bg-[#00486D] border-[#00486D]"
+                            : "bg-white border-gray-300"
+                        }`}
+                      >
+                        {isSel && <FiCheck className="text-white w-3 h-3" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className={`text-sm font-medium ${
+                            isSel ? "text-[#00486D]" : "text-gray-800"
+                          }`}
+                        >
+                          {item.name}
+                        </p>
+                        {item.dueDate && (
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Due: {item.dueDate}
+                          </p>
+                        )}
+                        {item.reminders && (
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {item.reminders}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
   };
 
   if (loading) {
@@ -348,29 +465,23 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
     );
   }
 
-  // Step 2: Show compliance assignment with hierarchical drill-down
-  const { branches: currentBranches, items: currentItems } = getCurrentLevel();
-  const isAtRoot = navigationPath.length === 0;
-
-  // Filter items by search
-  const filteredItems = currentItems.filter(
-    (i) =>
-      i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (i.code && i.code.toLowerCase().includes(searchQuery.toLowerCase())),
-  );
-
+  // Step 2: Show compliance assignment with expandable accordion
   // Filter branches by search
-  const filteredBranches = currentBranches.filter((b) => {
-    if (!searchQuery) return true;
+  const filterBranches = (branches) => {
+    if (!searchQuery) return branches;
     const q = searchQuery.toLowerCase();
-    if (b.heading.toLowerCase().includes(q)) return true;
-    const allItems = collectAllItems(b);
-    return allItems.some(
-      (item) =>
-        item.name.toLowerCase().includes(q) ||
-        (item.code && item.code.toLowerCase().includes(q)),
-    );
-  });
+    return branches.filter((b) => {
+      if (b.heading.toLowerCase().includes(q)) return true;
+      const allItems = collectAllItems(b);
+      return allItems.some(
+        (item) =>
+          item.name.toLowerCase().includes(q) ||
+          (item.code && item.code.toLowerCase().includes(q)),
+      );
+    });
+  };
+
+  const filteredBranches = filterBranches(flowBranches);
 
   return (
     <div className="flex flex-col gap-4 h-[calc(100vh-200px)]">
@@ -381,7 +492,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
             setSelectedOrg(null);
             setSelectedCodes([]);
             setSelectedItemsMap({});
-            setNavigationPath([]);
+            setExpandedBranches(new Set());
           }}
           className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
           title="Change organisation"
@@ -435,7 +546,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
             setSelectedOrg(null);
             setSelectedCodes([]);
             setSelectedItemsMap({});
-            setNavigationPath([]);
+            setExpandedBranches(new Set());
           }}
           className="text-xs font-medium text-[#00486D] hover:underline px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors"
         >
@@ -445,210 +556,40 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
 
       {/* Main Content */}
       <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
-        {/* Left Column: Compliance Selection (Hierarchical) */}
+        {/* Left Column: Compliance Selection (Accordion) */}
         <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
-          {/* Header with navigation */}
+          {/* Header */}
           <div className="p-4 pb-3 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              {!isAtRoot && (
-                <button
-                  onClick={handleNavigateBack}
-                  className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
-                >
-                  <FiArrowLeft size={18} />
-                </button>
-              )}
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {isAtRoot
-                    ? "Select Compliance Category"
-                    : navigationPath[navigationPath.length - 1]}
-                </h2>
-              </div>
-            </div>
-
-            {/* Breadcrumb */}
-            {navigationPath.length > 0 && (
-              <div className="flex items-center gap-1 text-xs mt-2 overflow-x-auto">
-                <button
-                  onClick={() => setNavigationPath([])}
-                  className="text-[#00486D] hover:underline font-medium flex-shrink-0"
-                >
-                  All
-                </button>
-                {navigationPath.map((path, idx) => (
-                  <React.Fragment key={idx}>
-                    <FiChevronRight
-                      className="text-gray-400 flex-shrink-0"
-                      size={12}
-                    />
-                    {idx === navigationPath.length - 1 ? (
-                      <span className="text-gray-600 font-medium flex-shrink-0">
-                        {path}
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() =>
-                          setNavigationPath((prev) => prev.slice(0, idx + 1))
-                        }
-                        className="text-[#00486D] hover:underline font-medium flex-shrink-0"
-                      >
-                        {path}
-                      </button>
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-            )}
+            <h2 className="text-lg font-semibold text-gray-900">
+              Select Applicable Compliances
+            </h2>
           </div>
 
           {/* Search */}
-          {(currentItems.length > 0 || currentBranches.length > 3) && (
-            <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
-              <div className="relative">
-                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder={
-                    currentItems.length > 0
-                      ? "Search compliances..."
-                      : "Search categories..."
-                  }
-                  className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D]"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
+          <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+            <div className="relative">
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search compliances or categories..."
+                className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D]"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-          )}
+          </div>
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-            {/* Sub-branches (category cards) */}
-            {filteredBranches.length > 0 && (
-              <div>
-                {currentItems.length > 0 && (
-                  <h3 className="font-bold text-gray-600 uppercase text-xs tracking-wider mb-3 px-1">
-                    Sub-Categories
-                  </h3>
-                )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {filteredBranches.map((branch) => {
-                    const selCount = getSelectedCount(branch);
-                    const totalCount = getTotalCount(branch);
-                    return (
-                      <div
-                        key={branch.heading}
-                        onClick={() => handleBranchSelect(branch)}
-                        className={`relative p-4 rounded-xl border cursor-pointer transition-all hover:shadow-md group ${
-                          selCount > 0
-                            ? "bg-[#00486D]/5 border-[#00486D]/30"
-                            : "bg-white border-gray-200 hover:border-[#00486D]/40"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-bold text-gray-900 group-hover:text-[#00486D] transition-colors">
-                              {branch.heading}
-                            </h4>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {totalCount} compliance
-                              {totalCount !== 1 ? "s" : ""}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {selCount > 0 && (
-                              <span className="text-xs font-semibold text-[#00486D] bg-[#00486D]/10 px-2 py-0.5 rounded-full">
-                                {selCount}/{totalCount}
-                              </span>
-                            )}
-                            <FiChevronRight
-                              className="text-gray-400 group-hover:text-[#00486D] transition-colors flex-shrink-0"
-                              size={18}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Items (selectable compliance items) */}
-            {filteredItems.length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-3 px-1">
-                  <h3 className="font-bold text-gray-600 uppercase text-xs tracking-wider">
-                    Compliances
-                  </h3>
-                  <button
-                    onClick={() => toggleAllCurrentItems(filteredItems)}
-                    className="text-xs text-[#00486D] hover:underline font-medium"
-                  >
-                    {filteredItems.every((i) => selectedCodes.includes(i.code))
-                      ? "Deselect All"
-                      : "Select All"}
-                  </button>
-                </div>
-                <div className="divide-y divide-gray-100 rounded-lg border border-gray-200 overflow-hidden">
-                  {filteredItems.map((item) => {
-                    const isSelected = selectedCodes.includes(item.code);
-                    return (
-                      <div
-                        key={item.code}
-                        onClick={() => toggleItem(item)}
-                        className={`flex items-center justify-between p-3.5 cursor-pointer transition-colors ${
-                          isSelected ? "bg-[#F0F7FA]" : "hover:bg-gray-50"
-                        }`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div
-                            className={`flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors mt-0.5 ${
-                              isSelected
-                                ? "bg-[#00486D] border-[#00486D]"
-                                : "bg-white border-gray-300"
-                            }`}
-                          >
-                            {isSelected && (
-                              <FiCheck className="text-white w-3.5 h-3.5" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p
-                              className={`text-sm font-medium ${
-                                isSelected ? "text-[#00486D]" : "text-gray-700"
-                              }`}
-                            >
-                              {item.name}
-                            </p>
-                            {item.dueDate && (
-                              <p className="text-xs text-gray-500 mt-0.5">
-                                📅 Due: {item.dueDate}
-                              </p>
-                            )}
-                            {item.reminders && (
-                              <p className="text-xs text-gray-400 mt-0.5">
-                                🔔 {item.reminders}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Empty search state */}
-            {filteredBranches.length === 0 && filteredItems.length === 0 && (
+          {/* Content - Accordion Tree */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar">
+            {filteredBranches.length > 0 ? (
+              filteredBranches.map((branch) => renderBranch(branch))
+            ) : (
               <div className="flex flex-col items-center justify-center py-16 text-gray-400">
                 <FiSearch size={36} className="mb-3" />
                 <p className="text-sm">
                   {searchQuery
                     ? "No compliances found matching your search."
-                    : "No items available at this level."}
+                    : "No items available."}
                 </p>
               </div>
             )}
