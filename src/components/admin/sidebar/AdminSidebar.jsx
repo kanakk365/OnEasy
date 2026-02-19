@@ -130,6 +130,11 @@ function AdminSidebar() {
       text: "CMS for Package",
       path: "/admin/cms-package",
     },
+    {
+      icon: <RiFileList3Line />,
+      text: "Compliance CMS",
+      path: "/admin/compliance-cms",
+    },
     { icon: <RiUser3Line />, text: "Profile", path: "/admin/profile" },
   ];
 
@@ -171,7 +176,7 @@ function AdminSidebar() {
       <div
         className={`${
           isCollapsed ? "w-[70px]" : "w-[240px]"
-        } h-screen bg-[#022b51] fixed left-0 top-0 flex flex-col hidden lg:flex transition-all duration-300 border-r border-[#022b51]`}
+        } h-screen bg-[#022b51] fixed left-0 top-0 flex-col hidden lg:flex transition-all duration-300 border-r border-[#022b51]`}
       >
         {/* Logo Section */}
         <div

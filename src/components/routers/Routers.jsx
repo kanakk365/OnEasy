@@ -136,6 +136,7 @@ import AdminComplianceRequests from "../admin/pages/AdminComplianceRequests";
 import AdminNoticeBoard from "../admin/pages/AdminNoticeBoard";
 import AdminNoticeManagement from "../admin/pages/AdminNoticeManagement";
 import AdminCMSPackage from "../admin/pages/AdminCMSPackage";
+import AdminComplianceCMS from "../admin/pages/AdminComplianceCMS";
 import AdminCustomPayment from "../admin/pages/AdminCustomPayment";
 import AdminDocumentsVault from "../admin/pages/AdminDocumentsVault";
 import AdminClientDocuments from "../admin/pages/AdminClientDocuments";
@@ -1267,6 +1268,7 @@ function Routers() {
         <Route path="coupon-generator" element={<CouponCodeGenerator />} />
         <Route path="coupon-management" element={<AdminCouponManagement />} />
         <Route path="cms-package" element={<AdminCMSPackage />} />
+        <Route path="compliance-cms" element={<AdminComplianceCMS />} />
         <Route path="profile" element={<AdminProfile />} />
         <Route
           path="client-details/:ticketId"
