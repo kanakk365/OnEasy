@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { FiX, FiCheck, FiChevronRight } from "react-icons/fi";
+import {
+  FiX,
+  FiCheck,
+  FiChevronRight,
+  FiArrowLeft,
+  FiSearch,
+} from "react-icons/fi";
 import apiClient from "../../../../utils/api";
 import ConfirmationModal from "../../../common/ConfirmationModal";
 import SuccessModal from "../../../common/SuccessModal";
 
 const API_FLOW_URL =
-  "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/flow";
+  "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/flow/whimsical";
 const API_POST_URL =
   "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/user-compliances";
 
@@ -19,8 +25,10 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
   const [selectedOrg, setSelectedOrg] = useState(null);
   const userOrgs = orgsProp || [];
 
-  // Data derived from API
-  const [complianceSections, setComplianceSections] = useState([]);
+  // Hierarchical data from API
+  const [flowBranches, setFlowBranches] = useState([]);
+  const [navigationPath, setNavigationPath] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Selected IDs (Using Code as ID)
   const [selectedCodes, setSelectedCodes] = useState([]);
@@ -50,8 +58,8 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
       }
 
       const data = await response.json();
-      const sections = processFlowData(data);
-      setComplianceSections(sections);
+      const branches = data.branches || [];
+      setFlowBranches(branches);
       setLoading(false);
     } catch (err) {
       console.error("Error fetching compliance flow:", err);
@@ -60,76 +68,62 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
     }
   };
 
-  const processFlowData = (data) => {
-    if (!data?.flow) return [];
-    const root = data.flow.find((q) => q.key === "annexure_1a_entity_type");
-    if (!root) return [];
-
-    let sections = [];
-
-    // 1. Process Root Options (Direct Compliances)
-    root.options.forEach((opt) => {
-      const directCompliances = extractCompliances(opt);
-      if (directCompliances.length > 0) {
-        sections.push({
-          id: opt.value,
-          title: opt.label,
-          items: directCompliances,
-        });
-      }
-    });
-
-    // 2. Process Children Questions (Sub-options with compliances)
-    if (root.children) {
-      root.children.forEach((childQ) => {
-        if (childQ.options) {
-          childQ.options.forEach((childOpt) => {
-            const childCompliances = extractCompliances(childOpt);
-            if (childCompliances.length > 0) {
-              let sectionTitle = childOpt.label;
-
-              // Try to find context from key to give better titles
-              if (childQ.key.includes("gst"))
-                sectionTitle = `GST - ${childOpt.label}`;
-              else if (childQ.key.includes("mca"))
-                sectionTitle = `MCA - ${childOpt.label}`;
-              else if (childQ.key.includes("income"))
-                sectionTitle = `Income Tax - ${childOpt.label}`;
-
-              sections.push({
-                id: childOpt.value,
-                title: sectionTitle,
-                items: childCompliances,
-              });
-            }
-          });
-        }
+  // Collect all items recursively from a branch node
+  const collectAllItems = (node) => {
+    let items = [];
+    if (node.items) {
+      items = [...items, ...node.items];
+    }
+    if (node.subBranches) {
+      node.subBranches.forEach((sb) => {
+        items = [...items, ...collectAllItems(sb)];
       });
     }
-
-    return sections;
+    return items;
   };
 
-  const extractCompliances = (obj) => {
-    const items = [];
-    const seenCodes = new Set();
-
-    if (obj.compliances) {
-      Object.values(obj.compliances)
-        .flat()
-        .forEach((c) => {
-          if (c && c.code && !seenCodes.has(c.code)) {
-            items.push({
-              code: c.code,
-              label: c.name,
-              category: c.category,
-              description: c.description,
-            });
-            seenCodes.add(c.code);
-          }
-        });
+  // Get current level data based on navigation path
+  const getCurrentLevel = () => {
+    if (navigationPath.length === 0) {
+      return { branches: flowBranches, items: [] };
     }
-    return items;
+    let current = flowBranches;
+    let node = null;
+    for (let i = 0; i < navigationPath.length; i++) {
+      node = current.find((b) => b.heading === navigationPath[i]);
+      if (!node) return { branches: [], items: [] };
+      current = node.subBranches || [];
+    }
+    return {
+      branches: node?.subBranches || [],
+      items: node?.items || [],
+    };
+  };
+
+  const handleBranchSelect = (branch) => {
+    if (
+      (branch.subBranches && branch.subBranches.length > 0) ||
+      (branch.items && branch.items.length > 0)
+    ) {
+      setNavigationPath((prev) => [...prev, branch.heading]);
+    }
+    setSearchQuery("");
+  };
+
+  const handleNavigateBack = () => {
+    setNavigationPath((prev) => prev.slice(0, -1));
+    setSearchQuery("");
+  };
+
+  // Count selected items in a branch
+  const getSelectedCount = (branch) => {
+    const allItems = collectAllItems(branch);
+    return allItems.filter((item) => selectedCodes.includes(item.code)).length;
+  };
+
+  // Get total items count in a branch
+  const getTotalCount = (branch) => {
+    return collectAllItems(branch).length;
   };
 
   const toggleItem = (item) => {
@@ -141,29 +135,46 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
       setSelectedItemsMap(newMap);
     } else {
       setSelectedCodes((prev) => [...prev, item.code]);
-      setSelectedItemsMap((prev) => ({ ...prev, [item.code]: item }));
+      setSelectedItemsMap((prev) => ({
+        ...prev,
+        [item.code]: {
+          code: item.code,
+          label: item.name,
+          dueDate: item.dueDate,
+          reminders: item.reminders,
+          category: navigationPath.length > 0 ? navigationPath[0] : "General",
+        },
+      }));
     }
   };
 
-  const toggleSectionAll = (section) => {
-    const allCodes = section.items.map((i) => i.code);
-    const allSelected = allCodes.every((code) => selectedCodes.includes(code));
+  const toggleAllCurrentItems = (items) => {
+    const codes = items.map((i) => i.code);
+    const allSelected = codes.every((c) => selectedCodes.includes(c));
 
     if (allSelected) {
       // Deselect all
-      setSelectedCodes((prev) => prev.filter((c) => !allCodes.includes(c)));
+      setSelectedCodes((prev) => prev.filter((c) => !codes.includes(c)));
       const newMap = { ...selectedItemsMap };
-      allCodes.forEach((c) => delete newMap[c]);
+      codes.forEach((c) => delete newMap[c]);
       setSelectedItemsMap(newMap);
     } else {
       // Select all
       const newCodes = [...selectedCodes];
       const newMap = { ...selectedItemsMap };
+      const category =
+        navigationPath.length > 0 ? navigationPath[0] : "General";
 
-      section.items.forEach((item) => {
+      items.forEach((item) => {
         if (!newCodes.includes(item.code)) {
           newCodes.push(item.code);
-          newMap[item.code] = item;
+          newMap[item.code] = {
+            code: item.code,
+            label: item.name,
+            dueDate: item.dueDate,
+            reminders: item.reminders,
+            category,
+          };
         }
       });
 
@@ -221,11 +232,6 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
       console.error("Error saving compliances:", err);
       alert(`❌ Failed to save: ${err.message}`);
     }
-  };
-
-  const formatBadge = (cat) => {
-    if (!cat) return "";
-    return cat.replace(/_/g, " ");
   };
 
   if (loading) {
@@ -342,7 +348,30 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
     );
   }
 
-  // Step 2: Show compliance assignment (with selected org context)
+  // Step 2: Show compliance assignment with hierarchical drill-down
+  const { branches: currentBranches, items: currentItems } = getCurrentLevel();
+  const isAtRoot = navigationPath.length === 0;
+
+  // Filter items by search
+  const filteredItems = currentItems.filter(
+    (i) =>
+      i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (i.code && i.code.toLowerCase().includes(searchQuery.toLowerCase())),
+  );
+
+  // Filter branches by search
+  const filteredBranches = currentBranches.filter((b) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    if (b.heading.toLowerCase().includes(q)) return true;
+    const allItems = collectAllItems(b);
+    return allItems.some(
+      (item) =>
+        item.name.toLowerCase().includes(q) ||
+        (item.code && item.code.toLowerCase().includes(q)),
+    );
+  });
+
   return (
     <div className="flex flex-col gap-4 h-[calc(100vh-200px)]">
       {/* Selected Org Header */}
@@ -352,6 +381,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
             setSelectedOrg(null);
             setSelectedCodes([]);
             setSelectedItemsMap({});
+            setNavigationPath([]);
           }}
           className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
           title="Change organisation"
@@ -405,6 +435,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
             setSelectedOrg(null);
             setSelectedCodes([]);
             setSelectedItemsMap({});
+            setNavigationPath([]);
           }}
           className="text-xs font-medium text-[#00486D] hover:underline px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors"
         >
@@ -414,86 +445,213 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
 
       {/* Main Content */}
       <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
-        {/* Left Column: Compliance Selection */}
+        {/* Left Column: Compliance Selection (Hierarchical) */}
         <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
-          <div className="p-6 pb-4 border-b border-gray-100">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Assign Compliance
-            </h2>
+          {/* Header with navigation */}
+          <div className="p-4 pb-3 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              {!isAtRoot && (
+                <button
+                  onClick={handleNavigateBack}
+                  className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
+                >
+                  <FiArrowLeft size={18} />
+                </button>
+              )}
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {isAtRoot
+                    ? "Select Compliance Category"
+                    : navigationPath[navigationPath.length - 1]}
+                </h2>
+              </div>
+            </div>
+
+            {/* Breadcrumb */}
+            {navigationPath.length > 0 && (
+              <div className="flex items-center gap-1 text-xs mt-2 overflow-x-auto">
+                <button
+                  onClick={() => setNavigationPath([])}
+                  className="text-[#00486D] hover:underline font-medium flex-shrink-0"
+                >
+                  All
+                </button>
+                {navigationPath.map((path, idx) => (
+                  <React.Fragment key={idx}>
+                    <FiChevronRight
+                      className="text-gray-400 flex-shrink-0"
+                      size={12}
+                    />
+                    {idx === navigationPath.length - 1 ? (
+                      <span className="text-gray-600 font-medium flex-shrink-0">
+                        {path}
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() =>
+                          setNavigationPath((prev) => prev.slice(0, idx + 1))
+                        }
+                        className="text-[#00486D] hover:underline font-medium flex-shrink-0"
+                      >
+                        {path}
+                      </button>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
-            {complianceSections.map((section) => {
-              const allCodes = section.items.map((i) => i.code);
-              const allSelected = allCodes.every((code) =>
-                selectedCodes.includes(code),
-              );
+          {/* Search */}
+          {(currentItems.length > 0 || currentBranches.length > 3) && (
+            <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+              <div className="relative">
+                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder={
+                    currentItems.length > 0
+                      ? "Search compliances..."
+                      : "Search categories..."
+                  }
+                  className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D]"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
 
-              return (
-                <div
-                  key={section.id}
-                  className="rounded-lg border border-gray-200 bg-gray-50/30 overflow-hidden"
-                >
-                  {/* Section Header */}
-                  <div className="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-                    <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide">
-                      {section.title}
-                    </h3>
-                    <button
-                      onClick={() => toggleSectionAll(section)}
-                      className="text-xs font-medium text-[#00486D] hover:underline"
-                    >
-                      {allSelected ? "Deselect All" : "Select All"}
-                    </button>
-                  </div>
-
-                  {/* Items Grid */}
-                  <div className="divide-y divide-gray-100">
-                    {section.items.map((item) => {
-                      const isSelected = selectedCodes.includes(item.code);
-                      return (
-                        <div
-                          key={item.code}
-                          onClick={() => toggleItem(item)}
-                          className={`
-                              flex items-center justify-between p-3 cursor-pointer transition-colors
-                              ${isSelected ? "bg-[#F0F7FA]" : "hover:bg-gray-50"}
-                          `}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`
-                               flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors
-                               ${isSelected ? "bg-[#00486D] border-[#00486D]" : "bg-white border-gray-300"}
-                            `}
-                            >
-                              {isSelected && (
-                                <FiCheck className="text-white w-3.5 h-3.5" />
-                              )}
-                            </div>
-                            <div>
-                              <p
-                                className={`text-sm font-medium ${isSelected ? "text-[#00486D]" : "text-gray-700"}`}
-                              >
-                                {item.label}
-                              </p>
-                              {item.description && (
-                                <p className="text-xs text-gray-400 mt-0.5">
-                                  {item.description}
-                                </p>
-                              )}
-                            </div>
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+            {/* Sub-branches (category cards) */}
+            {filteredBranches.length > 0 && (
+              <div>
+                {currentItems.length > 0 && (
+                  <h3 className="font-bold text-gray-600 uppercase text-xs tracking-wider mb-3 px-1">
+                    Sub-Categories
+                  </h3>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {filteredBranches.map((branch) => {
+                    const selCount = getSelectedCount(branch);
+                    const totalCount = getTotalCount(branch);
+                    return (
+                      <div
+                        key={branch.heading}
+                        onClick={() => handleBranchSelect(branch)}
+                        className={`relative p-4 rounded-xl border cursor-pointer transition-all hover:shadow-md group ${
+                          selCount > 0
+                            ? "bg-[#00486D]/5 border-[#00486D]/30"
+                            : "bg-white border-gray-200 hover:border-[#00486D]/40"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-bold text-gray-900 group-hover:text-[#00486D] transition-colors">
+                              {branch.heading}
+                            </h4>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {totalCount} compliance
+                              {totalCount !== 1 ? "s" : ""}
+                            </p>
                           </div>
-                          <span className="px-2 py-1 rounded text-[10px] uppercase font-semibold bg-white border border-gray-200 text-gray-500">
-                            {formatBadge(item.category)}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            {selCount > 0 && (
+                              <span className="text-xs font-semibold text-[#00486D] bg-[#00486D]/10 px-2 py-0.5 rounded-full">
+                                {selCount}/{totalCount}
+                              </span>
+                            )}
+                            <FiChevronRight
+                              className="text-gray-400 group-hover:text-[#00486D] transition-colors flex-shrink-0"
+                              size={18}
+                            />
+                          </div>
                         </div>
-                      );
-                    })}
-                  </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
+              </div>
+            )}
+
+            {/* Items (selectable compliance items) */}
+            {filteredItems.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-3 px-1">
+                  <h3 className="font-bold text-gray-600 uppercase text-xs tracking-wider">
+                    Compliances
+                  </h3>
+                  <button
+                    onClick={() => toggleAllCurrentItems(filteredItems)}
+                    className="text-xs text-[#00486D] hover:underline font-medium"
+                  >
+                    {filteredItems.every((i) => selectedCodes.includes(i.code))
+                      ? "Deselect All"
+                      : "Select All"}
+                  </button>
+                </div>
+                <div className="divide-y divide-gray-100 rounded-lg border border-gray-200 overflow-hidden">
+                  {filteredItems.map((item) => {
+                    const isSelected = selectedCodes.includes(item.code);
+                    return (
+                      <div
+                        key={item.code}
+                        onClick={() => toggleItem(item)}
+                        className={`flex items-center justify-between p-3.5 cursor-pointer transition-colors ${
+                          isSelected ? "bg-[#F0F7FA]" : "hover:bg-gray-50"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={`flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors mt-0.5 ${
+                              isSelected
+                                ? "bg-[#00486D] border-[#00486D]"
+                                : "bg-white border-gray-300"
+                            }`}
+                          >
+                            {isSelected && (
+                              <FiCheck className="text-white w-3.5 h-3.5" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p
+                              className={`text-sm font-medium ${
+                                isSelected ? "text-[#00486D]" : "text-gray-700"
+                              }`}
+                            >
+                              {item.name}
+                            </p>
+                            {item.dueDate && (
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                📅 Due: {item.dueDate}
+                              </p>
+                            )}
+                            {item.reminders && (
+                              <p className="text-xs text-gray-400 mt-0.5">
+                                🔔 {item.reminders}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Empty search state */}
+            {filteredBranches.length === 0 && filteredItems.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+                <FiSearch size={36} className="mb-3" />
+                <p className="text-sm">
+                  {searchQuery
+                    ? "No compliances found matching your search."
+                    : "No items available at this level."}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -528,9 +686,11 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
                     >
                       {item.label}
                     </p>
-                    <p className="text-xs text-blue-600 font-medium mt-0.5 capitalize">
-                      {formatBadge(item.category)}
-                    </p>
+                    {item.category && (
+                      <p className="text-xs text-blue-600 font-medium mt-0.5 capitalize">
+                        {item.category}
+                      </p>
+                    )}
                   </div>
                   <button
                     onClick={() => removeItem(item.code)}
@@ -549,7 +709,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
               disabled={selectedCodes.length === 0}
               onClick={handleSaveClick}
             >
-              Configure Reminders
+              Configure Reminders ({selectedCodes.length})
             </button>
           </div>
         </div>
