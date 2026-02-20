@@ -142,81 +142,38 @@ function ClientServices() {
     }
   };
 
-  const getStatusLabel = (reg) => {
-    // Check actual payment completion indicators first
-    const hasPaymentId = reg.razorpay_payment_id || reg.payment_id;
-    const paymentStatus = (reg.payment_status || '').toLowerCase().trim();
-    const isPaymentCompleted = reg.payment_completed || 
-                               hasPaymentId ||
-                               paymentStatus === 'paid' || 
-                               paymentStatus === 'payment_completed';
-    
-    // If payment is NOT completed, show payment status
-    if (!isPaymentCompleted) {
-      if (paymentStatus === 'pending' || paymentStatus === 'unpaid' || paymentStatus === '') {
-        return 'Payment pending';
-      }
-      if (reg.payment_status) {
-        return reg.payment_status;
-      }
-    }
-    
-    // If payment IS completed, check service_status
-    if (isPaymentCompleted) {
-      // Show service_status if it exists and is meaningful
-      if (reg.service_status && typeof reg.service_status === "string" && reg.service_status.trim() !== '') {
-        const serviceStatus = reg.service_status.toLowerCase().trim();
-        // Don't show "Payment completed" as service_status if payment is actually completed
-        if (serviceStatus !== 'payment completed' && serviceStatus !== 'payment_completed') {
-          return reg.service_status;
-        }
-      }
-      // Otherwise show payment completed status
-      return 'Payment completed';
-    }
-    
-    // Fallback to status field
-    if (reg.status && typeof reg.status === "string") return reg.status;
-    
-    // Default
-    return "Open";
+  const paymentStatusToDisplay = (dbValue) => {
+    if (!dbValue) return "Open to Pay";
+    const v = String(dbValue).toLowerCase().replace(/_/g, " ");
+    const map = { paid: "Paid", partially_paid: "Partially Paid", "pay later": "Pay later", "open to pay": "Open to Pay", pending: "Open to Pay", unpaid: "Open to Pay" };
+    return map[v] || dbValue;
   };
 
+  const getPaymentStatusLabel = (reg) => paymentStatusToDisplay(reg.payment_status);
+  const getWorkStatusLabel = (reg) => (reg.service_status && reg.service_status.trim() !== "") ? reg.service_status : "—";
+
   const getServiceTab = React.useCallback((reg) => {
-    // Step 1: Check payment status first - if payment is pending/unpaid, return "Open"
-    const paymentStatus = (reg.payment_status || '').toLowerCase().trim();
-    if (paymentStatus === 'pending' || paymentStatus === 'unpaid') {
-      return 'Open';
-    }
-    
-    // Step 2: Check if service_status is "completed" (case-insensitive) - return "Completed"
-    if (reg.service_status && reg.service_status.trim() !== '') {
-      const serviceStatus = reg.service_status.toLowerCase().trim();
-      if (serviceStatus === 'completed') {
-        return 'Completed';
-      }
-    }
-    
-    // Step 3: If payment is completed, check service status
-    const isPaymentCompleted = reg.payment_completed || 
-                               paymentStatus === 'paid' || 
-                               paymentStatus === 'payment_completed' ||
-                               reg.razorpay_payment_id ||
-                               reg.payment_id;
-    
-    if (isPaymentCompleted) {
-      // Payment completed - if service_status exists (and is not completed), it's "In progress"
-      // This includes: WIP, data received, data pending, submitted, etc.
-      if (reg.service_status && reg.service_status.trim() !== '') {
-        // Already checked for 'completed' above, so any other status means "In progress"
-        return 'In progress';
-      }
-      // Payment completed but no service_status set yet - treat as "In progress"
-      return 'In progress';
-    }
-    
-    // Default: no payment or pending payment
-    return 'Open';
+    const workStatus = (reg.service_status || "").trim();
+    const workLower = workStatus.toLowerCase();
+
+    // Completed
+    if (workLower === "completed") return "Completed";
+
+    // Open: Awaiting Data, Data Pending from the client
+    if (workLower === "awaiting data") return "Open";
+    if (workLower === "data pending from the client") return "Open";
+
+    // In progress: WIP, Data Received, Under Review, Awaiting response from the Government / awaiting confirmation from government
+    if (workLower === "wip") return "In progress";
+    if (workLower === "data received") return "In progress";
+    if (workLower === "under review") return "In progress";
+    if (workLower.includes("awaiting response from the government") || workLower.includes("awaiting confirmation from the govt") || workLower.includes("awaiting confirmation from the government")) return "In progress";
+
+    // No work status set: use payment to decide (unpaid → Open, else In progress)
+    const paymentStatus = (reg.payment_status || "").toLowerCase().trim().replace(/\s/g, "_");
+    const notPaid = ["pending", "unpaid", "open_to_pay", "pay_later"].includes(paymentStatus) || paymentStatus === "open to pay" || paymentStatus === "pay later";
+    if (notPaid && !reg.razorpay_payment_id && !reg.payment_id) return "Open";
+    return "In progress";
   }, []);
 
   const filteredServices = React.useMemo(() => {
@@ -226,16 +183,11 @@ function ClientServices() {
 
   const getStatusBadgeColor = (status) => {
     if (!status) return "bg-gray-100 text-gray-800";
-    
     const statusLower = status.toLowerCase();
-    
-    // Admin service status colors
-    if (statusLower === "completed") {
-      return "bg-green-100 text-green-800";
-    }
-    if (statusLower === "wip" || statusLower === "data received" || statusLower === "awaiting confirmation from the govt") {
-      return "bg-blue-100 text-blue-800";
-    }
+    if (statusLower === "paid" || statusLower === "completed") return "bg-green-100 text-green-800";
+    if (statusLower === "partially paid") return "bg-amber-100 text-amber-800";
+    if (statusLower === "pay later" || statusLower === "open to pay") return "bg-yellow-100 text-yellow-800";
+    if (statusLower === "wip" || statusLower === "data received" || statusLower === "awaiting data" || statusLower === "under review" || statusLower.includes("awaiting") || statusLower.includes("data pending")) return "bg-blue-100 text-blue-800";
     if (statusLower === "data pending from client") {
       return "bg-yellow-100 text-yellow-800";
     }
@@ -407,7 +359,10 @@ function ClientServices() {
                         Package
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Status
+                        Payment Status
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Work status
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Date of Payment
@@ -431,8 +386,13 @@ function ClientServices() {
                           {formatServiceName(service)}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <span className={`${getStatusBadgeColor(getStatusLabel(service))} px-2 py-1 rounded-full text-xs font-medium`}>
-                            {getStatusLabel(service)}
+                          <span className={`${getStatusBadgeColor(getPaymentStatusLabel(service))} px-2 py-1 rounded-full text-xs font-medium`}>
+                            {getPaymentStatusLabel(service)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className={`${getStatusBadgeColor(getWorkStatusLabel(service))} px-2 py-1 rounded-full text-xs font-medium`}>
+                            {getWorkStatusLabel(service)}
                           </span>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
@@ -440,11 +400,12 @@ function ClientServices() {
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm">
                           <div className="flex items-center gap-2">
-                            {/* Check if payment is pending/partly paid */}
-                            {((service.payment_status && (service.payment_status.toLowerCase() === 'pending' || service.payment_status.toLowerCase() === 'unpaid' || service.payment_status.toLowerCase() === 'partly paid')) ||
-                              service.service_status === 'Payment pending' ||
-                              (!service.payment_completed && !service.razorpay_payment_id && !service.payment_id)) &&
-                              (service.razorpay_order_id || service.order_id) ? (
+                            {/* Show Pay when payment status is open to pay / pay later / pending / unpaid */}
+                            {(() => {
+                              const ps = (service.payment_status || "").toLowerCase();
+                              const needsPayment = ["pending", "unpaid", "open_to_pay", "pay_later"].includes(ps) || ps === "open to pay" || ps === "pay later" || (!service.payment_completed && !service.razorpay_payment_id && !service.payment_id);
+                              return needsPayment && (service.razorpay_order_id || service.order_id);
+                            })() ? (
                                 // Show "Pay and View Details" combined button
                                 <button
                                   onClick={async (e) => {

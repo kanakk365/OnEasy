@@ -1810,50 +1810,28 @@ function AdminClientOverview() {
     setClientPersonaList(updatedList);
   };
 
-  const handleUpdateServiceStatus = async (newStatus, ticketId) => {
+  const handleUpdateWorkStatus = async (ticketId, newWorkStatus) => {
     try {
-      if (!ticketId) {
-        alert("Ticket ID is required to update status");
-        return;
-      }
-
-      // Find the registration to check payment status
-      const registration = allRegistrations.find(
-        (r) => r.ticket_id === ticketId,
-      );
-      if (!registration) {
-        alert("Registration not found");
-        return;
-      }
-
-      // Check if payment is pending and status is being changed from "Payment pending"
-      const currentStatus = (registration.service_status || "")
-        .toLowerCase()
-        .trim();
-      const isPaymentPending =
-        currentStatus === "payment pending" ||
-        (registration.payment_status &&
-          (registration.payment_status.toLowerCase() === "pending" ||
-            registration.payment_status.toLowerCase() === "unpaid"));
-      const hasPaymentId = !!registration.razorpay_payment_id;
-      const isChangingFromPending =
-        isPaymentPending &&
-        newStatus.toLowerCase().trim() !== "Payment pending";
-
-      // If payment is pending and trying to change status, show payment method dialog
-      if (isChangingFromPending && !hasPaymentId) {
-        setPendingStatusUpdate({ newStatus, ticketId });
-        setShowPaymentMethodDialog(true);
-        return;
-      }
-
-      // If already paid (has payment ID) or not changing from pending, proceed with status update
-      await performStatusUpdate(newStatus, ticketId, null);
+      if (!ticketId) return;
+      await performStatusUpdate(ticketId, newWorkStatus, null, null, null);
     } catch (error) {
-      console.error("Error updating service status:", error);
-      const errorMessage =
-        error.message || error.response?.data?.message || "Unknown error";
-      alert("Failed to update status: " + errorMessage);
+      console.error("Error updating work status:", error);
+      alert("Failed to update work status: " + (error.message || error.response?.data?.message || "Unknown error"));
+    }
+  };
+
+  const handleUpdatePaymentStatus = async (ticketId, newPaymentStatusDisplay) => {
+    try {
+      if (!ticketId) return;
+      await performStatusUpdate(ticketId, null, newPaymentStatusDisplay, null, null);
+    } catch (error) {
+      console.error("Error updating payment status:", error);
+      if (error.response?.data?.requiresPaymentMethod) {
+        setPendingStatusUpdate({ ticketId, newPaymentStatus: newPaymentStatusDisplay });
+        setShowPaymentMethodDialog(true);
+      } else {
+        alert("Failed to update payment status: " + (error.message || error.response?.data?.message || "Unknown error"));
+      }
     }
   };
 
@@ -1864,48 +1842,41 @@ function AdminClientOverview() {
 
   const handlePaymentFormSubmit = async () => {
     if (!pendingStatusUpdate || !selectedPaymentMethod) return;
-
-    // Validate required fields
     if (!paymentFormData.dateOfPayment || !paymentFormData.person) {
       alert("Please fill in Date of Payment and Person fields");
       return;
     }
-
-    const { newStatus, ticketId } = pendingStatusUpdate;
+    const { ticketId, newStatus, newPaymentStatus } = pendingStatusUpdate;
     try {
       await performStatusUpdate(
-        newStatus,
         ticketId,
+        newStatus || null,
+        newPaymentStatus || null,
         selectedPaymentMethod,
         paymentFormData,
       );
-      // Reset form and close dialog
       setShowPaymentMethodDialog(false);
       setPendingStatusUpdate(null);
       setSelectedPaymentMethod(null);
-      setPaymentFormData({
-        dateOfPayment: "",
-        person: "",
-        remark: "",
-      });
+      setPaymentFormData({ dateOfPayment: "", person: "", remark: "" });
     } catch (error) {
       console.error("Error updating status with payment method:", error);
-      const errorMessage =
-        error.message || error.response?.data?.message || "Unknown error";
-      alert("Failed to update status: " + errorMessage);
+      alert("Failed to update: " + (error.message || error.response?.data?.message || "Unknown error"));
     }
   };
 
   const performStatusUpdate = async (
-    newStatus,
     ticketId,
+    newStatus,
+    paymentStatusDisplay,
     paymentMethod,
     paymentDetails = null,
   ) => {
     try {
       const payload = {
         ticketId,
-        status: newStatus,
+        ...(newStatus != null && newStatus !== "" && { status: newStatus }),
+        ...(paymentStatusDisplay != null && paymentStatusDisplay !== "" && { paymentStatus: paymentStatusDisplay }),
         ...(paymentMethod && { paymentMethod }),
         ...(paymentDetails && {
           dateOfPayment: paymentDetails.dateOfPayment,
@@ -1919,43 +1890,27 @@ function AdminClientOverview() {
         payload,
       );
 
-      console.log("📝 Update status response:", response);
-
       if (response.success) {
-        // Refresh the client data and registrations to show updated status
         await fetchAllRegistrations();
         fetchClientProfile();
-        console.log("✅ Service status updated:", newStatus);
+        return;
+      }
+      if (response.requiresPaymentMethod) {
+        setPendingStatusUpdate(paymentStatusDisplay ? { ticketId, newPaymentStatus: paymentStatusDisplay } : { ticketId, newStatus });
+        setShowPaymentMethodDialog(true);
       } else {
-        // Check if it requires payment method
-        if (response.requiresPaymentMethod) {
-          setPendingStatusUpdate({ newStatus, ticketId });
-          setShowPaymentMethodDialog(true);
-        } else {
-          throw new Error(response.message || "Failed to update status");
-        }
+        throw new Error(response.message || "Failed to update status");
       }
     } catch (error) {
       console.error("Error updating service status:", error);
-      const errorMessage =
-        error.message || error.response?.data?.message || "Unknown error";
-
-      // Check if it's a database column error
-      if (
-        errorMessage.includes("service_status") &&
-        errorMessage.includes("column")
-      ) {
-        alert(
-          "The service_status column does not exist in the database. Please run the migration SQL first. See backend/migrations/add_service_status_column.sql",
-        );
-      } else if (error.response?.data?.requiresPaymentMethod) {
-        // Backend is asking for payment method
-        setPendingStatusUpdate({ newStatus, ticketId });
+      const errorMessage = error.message || error.response?.data?.message || "Unknown error";
+      if (error.response?.data?.requiresPaymentMethod) {
+        setPendingStatusUpdate(paymentStatusDisplay ? { ticketId, newPaymentStatus: paymentStatusDisplay } : { ticketId, newStatus });
         setShowPaymentMethodDialog(true);
       } else {
         alert("Failed to update status: " + errorMessage);
+        throw error;
       }
-      throw error;
     }
   };
 
@@ -2299,9 +2254,8 @@ function AdminClientOverview() {
           navigate={navigate}
           isServiceCardExpanded={isServiceCardExpanded}
           setIsServiceCardExpanded={setIsServiceCardExpanded}
-          isStatusDropdownOpen={isStatusDropdownOpen}
-          setIsStatusDropdownOpen={setIsStatusDropdownOpen}
-          handleUpdateServiceStatus={handleUpdateServiceStatus}
+          handleUpdateWorkStatus={handleUpdateWorkStatus}
+          handleUpdatePaymentStatus={handleUpdatePaymentStatus}
           handleDeleteService={handleDeleteService}
           formatDate={formatDate}
           apiClient={apiClient}

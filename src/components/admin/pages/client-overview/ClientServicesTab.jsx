@@ -1,6 +1,24 @@
-﻿import React from "react";
+import React from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { FiTrash2 } from "react-icons/fi";
+
+const PAYMENT_STATUS_OPTIONS = ["Paid", "Partially Paid", "Pay later", "Open to Pay"];
+const WORK_STATUS_OPTIONS = [
+  "Data Received",
+  "Awaiting Data",
+  "WIP",
+  "Data Pending from the client",
+  "Awaiting response from the Government",
+  "Under Review",
+  "Completed",
+];
+
+function paymentStatusToDisplay(dbValue) {
+  if (!dbValue) return "Open to Pay";
+  const v = String(dbValue).toLowerCase().replace(/_/g, " ");
+  const map = { paid: "Paid", partially_paid: "Partially Paid", "pay later": "Pay later", "open to pay": "Open to Pay", pending: "Open to Pay", unpaid: "Open to Pay" };
+  return map[v] || dbValue;
+}
 
 function ClientServicesTab({
   allRegistrations,
@@ -8,9 +26,8 @@ function ClientServicesTab({
   navigate,
   isServiceCardExpanded,
   setIsServiceCardExpanded,
-  isStatusDropdownOpen,
-  setIsStatusDropdownOpen,
-  handleUpdateServiceStatus,
+  handleUpdateWorkStatus,
+  handleUpdatePaymentStatus,
   handleDeleteService,
   formatDate,
   apiClient,
@@ -134,127 +151,33 @@ function ClientServicesTab({
                       </p>
                     </div>
 
-                    {/* Service Status Dropdown + Delete */}
-                    <div className="relative flex items-center gap-3">
-                      {(() => {
-                        const serviceStatusOptions = [
-                          "Payment pending",
-                          "Payment completed",
-                          "Data received",
-                          "WIP",
-                          "Awaiting confirmation from the Govt",
-                          "Data Pending from Client",
-                          "Completed",
-                          "Technical Issue",
-                        ];
-
-                        const currentStatus =
-                          registration.service_status || "Payment pending";
-
-                        const getStatusBadgeColor = (status) => {
-                          const statusLower = (status || "").toLowerCase();
-                          if (
-                            statusLower === "completed" ||
-                            statusLower === "payment completed"
-                          )
-                            return "bg-green-100 text-green-800";
-                          if (
-                            statusLower === "wip" ||
-                            statusLower === "data received" ||
-                            statusLower ===
-                              "awaiting confirmation from the govt" ||
-                            statusLower === "data pending from client"
-                          )
-                            return "bg-blue-100 text-blue-800";
-                          if (
-                            statusLower === "payment pending" ||
-                            statusLower === "technical issue"
-                          )
-                            return "bg-yellow-100 text-yellow-800";
-                          return "bg-gray-100 text-gray-800";
-                        };
-
-                        return (
-                          <>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setIsStatusDropdownOpen(
-                                  isStatusDropdownOpen === index ? null : index
-                                );
-                              }}
-                              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${getStatusBadgeColor(
-                                currentStatus
-                              )}`}
-                            >
-                              <span>{currentStatus}</span>
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M19 9l-7 7-7-7"
-                                />
-                              </svg>
-                            </button>
-
-                            {/* Dropdown Menu */}
-                            {isStatusDropdownOpen === index && (
-                              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-64 overflow-y-auto">
-                                {serviceStatusOptions.map(
-                                  (option, optIndex) => (
-                                    <button
-                                      key={option}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleUpdateServiceStatus(
-                                          option,
-                                          registration.ticket_id
-                                        );
-                                        setIsStatusDropdownOpen(null);
-                                      }}
-                                      className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 ${
-                                        optIndex === 0 ? "rounded-t-lg" : ""
-                                      } ${
-                                        optIndex ===
-                                        serviceStatusOptions.length - 1
-                                          ? "rounded-b-lg"
-                                          : ""
-                                      } ${
-                                        currentStatus === option
-                                          ? "bg-blue-50 font-semibold"
-                                          : ""
-                                      }`}
-                                    >
-                                      <span
-                                        className={`w-2 h-2 rounded-full ${
-                                          option === "Completed" ||
-                                          option === "Payment completed"
-                                            ? "bg-green-600"
-                                            : option === "WIP" ||
-                                              option === "Data received" ||
-                                              option ===
-                                                "Awaiting confirmation from the Govt" ||
-                                              option ===
-                                                "Data Pending from Client"
-                                            ? "bg-blue-600"
-                                            : "bg-yellow-600"
-                                        }`}
-                                      ></span>
-                                      {option}
-                                    </button>
-                                  )
-                                )}
-                              </div>
-                            )}
-                          </>
-                        );
-                      })()}
+                    {/* Payment Status + Work status dropdowns + Delete */}
+                    <div className="relative flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+                      {registration.ticket_id && (
+                        <>
+                          <select
+                            value={paymentStatusToDisplay(registration.payment_status)}
+                            onChange={(e) => handleUpdatePaymentStatus(registration.ticket_id, e.target.value)}
+                            className="px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white focus:ring-1 focus:ring-[#00486D] focus:outline-none cursor-pointer min-w-[120px]"
+                          >
+                            {PAYMENT_STATUS_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                          <select
+                            value={registration.service_status || ""}
+                            onChange={(e) => handleUpdateWorkStatus(registration.ticket_id, e.target.value)}
+                            className="px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white focus:ring-1 focus:ring-[#00486D] focus:outline-none cursor-pointer min-w-[140px] max-w-[200px]"
+                          >
+                            {[
+                              ...(registration.service_status && !WORK_STATUS_OPTIONS.includes(registration.service_status) ? [registration.service_status] : []),
+                              ...WORK_STATUS_OPTIONS,
+                            ].map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        </>
+                      )}
 
                       {registration.ticket_id && (
                         <button

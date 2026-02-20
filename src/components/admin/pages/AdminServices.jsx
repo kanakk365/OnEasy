@@ -154,41 +154,13 @@ function AdminServices() {
   };
 
   const getStatusLabel = useCallback((svc) => {
-    if (svc.team_fill_requested) return "Team Fill Requested";
-    if (svc.registration_submitted) return "Registered";
-    if (svc.payment_completed) return "Payment Done";
-    return "New";
+    return paymentStatusToDisplay(svc.payment_status);
   }, []);
 
   const getProgressLabel = useCallback((svc) => {
-    const paymentStatus = (svc.payment_status || "").toLowerCase().trim();
-    if (paymentStatus === "pending" || paymentStatus === "unpaid")
-      return "Open";
-
-    if (svc.service_status && svc.service_status.trim() !== "") {
-      const serviceStatus = svc.service_status.toLowerCase().trim();
-      if (serviceStatus === "completed") return "Resolved";
-    }
-
-    const isPaymentCompleted =
-      svc.payment_completed ||
-      paymentStatus === "paid" ||
-      paymentStatus === "payment_completed" ||
-      svc.razorpay_payment_id ||
-      svc.payment_id;
-
-    if (isPaymentCompleted) {
-      if (
-        svc.service_status &&
-        svc.service_status.trim() !== "" &&
-        svc.service_status.toLowerCase().trim() !== "completed"
-      ) {
-        return "Ongoing";
-      }
-      return "Ongoing";
-    }
-
-    return "Open";
+    return svc.service_status && svc.service_status.trim() !== ""
+      ? svc.service_status
+      : "";
   }, []);
 
   const deriveServiceFromTicket = useCallback((ticketId) => {
@@ -490,16 +462,38 @@ function AdminServices() {
     return [...new Set(allServices)];
   }, [services, getServiceLabel, CANONICAL_SERVICES]);
 
-  const adminStatusOptions = [
-    "Data received",
-    "WIP",
-    "Awaiting confirmation from the Govt",
-    "Data Pending from Client",
-    "Payment completed",
-    "Completed",
-    "Technical Issue",
-    "Payment pending",
+  const PAYMENT_STATUS_OPTIONS = [
+    "Paid",
+    "Partially Paid",
+    "Pay later",
+    "Open to Pay",
   ];
+  const WORK_STATUS_OPTIONS = [
+    "Data Received",
+    "Awaiting Data",
+    "WIP",
+    "Data Pending from the client",
+    "Awaiting response from the Government",
+    "Under Review",
+    "Completed",
+  ];
+  const paymentStatusToDisplay = (dbValue) => {
+    if (!dbValue) return "Open to Pay";
+    const v = String(dbValue).toLowerCase().replace(/_/g, " ");
+    const map = {
+      paid: "Paid",
+      partially_paid: "Partially Paid",
+      "pay later": "Pay later",
+      "open to pay": "Open to Pay",
+      pending: "Open to Pay",
+      unpaid: "Open to Pay",
+    };
+    return map[v] || PAYMENT_STATUS_OPTIONS.find((o) => o.toLowerCase().replace(/\s/g, "") === v.replace(/\s/g, "")) || dbValue;
+  };
+  const paymentDisplayToDb = (display) => {
+    const map = { Paid: "paid", "Partially Paid": "partially_paid", "Pay later": "pay_later", "Open to Pay": "open_to_pay" };
+    return map[display] || display;
+  };
 
   const toggleFromArray = (value, listSetter) => {
     listSetter((prev) =>
@@ -507,32 +501,28 @@ function AdminServices() {
     );
   };
 
-  const handleStatusUpdate = async (svc, newStatus) => {
+  const handleWorkStatusUpdate = async (svc, newWorkStatus) => {
     try {
-      if (!svc.ticket_id) {
-        alert("Ticket ID is required to update status");
-        return;
-      }
-      const currentStatus = (svc.service_status || "").toLowerCase().trim();
-      const isPaymentPending =
-        currentStatus === "payment pending" ||
-        (svc.payment_status &&
-          (svc.payment_status.toLowerCase() === "pending" ||
-            svc.payment_status.toLowerCase() === "unpaid"));
-      const hasPaymentId = !!svc.razorpay_payment_id;
-      const isChangingFromPending =
-        isPaymentPending &&
-        newStatus.toLowerCase().trim() !== "payment pending";
-
-      if (isChangingFromPending && !hasPaymentId) {
-        setPendingStatusUpdate({ svc, newStatus });
-        setShowPaymentMethodDialog(true);
-        return;
-      }
-      await performStatusUpdate(svc, newStatus, null);
+      if (!svc.ticket_id) return;
+      await performStatusUpdate(svc, newWorkStatus, null, null, null);
     } catch (error) {
-      console.error("Error updating status:", error);
-      alert("Failed to update status: " + (error.message || "Unknown error"));
+      console.error("Error updating work status:", error);
+      alert("Failed to update work status: " + (error.message || "Unknown error"));
+    }
+  };
+
+  const handlePaymentStatusUpdate = async (svc, newPaymentStatusDisplay) => {
+    try {
+      if (!svc.ticket_id) return;
+      await performStatusUpdate(svc, null, null, null, newPaymentStatusDisplay);
+    } catch (error) {
+      console.error("Error updating payment status:", error);
+      if (error.response?.data?.requiresPaymentMethod) {
+        setPendingStatusUpdate({ svc, newPaymentStatus: newPaymentStatusDisplay });
+        setShowPaymentMethodDialog(true);
+      } else {
+        alert("Failed to update payment status: " + (error.message || "Unknown error"));
+      }
     }
   };
 
@@ -543,36 +533,35 @@ function AdminServices() {
 
   const handlePaymentFormSubmit = async () => {
     if (!pendingStatusUpdate || !selectedPaymentMethod) return;
-    
-    // Validate required fields
     if (!paymentFormData.dateOfPayment || !paymentFormData.person) {
       alert("Please fill in Date of Payment and Person fields");
       return;
     }
-
-    const { svc, newStatus } = pendingStatusUpdate;
+    const { svc, newStatus, newPaymentStatus } = pendingStatusUpdate;
     try {
-      await performStatusUpdate(svc, newStatus, selectedPaymentMethod, paymentFormData);
-      // Reset form and close dialog
+      await performStatusUpdate(
+        svc,
+        newStatus || null,
+        selectedPaymentMethod,
+        paymentFormData,
+        newPaymentStatus || null
+      );
       setShowPaymentMethodDialog(false);
       setPendingStatusUpdate(null);
       setSelectedPaymentMethod(null);
-      setPaymentFormData({
-        dateOfPayment: "",
-        person: "",
-        remark: "",
-      });
+      setPaymentFormData({ dateOfPayment: "", person: "", remark: "" });
     } catch (error) {
       console.error("Error updating status with payment method:", error);
-      alert("Failed to update status: " + (error.message || "Unknown error"));
+      alert("Failed to update: " + (error.message || "Unknown error"));
     }
   };
 
-  const performStatusUpdate = async (svc, newStatus, paymentMethod, paymentDetails = null) => {
+  const performStatusUpdate = async (svc, newStatus, paymentMethod, paymentDetails = null, paymentStatusDisplay = null) => {
     try {
       const payload = {
         ticketId: svc.ticket_id,
-        status: newStatus,
+        ...(newStatus != null && newStatus !== "" && { status: newStatus }),
+        ...(paymentStatusDisplay != null && paymentStatusDisplay !== "" && { paymentStatus: paymentStatusDisplay }),
         ...(paymentMethod && { paymentMethod }),
         ...(paymentDetails && {
           dateOfPayment: paymentDetails.dateOfPayment,
@@ -580,34 +569,30 @@ function AdminServices() {
           remark: paymentDetails.remark,
         }),
       };
-      const response = await apiClient.post(
-        "/admin/update-service-status",
-        payload
-      );
+      const response = await apiClient.post("/admin/update-service-status", payload);
 
       if (response.success) {
         setServices((prev) =>
-          prev.map((item) =>
-            item.ticket_id === svc.ticket_id
-              ? { ...item, service_status: newStatus }
-              : item
-          )
+          prev.map((item) => {
+            if (item.ticket_id !== svc.ticket_id) return item;
+            const next = { ...item };
+            if (newStatus != null && newStatus !== "") next.service_status = newStatus;
+            if (paymentStatusDisplay != null && paymentStatusDisplay !== "") next.payment_status = paymentDisplayToDb(paymentStatusDisplay);
+            return next;
+          })
         );
-        setTimeout(async () => {
-          await fetchServices();
-        }, 500);
+        setTimeout(() => fetchServices(), 500);
+        return;
+      }
+      if (response.requiresPaymentMethod) {
+        setPendingStatusUpdate(paymentStatusDisplay ? { svc, newPaymentStatus: paymentStatusDisplay } : { svc, newStatus });
+        setShowPaymentMethodDialog(true);
       } else {
-        if (response.requiresPaymentMethod) {
-          setPendingStatusUpdate({ svc, newStatus });
-          setShowPaymentMethodDialog(true);
-        } else {
-          throw new Error(response.message || "Failed to update status");
-        }
+        throw new Error(response.message || "Failed to update status");
       }
     } catch (error) {
-      console.error("Error updating status:", error);
       if (error.response?.data?.requiresPaymentMethod) {
-        setPendingStatusUpdate({ svc, newStatus });
+        setPendingStatusUpdate(paymentStatusDisplay ? { svc, newPaymentStatus: paymentStatusDisplay } : { svc, newStatus });
         setShowPaymentMethodDialog(true);
       } else {
         throw error;
@@ -642,54 +627,6 @@ function AdminServices() {
     } catch (error) {
       console.error("Error deleting service:", error);
       alert("Failed to delete service");
-    }
-  };
-
-  const handleProgressUpdate = async (svc, newProgress) => {
-    try {
-      if (!svc.ticket_id) return;
-      const currentStatus = svc.service_status || "";
-      const currentStatusLower = currentStatus.toLowerCase();
-      const detailedStatuses = [
-        "data received",
-        "awaiting confirmation from the govt",
-        "awaiting confirmation from the government",
-        "data pending from client",
-        "technical issue",
-      ];
-      const isDetailedStatus = detailedStatuses.some((ds) =>
-        currentStatusLower.includes(ds)
-      );
-
-      let statusToSet = "";
-      if (newProgress === "Resolved") statusToSet = "Completed";
-      else if (newProgress === "Ongoing")
-        statusToSet = isDetailedStatus ? currentStatus : "WIP";
-      else if (newProgress === "Open")
-        statusToSet = isDetailedStatus ? currentStatus : "Payment pending";
-
-      if (statusToSet === currentStatus) return;
-
-      const payload = { ticketId: svc.ticket_id, status: statusToSet };
-      const response = await apiClient.post(
-        "/admin/update-service-status",
-        payload
-      );
-      if (response.success) {
-        setServices((prev) =>
-          prev.map((item) =>
-            item.ticket_id === svc.ticket_id
-              ? { ...item, service_status: statusToSet }
-              : item
-          )
-        );
-        setTimeout(async () => {
-          await fetchServices();
-        }, 500);
-      }
-    } catch (error) {
-      console.error("Error updating progress:", error);
-      alert("Failed to update progress");
     }
   };
 
@@ -751,36 +688,28 @@ function AdminServices() {
 
   const filteredServices = useMemo(() => {
     return services.filter((svc) => {
-      const status = getStatusLabel(svc);
-      const actualStatus = (svc.service_status || "").trim();
-      const progress = getProgressLabel(svc);
+      const paymentStatusDisplay = getStatusLabel(svc);
+      const workStatus = (svc.service_status || "").trim();
       const serviceName = getServiceLabel(svc);
       const clientName =
         svc.name || svc.legal_name || svc.client_name || svc.email || "-";
       const searchLower = searchTerm.toLowerCase();
 
-      // Search match
       const matchesSearch =
         !searchTerm ||
         clientName.toLowerCase().includes(searchLower) ||
         serviceName.toLowerCase().includes(searchLower) ||
         (svc.ticket_id && svc.ticket_id.toLowerCase().includes(searchLower));
 
-      // Status filter: match against both the derived status label and the actual service_status
       const matchesStatus =
-        statusFilters.length === 0 ||
-        statusFilters.some(
-          (f) =>
-            status === f ||
-            actualStatus.toLowerCase() === (f || "").toLowerCase(),
-        );
+        statusFilters.length === 0 || statusFilters.includes(paymentStatusDisplay);
 
       const matchesService =
         serviceFilters.length === 0 ||
         serviceFilters.includes(serviceName);
 
       const matchesProgress =
-        progressFilters.length === 0 || progressFilters.includes(progress);
+        progressFilters.length === 0 || progressFilters.includes(workStatus);
 
       return (
         matchesSearch &&
@@ -955,7 +884,7 @@ function AdminServices() {
                 Clear selection
               </button>
               <div className="space-y-1">
-                {adminStatusOptions.map((s) => (
+                {PAYMENT_STATUS_OPTIONS.map((s) => (
                   <label
                     key={s}
                     className="flex items-center gap-2 cursor-pointer"
@@ -974,7 +903,7 @@ function AdminServices() {
           )}
         </div>
 
-        {/* Progress multi-select */}
+        {/* Work status multi-select */}
         <div className="relative">
           <button
             type="button"
@@ -983,13 +912,13 @@ function AdminServices() {
           >
             <span className="truncate">
               {progressFilters.length === 0
-                ? "All Progress"
+                ? "All Work status"
                 : `${progressFilters.length} selected`}
             </span>
             <FiFilter className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
           </button>
           {showProgressFilterMenu && (
-            <div className="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg p-3 text-sm">
+            <div className="absolute z-20 mt-2 w-full max-h-64 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg p-3 text-sm">
               <button
                 type="button"
                 onClick={() => setProgressFilters([])}
@@ -998,7 +927,7 @@ function AdminServices() {
                 Clear selection
               </button>
               <div className="space-y-1">
-                {["Open", "Ongoing", "Resolved"].map((p) => (
+                {WORK_STATUS_OPTIONS.map((p) => (
                   <label
                     key={p}
                     className="flex items-center gap-2 cursor-pointer"
@@ -1009,7 +938,7 @@ function AdminServices() {
                       checked={progressFilters.includes(p)}
                       onChange={() => toggleFromArray(p, setProgressFilters)}
                     />
-                    <span>{p}</span>
+                    <span className="truncate">{p}</span>
                   </label>
                 ))}
               </div>
@@ -1052,10 +981,10 @@ function AdminServices() {
                         Service
                       </th>
                       <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D]">
-                        Status
+                        Payment Status
                       </th>
                       <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D]">
-                        Progress
+                        Work status
                       </th>
                       <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D] hidden lg:table-cell">
                         Updated
@@ -1095,13 +1024,13 @@ function AdminServices() {
                           {svc.ticket_id ? (
                             <div className="relative">
                               <select
-                                value={svc.service_status || "Payment pending"}
+                                value={paymentStatusToDisplay(svc.payment_status)}
                                 onChange={(e) =>
-                                  handleStatusUpdate(svc, e.target.value)
+                                  handlePaymentStatusUpdate(svc, e.target.value)
                                 }
                                 className="w-full max-w-[140px] md:max-w-[160px] pl-1.5 md:pl-2 pr-5 md:pr-6 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] appearance-none cursor-pointer"
                               >
-                                {adminStatusOptions.map((opt) => (
+                                {PAYMENT_STATUS_OPTIONS.map((opt) => (
                                   <option key={opt} value={opt}>
                                     {opt}
                                   </option>
@@ -1131,15 +1060,20 @@ function AdminServices() {
                           {svc.ticket_id ? (
                             <div className="relative">
                               <select
-                                value={getProgressLabel(svc)}
+                                value={svc.service_status || ""}
                                 onChange={(e) =>
-                                  handleProgressUpdate(svc, e.target.value)
+                                  handleWorkStatusUpdate(svc, e.target.value)
                                 }
-                                className="w-full max-w-[100px] md:max-w-[120px] pl-1.5 md:pl-2 pr-5 md:pr-6 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] appearance-none cursor-pointer"
+                                className="w-full max-w-[140px] md:max-w-[200px] pl-1.5 md:pl-2 pr-5 md:pr-6 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] appearance-none cursor-pointer"
                               >
-                                <option value="Open">Open</option>
-                                <option value="Ongoing">Ongoing</option>
-                                <option value="Resolved">Resolved</option>
+                                {[
+                                  ...(svc.service_status && !WORK_STATUS_OPTIONS.includes(svc.service_status) ? [svc.service_status] : []),
+                                  ...WORK_STATUS_OPTIONS,
+                                ].map((opt) => (
+                                  <option key={opt} value={opt}>
+                                    {opt}
+                                  </option>
+                                ))}
                               </select>
                               <div className="absolute right-1 md:right-2 top-1/2 -translate-y-1/2 pointer-events-none">
                                 <svg
@@ -1198,10 +1132,11 @@ function AdminServices() {
                         </td>
                         <td className="px-2 md:px-3 lg:px-4 py-3">
                           <div className="flex items-center gap-1 md:gap-2">
-                            {svc.service_status &&
-                              svc.service_status.toLowerCase().trim() ===
-                                "payment pending" &&
-                              (svc.razorpay_order_id || svc.order_id) && (
+                            {(() => {
+                              const ps = (svc.payment_status || "").toLowerCase();
+                              const needsPayment = ["pending", "unpaid", "open_to_pay", "pay_later"].includes(ps) || ps === "open to pay" || ps === "pay later";
+                              return needsPayment && (svc.razorpay_order_id || svc.order_id);
+                            })() && (
                                 <>
                                   <button
                                     onClick={() => handlePayClick(svc)}
