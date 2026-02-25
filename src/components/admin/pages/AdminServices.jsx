@@ -514,6 +514,16 @@ function AdminServices() {
   const handlePaymentStatusUpdate = async (svc, newPaymentStatusDisplay) => {
     try {
       if (!svc.ticket_id) return;
+      // If marking as Paid without an online payment ID, open the
+      // payment details dialog (date, mode/nature, person, remark)
+      const normalized = newPaymentStatusDisplay.toLowerCase().trim();
+      const hasOnlinePaymentId =
+        !!svc.razorpay_payment_id || !!svc.payment_id || !!svc.razorpay_order_id || !!svc.order_id;
+      if (normalized === "paid" && !hasOnlinePaymentId) {
+        setPendingStatusUpdate({ svc, newPaymentStatus: newPaymentStatusDisplay });
+        setShowPaymentMethodDialog(true);
+        return;
+      }
       await performStatusUpdate(svc, null, null, null, newPaymentStatusDisplay);
     } catch (error) {
       console.error("Error updating payment status:", error);
