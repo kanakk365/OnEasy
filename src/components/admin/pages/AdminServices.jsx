@@ -518,7 +518,7 @@ function AdminServices() {
       // payment details dialog (date, mode/nature, person, remark)
       const normalized = newPaymentStatusDisplay.toLowerCase().trim();
       const hasOnlinePaymentId =
-        !!svc.razorpay_payment_id || !!svc.payment_id || !!svc.razorpay_order_id || !!svc.order_id;
+        !!svc.razorpay_payment_id || !!svc.payment_id;
       if (normalized === "paid" && !hasOnlinePaymentId) {
         setPendingStatusUpdate({ svc, newPaymentStatus: newPaymentStatusDisplay });
         setShowPaymentMethodDialog(true);
