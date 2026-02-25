@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiTrash2 } from "react-icons/fi";
 import apiClient from "../../../../utils/api";
 import SuccessModal from "../../../common/SuccessModal";
+import ConfirmationModal from "../../../common/ConfirmationModal";
+
+const API_DELETE_URL =
+  "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/user-compliances";
 
 const ClientAssignedComplianceTab = ({ userId }) => {
   const [loading, setLoading] = useState(true);
@@ -12,9 +16,15 @@ const ClientAssignedComplianceTab = ({ userId }) => {
 
   // States for the details view
   const [instances, setInstances] = useState([]);
-  const [pendingUpdates, setPendingUpdates] = useState({}); // Map of instanceId -> boolean (isDone)
+  const [pendingUpdates, setPendingUpdates] = useState({});
   const [saving, setSaving] = useState(false);
   const [successfulSave, setSuccessfulSave] = useState(false);
+
+  // States for multi-select delete
+  const [selectedForDelete, setSelectedForDelete] = useState(new Set());
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -28,7 +38,6 @@ const ClientAssignedComplianceTab = ({ userId }) => {
       const token = apiClient.getToken();
       if (!token) throw new Error("No auth token found");
 
-      // Use the exact URL provided by the user
       const response = await fetch(
         `https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/user-compliances?userId=${userId}`,
         {
@@ -87,12 +96,11 @@ const ClientAssignedComplianceTab = ({ userId }) => {
 
   const handleComplianceClick = (assignment) => {
     setSelectedCompliance(assignment);
-    // Sort instances by due date
     const sortedInstances = [...(assignment.instances || [])].sort(
       (a, b) => new Date(a.dueDate) - new Date(b.dueDate),
     );
     setInstances(sortedInstances);
-    setPendingUpdates({}); // Reset pending updates
+    setPendingUpdates({});
   };
 
   const handleBack = () => {
@@ -102,29 +110,25 @@ const ClientAssignedComplianceTab = ({ userId }) => {
       setPendingUpdates({});
     } else if (selectedOrg) {
       setSelectedOrg(null);
+      setSelectedForDelete(new Set());
     }
   };
 
   const toggleInstanceStatus = (instanceId, currentStatus) => {
-    setPendingUpdates((prev) => {
-      const newStatus = !currentStatus;
-      return {
-        ...prev,
-        [instanceId]: newStatus,
-      };
-    });
+    setPendingUpdates((prev) => ({
+      ...prev,
+      [instanceId]: !currentStatus,
+    }));
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
       const token = apiClient.getToken();
-
       const doneInstanceIds = instances
         .filter((inst) => {
-          if (pendingUpdates[inst.id] !== undefined) {
+          if (pendingUpdates[inst.id] !== undefined)
             return pendingUpdates[inst.id];
-          }
           return inst.isDone;
         })
         .map((inst) => inst.id);
@@ -135,7 +139,6 @@ const ClientAssignedComplianceTab = ({ userId }) => {
         return;
       }
 
-      // Use the provided API URL
       const response = await fetch(
         "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/mark-instances-done",
         {
@@ -144,20 +147,13 @@ const ClientAssignedComplianceTab = ({ userId }) => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            instanceIds: doneInstanceIds,
-          }),
+          body: JSON.stringify({ instanceIds: doneInstanceIds }),
         },
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to update status");
-      }
+      if (!response.ok) throw new Error("Failed to update status");
 
-      // Refresh assignments to get latest state
       await fetchAssignments();
-
-      // Show success modal
       setSuccessfulSave(true);
       setPendingUpdates({});
     } catch (err) {
@@ -173,15 +169,100 @@ const ClientAssignedComplianceTab = ({ userId }) => {
     handleBack();
   };
 
-  // Helper to format category for badges
+  // --- Delete handlers ---
+  const toggleDeleteSelection = (complianceCode) => {
+    setSelectedForDelete((prev) => {
+      const next = new Set(prev);
+      if (next.has(complianceCode)) {
+        next.delete(complianceCode);
+      } else {
+        next.add(complianceCode);
+      }
+      return next;
+    });
+  };
+
+  const handleDeleteClick = () => {
+    if (selectedForDelete.size === 0) return;
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setShowDeleteConfirm(false);
+    setDeleting(true);
+    try {
+      const token = apiClient.getToken();
+      if (!token) throw new Error("Authentication token not found");
+
+      const response = await fetch(API_DELETE_URL, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: userId,
+          orgId: String(selectedOrg.id),
+          complianceCodes: Array.from(selectedForDelete),
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to delete compliances");
+
+      setDeleteSuccess(true);
+      setSelectedForDelete(new Set());
+      await fetchAssignments();
+      // Update the selectedOrg's assignments after refetch
+      const updatedGroups = getOrgGroupsFromAssignments();
+      const updatedOrg = updatedGroups.find(
+        (g) => String(g.id) === String(selectedOrg.id),
+      );
+      if (updatedOrg) {
+        setSelectedOrg(updatedOrg);
+      } else {
+        setSelectedOrg(null);
+      }
+    } catch (err) {
+      console.error("Error deleting compliances:", err);
+      alert(`❌ Failed to delete: ${err.message}`);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // Separate function that builds org groups from current assignments state
+  const getOrgGroupsFromAssignments = () => {
+    const orgMap = {};
+    assignments.forEach((assignment) => {
+      const org = assignment.organisation;
+      const orgKey = org ? org.id : "unassigned";
+      if (!orgMap[orgKey]) {
+        orgMap[orgKey] = {
+          id: orgKey,
+          legalName: org?.legalName || org?.legal_name || null,
+          tradeName: org?.tradeName || org?.trade_name || null,
+          gstin: org?.gstin || null,
+          assignments: [],
+          totalInstances: 0,
+          completedInstances: 0,
+        };
+      }
+      orgMap[orgKey].assignments.push(assignment);
+      const total = assignment.instances?.length || 0;
+      const completed =
+        assignment.instances?.filter((i) => i.isDone).length || 0;
+      orgMap[orgKey].totalInstances += total;
+      orgMap[orgKey].completedInstances += completed;
+    });
+    return Object.values(orgMap);
+  };
+
   const formatCategory = (cat) => cat?.replace(/_/g, " ") || "General";
 
-  // Helper to get Label for pill (Q1, Q2, Jan, Feb)
   const getPillLabel = (instance, idx, category) => {
     if (category.toLowerCase().includes("quarter")) {
       return `Q${(idx % 4) + 1}`;
     }
-    // Month name from dueDate
     const date = new Date(instance.dueDate);
     if (!isNaN(date)) {
       return date.toLocaleString("default", { month: "short" });
@@ -272,7 +353,6 @@ const ClientAssignedComplianceTab = ({ userId }) => {
 
                     const label = getPillLabel(instance, idx, categoryName);
 
-                    // Determine effective status (local pending or saved)
                     const isDone =
                       pendingUpdates[instance.id] !== undefined
                         ? pendingUpdates[instance.id]
@@ -353,7 +433,7 @@ const ClientAssignedComplianceTab = ({ userId }) => {
       "General (No Organisation)";
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 relative">
         {/* Header with Back Button and Org Context */}
         <div className="flex items-center gap-3">
           <button
@@ -390,6 +470,32 @@ const ClientAssignedComplianceTab = ({ userId }) => {
           </div>
         </div>
 
+        {orgAssignments.length > 0 && (
+          <div className="flex justify-end">
+            <button
+              onClick={() => {
+                const allCodes = orgAssignments
+                  .map((a) => a.compliance?.code)
+                  .filter(Boolean);
+                const allSelected = allCodes.every((c) => selectedForDelete.has(c));
+                if (allSelected) {
+                  setSelectedForDelete(new Set());
+                } else {
+                  setSelectedForDelete(new Set(allCodes));
+                }
+              }}
+              className="text-sm font-medium text-[#00486D] hover:text-[#003855] hover:underline transition-colors"
+            >
+              {orgAssignments
+                .map((a) => a.compliance?.code)
+                .filter(Boolean)
+                .every((c) => selectedForDelete.has(c))
+                ? "Deselect All"
+                : "Select All"}
+            </button>
+          </div>
+        )}
+
         <div className="space-y-4">
           {orgAssignments.length === 0 ? (
             <div className="text-center py-12 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
@@ -402,15 +508,30 @@ const ClientAssignedComplianceTab = ({ userId }) => {
               ).length;
               const totalCount = assignment.instances.length;
               const category = formatCategory(assignment.compliance?.category);
+              const compCode = assignment.compliance?.code;
+              const isSelected = compCode && selectedForDelete.has(compCode);
 
               return (
                 <div
                   key={assignment.id}
-                  className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow"
+                  className={`bg-white border rounded-xl p-6 hover:shadow-md transition-all ${
+                    isSelected
+                      ? "border-red-300 bg-red-50/30 shadow-sm"
+                      : "border-gray-200"
+                  }`}
                 >
-                  {/* Top Row: Title, Badge, Status */}
+                  {/* Top Row: Checkbox, Title, Badge, Status */}
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
                     <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          if (compCode) toggleDeleteSelection(compCode);
+                        }}
+                        className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500 cursor-pointer flex-shrink-0"
+                      />
                       <h3 className="text-lg font-bold text-gray-900">
                         {assignment.compliance?.name}
                       </h3>
@@ -469,6 +590,37 @@ const ClientAssignedComplianceTab = ({ userId }) => {
             })
           )}
         </div>
+
+        {/* Floating Delete Button */}
+        {selectedForDelete.size > 0 && (
+          <div className="sticky bottom-6 flex justify-end pt-4">
+            <button
+              onClick={handleDeleteClick}
+              disabled={deleting}
+              className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white text-sm font-semibold rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-600/25 disabled:opacity-70"
+            >
+              <FiTrash2 className="w-4 h-4" />
+              {deleting
+                ? "Deleting..."
+                : `Delete Selected (${selectedForDelete.size})`}
+            </button>
+          </div>
+        )}
+
+        <ConfirmationModal
+          isOpen={showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          onConfirm={handleConfirmDelete}
+          title="Delete Compliances"
+          message={`Are you sure you want to delete ${selectedForDelete.size} compliance(s) from "${orgName}"? This action cannot be undone.`}
+        />
+
+        <SuccessModal
+          isOpen={deleteSuccess}
+          onClose={() => setDeleteSuccess(false)}
+          title="Deleted"
+          message="Selected compliances have been removed successfully!"
+        />
       </div>
     );
   }
