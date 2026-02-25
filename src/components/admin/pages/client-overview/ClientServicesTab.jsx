@@ -157,7 +157,19 @@ function ClientServicesTab({
                         <>
                           <select
                             value={paymentStatusToDisplay(registration.payment_status)}
-                            onChange={(e) => handleUpdatePaymentStatus(registration.ticket_id, e.target.value)}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              const normalized = value.toLowerCase().trim();
+                              const hasOnlinePaymentId =
+                                !!registration.razorpay_payment_id || !!registration.payment_id;
+                              const shouldOpenDialog =
+                                normalized === "paid" && !hasOnlinePaymentId;
+                              handleUpdatePaymentStatus(
+                                registration.ticket_id,
+                                value,
+                                shouldOpenDialog
+                              );
+                            }}
                             className="px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white focus:ring-1 focus:ring-[#00486D] focus:outline-none cursor-pointer min-w-[120px]"
                           >
                             {PAYMENT_STATUS_OPTIONS.map((opt) => (

@@ -12,7 +12,7 @@ function PaymentMethodDialog({
 }) {
   return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4 max-h-[85vh] overflow-y-auto">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -32,6 +32,8 @@ function PaymentMethodDialog({
                   setPaymentFormData({
                     dateOfPayment: "",
                     person: "",
+                    natureOfPayment: "",
+                    transactionId: "",
                     remark: "",
                   });
                 }}
@@ -120,6 +122,42 @@ function PaymentMethodDialog({
                     placeholder="Enter person name"
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
                     required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nature of payment
+                  </label>
+                  <input
+                    type="text"
+                    value={paymentFormData.natureOfPayment}
+                    onChange={(e) =>
+                      setPaymentFormData({
+                        ...paymentFormData,
+                        natureOfPayment: e.target.value,
+                      })
+                    }
+                    placeholder="e.g. Advance, Full payment, Adjustment"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Transaction Id
+                  </label>
+                  <input
+                    type="text"
+                    value={paymentFormData.transactionId}
+                    onChange={(e) =>
+                      setPaymentFormData({
+                        ...paymentFormData,
+                        transactionId: e.target.value,
+                      })
+                    }
+                    placeholder="Enter transaction/reference ID (optional)"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
                   />
                 </div>
 

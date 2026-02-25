@@ -88,6 +88,8 @@ function AdminClientOverview() {
   const [paymentFormData, setPaymentFormData] = useState({
     dateOfPayment: "",
     person: "",
+    natureOfPayment: "",
+    transactionId: "",
     remark: "",
   });
   const [_visiblePasswords] = useState({});
@@ -1820,17 +1822,34 @@ function AdminClientOverview() {
     }
   };
 
-  const handleUpdatePaymentStatus = async (ticketId, newPaymentStatusDisplay) => {
+  const handleUpdatePaymentStatus = async (
+    ticketId,
+    newPaymentStatusDisplay,
+    shouldOpenDialog = false,
+  ) => {
+    if (!ticketId) return;
+    const normalized = (newPaymentStatusDisplay || "").toLowerCase().trim();
+
+    // For cash/other offline payments without an online payment id,
+    // open the payment details dialog instead of calling the API directly.
+    if (shouldOpenDialog && normalized === "paid") {
+      setPendingStatusUpdate({ ticketId, newPaymentStatus: newPaymentStatusDisplay });
+      setShowPaymentMethodDialog(true);
+      return;
+    }
+
     try {
-      if (!ticketId) return;
       await performStatusUpdate(ticketId, null, newPaymentStatusDisplay, null, null);
     } catch (error) {
       console.error("Error updating payment status:", error);
-      if (error.response?.data?.requiresPaymentMethod) {
+      // Fallback: if backend ever responds with requiresPaymentMethod,
+      // open the dialog; otherwise show an error.
+      const message = error.message || error.response?.data?.message || "Unknown error";
+      if (message.toLowerCase().includes("select payment method")) {
         setPendingStatusUpdate({ ticketId, newPaymentStatus: newPaymentStatusDisplay });
         setShowPaymentMethodDialog(true);
       } else {
-        alert("Failed to update payment status: " + (error.message || error.response?.data?.message || "Unknown error"));
+        alert("Failed to update payment status: " + message);
       }
     }
   };
@@ -1858,7 +1877,13 @@ function AdminClientOverview() {
       setShowPaymentMethodDialog(false);
       setPendingStatusUpdate(null);
       setSelectedPaymentMethod(null);
-      setPaymentFormData({ dateOfPayment: "", person: "", remark: "" });
+      setPaymentFormData({
+        dateOfPayment: "",
+        person: "",
+        natureOfPayment: "",
+        transactionId: "",
+        remark: "",
+      });
     } catch (error) {
       console.error("Error updating status with payment method:", error);
       alert("Failed to update: " + (error.message || error.response?.data?.message || "Unknown error"));
@@ -1882,6 +1907,8 @@ function AdminClientOverview() {
           dateOfPayment: paymentDetails.dateOfPayment,
           person: paymentDetails.person,
           remark: paymentDetails.remark,
+          natureOfPayment: paymentDetails.natureOfPayment,
+          transactionId: paymentDetails.transactionId,
         }),
       };
 

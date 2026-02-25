@@ -44,6 +44,8 @@ function AdminServices() {
   const [paymentFormData, setPaymentFormData] = useState({
     dateOfPayment: "",
     person: "",
+    natureOfPayment: "",
+    transactionId: "",
     remark: "",
   });
 
@@ -559,7 +561,13 @@ function AdminServices() {
       setShowPaymentMethodDialog(false);
       setPendingStatusUpdate(null);
       setSelectedPaymentMethod(null);
-      setPaymentFormData({ dateOfPayment: "", person: "", remark: "" });
+      setPaymentFormData({
+        dateOfPayment: "",
+        person: "",
+        natureOfPayment: "",
+        transactionId: "",
+        remark: "",
+      });
     } catch (error) {
       console.error("Error updating status with payment method:", error);
       alert("Failed to update: " + (error.message || "Unknown error"));
@@ -577,6 +585,8 @@ function AdminServices() {
           dateOfPayment: paymentDetails.dateOfPayment,
           person: paymentDetails.person,
           remark: paymentDetails.remark,
+          natureOfPayment: paymentDetails.natureOfPayment,
+          transactionId: paymentDetails.transactionId,
         }),
       };
       const response = await apiClient.post("/admin/update-service-status", payload);
@@ -1205,7 +1215,7 @@ function AdminServices() {
       {/* Payment Method Dialog */}
       {showPaymentMethodDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4 border border-gray-100">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4 border border-gray-100 max-h-[85vh] overflow-y-auto">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -1225,6 +1235,8 @@ function AdminServices() {
                   setPaymentFormData({
                     dateOfPayment: "",
                     person: "",
+                    natureOfPayment: "",
+                    transactionId: "",
                     remark: "",
                   });
                 }}
@@ -1314,6 +1326,42 @@ function AdminServices() {
                     placeholder="Enter person name"
                     className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
                     required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nature of payment
+                  </label>
+                  <input
+                    type="text"
+                    value={paymentFormData.natureOfPayment}
+                    onChange={(e) =>
+                      setPaymentFormData({
+                        ...paymentFormData,
+                        natureOfPayment: e.target.value,
+                      })
+                    }
+                    placeholder="e.g. Advance, Full payment, Adjustment"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Transaction Id
+                  </label>
+                  <input
+                    type="text"
+                    value={paymentFormData.transactionId}
+                    onChange={(e) =>
+                      setPaymentFormData({
+                        ...paymentFormData,
+                        transactionId: e.target.value,
+                      })
+                    }
+                    placeholder="Enter transaction/reference ID (optional)"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
                   />
                 </div>
 
