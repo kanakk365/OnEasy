@@ -280,7 +280,9 @@ function AdminServices() {
 
   const normalizeService = useCallback((text) => {
     if (!text) return null;
-    const lower = text.toLowerCase();
+    // Normalize separators so slugs like "din-application" or "address-change"
+    // match the human-readable checks below (e.g. "din application", "address change").
+    const lower = text.toLowerCase().replace(/[-_]+/g, " ");
 
     if (lower.includes("private limited")) return "Private Limited Company";
     if (lower.includes("opc") || lower.includes("one person company"))
