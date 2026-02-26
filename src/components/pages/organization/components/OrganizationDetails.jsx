@@ -8,6 +8,7 @@ import CredentialsSection from "./CredentialsSection";
 import OrganizationNotesSection from "./OrganizationNotesSection";
 import OrganizationTasksSection from "./OrganizationTasksSection";
 import UserOrgComplianceSection from "./UserOrgComplianceSection";
+import AddComplianceSection from "./AddComplianceSection";
 
 const OrganizationDetails = ({
   selectedOrg,
@@ -60,6 +61,7 @@ const OrganizationDetails = ({
     { key: "notes", label: "Notes" },
     { key: "tasks", label: "Tasks" },
     { key: "assigned-compliances", label: "Assigned Compliances" },
+    { key: "add-compliance", label: "Add Compliance" },
   ];
 
   return (
@@ -240,6 +242,10 @@ const OrganizationDetails = ({
 
           {activeTab === "assigned-compliances" && (
             <UserOrgComplianceSection selectedOrg={selectedOrg} />
+          )}
+
+          {activeTab === "add-compliance" && (
+            <AddComplianceSection selectedOrg={selectedOrg} />
           )}
 
           {/* Save Changes Button */}
