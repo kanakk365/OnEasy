@@ -7,6 +7,7 @@ import AttachmentsSection from "./AttachmentsSection";
 import CredentialsSection from "./CredentialsSection";
 import OrganizationNotesSection from "./OrganizationNotesSection";
 import OrganizationTasksSection from "./OrganizationTasksSection";
+import UserOrgComplianceSection from "./UserOrgComplianceSection";
 
 const OrganizationDetails = ({
   selectedOrg,
@@ -58,6 +59,7 @@ const OrganizationDetails = ({
     { key: "credentials", label: "Credentials" },
     { key: "notes", label: "Notes" },
     { key: "tasks", label: "Tasks" },
+    { key: "assigned-compliances", label: "Assigned Compliances" },
   ];
 
   return (
@@ -101,12 +103,12 @@ const OrganizationDetails = ({
 
         {/* Tabs Navigation */}
         <div className="border-b border-gray-200">
-          <div className="flex space-x-1 px-4 pt-4">
+          <div className="flex space-x-1 px-4 pt-4 overflow-x-auto overflow-y-hidden">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => handleTabClick(tab.key)}
-                className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 ${
+                className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 whitespace-nowrap ${
                   activeTab === tab.key
                     ? "bg-white text-[#00486D] border-b-2 border-[#00486D] -mb-px"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
@@ -208,12 +210,18 @@ const OrganizationDetails = ({
                 // Redirect to Settings Notes tab to add note
                 navigate(`/settings?tab=notes&orgId=${selectedOrg?.id}`);
               }}
-              onSaveUserNote={handleSaveUserNoteInline ? async (editedNote, noteIndex) => {
-                await handleSaveUserNoteInline(editedNote, noteIndex);
-              } : undefined}
+              onSaveUserNote={
+                handleSaveUserNoteInline
+                  ? async (editedNote, noteIndex) => {
+                      await handleSaveUserNoteInline(editedNote, noteIndex);
+                    }
+                  : undefined
+              }
               onDeleteUserNote={(index, note) => {
                 // Redirect to Settings Notes tab for deletion (or handle inline if needed)
-                navigate(`/settings?tab=notes&orgId=${selectedOrg?.id}&deleteNoteId=${note.id || index}`);
+                navigate(
+                  `/settings?tab=notes&orgId=${selectedOrg?.id}&deleteNoteId=${note.id || index}`,
+                );
               }}
             />
           )}
@@ -230,6 +238,9 @@ const OrganizationDetails = ({
             />
           )}
 
+          {activeTab === "assigned-compliances" && (
+            <UserOrgComplianceSection selectedOrg={selectedOrg} />
+          )}
 
           {/* Save Changes Button */}
           {editingOrg && (

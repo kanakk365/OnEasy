@@ -8,6 +8,7 @@ import {
   FiArrowLeft,
   FiChevronRight,
   FiChevronDown,
+  FiCornerUpLeft,
 } from "react-icons/fi";
 import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 import { useNavigate } from "react-router-dom";
@@ -477,13 +478,43 @@ const ComplianceChat = () => {
     }
   };
 
+  const handleGoBack = () => {
+    if (currentQuestionIndex <= 0 || isCompleted) return;
+
+    const prevIndex = currentQuestionIndex - 1;
+
+    setMessages((prev) => {
+      const newMsgs = [...prev];
+      let removed = 0;
+      while (removed < 3 && newMsgs.length > 0) {
+        newMsgs.pop();
+        removed++;
+      }
+      return newMsgs;
+    });
+
+    const updatedResponses = userResponses.slice(0, -1);
+    setUserResponses(updatedResponses);
+    setRecommendedCompliances({ registration: [], compliance: [] });
+    updatedResponses.forEach((resp) => {
+      if (resp.selectedOption && resp.selectedOption.compliances) {
+        extractCompliances(resp.selectedOption.compliances);
+      }
+    });
+
+    setCurrentQuestionIndex(prevIndex);
+
+    setTimeout(() => {
+      showQuestion(flowQuestions[prevIndex]);
+    }, 300);
+  };
+
   const submitResponses = async (responses) => {
     setIsTyping(true);
 
     try {
       const token = getAuthToken();
 
-      // Format responses for API
       const formattedResponses = responses.map((r) => ({
         questionKey: r.questionKey,
         ...(r.optionId ? { optionId: r.optionId } : { textValue: r.textValue }),
@@ -507,7 +538,6 @@ const ComplianceChat = () => {
 
       const data = await response.json();
 
-      // Show success message with saved count
       if (data.success) {
         setMessages((prev) => [
           ...prev,
@@ -1207,11 +1237,17 @@ const ComplianceChat = () => {
       const details = [];
       const findItems = (branches, path = "") => {
         branches.forEach((branch) => {
-          const currentPath = path ? `${path} > ${branch.heading}` : branch.heading;
+          const currentPath = path
+            ? `${path} > ${branch.heading}`
+            : branch.heading;
           if (branch.items) {
             branch.items.forEach((item) => {
               if (selectedCodes.includes(item.code)) {
-                details.push({ code: item.code, name: item.name, category: branch.heading });
+                details.push({
+                  code: item.code,
+                  name: item.name,
+                  category: branch.heading,
+                });
               }
             });
           }
@@ -1451,6 +1487,18 @@ const ComplianceChat = () => {
                     {option.label}
                   </button>
                 ))}
+                {/* Go Back button - show when we're past the first question */}
+                {currentQuestionIndex > 0 &&
+                  msg.questionKey ===
+                    flowQuestions[currentQuestionIndex]?.key && (
+                    <button
+                      onClick={handleGoBack}
+                      className="px-4 py-2 bg-gray-100 border border-gray-300 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors flex items-center gap-1.5"
+                    >
+                      <FiCornerUpLeft size={14} />
+                      Go Back
+                    </button>
+                  )}
               </div>
             )}
 
@@ -1511,6 +1559,19 @@ const ComplianceChat = () => {
       </div>
 
       <div className="bg-white p-4 border-t border-gray-100 flex gap-2">
+        {/* Go Back button in the input area for text-type questions */}
+        {currentQuestionIndex > 0 &&
+          !isCompleted &&
+          !showSelectionGrid &&
+          flowQuestions.length > 0 && (
+            <button
+              onClick={handleGoBack}
+              className="px-4 py-3 bg-gray-100 border border-gray-200 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors flex items-center gap-1.5 flex-shrink-0"
+              title="Go back to previous question"
+            >
+              <FiCornerUpLeft size={14} />
+            </button>
+          )}
         <input
           type="text"
           value={inputValue}
