@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { FiChevronLeft, FiChevronRight, FiTrash2 } from "react-icons/fi";
+import {
+  FiChevronLeft,
+  FiChevronRight,
+  FiTrash2,
+  FiBell,
+} from "react-icons/fi";
 import apiClient from "../../../../utils/api";
 import SuccessModal from "../../../common/SuccessModal";
 import ConfirmationModal from "../../../common/ConfirmationModal";
@@ -310,6 +315,29 @@ const ClientAssignedComplianceTab = ({ userId }) => {
           </h2>
         </div>
 
+        {/* Reminders Info Card */}
+        {selectedCompliance.compliance?.reminders && (
+          <div className="bg-amber-50 rounded-xl border border-amber-200 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <FiBell className="w-4 h-4 text-amber-600" />
+              <h3 className="text-sm font-semibold text-amber-800">Reminders</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {selectedCompliance.compliance.reminders
+                .split(",")
+                .map((reminder, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-white text-amber-800 border border-amber-200 shadow-sm"
+                  >
+                    <FiBell className="w-3 h-3 mr-1.5 text-amber-500" />
+                    {reminder.trim()}
+                  </span>
+                ))}
+            </div>
+          </div>
+        )}
+
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="p-6">
             <p className="text-gray-500 italic mb-6">
@@ -477,7 +505,9 @@ const ClientAssignedComplianceTab = ({ userId }) => {
                 const allCodes = orgAssignments
                   .map((a) => a.compliance?.code)
                   .filter(Boolean);
-                const allSelected = allCodes.every((c) => selectedForDelete.has(c));
+                const allSelected = allCodes.every((c) =>
+                  selectedForDelete.has(c),
+                );
                 if (allSelected) {
                   setSelectedForDelete(new Set());
                 } else {
