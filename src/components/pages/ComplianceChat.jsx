@@ -528,10 +528,6 @@ const ComplianceChat = () => {
     });
 
     setCurrentQuestionIndex(prevIndex);
-
-    setTimeout(() => {
-      showQuestion(flowQuestions[prevIndex]);
-    }, 300);
   };
 
   const submitResponses = async (responses) => {
@@ -916,7 +912,8 @@ const ComplianceChat = () => {
         registeredAddressLine2: newOrgData.registeredAddressLine2,
         registeredAddressDistrict: newOrgData.registeredAddressDistrict,
         registeredAddressState: newOrgData.registeredAddressState,
-        registeredAddressCountry: newOrgData.registeredAddressCountry || "India",
+        registeredAddressCountry:
+          newOrgData.registeredAddressCountry || "India",
         registeredAddressPincode: newOrgData.registeredAddressPincode,
         panFile: null,
         directorsPartners: [],
@@ -1347,7 +1344,7 @@ const ComplianceChat = () => {
                 </div>
               </div>
 
-               {/* Inline Add Organisation Form */}
+              {/* Inline Add Organisation Form */}
               {showAddOrgForm && (
                 <div className="mt-6 bg-gray-50 rounded-xl border border-gray-200 p-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <h3 className="text-lg font-bold text-gray-900 mb-5">
@@ -1363,7 +1360,10 @@ const ComplianceChat = () => {
                         type="text"
                         value={newOrgData.legalName}
                         onChange={(e) =>
-                          setNewOrgData((prev) => ({ ...prev, legalName: e.target.value }))
+                          setNewOrgData((prev) => ({
+                            ...prev,
+                            legalName: e.target.value,
+                          }))
                         }
                         placeholder="Enter Legal Name"
                         className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
@@ -1371,12 +1371,17 @@ const ComplianceChat = () => {
                     </div>
                     {/* Trade Name */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Trade Name</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Trade Name
+                      </label>
                       <input
                         type="text"
                         value={newOrgData.tradeName}
                         onChange={(e) =>
-                          setNewOrgData((prev) => ({ ...prev, tradeName: e.target.value }))
+                          setNewOrgData((prev) => ({
+                            ...prev,
+                            tradeName: e.target.value,
+                          }))
                         }
                         placeholder="Enter Trade Name"
                         className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
@@ -1384,38 +1389,68 @@ const ComplianceChat = () => {
                     </div>
                     {/* Category */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Category
+                      </label>
                       <select
                         value={newOrgData.category}
                         onChange={(e) =>
-                          setNewOrgData((prev) => ({ ...prev, category: e.target.value }))
+                          setNewOrgData((prev) => ({
+                            ...prev,
+                            category: e.target.value,
+                          }))
                         }
                         className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors bg-white"
                       >
                         <option value="">Select Category</option>
                         <option value="Individual">Individual</option>
-                        <option value="Hindu undivided family">Hindu undivided family</option>
-                        <option value="Partnership Firm">Partnership Firm</option>
-                        <option value="Limited Liability Partnership">Limited Liability Partnership</option>
-                        <option value="Private Limited Company">Private Limited Company</option>
-                        <option value="One Person Company">One Person Company</option>
-                        <option value="Section 8 Company">Section 8 Company</option>
+                        <option value="Hindu undivided family">
+                          Hindu undivided family
+                        </option>
+                        <option value="Partnership Firm">
+                          Partnership Firm
+                        </option>
+                        <option value="Limited Liability Partnership">
+                          Limited Liability Partnership
+                        </option>
+                        <option value="Private Limited Company">
+                          Private Limited Company
+                        </option>
+                        <option value="One Person Company">
+                          One Person Company
+                        </option>
+                        <option value="Section 8 Company">
+                          Section 8 Company
+                        </option>
                         <option value="Society">Society</option>
-                        <option value="Charitable Trust">Charitable Trust</option>
+                        <option value="Charitable Trust">
+                          Charitable Trust
+                        </option>
                         <option value="Government">Government</option>
-                        <option value="Association of Persons">Association of Persons</option>
-                        <option value="Body of Individuals">Body of Individuals</option>
-                        <option value="Artificial Judicial Person">Artificial Judicial Person</option>
+                        <option value="Association of Persons">
+                          Association of Persons
+                        </option>
+                        <option value="Body of Individuals">
+                          Body of Individuals
+                        </option>
+                        <option value="Artificial Judicial Person">
+                          Artificial Judicial Person
+                        </option>
                       </select>
                     </div>
                     {/* GSTIN */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">GSTIN</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        GSTIN
+                      </label>
                       <input
                         type="text"
                         value={newOrgData.gstin}
                         onChange={(e) =>
-                          setNewOrgData((prev) => ({ ...prev, gstin: e.target.value.toUpperCase() }))
+                          setNewOrgData((prev) => ({
+                            ...prev,
+                            gstin: e.target.value.toUpperCase(),
+                          }))
                         }
                         placeholder="Enter GSTIN"
                         maxLength={15}
@@ -1424,12 +1459,17 @@ const ComplianceChat = () => {
                     </div>
                     {/* PAN Number */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">PAN Number</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        PAN Number
+                      </label>
                       <input
                         type="text"
                         value={newOrgData.panNumber}
                         onChange={(e) =>
-                          setNewOrgData((prev) => ({ ...prev, panNumber: e.target.value.toUpperCase() }))
+                          setNewOrgData((prev) => ({
+                            ...prev,
+                            panNumber: e.target.value.toUpperCase(),
+                          }))
                         }
                         placeholder="Enter PAN Number"
                         maxLength={10}
@@ -1438,24 +1478,34 @@ const ComplianceChat = () => {
                     </div>
                     {/* Incorporation Date */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Incorporation Date</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Incorporation Date
+                      </label>
                       <input
                         type="date"
                         value={newOrgData.incorporationDate}
                         onChange={(e) =>
-                          setNewOrgData((prev) => ({ ...prev, incorporationDate: e.target.value }))
+                          setNewOrgData((prev) => ({
+                            ...prev,
+                            incorporationDate: e.target.value,
+                          }))
                         }
                         className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
                       />
                     </div>
                     {/* TAN */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">TAN</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        TAN
+                      </label>
                       <input
                         type="text"
                         value={newOrgData.tan}
                         onChange={(e) =>
-                          setNewOrgData((prev) => ({ ...prev, tan: e.target.value.toUpperCase() }))
+                          setNewOrgData((prev) => ({
+                            ...prev,
+                            tan: e.target.value.toUpperCase(),
+                          }))
                         }
                         placeholder="Enter TAN"
                         className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
@@ -1463,12 +1513,17 @@ const ComplianceChat = () => {
                     </div>
                     {/* CIN */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">CIN</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        CIN
+                      </label>
                       <input
                         type="text"
                         value={newOrgData.cin}
                         onChange={(e) =>
-                          setNewOrgData((prev) => ({ ...prev, cin: e.target.value.toUpperCase() }))
+                          setNewOrgData((prev) => ({
+                            ...prev,
+                            cin: e.target.value.toUpperCase(),
+                          }))
                         }
                         placeholder="Enter CIN"
                         className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
@@ -1476,11 +1531,16 @@ const ComplianceChat = () => {
                     </div>
                     {/* Organisation Type */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Organisation Type</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Organisation Type
+                      </label>
                       <select
                         value={newOrgData.organisationType}
                         onChange={(e) =>
-                          setNewOrgData((prev) => ({ ...prev, organisationType: e.target.value }))
+                          setNewOrgData((prev) => ({
+                            ...prev,
+                            organisationType: e.target.value,
+                          }))
                         }
                         className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors bg-white"
                       >
@@ -1501,16 +1561,23 @@ const ComplianceChat = () => {
 
                     {/* --- Registered Office Address Section --- */}
                     <div className="col-span-1 md:col-span-2 mt-2">
-                      <h4 className="text-sm font-semibold text-gray-900 mb-3">Registered Office Address</h4>
+                      <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                        Registered Office Address
+                      </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Address Line 1 */}
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Address Line 1</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Address Line 1
+                          </label>
                           <input
                             type="text"
                             value={newOrgData.registeredAddressLine1}
                             onChange={(e) =>
-                              setNewOrgData((prev) => ({ ...prev, registeredAddressLine1: e.target.value }))
+                              setNewOrgData((prev) => ({
+                                ...prev,
+                                registeredAddressLine1: e.target.value,
+                              }))
                             }
                             placeholder="Enter Address Line 1"
                             className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
@@ -1518,12 +1585,17 @@ const ComplianceChat = () => {
                         </div>
                         {/* Address Line 2 */}
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Address Line 2</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Address Line 2
+                          </label>
                           <input
                             type="text"
                             value={newOrgData.registeredAddressLine2}
                             onChange={(e) =>
-                              setNewOrgData((prev) => ({ ...prev, registeredAddressLine2: e.target.value }))
+                              setNewOrgData((prev) => ({
+                                ...prev,
+                                registeredAddressLine2: e.target.value,
+                              }))
                             }
                             placeholder="Enter Address Line 2 (Optional)"
                             className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
@@ -1531,12 +1603,17 @@ const ComplianceChat = () => {
                         </div>
                         {/* District */}
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">District</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            District
+                          </label>
                           <input
                             type="text"
                             value={newOrgData.registeredAddressDistrict}
                             onChange={(e) =>
-                              setNewOrgData((prev) => ({ ...prev, registeredAddressDistrict: e.target.value }))
+                              setNewOrgData((prev) => ({
+                                ...prev,
+                                registeredAddressDistrict: e.target.value,
+                              }))
                             }
                             placeholder="Enter District"
                             className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
@@ -1544,12 +1621,17 @@ const ComplianceChat = () => {
                         </div>
                         {/* State */}
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            State
+                          </label>
                           <input
                             type="text"
                             value={newOrgData.registeredAddressState}
                             onChange={(e) =>
-                              setNewOrgData((prev) => ({ ...prev, registeredAddressState: e.target.value }))
+                              setNewOrgData((prev) => ({
+                                ...prev,
+                                registeredAddressState: e.target.value,
+                              }))
                             }
                             placeholder="Enter State"
                             className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
@@ -1557,12 +1639,17 @@ const ComplianceChat = () => {
                         </div>
                         {/* Country */}
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Country
+                          </label>
                           <input
                             type="text"
                             value={newOrgData.registeredAddressCountry}
                             onChange={(e) =>
-                              setNewOrgData((prev) => ({ ...prev, registeredAddressCountry: e.target.value }))
+                              setNewOrgData((prev) => ({
+                                ...prev,
+                                registeredAddressCountry: e.target.value,
+                              }))
                             }
                             placeholder="Enter Country"
                             className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
@@ -1570,12 +1657,19 @@ const ComplianceChat = () => {
                         </div>
                         {/* Pincode */}
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">PIN Code</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            PIN Code
+                          </label>
                           <input
                             type="text"
                             value={newOrgData.registeredAddressPincode}
                             onChange={(e) =>
-                              setNewOrgData((prev) => ({ ...prev, registeredAddressPincode: e.target.value.replace(/\D/g, "").slice(0, 6) }))
+                              setNewOrgData((prev) => ({
+                                ...prev,
+                                registeredAddressPincode: e.target.value
+                                  .replace(/\D/g, "")
+                                  .slice(0, 6),
+                              }))
                             }
                             placeholder="Enter 6-digit PIN Code"
                             maxLength={6}
