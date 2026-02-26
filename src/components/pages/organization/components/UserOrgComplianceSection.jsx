@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiCheckCircle, FiClock } from "react-icons/fi";
+import { FiCheckCircle, FiClock, FiBell } from "react-icons/fi";
 import { AUTH_CONFIG } from "../../../../config/auth";
 
 const UserOrgComplianceSection = ({ selectedOrg }) => {
@@ -61,6 +61,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
             code: item.compliance.code,
             category: item.compliance.category,
             description: item.compliance.description,
+            reminders: item.compliance.reminders || null,
             type:
               item.compliance.category === "return"
                 ? "Return"
@@ -176,6 +177,21 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
               <p className="text-xs text-gray-400 mb-4 line-clamp-2">
                 {item.description}
               </p>
+            )}
+
+            {/* Reminders */}
+            {item.reminders && (
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {item.reminders.split(",").map((r, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200"
+                  >
+                    <FiBell className="w-2.5 h-2.5 mr-1 text-amber-500" />
+                    {r.trim()}
+                  </span>
+                ))}
+              </div>
             )}
 
             {/* Stats */}

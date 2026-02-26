@@ -1,6 +1,7 @@
 import React from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { IoChevronBackOutline } from "react-icons/io5";
+import { FiBell } from "react-icons/fi";
 
 const AssignedComplianceDetails = () => {
   const navigate = useNavigate();
@@ -48,6 +49,27 @@ const AssignedComplianceDetails = () => {
           View and manage all assigned compliances for this client
         </p>
       </div>
+
+      {/* Reminders Info Card */}
+      {complianceData.reminders && (
+        <div className="bg-amber-50 rounded-xl border border-amber-200 p-5 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <FiBell className="w-4 h-4 text-amber-600" />
+            <h3 className="text-sm font-semibold text-amber-800">Reminders</h3>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {complianceData.reminders.split(",").map((reminder, i) => (
+              <span
+                key={i}
+                className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-white text-amber-800 border border-amber-200 shadow-sm"
+              >
+                <FiBell className="w-3 h-3 mr-1.5 text-amber-500" />
+                {reminder.trim()}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Details Table Card */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[200px]">

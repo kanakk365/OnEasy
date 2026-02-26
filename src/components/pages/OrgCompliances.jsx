@@ -1,7 +1,7 @@
 import React from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { IoChevronBackOutline } from "react-icons/io5";
-import { FiCheckCircle, FiClock } from "react-icons/fi";
+import { FiCheckCircle, FiClock, FiBell } from "react-icons/fi";
 import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 import { AUTH_CONFIG } from "../../config/auth";
 
@@ -97,6 +97,7 @@ const OrgCompliances = () => {
         code: item.compliance.code,
         category: item.compliance.category,
         description: item.compliance.description,
+        reminders: item.compliance.reminders || null,
         type:
           item.compliance.category === "return"
             ? "Return"
@@ -202,6 +203,21 @@ const OrgCompliances = () => {
                   {item.type}
                 </span>
               </div>
+
+              {/* Reminders */}
+              {item.reminders && (
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  {item.reminders.split(",").map((r, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200"
+                    >
+                      <FiBell className="w-2.5 h-2.5 mr-1 text-amber-500" />
+                      {r.trim()}
+                    </span>
+                  ))}
+                </div>
+              )}
 
               {/* Stats */}
               <div className="space-y-4 mb-6">
