@@ -1030,20 +1030,22 @@ function AdminComplianceCMS() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Option ID <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="optionId"
-                  value={ruleFormData.optionId}
-                  onChange={handleRuleInputChange}
-                  required
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent font-mono"
-                  placeholder="e.g. opt_1a_gst_regular_monthly"
-                />
-              </div>
+              {!editingRule && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Option ID <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="optionId"
+                    value={ruleFormData.optionId}
+                    onChange={handleRuleInputChange}
+                    required
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent font-mono"
+                    placeholder="e.g. opt_1a_gst_regular_monthly"
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
