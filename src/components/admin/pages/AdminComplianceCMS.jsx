@@ -13,11 +13,11 @@ import {
   RiFileList3Line,
   RiShieldCheckLine,
   RiEyeLine,
+  RiCheckLine,
 } from "react-icons/ri";
 import { BsShieldCheck } from "react-icons/bs";
 
-const CATEGORY_OPTIONS = [
-  { value: "all", label: "All Categories" },
+const DEFAULT_CATEGORIES = [
   { value: "filing", label: "Filing" },
   { value: "return", label: "Return" },
   { value: "payment", label: "Payment" },
@@ -25,7 +25,7 @@ const CATEGORY_OPTIONS = [
   { value: "tax_filing", label: "Tax Filing" },
 ];
 
-const CATEGORY_COLORS = {
+const DEFAULT_CATEGORY_COLORS = {
   filing: {
     bg: "bg-blue-50",
     text: "text-blue-700",
@@ -53,10 +53,38 @@ const CATEGORY_COLORS = {
   },
 };
 
+// Extra color palettes for dynamically added categories
+const EXTRA_COLOR_PALETTES = [
+  { bg: "bg-teal-50", text: "text-teal-700", border: "border-teal-200" },
+  { bg: "bg-cyan-50", text: "text-cyan-700", border: "border-cyan-200" },
+  { bg: "bg-orange-50", text: "text-orange-700", border: "border-orange-200" },
+  { bg: "bg-indigo-50", text: "text-indigo-700", border: "border-indigo-200" },
+  { bg: "bg-pink-50", text: "text-pink-700", border: "border-pink-200" },
+  { bg: "bg-lime-50", text: "text-lime-700", border: "border-lime-200" },
+  {
+    bg: "bg-fuchsia-50",
+    text: "text-fuchsia-700",
+    border: "border-fuchsia-200",
+  },
+  { bg: "bg-sky-50", text: "text-sky-700", border: "border-sky-200" },
+  { bg: "bg-violet-50", text: "text-violet-700", border: "border-violet-200" },
+  {
+    bg: "bg-emerald-50",
+    text: "text-emerald-700",
+    border: "border-emerald-200",
+  },
+];
+
 function AdminComplianceCMS() {
   const [activeTab, setActiveTab] = useState("items");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // ─── Categories State ───
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  const [categoryColors, setCategoryColors] = useState(DEFAULT_CATEGORY_COLORS);
+  const [showAddCategory, setShowAddCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
 
   // ─── Compliance Items State ───
   const [items, setItems] = useState([]);
@@ -95,6 +123,43 @@ function AdminComplianceCMS() {
     fetchItems();
     fetchRules();
   }, []);
+
+  // Sync categories from fetched items (pick up any categories from DB that aren't in defaults)
+  useEffect(() => {
+    if (items.length > 0) {
+      const existingValues = new Set(categories.map((c) => c.value));
+      const newCats = [];
+      items.forEach((item) => {
+        if (item.category && !existingValues.has(item.category)) {
+          existingValues.add(item.category);
+          newCats.push({
+            value: item.category,
+            label: item.category
+              .replace(/_/g, " ")
+              .replace(/\b\w/g, (c) => c.toUpperCase()),
+          });
+        }
+      });
+      if (newCats.length > 0) {
+        setCategories((prev) => [...prev, ...newCats]);
+        // Assign colors to new categories
+        setCategoryColors((prev) => {
+          const updated = { ...prev };
+          newCats.forEach((cat, i) => {
+            if (!updated[cat.value]) {
+              const paletteIndex =
+                (Object.keys(updated).length -
+                  Object.keys(DEFAULT_CATEGORY_COLORS).length +
+                  i) %
+                EXTRA_COLOR_PALETTES.length;
+              updated[cat.value] = EXTRA_COLOR_PALETTES[paletteIndex];
+            }
+          });
+          return updated;
+        });
+      }
+    }
+  }, [items]);
 
   const fetchItems = async () => {
     try {
@@ -136,6 +201,8 @@ function AdminComplianceCMS() {
       reminders: "",
       annexureType: "1A",
     });
+    setShowAddCategory(false);
+    setNewCategoryName("");
     setShowItemModal(true);
   };
 
@@ -149,6 +216,8 @@ function AdminComplianceCMS() {
       reminders: item.reminders || "",
       annexureType: item.annexureType || "1A",
     });
+    setShowAddCategory(false);
+    setNewCategoryName("");
     setShowItemModal(true);
   };
 
@@ -405,9 +474,39 @@ function AdminComplianceCMS() {
     );
   };
 
+  // ─── Add Category Handler ───
+  const handleAddCategory = () => {
+    const trimmed = newCategoryName.trim();
+    if (!trimmed) return;
+
+    const value = trimmed.toLowerCase().replace(/\s+/g, "_");
+
+    // Check if already exists
+    if (categories.some((c) => c.value === value)) {
+      alert("This category already exists!");
+      return;
+    }
+
+    const label = trimmed.replace(/\b\w/g, (c) => c.toUpperCase());
+    setCategories((prev) => [...prev, { value, label }]);
+
+    // Assign a color from the extra palette
+    setCategoryColors((prev) => {
+      const usedExtra =
+        Object.keys(prev).length - Object.keys(DEFAULT_CATEGORY_COLORS).length;
+      const paletteIndex = usedExtra % EXTRA_COLOR_PALETTES.length;
+      return { ...prev, [value]: EXTRA_COLOR_PALETTES[paletteIndex] };
+    });
+
+    // Auto-select the new category in the form
+    setItemFormData((prev) => ({ ...prev, category: value }));
+    setNewCategoryName("");
+    setShowAddCategory(false);
+  };
+
   const getCategoryStyle = (category) => {
     return (
-      CATEGORY_COLORS[category] || {
+      categoryColors[category] || {
         bg: "bg-gray-50",
         text: "text-gray-700",
         border: "border-gray-200",
@@ -531,7 +630,8 @@ function AdminComplianceCMS() {
                       onChange={(e) => setItemCategoryFilter(e.target.value)}
                       className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow appearance-none bg-white font-medium text-gray-700"
                     >
-                      {CATEGORY_OPTIONS.map((cat) => (
+                      <option value="all">All Categories</option>
+                      {categories.map((cat) => (
                         <option key={cat.value} value={cat.value}>
                           {cat.label}
                         </option>
@@ -876,25 +976,82 @@ function AdminComplianceCMS() {
                 </div>
               </div>
 
+              {showAddCategory && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Add New Category
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddCategory();
+                        }
+                        if (e.key === "Escape") {
+                          setShowAddCategory(false);
+                          setNewCategoryName("");
+                        }
+                      }}
+                      autoFocus
+                      className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
+                      placeholder="e.g. Audit"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddCategory}
+                      disabled={!newCategoryName.trim()}
+                      className="p-2.5 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      title="Add category"
+                    >
+                      <RiCheckLine className="w-5 h-5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAddCategory(false);
+                        setNewCategoryName("");
+                      }}
+                      className="p-2.5 border border-gray-300 text-gray-500 rounded-xl hover:bg-gray-100 transition-all"
+                      title="Cancel"
+                    >
+                      <RiCloseLine className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     Category
                   </label>
-                  <select
-                    name="category"
-                    value={itemFormData.category}
-                    onChange={handleItemInputChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent bg-white"
-                  >
-                    {CATEGORY_OPTIONS.filter((c) => c.value !== "all").map(
-                      (cat) => (
+                  <div className="relative">
+                    <select
+                      name="category"
+                      value={itemFormData.category}
+                      onChange={(e) => {
+                        if (e.target.value === "__add_new__") {
+                          setShowAddCategory(true);
+                          setNewCategoryName("");
+                        } else {
+                          handleItemInputChange(e);
+                        }
+                      }}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent bg-white appearance-none"
+                    >
+                      {categories.map((cat) => (
                         <option key={cat.value} value={cat.value}>
                           {cat.label}
                         </option>
-                      ),
-                    )}
-                  </select>
+                      ))}
+                      <option value="__add_new__">+ Add New Category</option>
+                    </select>
+                    <RiArrowDownSLine className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
