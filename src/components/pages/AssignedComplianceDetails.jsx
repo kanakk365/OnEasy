@@ -311,78 +311,70 @@ const AssignedComplianceDetails = () => {
       ══════════════════════════════════════════ */}
       {viewMode === "list" && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[200px]">
-          {/* Table Header */}
-          <div className="grid grid-cols-4 bg-[#023752] text-white py-4 px-8">
-            <div className="text-sm font-medium">Period</div>
-            <div className="text-sm font-medium">Year</div>
-            <div className="text-sm font-medium">Due Date</div>
-            <div className="text-sm font-medium">Status</div>
-          </div>
-
-          {/* Table Body */}
-          <div className="flex flex-col">
-            {complianceData.details ? (
-              complianceData.details.map((item, index) => (
-                <div
-                  key={index}
-                  className="grid grid-cols-4 py-6 px-8 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="text-gray-700 font-medium">{item.period}</div>
-                  <div className="text-gray-700">{item.year}</div>
-                  <div className="text-gray-700">{item.dueDate}</div>
-                  <div>
-                    <span
-                      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(item.status)}`}
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#023752] text-white">
+                  <th className="px-6 py-4 text-left text-sm font-semibold">
+                    Period
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold">
+                    Due Date
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {complianceData.details && complianceData.details.length > 0 ? (
+                  complianceData.details.map((item, index) => (
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-50 transition-colors"
                     >
-                      {item.status}
-                    </span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <>
-                <div className="grid grid-cols-4 py-6 px-8 border-b border-gray-100 hover:bg-gray-50">
-                  <div className="text-gray-700 font-medium">Q1</div>
-                  <div className="text-gray-700">2026</div>
-                  <div className="text-gray-700">15 July</div>
-                  <div>
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold text-green-600 bg-green-50 border border-green-200">
-                      Done
-                    </span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-4 py-6 px-8 border-b border-gray-100 hover:bg-gray-50">
-                  <div className="text-gray-700 font-medium">Q2</div>
-                  <div className="text-gray-700">2026</div>
-                  <div className="text-gray-700">15 Oct</div>
-                  <div>
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold text-green-600 bg-green-50 border border-green-200">
-                      Done
-                    </span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-4 py-6 px-8 border-b border-gray-100 hover:bg-gray-50">
-                  <div className="text-gray-700 font-medium">Q3</div>
-                  <div className="text-gray-700">2026</div>
-                  <div className="text-gray-700">15 Jan</div>
-                  <div>
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold text-amber-600 bg-amber-50 border border-amber-200">
-                      Pending
-                    </span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-4 py-6 px-8 border-b-0 hover:bg-gray-50">
-                  <div className="text-gray-700 font-medium">Q4</div>
-                  <div className="text-gray-700">2026</div>
-                  <div className="text-gray-700">15 May</div>
-                  <div>
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold text-amber-600 bg-amber-50 border border-amber-200">
-                      Pending
-                    </span>
-                  </div>
-                </div>
-              </>
-            )}
+                      {/* Period + Year */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-[#023752]/8 text-[#023752] text-sm font-bold">
+                            {item.period}
+                          </span>
+                          {item.year && (
+                            <span className="text-xs text-gray-400 font-medium">
+                              {item.year}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      {/* Due Date */}
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-semibold text-gray-800">
+                          {item.dueDate}
+                        </span>
+                      </td>
+                      {/* Status */}
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(item.status)}`}
+                        >
+                          {item.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={3}
+                      className="px-6 py-16 text-center text-gray-400 text-sm"
+                    >
+                      No compliance periods found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

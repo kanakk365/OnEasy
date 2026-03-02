@@ -111,21 +111,53 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
             stats: { done: doneCount, pending: pendingCount },
             totalItems: instances.length,
             progress: sortedInstances.map((i) => i.isDone),
-            details: sortedInstances.map((instance) => {
+            details: sortedInstances.map((instance, idx) => {
               const date = new Date(instance.dueDate);
+              // Derive period label from yearMonth (e.g. "2026-09" -> "Sep")
+              const MONTH_SHORT = [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec",
+              ];
+              let period = "—";
+              let year = "";
+              if (instance.yearMonth) {
+                const parts = instance.yearMonth.split("-");
+                year = parts[0] || "";
+                const mNum = parseInt(parts[1], 10);
+                period =
+                  mNum >= 1 && mNum <= 12 ? MONTH_SHORT[mNum - 1] : `M${mNum}`;
+              } else if (!isNaN(date)) {
+                year = String(date.getFullYear());
+                period = MONTH_SHORT[date.getMonth()];
+              }
+              // Check if quarterly compliance by name/category
+              const isQuarterly =
+                item.compliance?.name?.toLowerCase().includes("q") ||
+                (item.compliance?.category || "")
+                  .toLowerCase()
+                  .includes("quarter");
+              if (isQuarterly) period = `Q${(idx % 4) + 1}`;
+
               return {
-                period: instance.yearMonth
-                  ? instance.yearMonth.split("-")[1] > 0
-                    ? instance.yearMonth.split("-")[1]
-                    : "Q1"
-                  : "Q1",
-                year: instance.yearMonth
-                  ? instance.yearMonth.split("-")[0]
-                  : "2026",
-                dueDate: date.toLocaleDateString("en-US", {
-                  day: "numeric",
-                  month: "short",
-                }),
+                period,
+                year,
+                dueDate: !isNaN(date)
+                  ? date.toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })
+                  : instance.dueDate,
                 dueDateRaw: instance.dueDate,
                 status: instance.isDone ? "Done" : "Pending",
               };
