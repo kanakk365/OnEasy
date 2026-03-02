@@ -88,6 +88,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
                   day: "numeric",
                   month: "short",
                 }),
+                dueDateRaw: instance.dueDate,
                 status: instance.isDone ? "Done" : "Pending",
               };
             }),
