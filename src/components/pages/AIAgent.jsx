@@ -48,16 +48,13 @@ const AIAgent = () => {
   ];
 
   return (
-    <div className="relative bg-[#f4f6f8] min-h-screen py-20 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="relative bg-[#f4f6f8] py-20 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="relative z-10 max-w-[1400px] mx-auto">
         <div className="mb-16 md:mb-24 flex flex-col items-center text-center max-w-2xl mx-auto">
           <h1 className="text-3xl md:text-[44px] leading-tight font-semibold text-[#0a192f] tracking-tight mb-5">
             Supercharge Your Workflow
           </h1>
-          <p className="text-gray-500 text-[16px] md:text-[18px] leading-relaxed">
-            Have a natural conversation with specialized AI consultants. Get
-            market analysis, insights, and proposals — in minutes, not weeks.
-          </p>
+
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
