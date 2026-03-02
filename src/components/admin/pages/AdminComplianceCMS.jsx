@@ -83,8 +83,6 @@ function AdminComplianceCMS() {
   // ─── Categories State ───
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [categoryColors, setCategoryColors] = useState(DEFAULT_CATEGORY_COLORS);
-  const [showAddCategory, setShowAddCategory] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
 
   // ─── Compliance Items State ───
   const [items, setItems] = useState([]);
@@ -125,6 +123,7 @@ function AdminComplianceCMS() {
   }, []);
 
   // Sync categories from fetched items (pick up any categories from DB that aren't in defaults)
+  // Used for the filter bar category dropdown
   useEffect(() => {
     if (items.length > 0) {
       const existingValues = new Set(categories.map((c) => c.value));
@@ -142,7 +141,6 @@ function AdminComplianceCMS() {
       });
       if (newCats.length > 0) {
         setCategories((prev) => [...prev, ...newCats]);
-        // Assign colors to new categories
         setCategoryColors((prev) => {
           const updated = { ...prev };
           newCats.forEach((cat, i) => {
@@ -159,6 +157,7 @@ function AdminComplianceCMS() {
         });
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
   const fetchItems = async () => {
@@ -201,8 +200,6 @@ function AdminComplianceCMS() {
       reminders: "",
       annexureType: "1A",
     });
-    setShowAddCategory(false);
-    setNewCategoryName("");
     setShowItemModal(true);
   };
 
@@ -216,8 +213,6 @@ function AdminComplianceCMS() {
       reminders: item.reminders || "",
       annexureType: item.annexureType || "1A",
     });
-    setShowAddCategory(false);
-    setNewCategoryName("");
     setShowItemModal(true);
   };
 
@@ -474,35 +469,7 @@ function AdminComplianceCMS() {
     );
   };
 
-  // ─── Add Category Handler ───
-  const handleAddCategory = () => {
-    const trimmed = newCategoryName.trim();
-    if (!trimmed) return;
 
-    const value = trimmed.toLowerCase().replace(/\s+/g, "_");
-
-    // Check if already exists
-    if (categories.some((c) => c.value === value)) {
-      alert("This category already exists!");
-      return;
-    }
-
-    const label = trimmed.replace(/\b\w/g, (c) => c.toUpperCase());
-    setCategories((prev) => [...prev, { value, label }]);
-
-    // Assign a color from the extra palette
-    setCategoryColors((prev) => {
-      const usedExtra =
-        Object.keys(prev).length - Object.keys(DEFAULT_CATEGORY_COLORS).length;
-      const paletteIndex = usedExtra % EXTRA_COLOR_PALETTES.length;
-      return { ...prev, [value]: EXTRA_COLOR_PALETTES[paletteIndex] };
-    });
-
-    // Auto-select the new category in the form
-    setItemFormData((prev) => ({ ...prev, category: value }));
-    setNewCategoryName("");
-    setShowAddCategory(false);
-  };
 
   const getCategoryStyle = (category) => {
     return (
@@ -976,96 +943,32 @@ function AdminComplianceCMS() {
                 </div>
               </div>
 
-              {showAddCategory && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Add New Category
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={newCategoryName}
-                      onChange={(e) => setNewCategoryName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleAddCategory();
-                        }
-                        if (e.key === "Escape") {
-                          setShowAddCategory(false);
-                          setNewCategoryName("");
-                        }
-                      }}
-                      autoFocus
-                      className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
-                      placeholder="e.g. Audit"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddCategory}
-                      disabled={!newCategoryName.trim()}
-                      className="p-2.5 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                      title="Add category"
-                    >
-                      <RiCheckLine className="w-5 h-5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowAddCategory(false);
-                        setNewCategoryName("");
-                      }}
-                      className="p-2.5 border border-gray-300 text-gray-500 rounded-xl hover:bg-gray-100 transition-all"
-                      title="Cancel"
-                    >
-                      <RiCloseLine className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              )}
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     Category
                   </label>
-                  <div className="relative">
-                    <select
-                      name="category"
-                      value={itemFormData.category}
-                      onChange={(e) => {
-                        if (e.target.value === "__add_new__") {
-                          setShowAddCategory(true);
-                          setNewCategoryName("");
-                        } else {
-                          handleItemInputChange(e);
-                        }
-                      }}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent bg-white appearance-none"
-                    >
-                      {categories.map((cat) => (
-                        <option key={cat.value} value={cat.value}>
-                          {cat.label}
-                        </option>
-                      ))}
-                      <option value="__add_new__">+ Add New Category</option>
-                    </select>
-                    <RiArrowDownSLine className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
-                  </div>
+                  <input
+                    type="text"
+                    name="category"
+                    value={itemFormData.category}
+                    onChange={handleItemInputChange}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
+                    placeholder="e.g. filing, return, payment, tax_filing"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     Annexure Type
                   </label>
-                  <select
+                  <input
+                    type="text"
                     name="annexureType"
                     value={itemFormData.annexureType}
                     onChange={handleItemInputChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent bg-white"
-                  >
-                    <option value="1A">1A</option>
-                    <option value="1B">1B</option>
-                  </select>
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
+                    placeholder="e.g. 1A, 1B"
+                  />
                 </div>
               </div>
 
