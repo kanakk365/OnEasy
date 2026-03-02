@@ -1,64 +1,100 @@
 import React from "react";
-import { RiUser3Line, RiRocketLine, RiFileTextLine } from "react-icons/ri";
+import {
+  RiUser3Line,
+  RiRocketLine,
+  RiFileTextLine,
+  RiLightbulbLine,
+  RiShareBoxLine,
+} from "react-icons/ri";
 
 const AIAgent = () => {
   const agents = [
     {
-      name: "Profile AI Agent",
-      icon: <RiUser3Line className="w-12 h-12 mb-4 text-blue-600" />,
+      name: "Profile AI",
+      role: "Optimization Expert",
+      icon: <RiUser3Line className="w-6 h-6 text-[#0ea5e9]" />,
       link: "https://profile.oneasy.ai",
-      description:
-        "Manage and optimize your profile effortlessly with AI assistance.",
-      color: "bg-blue-50 border-blue-200 hover:border-blue-400",
+      tags: ["Resume", "LinkedIn"],
+      description: "Manage and optimize your profile effortlessly with AI assistance.",
+      buttonText: "Launch Agent",
     },
     {
-      name: "Startup AI Agent",
-      icon: <RiRocketLine className="w-12 h-12 mb-4 text-green-600" />,
+      name: "Startup AI",
+      role: "Strategic Consultant",
+      icon: <RiRocketLine className="w-6 h-6 text-[#0ea5e9]" />,
       link: "https://startup.oneasy.ai",
-      description:
-        "Get strategic insights and support for your startup journey.",
-      color: "bg-green-50 border-green-200 hover:border-green-400",
+      tags: ["Planning", "Strategy"],
+      description: "Get strategic insights and support for your startup journey.",
+      buttonText: "Launch Agent",
     },
     {
-      name: "Proposal AI Agent",
-      icon: <RiFileTextLine className="w-12 h-12 mb-4 text-purple-600" />,
+      name: "Proposal AI",
+      role: "Sales Copywriter",
+      icon: <RiFileTextLine className="w-6 h-6 text-[#0ea5e9]" />,
       link: "https://proposal.oneasy.ai",
+      tags: ["Pitch", "B2B"],
       description: "Generate professional, winning proposals in seconds.",
-      color: "bg-purple-50 border-purple-200 hover:border-purple-400",
+      buttonText: "Launch Agent",
+    },
+    {
+      name: "Validator AI",
+      role: "Business Analyst",
+      icon: <RiLightbulbLine className="w-6 h-6 text-[#0ea5e9]" />,
+      link: "https://businessmodel.oneasy.ai/",
+      tags: ["Market", "Finance"],
+      description: "Validate your business idea before you build it with an AI consultant.",
+      buttonText: "Start Validation",
     },
   ];
 
   return (
-    <div className="bg-gray-50 min-h-screen p-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">
-          AI Agents Dashboard
-        </h1>
+    <div className="relative bg-[#f4f6f8] min-h-screen py-20 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="relative z-10 max-w-[1400px] mx-auto">
+        <div className="mb-16 md:mb-24 flex flex-col items-center text-center max-w-2xl mx-auto">
+          <h1 className="text-3xl md:text-[44px] leading-tight font-semibold text-[#0a192f] tracking-tight mb-5">
+            Supercharge Your Workflow
+          </h1>
+          <p className="text-gray-500 text-[16px] md:text-[18px] leading-relaxed">
+            Have a natural conversation with specialized AI consultants. Get
+            market analysis, insights, and proposals — in minutes, not weeks.
+          </p>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {agents.map((agent, index) => (
-            <a
+            <div
               key={index}
-              href={agent.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`block p-8 rounded-xl border-2 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl ${agent.color} group`}
+              className="relative rounded-[40px] bg-gradient-to-br from-white via-[#f8fcff] to-[#e6f4fc] p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-white hover:-translate-y-1 transition-transform duration-300 flex flex-col h-full"
             >
-              <div className="flex flex-col items-center text-center">
-                <div className="p-4 bg-white rounded-full shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300">
-                  {agent.icon}
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-3 group-hover:text-gray-900">
-                  {agent.name}
-                </h2>
-                <p className="text-gray-600 leading-relaxed font-medium">
-                  {agent.description}
-                </p>
-                <div className="mt-6 px-6 py-2 bg-white text-gray-800 rounded-full text-sm font-semibold shadow-sm group-hover:shadow-md transition-all">
-                  Launch Agent →
-                </div>
+              <a href={agent.link} target="_blank" rel="noopener noreferrer" className="absolute top-8 right-8 text-black cursor-pointer hover:text-[#0ea5e9] transition-colors">
+                <RiShareBoxLine className="w-6 h-6" />
+              </a>
+
+              <div className="w-14 h-14 rounded-full bg-[#afe4fa] flex items-center justify-center mb-6 shadow-inner">
+                {agent.icon}
               </div>
-            </a>
+              
+              <h2 className="text-[28px] font-medium text-black tracking-tight mb-3">
+                {agent.name}
+              </h2>
+              
+            
+
+              <p className="text-[#64748b] text-[15px] leading-relaxed mb-10 flex-grow">
+                {agent.description}
+              </p>
+
+              <div className="flex items-center gap-4 mt-auto">
+                <a
+                  href={agent.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex justify-center py-4 rounded-full bg-gradient-to-r from-white/90 to-[#e0f4fc] border border-white hover:border-[#99dffc] hover:shadow-[0_4px_12px_rgba(153,223,252,0.3)] text-black text-[16px] font-semibold transition-all duration-300"
+                >
+                  {agent.buttonText}
+                </a>
+              </div>
+            </div>
           ))}
         </div>
       </div>
