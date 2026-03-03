@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../../utils/api";
+import complianceApi from "../../../utils/complianceApi";
 import { initPaymentWithOrderId } from "../../../utils/payment";
+import SuccessModal from "../../common/SuccessModal";
 import {
   FiSearch,
   FiFilter,
@@ -18,6 +20,7 @@ import {
   FiCreditCard,
   FiLink,
   FiX,
+  FiEdit3,
 } from "react-icons/fi";
 
 function AdminServices() {
@@ -53,6 +56,13 @@ function AdminServices() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  // Notes modal state
+  const [showNotesModal, setShowNotesModal] = useState(false);
+  const [notesSvc, setNotesSvc] = useState(null);
+  const [noteContent, setNoteContent] = useState("");
+  const [savingNote, setSavingNote] = useState(false);
+  const [noteSuccess, setNoteSuccess] = useState(false);
+
   useEffect(() => {
     fetchServices();
     fetchAllClients();
@@ -67,8 +77,8 @@ function AdminServices() {
           new Set(
             response.data
               .map((client) => client.name || client.email || null)
-              .filter((name) => name !== null)
-          )
+              .filter((name) => name !== null),
+          ),
         ).sort();
         setAllClients(clientNames);
       }
@@ -205,9 +215,9 @@ function AdminServices() {
   const isTier = useCallback(
     (name) =>
       ["starter", "growth", "pro", "basic"].includes(
-        (name || "").toLowerCase()
+        (name || "").toLowerCase(),
       ),
-    []
+    [],
   );
 
   const CANONICAL_SERVICES = useMemo(
@@ -275,7 +285,7 @@ function AdminServices() {
       "Partnership Firm - ITR",
       "Company - ITR",
     ],
-    []
+    [],
   );
 
   const normalizeService = useCallback((text) => {
@@ -432,12 +442,12 @@ function AdminServices() {
         inferred || packageNameNormalized || normalizedTicketService || "Other"
       );
     },
-    [deriveServiceFromTicket, isTier, normalizeService]
+    [deriveServiceFromTicket, isTier, normalizeService],
   );
 
   const getServiceLabel = useCallback(
     (svc) => getServiceName(svc),
-    [getServiceName]
+    [getServiceName],
   );
 
   const clientsList = useMemo(() => {
@@ -445,16 +455,16 @@ function AdminServices() {
     const clientsFromServices = Array.from(
       new Set(
         services.map(
-          (s) => s.name || s.legal_name || s.client_name || s.email || "-"
-        )
-      )
+          (s) => s.name || s.legal_name || s.client_name || s.email || "-",
+        ),
+      ),
     );
-    
+
     // Merge both lists and remove duplicates
     const allClientsList = Array.from(
-      new Set([...allClients, ...clientsFromServices])
+      new Set([...allClients, ...clientsFromServices]),
     ).filter((name) => name !== "-"); // Remove "-" placeholder
-    
+
     return allClientsList.sort(); // Sort alphabetically
   }, [services, allClients]);
 
@@ -492,10 +502,21 @@ function AdminServices() {
       pending: "Open to Pay",
       unpaid: "Open to Pay",
     };
-    return map[v] || PAYMENT_STATUS_OPTIONS.find((o) => o.toLowerCase().replace(/\s/g, "") === v.replace(/\s/g, "")) || dbValue;
+    return (
+      map[v] ||
+      PAYMENT_STATUS_OPTIONS.find(
+        (o) => o.toLowerCase().replace(/\s/g, "") === v.replace(/\s/g, ""),
+      ) ||
+      dbValue
+    );
   };
   const paymentDisplayToDb = (display) => {
-    const map = { Paid: "paid", "Partially Paid": "partially_paid", "Pay later": "pay_later", "Open to Pay": "open_to_pay" };
+    const map = {
+      Paid: "paid",
+      "Partially Paid": "partially_paid",
+      "Pay later": "pay_later",
+      "Open to Pay": "open_to_pay",
+    };
     return map[display] || display;
   };
 
@@ -511,7 +532,9 @@ function AdminServices() {
       await performStatusUpdate(svc, newWorkStatus, null, null, null);
     } catch (error) {
       console.error("Error updating work status:", error);
-      alert("Failed to update work status: " + (error.message || "Unknown error"));
+      alert(
+        "Failed to update work status: " + (error.message || "Unknown error"),
+      );
     }
   };
 
@@ -521,10 +544,12 @@ function AdminServices() {
       // If marking as Paid without an online payment ID, open the
       // payment details dialog (date, mode/nature, person, remark)
       const normalized = newPaymentStatusDisplay.toLowerCase().trim();
-      const hasOnlinePaymentId =
-        !!svc.razorpay_payment_id || !!svc.payment_id;
+      const hasOnlinePaymentId = !!svc.razorpay_payment_id || !!svc.payment_id;
       if (normalized === "paid" && !hasOnlinePaymentId) {
-        setPendingStatusUpdate({ svc, newPaymentStatus: newPaymentStatusDisplay });
+        setPendingStatusUpdate({
+          svc,
+          newPaymentStatus: newPaymentStatusDisplay,
+        });
         setShowPaymentMethodDialog(true);
         return;
       }
@@ -532,10 +557,16 @@ function AdminServices() {
     } catch (error) {
       console.error("Error updating payment status:", error);
       if (error.response?.data?.requiresPaymentMethod) {
-        setPendingStatusUpdate({ svc, newPaymentStatus: newPaymentStatusDisplay });
+        setPendingStatusUpdate({
+          svc,
+          newPaymentStatus: newPaymentStatusDisplay,
+        });
         setShowPaymentMethodDialog(true);
       } else {
-        alert("Failed to update payment status: " + (error.message || "Unknown error"));
+        alert(
+          "Failed to update payment status: " +
+            (error.message || "Unknown error"),
+        );
       }
     }
   };
@@ -558,7 +589,7 @@ function AdminServices() {
         newStatus || null,
         selectedPaymentMethod,
         paymentFormData,
-        newPaymentStatus || null
+        newPaymentStatus || null,
       );
       setShowPaymentMethodDialog(false);
       setPendingStatusUpdate(null);
@@ -576,12 +607,21 @@ function AdminServices() {
     }
   };
 
-  const performStatusUpdate = async (svc, newStatus, paymentMethod, paymentDetails = null, paymentStatusDisplay = null) => {
+  const performStatusUpdate = async (
+    svc,
+    newStatus,
+    paymentMethod,
+    paymentDetails = null,
+    paymentStatusDisplay = null,
+  ) => {
     try {
       const payload = {
         ticketId: svc.ticket_id,
         ...(newStatus != null && newStatus !== "" && { status: newStatus }),
-        ...(paymentStatusDisplay != null && paymentStatusDisplay !== "" && { paymentStatus: paymentStatusDisplay }),
+        ...(paymentStatusDisplay != null &&
+          paymentStatusDisplay !== "" && {
+            paymentStatus: paymentStatusDisplay,
+          }),
         ...(paymentMethod && { paymentMethod }),
         ...(paymentDetails && {
           dateOfPayment: paymentDetails.dateOfPayment,
@@ -591,30 +631,43 @@ function AdminServices() {
           transactionId: paymentDetails.transactionId,
         }),
       };
-      const response = await apiClient.post("/admin/update-service-status", payload);
+      const response = await apiClient.post(
+        "/admin/update-service-status",
+        payload,
+      );
 
       if (response.success) {
         setServices((prev) =>
           prev.map((item) => {
             if (item.ticket_id !== svc.ticket_id) return item;
             const next = { ...item };
-            if (newStatus != null && newStatus !== "") next.service_status = newStatus;
-            if (paymentStatusDisplay != null && paymentStatusDisplay !== "") next.payment_status = paymentDisplayToDb(paymentStatusDisplay);
+            if (newStatus != null && newStatus !== "")
+              next.service_status = newStatus;
+            if (paymentStatusDisplay != null && paymentStatusDisplay !== "")
+              next.payment_status = paymentDisplayToDb(paymentStatusDisplay);
             return next;
-          })
+          }),
         );
         setTimeout(() => fetchServices(), 500);
         return;
       }
       if (response.requiresPaymentMethod) {
-        setPendingStatusUpdate(paymentStatusDisplay ? { svc, newPaymentStatus: paymentStatusDisplay } : { svc, newStatus });
+        setPendingStatusUpdate(
+          paymentStatusDisplay
+            ? { svc, newPaymentStatus: paymentStatusDisplay }
+            : { svc, newStatus },
+        );
         setShowPaymentMethodDialog(true);
       } else {
         throw new Error(response.message || "Failed to update status");
       }
     } catch (error) {
       if (error.response?.data?.requiresPaymentMethod) {
-        setPendingStatusUpdate(paymentStatusDisplay ? { svc, newPaymentStatus: paymentStatusDisplay } : { svc, newStatus });
+        setPendingStatusUpdate(
+          paymentStatusDisplay
+            ? { svc, newPaymentStatus: paymentStatusDisplay }
+            : { svc, newStatus },
+        );
         setShowPaymentMethodDialog(true);
       } else {
         throw error;
@@ -627,7 +680,7 @@ function AdminServices() {
     const serviceName = getServiceLabel(svc);
     if (
       !window.confirm(
-        `Are you sure you want to permanently delete this service?\n\nService: ${serviceName}\nTicket ID: ${svc.ticket_id}\n\nThis action cannot be undone.`
+        `Are you sure you want to permanently delete this service?\n\nService: ${serviceName}\nTicket ID: ${svc.ticket_id}\n\nThis action cannot be undone.`,
       )
     )
       return;
@@ -638,7 +691,7 @@ function AdminServices() {
       });
       if (response.success) {
         setServices((prev) =>
-          prev.filter((item) => item.ticket_id !== svc.ticket_id)
+          prev.filter((item) => item.ticket_id !== svc.ticket_id),
         );
         setTimeout(async () => {
           await fetchServices();
@@ -724,11 +777,11 @@ function AdminServices() {
         (svc.ticket_id && svc.ticket_id.toLowerCase().includes(searchLower));
 
       const matchesStatus =
-        statusFilters.length === 0 || statusFilters.includes(paymentStatusDisplay);
+        statusFilters.length === 0 ||
+        statusFilters.includes(paymentStatusDisplay);
 
       const matchesService =
-        serviceFilters.length === 0 ||
-        serviceFilters.includes(serviceName);
+        serviceFilters.length === 0 || serviceFilters.includes(serviceName);
 
       const matchesProgress =
         progressFilters.length === 0 || progressFilters.includes(workStatus);
@@ -758,10 +811,55 @@ function AdminServices() {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentServices = filteredServices.slice(
     indexOfFirstItem,
-    indexOfLastItem
+    indexOfLastItem,
   );
   const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // --- Notes handlers ---
+  const openNotesModal = (svc) => {
+    setNotesSvc(svc);
+    setNoteContent("");
+    setShowNotesModal(true);
+  };
+
+  const handleAddNote = async () => {
+    if (!noteContent.trim() || !notesSvc) return;
+    setSavingNote(true);
+    try {
+      const token = complianceApi.getToken();
+      if (!token) throw new Error("Authentication token not found");
+
+      const response = await fetch(
+        "https://oneasycompliance.oneasy.ai/admin/compliance/notes",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: notesSvc.user_id || notesSvc.id || "",
+            content: noteContent.trim(),
+            orgId: notesSvc.org_id || notesSvc.orgId || "",
+            serviceName: getServiceLabel(notesSvc),
+          }),
+        },
+      );
+
+      if (!response.ok) throw new Error("Failed to add note");
+
+      setShowNotesModal(false);
+      setNotesSvc(null);
+      setNoteContent("");
+      setNoteSuccess(true);
+    } catch (err) {
+      console.error("Error adding note:", err);
+      alert(`Failed to add note: ${err.message}`);
+    } finally {
+      setSavingNote(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -1014,6 +1112,9 @@ function AdminServices() {
                       <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D]">
                         Action
                       </th>
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D]">
+                        Notes
+                      </th>
                       <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D] rounded-r-xl">
                         Payment
                       </th>
@@ -1026,10 +1127,16 @@ function AdminServices() {
                         className="hover:bg-blue-50/50 transition-colors"
                       >
                         <td className="px-2 md:px-3 lg:px-4 py-3">
-                          <div className="font-medium text-gray-900 text-xs md:text-sm truncate max-w-[120px] md:max-w-[150px]" title={svc.name || svc.legal_name || "-"}>
+                          <div
+                            className="font-medium text-gray-900 text-xs md:text-sm truncate max-w-[120px] md:max-w-[150px]"
+                            title={svc.name || svc.legal_name || "-"}
+                          >
                             {svc.name || svc.legal_name || "-"}
                           </div>
-                          <div className="text-xs text-gray-500 truncate max-w-[120px] md:max-w-[150px]" title={svc.email || "No email"}>
+                          <div
+                            className="text-xs text-gray-500 truncate max-w-[120px] md:max-w-[150px]"
+                            title={svc.email || "No email"}
+                          >
                             {svc.email || "No email"}
                           </div>
                         </td>
@@ -1046,7 +1153,9 @@ function AdminServices() {
                           {svc.ticket_id ? (
                             <div className="relative">
                               <select
-                                value={paymentStatusToDisplay(svc.payment_status)}
+                                value={paymentStatusToDisplay(
+                                  svc.payment_status,
+                                )}
                                 onChange={(e) =>
                                   handlePaymentStatusUpdate(svc, e.target.value)
                                 }
@@ -1089,7 +1198,12 @@ function AdminServices() {
                                 className="w-full max-w-[140px] md:max-w-[200px] pl-1.5 md:pl-2 pr-5 md:pr-6 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] appearance-none cursor-pointer"
                               >
                                 {[
-                                  ...(svc.service_status && !WORK_STATUS_OPTIONS.includes(svc.service_status) ? [svc.service_status] : []),
+                                  ...(svc.service_status &&
+                                  !WORK_STATUS_OPTIONS.includes(
+                                    svc.service_status,
+                                  )
+                                    ? [svc.service_status]
+                                    : []),
                                   ...WORK_STATUS_OPTIONS,
                                 ].map((opt) => (
                                   <option key={opt} value={opt}>
@@ -1119,7 +1233,9 @@ function AdminServices() {
                         </td>
                         <td className="px-2 md:px-3 lg:px-4 py-3 text-xs text-gray-500 hidden lg:table-cell">
                           {formatDateTime(
-                            svc.updated_at || svc.confirmed_at || svc.created_at
+                            svc.updated_at ||
+                              svc.confirmed_at ||
+                              svc.created_at,
                           )}
                         </td>
                         <td className="px-2 md:px-3 lg:px-4 py-3">
@@ -1133,7 +1249,7 @@ function AdminServices() {
                                     svc.ticket_id
                                       ? `&ticketId=${svc.ticket_id}`
                                       : ""
-                                  }`
+                                  }`,
                                 )
                               }
                               className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -1153,29 +1269,52 @@ function AdminServices() {
                           </div>
                         </td>
                         <td className="px-2 md:px-3 lg:px-4 py-3">
+                          <button
+                            onClick={() => openNotesModal(svc)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[#00486D] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-100"
+                            title="Add Note"
+                          >
+                            <FiEdit3 className="w-3 h-3" />
+                            Add
+                          </button>
+                        </td>
+                        <td className="px-2 md:px-3 lg:px-4 py-3">
                           <div className="flex items-center gap-1 md:gap-2">
                             {(() => {
-                              const ps = (svc.payment_status || "").toLowerCase();
-                              const needsPayment = ["pending", "unpaid", "open_to_pay", "pay_later"].includes(ps) || ps === "open to pay" || ps === "pay later";
-                              return needsPayment && (svc.razorpay_order_id || svc.order_id);
+                              const ps = (
+                                svc.payment_status || ""
+                              ).toLowerCase();
+                              const needsPayment =
+                                [
+                                  "pending",
+                                  "unpaid",
+                                  "open_to_pay",
+                                  "pay_later",
+                                ].includes(ps) ||
+                                ps === "open to pay" ||
+                                ps === "pay later";
+                              return (
+                                needsPayment &&
+                                (svc.razorpay_order_id || svc.order_id)
+                              );
                             })() && (
-                                <>
-                                  <button
-                                    onClick={() => handlePayClick(svc)}
-                                    className="p-1 md:p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                                    title="Pay Now"
-                                  >
-                                    <FiCreditCard className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleCopyLinkClick(svc)}
-                                    className="p-1 md:p-1.5 text-[#00486D] hover:bg-blue-50 rounded-lg transition-colors"
-                                    title="Copy Link"
-                                  >
-                                    <FiLink className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                                  </button>
-                                </>
-                              )}
+                              <>
+                                <button
+                                  onClick={() => handlePayClick(svc)}
+                                  className="p-1 md:p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                  title="Pay Now"
+                                >
+                                  <FiCreditCard className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleCopyLinkClick(svc)}
+                                  className="p-1 md:p-1.5 text-[#00486D] hover:bg-blue-50 rounded-lg transition-colors"
+                                  title="Copy Link"
+                                >
+                                  <FiLink className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                </button>
+                              </>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -1221,7 +1360,9 @@ function AdminServices() {
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {selectedPaymentMethod ? "Payment Details" : "Payment Method Required"}
+                  {selectedPaymentMethod
+                    ? "Payment Details"
+                    : "Payment Method Required"}
                 </h3>
                 <p className="text-sm text-gray-500 mt-1">
                   {selectedPaymentMethod
@@ -1283,7 +1424,9 @@ function AdminServices() {
                   </label>
                   <div className="px-4 py-2 bg-gray-50 rounded-xl">
                     <span className="text-sm font-medium text-gray-900">
-                      {selectedPaymentMethod === "cash" ? "Paid by Cash" : "Paid by Other Source"}
+                      {selectedPaymentMethod === "cash"
+                        ? "Paid by Cash"
+                        : "Paid by Other Source"}
                     </span>
                   </div>
                   <button
@@ -1413,6 +1556,76 @@ function AdminServices() {
           </div>
         </div>
       )}
+
+      {/* Add Note Modal */}
+      {showNotesModal && notesSvc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4 border border-gray-100">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Add Note
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  {getServiceLabel(notesSvc)} &mdash;{" "}
+                  {notesSvc.name || notesSvc.legal_name || "Client"}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowNotesModal(false);
+                  setNotesSvc(null);
+                  setNoteContent("");
+                }}
+                className="p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Note <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={noteContent}
+                onChange={(e) => setNoteContent(e.target.value)}
+                placeholder="Enter your note here..."
+                rows={4}
+                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C] text-sm"
+                autoFocus
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleAddNote}
+                disabled={savingNote || !noteContent.trim()}
+                className="flex-1 px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                {savingNote ? "Saving..." : "Save Note"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowNotesModal(false);
+                  setNotesSvc(null);
+                  setNoteContent("");
+                }}
+                className="px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <SuccessModal
+        isOpen={noteSuccess}
+        onClose={() => setNoteSuccess(false)}
+        title="Note Added"
+        message="Your note has been saved successfully!"
+      />
     </div>
   );
 }
