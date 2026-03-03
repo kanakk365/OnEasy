@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../utils/api";
+import complianceApi from "../../utils/complianceApi";
 import { AUTH_CONFIG } from "../../config/auth";
 import { getUsersPageData } from "../../utils/usersPageApi";
 import { TriangleAlert } from "lucide-react";
@@ -24,6 +25,12 @@ function Client() {
   });
   const [currentNoticeIndex, setCurrentNoticeIndex] = React.useState(0);
 
+  // Upcoming compliance state
+  const [complianceOrgs, setComplianceOrgs] = React.useState([]);
+  const [selectedComplianceOrg, setSelectedComplianceOrg] = React.useState("");
+  const [allComplianceItems, setAllComplianceItems] = React.useState([]);
+  const [loadingCompliances, setLoadingCompliances] = React.useState(true);
+
   React.useEffect(() => {
     // Add smooth scrolling behavior
     document.documentElement.style.scrollBehavior = "smooth";
@@ -36,7 +43,7 @@ function Client() {
     const loadLatestService = async () => {
       try {
         const storedUser = JSON.parse(
-          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}",
         );
         const userId = storedUser.id;
         const rawName = storedUser.name || storedUser.fullName || "there";
@@ -49,8 +56,7 @@ function Client() {
           "You've got this! Let's get it done!",
           "Hope you have a great day ahead!",
         ];
-        const tagline =
-          taglines[Math.floor(Math.random() * taglines.length)];
+        const tagline = taglines[Math.floor(Math.random() * taglines.length)];
         setGreeting(`Hi ${userName}, ${tagline}`);
 
         if (!userId) {
@@ -85,24 +91,34 @@ function Client() {
 
         // Filter generic services (exclude duplicates from specific service tables)
         const specificServiceTicketIds = new Set([
-          ...normalize(pl).map(s => s.ticket_id).filter(Boolean),
-          ...normalize(prop).map(s => s.ticket_id).filter(Boolean),
-          ...normalize(si).map(s => s.ticket_id).filter(Boolean),
-          ...normalize(gst).map(s => s.ticket_id).filter(Boolean),
+          ...normalize(pl)
+            .map((s) => s.ticket_id)
+            .filter(Boolean),
+          ...normalize(prop)
+            .map((s) => s.ticket_id)
+            .filter(Boolean),
+          ...normalize(si)
+            .map((s) => s.ticket_id)
+            .filter(Boolean),
+          ...normalize(gst)
+            .map((s) => s.ticket_id)
+            .filter(Boolean),
         ]);
-        
+
         // Include generic services that are not in specific service tables
-        const genericServices = normalize(allServices).filter(service => {
+        const genericServices = normalize(allServices).filter((service) => {
           const ticketId = service.ticket_id || service.id;
           if (!ticketId) return false;
           // Exclude services that are already in specific tables (SI_, GST_, PROP_, PVT_, PLC_, OPC_)
           const upperTicketId = ticketId.toString().toUpperCase();
-          if (upperTicketId.startsWith('SI_') || 
-              upperTicketId.startsWith('GST_') || 
-              upperTicketId.startsWith('PROP_') ||
-              upperTicketId.startsWith('PVT_') ||
-              upperTicketId.startsWith('PLC_') ||
-              upperTicketId.startsWith('OPC_')) {
+          if (
+            upperTicketId.startsWith("SI_") ||
+            upperTicketId.startsWith("GST_") ||
+            upperTicketId.startsWith("PROP_") ||
+            upperTicketId.startsWith("PVT_") ||
+            upperTicketId.startsWith("PLC_") ||
+            upperTicketId.startsWith("OPC_")
+          ) {
             return false;
           }
           // Include if not already in specific service tables
@@ -125,7 +141,7 @@ function Client() {
         const sorted = combined.sort(
           (a, b) =>
             new Date(b.created_at || b.createdAt || b.updated_at || 0) -
-            new Date(a.created_at || a.createdAt || a.updated_at || 0)
+            new Date(a.created_at || a.createdAt || a.updated_at || 0),
         );
 
         setAllServices(sorted);
@@ -142,7 +158,7 @@ function Client() {
       try {
         // Get current user ID to fetch user-specific notices
         const storedUser = JSON.parse(
-          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}",
         );
         const userId = storedUser.id;
 
@@ -195,6 +211,65 @@ function Client() {
       }
     };
     loadOrganizations();
+
+    // Load upcoming compliances
+    const loadUpcomingCompliances = async () => {
+      try {
+        setLoadingCompliances(true);
+        const storedUser = JSON.parse(
+          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}",
+        );
+        const userId = storedUser.id;
+        if (!userId) return;
+
+        const token = complianceApi.getToken();
+        if (!token) return;
+
+        const response = await fetch(
+          `https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/user-compliances?userId=${userId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (!response.ok) throw new Error("Failed to fetch compliances");
+
+        const data = await response.json();
+        const items = data.items || [];
+        setAllComplianceItems(items);
+
+        // Extract unique orgs
+        const orgMap = new Map();
+        items.forEach((item) => {
+          const org = item.organisation;
+          if (org && org.id) {
+            orgMap.set(String(org.id), {
+              id: String(org.id),
+              name:
+                org.legalName ||
+                org.legal_name ||
+                org.tradeName ||
+                org.trade_name ||
+                `Org ${org.id}`,
+            });
+          }
+        });
+        const orgsList = Array.from(orgMap.values());
+        setComplianceOrgs(orgsList);
+        if (orgsList.length > 0) {
+          setSelectedComplianceOrg(orgsList[0].id);
+        }
+      } catch (err) {
+        console.error("Error loading compliances:", err);
+      } finally {
+        setLoadingCompliances(false);
+      }
+    };
+    loadUpcomingCompliances();
   }, []);
 
   const formatDate = (dateString) => {
@@ -220,7 +295,7 @@ function Client() {
   // Filter notices based on active tab
   const filteredNotices = React.useMemo(() => {
     const storedUser = JSON.parse(
-      localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+      localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}",
     );
     const userId = storedUser.id;
 
@@ -230,7 +305,7 @@ function Client() {
     } else {
       // Show only user-specific notices (user_id matches current user)
       return allNotices.filter(
-        (notice) => notice.user_id && String(notice.user_id) === String(userId)
+        (notice) => notice.user_id && String(notice.user_id) === String(userId),
       );
     }
   }, [allNotices, activeNoticeTab]);
@@ -249,13 +324,13 @@ function Client() {
   // Handle infinite loop: reset to start when reaching the duplicate at the end
   React.useEffect(() => {
     if (filteredNotices.length <= 1) return;
-    
+
     // When we reach the duplicate (index === filteredNotices.length), reset to 0 without animation
     if (currentNoticeIndex === filteredNotices.length) {
       const timeout = setTimeout(() => {
         setCurrentNoticeIndex(0);
       }, 700); // Wait for animation to complete (700ms)
-      
+
       return () => clearTimeout(timeout);
     }
   }, [currentNoticeIndex, filteredNotices.length]);
@@ -267,45 +342,46 @@ function Client() {
 
   const getServiceTab = React.useCallback((reg) => {
     // Step 1: Check payment status first - if payment is pending/unpaid, return "Open"
-    const paymentStatus = (reg.payment_status || '').toLowerCase().trim();
-    if (paymentStatus === 'pending' || paymentStatus === 'unpaid') {
-      return 'Open';
+    const paymentStatus = (reg.payment_status || "").toLowerCase().trim();
+    if (paymentStatus === "pending" || paymentStatus === "unpaid") {
+      return "Open";
     }
-    
+
     // Step 2: Check if service_status is "completed" (case-insensitive) - return "Completed"
-    if (reg.service_status && reg.service_status.trim() !== '') {
+    if (reg.service_status && reg.service_status.trim() !== "") {
       const serviceStatus = reg.service_status.toLowerCase().trim();
-      if (serviceStatus === 'completed') {
-        return 'Completed';
+      if (serviceStatus === "completed") {
+        return "Completed";
       }
     }
-    
+
     // Step 3: If payment is completed, check service status
-    const isPaymentCompleted = reg.payment_completed || 
-                               paymentStatus === 'paid' || 
-                               paymentStatus === 'payment_completed' ||
-                               reg.razorpay_payment_id ||
-                               reg.payment_id;
-    
+    const isPaymentCompleted =
+      reg.payment_completed ||
+      paymentStatus === "paid" ||
+      paymentStatus === "payment_completed" ||
+      reg.razorpay_payment_id ||
+      reg.payment_id;
+
     if (isPaymentCompleted) {
       // Payment completed - if service_status exists (and is not completed), it's "In progress"
       // This includes: WIP, data received, data pending, submitted, etc.
-      if (reg.service_status && reg.service_status.trim() !== '') {
+      if (reg.service_status && reg.service_status.trim() !== "") {
         // Already checked for 'completed' above, so any other status means "In progress"
-        return 'In progress';
+        return "In progress";
       }
       // Payment completed but no service_status set yet - treat as "In progress"
-      return 'In progress';
+      return "In progress";
     }
-    
+
     // Default: no payment or pending payment
-    return 'Open';
+    return "Open";
   }, []);
 
   const filteredServices = React.useMemo(() => {
     if (!allServices || allServices.length === 0) return [];
     return allServices.filter(
-      (service) => getServiceTab(service) === activeServiceTab
+      (service) => getServiceTab(service) === activeServiceTab,
     );
   }, [allServices, activeServiceTab, getServiceTab]);
 
@@ -355,7 +431,6 @@ function Client() {
     setComplianceStats({ ongoing, upcoming, overdue, other });
   }, [allServices, getServiceTab]);
 
-
   const getStatusBadgeColor = (status) => {
     if (!status) return "bg-gray-100 text-gray-800";
 
@@ -402,13 +477,17 @@ function Client() {
 
   const formatServiceName = (reg) => {
     // Prioritize package_name first (like "Starter", "Pro", etc.), then business_name
-    const raw = reg.package_name || reg.business_name || reg.service_name || "Service";
+    const raw =
+      reg.package_name || reg.business_name || reg.service_name || "Service";
     const cleaned = raw.replace(/[-–]\s*Payment\s*Completed/i, "").trim();
 
     // If the package name is incorrectly set to "Private Limited Registration" but the service type
     // is different (determined by ticket ID), replace it with the correct service name
     const type = deriveType(reg);
-    if (cleaned === "Private Limited Registration" && type !== "Private Limited") {
+    if (
+      cleaned === "Private Limited Registration" &&
+      type !== "Private Limited"
+    ) {
       return `${type}`;
     }
 
@@ -419,8 +498,10 @@ function Client() {
     const tid = (reg.ticket_id || reg.id || "").toString().toUpperCase();
     if (tid.startsWith("OPC_")) return "OPC";
     if (tid.startsWith("LLP_")) return "LLP";
-    if (tid.startsWith("PART_") || tid.startsWith("PARTNERSHIP_")) return "Partnership";
-    if (tid.startsWith("SEC8_") || tid.startsWith("SECTION8_")) return "Section 8";
+    if (tid.startsWith("PART_") || tid.startsWith("PARTNERSHIP_"))
+      return "Partnership";
+    if (tid.startsWith("SEC8_") || tid.startsWith("SECTION8_"))
+      return "Section 8";
     if (tid.startsWith("PVT_")) return "Private Limited";
     if (tid.startsWith("PROP_")) return "Proprietorship";
     if (tid.startsWith("SI_")) return "Startup India";
@@ -443,10 +524,10 @@ function Client() {
         {greeting && (
           <>
             <h1 className="text-2xl font-medium text-gray-900 mb-2">
-              {greeting.split(',')[0]}
+              {greeting.split(",")[0]}
             </h1>
             <p className="text-gray-500">
-              {greeting.split(',').slice(1).join(',').trim()}
+              {greeting.split(",").slice(1).join(",").trim()}
             </p>
           </>
         )}
@@ -545,7 +626,7 @@ function Client() {
                       Date
                     </div>
                   </div>
-                  
+
                   {/* Table Rows */}
                   <div className="space-y-0">
                     {filteredServices.slice(0, 5).map((service, idx) => (
@@ -615,22 +696,22 @@ function Client() {
 
             {/* Notice Tabs */}
             <div className="flex border-b border-gray-100 mb-4">
-              <button 
-                onClick={() => setActiveNoticeTab('All Notices')}
+              <button
+                onClick={() => setActiveNoticeTab("All Notices")}
                 className={`pb-2 mr-6 text-sm font-medium transition-colors ${
-                  activeNoticeTab === 'All Notices' 
-                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
-                    : 'text-gray-500 hover:text-gray-700'
+                  activeNoticeTab === "All Notices"
+                    ? "text-[#01334C] border-b-2 border-[#01334C]"
+                    : "text-gray-500 hover:text-gray-700"
                 }`}
               >
                 All Notices
               </button>
-              <button 
-                onClick={() => setActiveNoticeTab('My Notices')}
+              <button
+                onClick={() => setActiveNoticeTab("My Notices")}
                 className={`pb-2 text-sm font-medium transition-colors ${
-                  activeNoticeTab === 'My Notices' 
-                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
-                    : 'text-gray-500 hover:text-gray-700'
+                  activeNoticeTab === "My Notices"
+                    ? "text-[#01334C] border-b-2 border-[#01334C]"
+                    : "text-gray-500 hover:text-gray-700"
                 }`}
               >
                 My Notices
@@ -642,16 +723,18 @@ function Client() {
             ) : filteredNotices.length > 0 ? (
               <div className="relative overflow-hidden">
                 {/* Carousel Container */}
-                <div 
-                  className={`flex ${currentNoticeIndex === 0 ? '' : 'transition-transform duration-700 ease-in-out'}`}
-                  style={{ transform: `translateX(-${currentNoticeIndex * 100}%)` }}
+                <div
+                  className={`flex ${currentNoticeIndex === 0 ? "" : "transition-transform duration-700 ease-in-out"}`}
+                  style={{
+                    transform: `translateX(-${currentNoticeIndex * 100}%)`,
+                  }}
                 >
                   {/* Render all notices + duplicate first notice at the end for infinite loop */}
-                  {[...filteredNotices, ...(filteredNotices.length > 1 ? [filteredNotices[0]] : [])].map((noticeItem, index) => (
-                    <div 
-                      key={index} 
-                      className="w-full flex-shrink-0"
-                    >
+                  {[
+                    ...filteredNotices,
+                    ...(filteredNotices.length > 1 ? [filteredNotices[0]] : []),
+                  ].map((noticeItem, index) => (
+                    <div key={index} className="w-full flex-shrink-0">
                       <div className="bg-[#FFF9F0] rounded-xl p-6 border border-[#FFF0D4]">
                         <div className="flex items-start space-x-4">
                           <div className="bg-[#FFAB00] rounded-full p-2.5 flex-shrink-0 shadow-sm text-white">
@@ -689,9 +772,9 @@ function Client() {
                         key={index}
                         onClick={() => setCurrentNoticeIndex(index)}
                         className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                          index === (currentNoticeIndex % filteredNotices.length)
-                            ? 'bg-gray-800' 
-                            : 'bg-gray-300 hover:bg-gray-400'
+                          index === currentNoticeIndex % filteredNotices.length
+                            ? "bg-gray-800"
+                            : "bg-gray-300 hover:bg-gray-400"
                         }`}
                         aria-label={`Go to notice ${index + 1}`}
                       />
@@ -708,37 +791,123 @@ function Client() {
 
           {/* Upcoming Compliances */}
           <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm relative overflow-hidden">
-            <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-medium text-gray-900">
                 Upcoming Compliances
               </h2>
+              {complianceOrgs.length > 0 && (
+                <select
+                  value={selectedComplianceOrg}
+                  onChange={(e) => setSelectedComplianceOrg(e.target.value)}
+                  className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#00486D] bg-white max-w-[180px] truncate"
+                >
+                  {complianceOrgs.map((org) => (
+                    <option key={org.id} value={org.id}>
+                      {org.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <div className="bg-[#FFF5F3] rounded-xl p-6">
-              <ul className="space-y-4 mb-6">
-                {[
-                  "GST Filing – Due in 7 days",
-                  "Income Tax Return – Due in 14 days",
-                  "ROC Annual Filing – Due in 21 days",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center space-x-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#FF3D00]"></div>
-                    <span className="text-sm text-gray-800 font-medium">
-                      {item}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              {loadingCompliances ? (
+                <div className="text-center py-6 text-gray-400 text-sm">
+                  Loading compliances...
+                </div>
+              ) : (
+                (() => {
+                  // Filter items by selected org and get upcoming instances
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
 
-              <button
-                className="text-white text-sm font-medium px-6 py-2.5 rounded-lg transition-all shadow-md active:scale-95 cursor-pointer"
-                style={{
-                  background:
-                    "linear-gradient(180deg, #FF3D00 0%, #AD2C04 100%)",
-                }}
-              >
-                Get Help
-              </button>
+                  const upcoming = [];
+                  allComplianceItems
+                    .filter((item) => {
+                      const org = item.organisation;
+                      if (!org) return false;
+                      return String(org.id) === String(selectedComplianceOrg);
+                    })
+                    .forEach((item) => {
+                      (item.instances || []).forEach((inst) => {
+                        if (!inst.dueDate) return;
+                        const due = new Date(inst.dueDate);
+                        if (due >= today && !inst.isDone) {
+                          upcoming.push({
+                            name:
+                              item.complianceCode ||
+                              item.complianceName ||
+                              "Compliance",
+                            dueDate: due,
+                            category: item.category || "",
+                          });
+                        }
+                      });
+                    });
+
+                  // Sort by date ascending and take 3 closest
+                  upcoming.sort((a, b) => a.dueDate - b.dueDate);
+                  const closest3 = upcoming.slice(0, 3);
+
+                  if (closest3.length === 0) {
+                    return (
+                      <div className="text-center py-6 text-gray-400 text-sm">
+                        {complianceOrgs.length === 0
+                          ? "No compliance data available."
+                          : "No upcoming compliances for this organization."}
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <>
+                      <ul className="space-y-4 mb-6">
+                        {closest3.map((item, i) => {
+                          const diffMs = item.dueDate - today;
+                          const diffDays = Math.ceil(
+                            diffMs / (1000 * 60 * 60 * 24),
+                          );
+                          const dueLabel =
+                            diffDays === 0
+                              ? "Due today"
+                              : diffDays === 1
+                                ? "Due tomorrow"
+                                : `Due in ${diffDays} days`;
+
+                          return (
+                            <li key={i} className="flex items-start space-x-3">
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#FF3D00] mt-1.5 flex-shrink-0"></div>
+                              <div className="flex-1">
+                                <span className="text-sm text-gray-800 font-medium block">
+                                  {item.name}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {item.dueDate.toLocaleDateString("en-IN", {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  })}{" "}
+                                  &middot; {dueLabel}
+                                </span>
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+
+                      <button
+                        className="text-white text-sm font-medium px-6 py-2.5 rounded-lg transition-all shadow-md active:scale-95 cursor-pointer"
+                        style={{
+                          background:
+                            "linear-gradient(180deg, #FF3D00 0%, #AD2C04 100%)",
+                        }}
+                      >
+                        Get Help
+                      </button>
+                    </>
+                  );
+                })()
+              )}
             </div>
           </div>
         </div>
