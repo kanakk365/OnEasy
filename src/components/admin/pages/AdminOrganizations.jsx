@@ -31,6 +31,7 @@ import OrganizationNotesSection from "../../pages/organization/components/Organi
 import OrganizationTasksSection from "../../pages/organization/components/OrganizationTasksSection";
 import OrgComplianceAssignmentTab from "./organization/OrgComplianceAssignmentTab";
 import OrgAssignedComplianceTab from "./organization/OrgAssignedComplianceTab";
+import AdminServiceNotesSection from "./organization/AdminServiceNotesSection";
 
 function AdminOrganizations() {
   const navigate = useNavigate();
@@ -2420,6 +2421,7 @@ function AdminOrganizations() {
                 { key: "attachments", label: "Attachments" },
                 { key: "credentials", label: "Credentials" },
                 { key: "notes", label: "Notes" },
+                { key: "service-notes", label: "Service Notes" },
                 { key: "tasks", label: "Tasks" },
                 { key: "assign-compliance", label: "Add/Assign Compliance" },
                 { key: "assigned-compliance", label: "Assigned Compliance" },
@@ -4477,6 +4479,15 @@ function AdminOrganizations() {
                 <OrgAssignedComplianceTab
                   userId={selectedOrgUserId}
                   org={selectedOrg}
+                />
+              </div>
+            )}
+
+            {activeDetailTab === "service-notes" && (
+              <div className="px-6 pb-6 pt-2">
+                <AdminServiceNotesSection
+                  userId={selectedOrgUserId}
+                  orgId={selectedOrg?.id}
                 />
               </div>
             )}

@@ -7,6 +7,7 @@ import AttachmentsSection from "./AttachmentsSection";
 import CredentialsSection from "./CredentialsSection";
 import OrganizationNotesSection from "./OrganizationNotesSection";
 import OrganizationTasksSection from "./OrganizationTasksSection";
+import ServiceNotesSection from "./ServiceNotesSection";
 import UserOrgComplianceSection from "./UserOrgComplianceSection";
 import AddComplianceSection from "./AddComplianceSection";
 
@@ -59,6 +60,7 @@ const OrganizationDetails = ({
     { key: "attachments", label: "Attachments" },
     { key: "credentials", label: "Credentials" },
     { key: "notes", label: "Notes" },
+    { key: "service-notes", label: "Service Notes" },
     { key: "tasks", label: "Tasks" },
     { key: "assigned-compliances", label: "Assigned Compliances" },
     { key: "add-compliance", label: "Add Compliance" },
@@ -226,6 +228,10 @@ const OrganizationDetails = ({
                 );
               }}
             />
+          )}
+
+          {activeTab === "service-notes" && (
+            <ServiceNotesSection orgId={selectedOrg?.id} />
           )}
 
           {activeTab === "tasks" && (
