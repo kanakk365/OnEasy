@@ -16,6 +16,9 @@ import ConfirmationModal from "../../../common/ConfirmationModal";
 const API_DELETE_URL =
   "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/user-compliances";
 
+const API_DELETE_INSTANCE_URL =
+  "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/instances";
+
 // ─── Calendar Constants ───────────────────────────────────────────────────────
 const MONTH_NAMES = [
   "January",
@@ -61,6 +64,12 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
+
+  // States for individual instance delete
+  const [instanceToDelete, setInstanceToDelete] = useState(null);
+  const [showInstanceDeleteConfirm, setShowInstanceDeleteConfirm] =
+    useState(false);
+  const [deletingInstance, setDeletingInstance] = useState(false);
 
   // Calendar state
   const today = new Date();
@@ -230,6 +239,46 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
       alert(`❌ Failed to delete: ${err.message}`);
     } finally {
       setDeleting(false);
+    }
+  };
+
+  // ─── Instance Delete Handlers ──────────────────────────────────────────────
+  const handleInstanceDeleteClick = (instance) => {
+    setInstanceToDelete(instance);
+    setShowInstanceDeleteConfirm(true);
+  };
+
+  const handleConfirmInstanceDelete = async () => {
+    if (!instanceToDelete) return;
+    setShowInstanceDeleteConfirm(false);
+    setDeletingInstance(true);
+    try {
+      const token = apiClient.getToken();
+      if (!token) throw new Error("Authentication token not found");
+
+      const response = await fetch(
+        `${API_DELETE_INSTANCE_URL}/${instanceToDelete.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (!response.ok) throw new Error("Failed to delete instance");
+
+      // Remove instance from local state
+      setInstances((prev) => prev.filter((i) => i.id !== instanceToDelete.id));
+      setInstanceToDelete(null);
+      // Refresh the full list in background
+      fetchAssignments();
+    } catch (err) {
+      console.error("Error deleting instance:", err);
+      alert(`❌ Failed to delete instance: ${err.message}`);
+    } finally {
+      setDeletingInstance(false);
     }
   };
 
@@ -475,6 +524,9 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
                     <th className="px-6 py-4 text-center text-sm font-semibold w-24">
                       Action
                     </th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold w-16">
+                      Delete
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -533,6 +585,16 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
                             />
                           </div>
                         </td>
+                        <td className="px-6 py-4 text-center">
+                          <button
+                            onClick={() => handleInstanceDeleteClick(instance)}
+                            disabled={deletingInstance}
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                            title="Delete instance"
+                          >
+                            <FiTrash2 className="w-4 h-4" />
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
@@ -557,6 +619,17 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
           onClose={handleSuccessModalClose}
           title="Success"
           message="Progress saved successfully!"
+        />
+
+        <ConfirmationModal
+          isOpen={showInstanceDeleteConfirm}
+          onClose={() => {
+            setShowInstanceDeleteConfirm(false);
+            setInstanceToDelete(null);
+          }}
+          onConfirm={handleConfirmInstanceDelete}
+          title="Delete Instance"
+          message={`Are you sure you want to delete this compliance instance? This action cannot be undone.`}
         />
       </div>
     );

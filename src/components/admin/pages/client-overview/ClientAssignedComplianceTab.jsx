@@ -12,6 +12,9 @@ import ConfirmationModal from "../../../common/ConfirmationModal";
 const API_DELETE_URL =
   "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/user-compliances";
 
+const API_DELETE_INSTANCE_URL =
+  "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/instances";
+
 const ClientAssignedComplianceTab = ({ userId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,6 +33,12 @@ const ClientAssignedComplianceTab = ({ userId }) => {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
+
+  // States for individual instance delete
+  const [instanceToDelete, setInstanceToDelete] = useState(null);
+  const [showInstanceDeleteConfirm, setShowInstanceDeleteConfirm] =
+    useState(false);
+  const [deletingInstance, setDeletingInstance] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -264,6 +273,46 @@ const ClientAssignedComplianceTab = ({ userId }) => {
 
   const formatCategory = (cat) => cat?.replace(/_/g, " ") || "General";
 
+  // --- Instance Delete Handlers ---
+  const handleInstanceDeleteClick = (instance) => {
+    setInstanceToDelete(instance);
+    setShowInstanceDeleteConfirm(true);
+  };
+
+  const handleConfirmInstanceDelete = async () => {
+    if (!instanceToDelete) return;
+    setShowInstanceDeleteConfirm(false);
+    setDeletingInstance(true);
+    try {
+      const token = apiClient.getToken();
+      if (!token) throw new Error("Authentication token not found");
+
+      const response = await fetch(
+        `${API_DELETE_INSTANCE_URL}/${instanceToDelete.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (!response.ok) throw new Error("Failed to delete instance");
+
+      // Remove instance from local state
+      setInstances((prev) => prev.filter((i) => i.id !== instanceToDelete.id));
+      setInstanceToDelete(null);
+      // Refresh the full list in background
+      fetchAssignments();
+    } catch (err) {
+      console.error("Error deleting instance:", err);
+      alert(`\u274c Failed to delete instance: ${err.message}`);
+    } finally {
+      setDeletingInstance(false);
+    }
+  };
+
   const getPillLabel = (instance, idx, category) => {
     if (category.toLowerCase().includes("quarter")) {
       return `Q${(idx % 4) + 1}`;
@@ -320,7 +369,9 @@ const ClientAssignedComplianceTab = ({ userId }) => {
           <div className="bg-amber-50 rounded-xl border border-amber-200 p-5">
             <div className="flex items-center gap-2 mb-3">
               <FiBell className="w-4 h-4 text-amber-600" />
-              <h3 className="text-sm font-semibold text-amber-800">Reminders</h3>
+              <h3 className="text-sm font-semibold text-amber-800">
+                Reminders
+              </h3>
             </div>
             <div className="flex flex-wrap gap-2">
               {selectedCompliance.compliance.reminders
@@ -362,6 +413,9 @@ const ClientAssignedComplianceTab = ({ userId }) => {
                     </th>
                     <th className="px-6 py-4 text-center text-sm font-semibold w-24">
                       Action
+                    </th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold w-16">
+                      Delete
                     </th>
                   </tr>
                 </thead>
@@ -423,6 +477,16 @@ const ClientAssignedComplianceTab = ({ userId }) => {
                             />
                           </div>
                         </td>
+                        <td className="px-6 py-4 text-center">
+                          <button
+                            onClick={() => handleInstanceDeleteClick(instance)}
+                            disabled={deletingInstance}
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                            title="Delete instance"
+                          >
+                            <FiTrash2 className="w-4 h-4" />
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
@@ -447,6 +511,17 @@ const ClientAssignedComplianceTab = ({ userId }) => {
           onClose={handleSuccessModalClose}
           title="Success"
           message="Progress saved successfully!"
+        />
+
+        <ConfirmationModal
+          isOpen={showInstanceDeleteConfirm}
+          onClose={() => {
+            setShowInstanceDeleteConfirm(false);
+            setInstanceToDelete(null);
+          }}
+          onConfirm={handleConfirmInstanceDelete}
+          title="Delete Instance"
+          message={`Are you sure you want to delete this compliance instance? This action cannot be undone.`}
         />
       </div>
     );
