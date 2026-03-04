@@ -405,88 +405,80 @@ const OrgCompliances = () => {
             : "Calendar view of compliance due dates and reminders"}
         </p>
       </div>
-
-      {/* ══════════════════════════════════════════
-         LIST VIEW
-      ══════════════════════════════════════════ */}
       {viewMode === "list" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {compliances.length > 0 ? (
+        <div className="space-y-4">
+          {compliances.length === 0 ? (
+            <div className="text-center py-12 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
+              No compliances assigned to this organisation.
+            </div>
+          ) : (
             compliances.map((item) => (
               <div
                 key={item.id}
-                onClick={() =>
-                  navigate(`/assigned-compliances/${item.id}`, { state: item })
-                }
-                className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+                className="bg-white border rounded-xl p-6 border-gray-200 hover:shadow-md transition-all"
               >
-                {/* Card Header */}
-                <div className="flex justify-between items-start mb-6">
-                  <h3
-                    className="text-lg font-bold text-gray-900 line-clamp-2"
-                    title={item.name}
-                  >
-                    {item.name}
-                  </h3>
-                  <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full border border-gray-200 whitespace-nowrap ml-2">
-                    {item.type}
-                  </span>
-                </div>
-
-                {/* Reminders */}
-                {item.reminders && (
-                  <div className="flex flex-wrap gap-1.5 mb-4">
-                    {item.reminders.split(",").map((r, i) => (
-                      <span
-                        key={i}
-                        className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200"
-                      >
-                        <FiBell className="w-2.5 h-2.5 mr-1 text-amber-500" />
-                        {r.trim()}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* Stats */}
-                <div className="space-y-4 mb-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <FiCheckCircle className="w-5 h-5 text-green-500" />
-                      <span className="text-gray-700 font-medium">Done</span>
-                    </div>
-                    <span className="font-bold text-gray-900">
-                      {item.stats.done}
+                {/* Top Row: Title, Badge, Status */}
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-lg font-bold text-gray-900">
+                      {item.name}
+                    </h3>
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 capitalize border border-gray-200">
+                      {(item.category || "General").replace(/_/g, " ")}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <FiClock className="w-5 h-5 text-orange-500" />
-                      <span className="text-gray-700 font-medium">Pending</span>
-                    </div>
-                    <span className="font-bold text-gray-900">
-                      {String(item.stats.pending).padStart(2, "0")}
-                    </span>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">
+                      Status
+                    </p>
+                    <p className="text-sm font-bold text-gray-900">
+                      {item.stats.done} of {item.totalItems} completed
+                    </p>
                   </div>
                 </div>
 
-                {/* Progress Dots */}
-                <div className="flex items-center space-x-1 mt-auto flex-wrap gap-y-1">
-                  {item.progress.map((isDone, index) => (
-                    <div
-                      key={index}
-                      className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                        isDone ? "bg-[#023752]" : "bg-gray-200"
-                      }`}
-                    />
+                <p className="text-sm text-gray-500 mb-6">
+                  {item.description ||
+                    `${(item.category || "General").replace(/_/g, " ")} Compliance`}
+                </p>
+
+                {/* Instances Pills/Buttons */}
+                <div className="flex flex-wrap gap-3">
+                  {item.details.slice(0, 12).map((instance, i) => (
+                    <button
+                      key={`${item.id}-${i}`}
+                      onClick={() =>
+                        navigate(`/assigned-compliances/${item.id}`, {
+                          state: item,
+                        })
+                      }
+                      className={`
+                        h-9 px-4 rounded-full text-sm font-medium border transition-all
+                        ${
+                          instance.status === "Done"
+                            ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                            : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+                        }
+                      `}
+                    >
+                      {instance.period}
+                    </button>
                   ))}
+
+                  {/* View Details Button as a pill */}
+                  <button
+                    onClick={() =>
+                      navigate(`/assigned-compliances/${item.id}`, {
+                        state: item,
+                      })
+                    }
+                    className="h-9 px-4 rounded-full text-sm font-medium bg-[#00486D]/5 text-[#00486D] border border-[#00486D]/10 hover:bg-[#00486D]/10 transition-colors"
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             ))
-          ) : (
-            <div className="col-span-full text-center text-gray-500 py-10">
-              No compliances found for this organisation.
-            </div>
           )}
         </div>
       )}

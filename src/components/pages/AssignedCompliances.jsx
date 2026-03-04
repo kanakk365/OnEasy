@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { IoChevronBackOutline } from "react-icons/io5";
-import { FiCheckCircle, FiClock, FiFileText } from "react-icons/fi";
 import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 import { AUTH_CONFIG } from "../../config/auth";
 
@@ -120,91 +119,105 @@ const AssignedCompliances = () => {
       </div>
 
       {/* Organisation Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {orgGroups.length > 0 ? (
-          orgGroups.map((group) => (
-            <div
-              key={group.orgId}
-              onClick={() =>
-                navigate(`/assigned-compliances/org/${group.orgId}`, {
-                  state: { orgData: group },
-                })
-              }
-              className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-[#023752]/20 transition-all duration-200 cursor-pointer group"
-            >
-              {/* Org Icon & Name */}
-              <div className="flex items-start gap-4 mb-5">
-                <div className="w-12 h-12 rounded-xl bg-[#023752]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#023752]/20 transition-colors">
-                  <HiOutlineBuildingOffice2 className="w-6 h-6 text-[#023752]" />
-                </div>
-                <div className="min-w-0">
-                  <h3
-                    className="text-lg font-bold text-gray-900 truncate"
-                    title={group.legalName || "Unassigned"}
+          orgGroups.map((group) => {
+            const progressPercent =
+              group.totalInstances > 0
+                ? Math.round((group.doneInstances / group.totalInstances) * 100)
+                : 0;
+
+            return (
+              <button
+                key={group.orgId}
+                onClick={() =>
+                  navigate(`/assigned-compliances/org/${group.orgId}`, {
+                    state: { orgData: group },
+                  })
+                }
+                className="group text-left p-8 rounded-xl border border-gray-200 bg-white hover:border-[#00486D] hover:shadow-md transition-all duration-200"
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0 group-hover:scale-105 transition-transform"
+                    style={{
+                      background:
+                        group.orgId === "unassigned"
+                          ? "linear-gradient(180deg, #6B7280 0%, #9CA3AF 100%)"
+                          : "linear-gradient(180deg, #022B51 0%, #015079 100%)",
+                    }}
                   >
-                    {group.legalName || "Unassigned"}
-                  </h3>
-                  {group.tradeName && (
-                    <p
-                      className="text-sm text-gray-500 truncate"
-                      title={group.tradeName}
+                    <HiOutlineBuildingOffice2 className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3
+                      className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#00486D] transition-colors"
+                      title={group.legalName || "Unassigned"}
                     >
-                      {group.tradeName}
-                    </p>
-                  )}
-                  {group.gstin && (
-                    <p className="text-xs text-gray-400 mt-0.5 font-mono">
-                      GSTIN: {group.gstin}
-                    </p>
-                  )}
-                </div>
-              </div>
+                      {group.legalName || "Unassigned"}
+                    </h3>
+                    {group.tradeName && group.tradeName !== group.legalName && (
+                      <p
+                        className="text-xs text-gray-500 mt-0.5 truncate"
+                        title={group.tradeName}
+                      >
+                        Trade: {group.tradeName}
+                      </p>
+                    )}
+                    {group.gstin && (
+                      <p className="text-xs text-gray-400 mt-0.5 truncate font-mono">
+                        GSTIN: {group.gstin}
+                      </p>
+                    )}
 
-              {/* Stats */}
-              <div className="space-y-3 mb-5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <FiFileText className="w-4 h-4 text-[#023752]" />
-                    <span className="text-gray-600 text-sm">Compliances</span>
-                  </div>
-                  <span className="font-bold text-gray-900">
-                    {String(group.totalCompliances).padStart(2, "0")}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <FiCheckCircle className="w-4 h-4 text-green-500" />
-                    <span className="text-gray-600 text-sm">Done</span>
-                  </div>
-                  <span className="font-bold text-gray-900">
-                    {String(group.doneInstances).padStart(2, "0")}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <FiClock className="w-4 h-4 text-orange-500" />
-                    <span className="text-gray-600 text-sm">Pending</span>
-                  </div>
-                  <span className="font-bold text-gray-900">
-                    {String(group.pendingInstances).padStart(2, "0")}
-                  </span>
-                </div>
-              </div>
+                    {/* Stats */}
+                    <div className="mt-3 flex items-center gap-3">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                        {group.totalCompliances} compliance(s)
+                      </span>
+                    </div>
 
-              {/* Bottom progress bar */}
-              <div className="w-full bg-gray-100 rounded-full h-1.5">
-                <div
-                  className="bg-[#023752] h-1.5 rounded-full transition-all duration-300"
-                  style={{
-                    width:
-                      group.totalInstances > 0
-                        ? `${(group.doneInstances / group.totalInstances) * 100}%`
-                        : "0%",
-                  }}
-                />
-              </div>
-            </div>
-          ))
+                    {/* Progress Bar */}
+                    <div className="mt-2.5">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-[10px] text-gray-400 uppercase tracking-wide font-medium">
+                          Progress
+                        </span>
+                        <span className="text-[10px] text-gray-500 font-semibold">
+                          {group.doneInstances}/{group.totalInstances}
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${progressPercent}%`,
+                            background:
+                              progressPercent === 100 && progressPercent > 0
+                                ? "#16a34a"
+                                : "linear-gradient(90deg, #022B51, #015079)",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <svg
+                    className="w-4 h-4 text-gray-300 flex-shrink-0 group-hover:text-[#00486D] mt-1 transition-colors"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </div>
+              </button>
+            );
+          })
         ) : (
           <div className="col-span-full text-center text-gray-500 py-10">
             No compliances found.

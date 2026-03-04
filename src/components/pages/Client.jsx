@@ -835,6 +835,7 @@ function Client() {
                         if (due >= today && !inst.isDone) {
                           upcoming.push({
                             name:
+                              item.compliance?.name ||
                               item.complianceCode ||
                               item.complianceName ||
                               "Compliance",
@@ -896,13 +897,14 @@ function Client() {
                       </ul>
 
                       <button
+                        onClick={() => navigate(`/assigned-compliances/org/${selectedComplianceOrg}`)}
                         className="text-white text-sm font-medium px-6 py-2.5 rounded-lg transition-all shadow-md active:scale-95 cursor-pointer"
                         style={{
                           background:
                             "linear-gradient(180deg, #FF3D00 0%, #AD2C04 100%)",
                         }}
                       >
-                        Get Help
+                        View Compliance
                       </button>
                     </>
                   );
