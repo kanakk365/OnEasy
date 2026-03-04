@@ -102,6 +102,35 @@ class ComplianceAPIClient {
   async deleteComplianceRule(id) {
     return this.delete(`/admin/compliance/compliance-rules/${id}`);
   }
+
+  // Whimsical Flow
+  async createWhimsicalBranch(data) {
+    return this.post(
+      "/admin/compliance/annexure-1a/flow/whimsical/branches",
+      data,
+    );
+  }
+
+  async updateWhimsicalBranch(id, data) {
+    return this.put(
+      `/admin/compliance/annexure-1a/flow/whimsical/branches/${id}`,
+      data,
+    );
+  }
+
+  async createWhimsicalItem(branchId, data) {
+    return this.post(
+      `/admin/compliance/annexure-1a/flow/whimsical/branches/${branchId}/items`,
+      data,
+    );
+  }
+
+  async updateWhimsicalItem(id, data) {
+    return this.put(
+      `/admin/compliance/annexure-1a/flow/whimsical/items/${id}`,
+      data,
+    );
+  }
 }
 
 const complianceApi = new ComplianceAPIClient();
