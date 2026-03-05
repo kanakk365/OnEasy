@@ -12,7 +12,7 @@ import ConfirmationModal from "../../../common/ConfirmationModal";
 import SuccessModal from "../../../common/SuccessModal";
 
 const API_FLOW_URL =
-  "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/flow/whimsical";
+  "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/flow/whimsical-db";
 const API_POST_URL =
   "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/user-compliances";
 

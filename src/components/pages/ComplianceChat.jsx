@@ -23,7 +23,7 @@ const COMPLIANCE_API_BASE = "https://oneasycompliance.oneasy.ai";
 
 // 1A APIs
 const API_1A_GET =
-  "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/flow/whimsical";
+  "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/flow/whimsical-db";
 const API_1A_POST =
   "https://oneasycompliance.oneasy.ai/compliance/annexure-1a/my-compliances";
 

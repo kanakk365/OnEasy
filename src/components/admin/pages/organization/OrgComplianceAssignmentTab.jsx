@@ -11,18 +11,10 @@ import ConfirmationModal from "../../../common/ConfirmationModal";
 import SuccessModal from "../../../common/SuccessModal";
 
 const API_FLOW_URL =
-  "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/flow/whimsical";
+  "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/flow/whimsical-db";
 const API_POST_URL =
   "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1a/user-compliances";
 
-/**
- * OrgComplianceAssignmentTab
- * Same functionality as ClientComplianceAssignmentTab but the org is already pre-selected.
- *
- * Props:
- *   userId  – the owner user id
- *   org     – the organisation object (already selected)
- */
 function OrgComplianceAssignmentTab({ userId, org }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
