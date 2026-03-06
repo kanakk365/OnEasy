@@ -106,28 +106,28 @@ class ComplianceAPIClient {
   // Whimsical Flow
   async createWhimsicalBranch(data) {
     return this.post(
-      "/admin/compliance/annexure-1a/flow/whimsical-db/branches",
+      "/admin/compliance/annexure-1a/flow/whimsical/branches",
       data,
     );
   }
 
   async updateWhimsicalBranch(id, data) {
     return this.put(
-      `/admin/compliance/annexure-1a/flow/whimsical-db/branches/${id}`,
+      `/admin/compliance/annexure-1a/flow/whimsical/branches/${id}`,
       data,
     );
   }
 
   async createWhimsicalItem(branchId, data) {
     return this.post(
-      `/admin/compliance/annexure-1a/flow/whimsical-db/branches/${branchId}/items`,
+      `/admin/compliance/annexure-1a/flow/whimsical/branches/${branchId}/items`,
       data,
     );
   }
 
   async updateWhimsicalItem(id, data) {
     return this.put(
-      `/admin/compliance/annexure-1a/flow/whimsical-db/items/${id}`,
+      `/admin/compliance/annexure-1a/flow/whimsical/items/${id}`,
       data,
     );
   }
