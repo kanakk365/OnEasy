@@ -131,6 +131,18 @@ class ComplianceAPIClient {
       data,
     );
   }
+
+  async deleteWhimsicalBranch(id) {
+    return this.delete(
+      `/admin/compliance/annexure-1a/flow/whimsical/branches/${id}`,
+    );
+  }
+
+  async deleteWhimsicalItem(id) {
+    return this.delete(
+      `/admin/compliance/annexure-1a/flow/whimsical/items/${id}`,
+    );
+  }
 }
 
 const complianceApi = new ComplianceAPIClient();

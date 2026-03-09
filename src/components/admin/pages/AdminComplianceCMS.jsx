@@ -98,6 +98,12 @@ function AdminComplianceCMS() {
   const [showItemModal, setShowItemModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [itemSaving, setItemSaving] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({
+    open: false,
+    type: null,
+    data: null,
+  });
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [itemFormData, setItemFormData] = useState({
     code: "",
     name: "",
@@ -543,6 +549,47 @@ function AdminComplianceCMS() {
     }
   };
 
+  const handleDeleteBranch = (branch, e) => {
+    if (e) e.stopPropagation();
+    const message =
+      branch.subBranches?.length > 0 || branch.items?.length > 0
+        ? `"${branch.heading}" has sub-sections or items. Deleting it will remove all nested content. Are you sure?`
+        : `Are you sure you want to delete the section "${branch.heading}"?`;
+    setDeleteModal({ open: true, type: "branch", data: branch, message });
+  };
+
+  const handleDeleteItem = (item, e) => {
+    if (e) e.stopPropagation();
+    setDeleteModal({
+      open: true,
+      type: "item",
+      data: item,
+      message: `Are you sure you want to delete the item "${item.name}"?`,
+    });
+  };
+
+  const executeDelete = async () => {
+    if (!deleteModal.data) return;
+    setDeleteLoading(true);
+    try {
+      if (deleteModal.type === "branch") {
+        await complianceApi.deleteWhimsicalBranch(deleteModal.data.id);
+        if (selectedNode?.data?.id === deleteModal.data.id)
+          setSelectedNode(null);
+      } else {
+        await complianceApi.deleteWhimsicalItem(deleteModal.data.id);
+        if (selectedNode?.data?.id === deleteModal.data.id)
+          setSelectedNode(null);
+      }
+      setDeleteModal({ open: false, type: null, data: null });
+      await fetchFlowTree();
+    } catch (err) {
+      alert("Error deleting: " + err.message);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   const renderBranch = (branch, parentPath = "", depth = 0) => {
     const path = parentPath
       ? `${parentPath} > ${branch.heading}`
@@ -654,6 +701,12 @@ function AdminComplianceCMS() {
               >
                 +Item
               </button>
+              <button
+                onClick={(e) => handleDeleteBranch(branch, e)}
+                className="px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded text-xs font-medium transition-colors border border-red-200/50"
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>
@@ -738,6 +791,13 @@ function AdminComplianceCMS() {
                           title="Edit"
                         >
                           Edit
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteItem(item, e)}
+                          className="px-2.5 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200/50 rounded-md text-xs font-semibold"
+                          title="Delete"
+                        >
+                          Delete
                         </button>
                       </div>
                     </div>
@@ -1090,21 +1150,45 @@ function AdminComplianceCMS() {
                               </>
                             )}
                           </div>
-                          <div className="p-4 border-t border-gray-200 bg-gray-50 flex gap-3 rounded-b-xl mt-auto">
-                            <button
-                              type="button"
-                              onClick={() => setSelectedNode(null)}
-                              className="flex-1 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-white hover:border-gray-400 transition-colors shadow-sm"
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              type="submit"
-                              disabled={nodeSaving}
-                              className="flex-1 py-2.5 rounded-lg bg-[#01334C] text-white text-sm font-semibold hover:bg-[#00486D] disabled:opacity-50 transition-all shadow-md active:scale-[0.98]"
-                            >
-                              {nodeSaving ? "Saving..." : "Save Changes"}
-                            </button>
+                          <div className="p-4 border-t border-gray-200 bg-gray-50 flex flex-col gap-3 rounded-b-xl mt-auto">
+                            <div className="flex gap-3">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedNode(null)}
+                                className="flex-1 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-white hover:border-gray-400 transition-colors shadow-sm"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="submit"
+                                disabled={nodeSaving}
+                                className="flex-1 py-2.5 rounded-lg bg-[#01334C] text-white text-sm font-semibold hover:bg-[#00486D] disabled:opacity-50 transition-all shadow-md active:scale-[0.98]"
+                              >
+                                {nodeSaving ? "Saving..." : "Save Changes"}
+                              </button>
+                            </div>
+                            {selectedNode.action === "edit" &&
+                              selectedNode.data.id && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (selectedNode.type === "branch") {
+                                      handleDeleteBranch(selectedNode.data);
+                                    } else {
+                                      handleDeleteItem(selectedNode.data);
+                                    }
+                                  }}
+                                  className="w-full py-2.5 rounded-lg border border-red-300 text-red-600 text-sm font-semibold hover:bg-red-50 hover:border-red-400 transition-colors"
+                                >
+                                  <span className="flex items-center justify-center gap-2">
+                                    <RiDeleteBinLine className="w-4 h-4" />
+                                    Delete{" "}
+                                    {selectedNode.type === "branch"
+                                      ? "Section"
+                                      : "Item"}
+                                  </span>
+                                </button>
+                              )}
                           </div>
                         </form>
                       ) : (
@@ -1604,6 +1688,60 @@ function AdminComplianceCMS() {
                   </>
                 ) : (
                   <>{editingRule ? "Update Rule" : "Create Rule"}</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.open && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"
+            onClick={() =>
+              !deleteLoading &&
+              setDeleteModal({ open: false, type: null, data: null })
+            }
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-[420px] overflow-hidden z-[110] animate-in fade-in zoom-in-95">
+            <div className="p-6 pb-4">
+              <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
+                <RiDeleteBinLine className="w-6 h-6 text-red-500" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Delete {deleteModal.type === "branch" ? "Section" : "Item"}
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {deleteModal.message}
+              </p>
+            </div>
+            <div className="px-6 pb-6 flex justify-end gap-3">
+              <button
+                onClick={() =>
+                  setDeleteModal({ open: false, type: null, data: null })
+                }
+                disabled={deleteLoading}
+                className="px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-300 rounded-xl transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={executeDelete}
+                disabled={deleteLoading}
+                className="px-5 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2 shadow-sm"
+              >
+                {deleteLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <RiDeleteBinLine className="w-4 h-4" />
+                    Delete
+                  </>
                 )}
               </button>
             </div>
