@@ -817,9 +817,11 @@ function Client() {
                 </div>
               ) : (
                 (() => {
-                  // Filter items by selected org and get upcoming instances
+                  // Filter items by selected org and get upcoming instances for THIS MONTH only
                   const today = new Date();
                   today.setHours(0, 0, 0, 0);
+                  const currentMonth = today.getMonth();
+                  const currentYear = today.getFullYear();
 
                   const upcoming = [];
                   allComplianceItems
@@ -832,7 +834,12 @@ function Client() {
                       (item.instances || []).forEach((inst) => {
                         if (!inst.dueDate) return;
                         const due = new Date(inst.dueDate);
-                        if (due >= today && !inst.isDone) {
+                        if (
+                          due >= today &&
+                          due.getMonth() === currentMonth &&
+                          due.getFullYear() === currentYear &&
+                          !inst.isDone
+                        ) {
                           upcoming.push({
                             name:
                               item.compliance?.name ||
@@ -855,7 +862,7 @@ function Client() {
                       <div className="text-center py-6 text-gray-400 text-sm">
                         {complianceOrgs.length === 0
                           ? "No compliance data available."
-                          : "No upcoming compliances for this organization."}
+                          : "No upcoming compliances this month."}
                       </div>
                     );
                   }
@@ -897,7 +904,11 @@ function Client() {
                       </ul>
 
                       <button
-                        onClick={() => navigate(`/assigned-compliances/org/${selectedComplianceOrg}`)}
+                        onClick={() =>
+                          navigate(
+                            `/assigned-compliances/org/${selectedComplianceOrg}`,
+                          )
+                        }
                         className="text-white text-sm font-medium px-6 py-2.5 rounded-lg transition-all shadow-md active:scale-95 cursor-pointer"
                         style={{
                           background:
