@@ -63,7 +63,7 @@ function AdminNewRegistration() {
   const serviceTypeForApi = selectedType?.id || null;
   const { packages: apiPackages, loading: packagesLoading } = usePackages(
     serviceTypeForApi,
-    !!selectedType
+    !!selectedType,
   );
 
   const registrationTypes = [
@@ -558,12 +558,12 @@ function AdminNewRegistration() {
             discountPercentage: 0,
             couponCode: null,
           },
-        }
+        },
       );
 
       if (response.success) {
         alert(
-          `✅ Registration created successfully! Payment can be collected later via Custom Payment.`
+          `✅ Registration created successfully! Payment can be collected later via Custom Payment.`,
         );
         // Reset form
         setStep(1);
@@ -578,7 +578,7 @@ function AdminNewRegistration() {
       alert(
         error.response?.data?.message ||
           error.message ||
-          "Failed to create registration. Please try again."
+          "Failed to create registration. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -591,6 +591,12 @@ function AdminNewRegistration() {
 
   const handleBack = () => {
     if (step === 2) {
+      // If we came from a client page (userId in URL), go back to that client's overview
+      const userIdFromUrl = searchParams.get("userId");
+      if (userIdFromUrl) {
+        navigate(`/admin/client-overview/${userIdFromUrl}`);
+        return;
+      }
       setStep(1);
       setSelectedUser(null);
     } else if (step === 3) {
@@ -617,8 +623,8 @@ function AdminNewRegistration() {
                 step > s.num
                   ? "bg-green-500 text-white"
                   : step === s.num
-                  ? "text-white"
-                  : "bg-gray-100 text-gray-400"
+                    ? "text-white"
+                    : "bg-gray-100 text-gray-400"
               }`}
               style={
                 step === s.num
@@ -750,7 +756,7 @@ function AdminNewRegistration() {
                     {filteredUsers
                       .slice(
                         (currentPage - 1) * itemsPerPage,
-                        currentPage * itemsPerPage
+                        currentPage * itemsPerPage,
                       )
                       .map((user) => (
                         <tr
@@ -811,7 +817,7 @@ function AdminNewRegistration() {
                     <span className="font-semibold">
                       {Math.min(
                         currentPage * itemsPerPage,
-                        filteredUsers.length
+                        filteredUsers.length,
                       )}
                     </span>{" "}
                     of{" "}
@@ -838,14 +844,14 @@ function AdminNewRegistration() {
                       {Array.from(
                         {
                           length: Math.ceil(
-                            filteredUsers.length / itemsPerPage
+                            filteredUsers.length / itemsPerPage,
                           ),
                         },
-                        (_, i) => i + 1
+                        (_, i) => i + 1,
                       )
                         .filter((page) => {
                           const totalPages = Math.ceil(
-                            filteredUsers.length / itemsPerPage
+                            filteredUsers.length / itemsPerPage,
                           );
                           if (totalPages <= 5) return true;
                           if (page === 1 || page === totalPages) return true;
@@ -883,8 +889,8 @@ function AdminNewRegistration() {
                         setCurrentPage((prev) =>
                           Math.min(
                             prev + 1,
-                            Math.ceil(filteredUsers.length / itemsPerPage)
-                          )
+                            Math.ceil(filteredUsers.length / itemsPerPage),
+                          ),
                         )
                       }
                       disabled={
