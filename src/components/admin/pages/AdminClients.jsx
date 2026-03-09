@@ -8,14 +8,15 @@ import {
   FiEye,
 } from "react-icons/fi";
 import apiClient from "../../../utils/api";
+import useAdminClientsStore from "../../../stores/useAdminClientsStore";
 
 function AdminClients() {
   const navigate = useNavigate();
+  const { currentPage, setCurrentPage } = useAdminClientsStore();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -52,8 +53,12 @@ function AdminClients() {
         (client.name && client.name.toLowerCase().includes(searchLower)) ||
         (client.email && client.email.toLowerCase().includes(searchLower)) ||
         (client.phone && client.phone.toLowerCase().includes(searchLower)) ||
-        (client.primary_organization_name && client.primary_organization_name.toLowerCase().includes(searchLower)) ||
-        (client.company_name && client.company_name.toLowerCase().includes(searchLower));
+        (client.primary_organization_name &&
+          client.primary_organization_name
+            .toLowerCase()
+            .includes(searchLower)) ||
+        (client.company_name &&
+          client.company_name.toLowerCase().includes(searchLower));
       if (!matchesSearch) return false;
     }
 
@@ -100,10 +105,7 @@ function AdminClients() {
     }
   };
 
-  // Reset page when filter changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filter, searchTerm]);
+
 
   const handleDeleteClient = async (e, client) => {
     e.stopPropagation();
@@ -143,7 +145,7 @@ function AdminClients() {
           !c.registration_submitted &&
           !c.team_fill_requested &&
           !c.payment_completed &&
-          !c.ticket_id
+          !c.ticket_id,
       ).length,
     },
     {
@@ -152,14 +154,14 @@ function AdminClients() {
       count: clients.filter(
         (c) =>
           c.payment_completed === false &&
-          (c.registration_submitted || c.ticket_id)
+          (c.registration_submitted || c.ticket_id),
       ).length,
     },
     {
       key: "subscribed",
       label: "Subscribed Users",
       count: clients.filter(
-        (c) => c.ticket_id || c.registration_submitted || c.payment_completed
+        (c) => c.ticket_id || c.registration_submitted || c.payment_completed,
       ).length,
     },
     {
@@ -204,14 +206,20 @@ function AdminClients() {
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               placeholder="Search by client name, email, phone, or organization name..."
               className="w-full pl-11 pr-4 py-3 bg-[#F8F9FA] border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent transition-all"
             />
           </div>
           {searchTerm && (
             <button
-              onClick={() => setSearchTerm("")}
+              onClick={() => {
+                setSearchTerm("");
+                setCurrentPage(1);
+              }}
               className="px-4 py-3 text-sm text-gray-600 hover:text-gray-900 transition-colors"
             >
               Clear
@@ -224,7 +232,10 @@ function AdminClients() {
           {filterTabs.map((tab) => (
             <button
               key={tab.key}
-              onClick={() => setFilter(tab.key)}
+              onClick={() => {
+                setFilter(tab.key);
+                setCurrentPage(1);
+              }}
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                 filter === tab.key
                   ? "text-white"
@@ -365,7 +376,7 @@ function AdminClients() {
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(
-                              `/admin/client-overview/${client.user_id}`
+                              `/admin/client-overview/${client.user_id}`,
                             );
                           }}
                           className="p-2 text-white rounded-lg hover:opacity-90 transition-opacity"
@@ -398,7 +409,7 @@ function AdminClients() {
               <p className="text-sm text-gray-500">
                 Showing {String(indexOfFirstItem + 1).padStart(2, "0")} -{" "}
                 {String(
-                  Math.min(indexOfLastItem, filteredClients.length)
+                  Math.min(indexOfLastItem, filteredClients.length),
                 ).padStart(2, "0")}{" "}
                 of {filteredClients.length}
               </p>
