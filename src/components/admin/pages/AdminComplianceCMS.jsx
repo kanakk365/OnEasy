@@ -532,13 +532,25 @@ function AdminComplianceCMS() {
         if (payload.dueDateType === "MONTHLY") {
           payload.monthBasis = selectedNode.data.monthBasis || "NEXT_MONTH";
           payload.dueDate = parseInt(selectedNode.data.dueDate) || 20;
-          if (typeof selectedNode.data.reminders === "string") {
+
+          // Now handling array from the UI directly as strings or numbers
+          if (Array.isArray(selectedNode.data.reminders)) {
             payload.reminders = selectedNode.data.reminders
-              .split(",")
-              .map((r) => parseInt(r.trim()))
+              .map((r) => parseInt(r))
               .filter((n) => !isNaN(n));
+          } else if (typeof selectedNode.data.reminders === "string") {
+            try {
+              payload.reminders = JSON.parse(selectedNode.data.reminders)
+                .map((r) => parseInt(r))
+                .filter((n) => !isNaN(n));
+            } catch (e) {
+              payload.reminders = selectedNode.data.reminders
+                .split(",")
+                .map((r) => parseInt(r.trim()))
+                .filter((n) => !isNaN(n));
+            }
           } else {
-            payload.reminders = selectedNode.data.reminders || [];
+            payload.reminders = [];
           }
         } else {
           try {
@@ -724,7 +736,7 @@ function AdminComplianceCMS() {
                       dueDateType: "MONTHLY",
                       monthBasis: "NEXT_MONTH",
                       dueDate: 20,
-                      reminders: "",
+                      reminders: [15],
                       order: (branch.items?.length || 0) + 1,
                     },
                   });
@@ -770,9 +782,16 @@ function AdminComplianceCMS() {
                         let formattedDueDate = item.dueDate;
                         let formattedReminders = item.reminders;
                         if (item.dueDateType === "MONTHLY") {
-                          if (Array.isArray(item.reminders)) {
-                             formattedReminders = item.reminders.join(", ");
+                          if (!Array.isArray(item.reminders)) {
+                             // Fallback if the data is a string
+                             try {
+                               formattedReminders = JSON.parse(item.reminders);
+                             } catch (e) {
+                               formattedReminders = typeof item.reminders === 'string' ? item.reminders.split(',').map(r => r.trim()).filter(Boolean) : [];
+                             }
                           }
+                          // Ensure it's an array
+                          if (!Array.isArray(formattedReminders)) formattedReminders = [];
                         } else {
                           if (typeof item.dueDate === 'object') formattedDueDate = JSON.stringify(item.dueDate, null, 2);
                           if (typeof item.reminders === 'object') formattedReminders = JSON.stringify(item.reminders, null, 2);
@@ -834,9 +853,14 @@ function AdminComplianceCMS() {
                             let formattedDueDate = item.dueDate;
                             let formattedReminders = item.reminders;
                             if (item.dueDateType === "MONTHLY") {
-                              if (Array.isArray(item.reminders)) {
-                                 formattedReminders = item.reminders.join(", ");
+                              if (!Array.isArray(item.reminders)) {
+                                 try {
+                                   formattedReminders = JSON.parse(item.reminders);
+                                 } catch (err) {
+                                   formattedReminders = typeof item.reminders === 'string' ? item.reminders.split(',').map(r => r.trim()).filter(Boolean) : [];
+                                 }
                               }
+                              if (!Array.isArray(formattedReminders)) formattedReminders = [];
                             } else {
                               if (typeof item.dueDate === 'object') formattedDueDate = JSON.stringify(item.dueDate, null, 2);
                               if (typeof item.reminders === 'object') formattedReminders = JSON.stringify(item.reminders, null, 2);
@@ -1236,28 +1260,68 @@ function AdminComplianceCMS() {
                                   )}
                                 </div>
                                 <div>
-                                  <label className="block text-xs font-semibold text-gray-700 mb-1.5 ml-0.5">
+                                  <label className="block text-xs font-semibold text-gray-700 mb-2 ml-0.5 mt-1">
                                     Reminders{" "}
                                     <span className="text-gray-400 font-normal">
                                       (Optional)
                                     </span>
                                   </label>
                                   {selectedNode.data.dueDateType === "MONTHLY" ? (
-                                    <input
-                                      type="text"
-                                      className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
-                                      value={selectedNode.data.reminders}
-                                      onChange={(e) =>
-                                        setSelectedNode({
-                                          ...selectedNode,
-                                          data: {
-                                            ...selectedNode.data,
-                                            reminders: e.target.value,
-                                          },
-                                        })
-                                      }
-                                      placeholder="Comma separated days (e.g. 15, 17, 19)"
-                                    />
+                                    <div className="space-y-2">
+                                      {Array.isArray(selectedNode.data.reminders) ? (
+                                        selectedNode.data.reminders.map((reminderValue, idx) => (
+                                          <div key={`reminder-${idx}`} className="flex items-center gap-2">
+                                            <input
+                                              type="number"
+                                              min="1"
+                                              max="31"
+                                              className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
+                                              value={reminderValue}
+                                              onChange={(e) => {
+                                                const newReminders = [...selectedNode.data.reminders];
+                                                newReminders[idx] = e.target.value;
+                                                setSelectedNode({
+                                                  ...selectedNode,
+                                                  data: {
+                                                    ...selectedNode.data,
+                                                    reminders: newReminders,
+                                                  },
+                                                });
+                                              }}
+                                              placeholder="Day (e.g. 15)"
+                                            />
+                                            <button
+                                              type="button"
+                                              onClick={() => {
+                                                const newReminders = selectedNode.data.reminders.filter((_, i) => i !== idx);
+                                                setSelectedNode({
+                                                  ...selectedNode,
+                                                  data: { ...selectedNode.data, reminders: newReminders }
+                                                });
+                                              }}
+                                              className="p-3 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100 flex-shrink-0"
+                                            >
+                                              <RiDeleteBinLine className="w-4 h-4" />
+                                            </button>
+                                          </div>
+                                        ))
+                                      ) : null}
+                                      
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const current = Array.isArray(selectedNode.data.reminders) ? selectedNode.data.reminders : [];
+                                          setSelectedNode({
+                                            ...selectedNode,
+                                            data: { ...selectedNode.data, reminders: [...current, ""] }
+                                          });
+                                        }}
+                                        className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-[#00486D] bg-blue-50/50 border border-blue-100/50 hover:bg-blue-100 hover:border-blue-200 rounded-lg transition-colors w-full justify-center"
+                                      >
+                                        <RiAddLine className="w-4 h-4" />
+                                        Add Reminder Day
+                                      </button>
+                                    </div>
                                   ) : (
                                     <textarea
                                       className="w-full text-sm p-3 border border-gray-200 rounded-lg font-mono focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all resize-y text-xs"
