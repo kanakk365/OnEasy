@@ -104,43 +104,43 @@ class ComplianceAPIClient {
   }
 
   // Whimsical Flow
-  async createWhimsicalBranch(data) {
+  async createWhimsicalBranch(data, annexure = "1a") {
     return this.post(
-      "/admin/compliance/annexure-1a/flow/whimsical/branches",
+      `/admin/compliance/annexure-${annexure}/flow/whimsical/branches`,
       data,
     );
   }
 
-  async updateWhimsicalBranch(id, data) {
+  async updateWhimsicalBranch(id, data, annexure = "1a") {
     return this.put(
-      `/admin/compliance/annexure-1a/flow/whimsical/branches/${id}`,
+      `/admin/compliance/annexure-${annexure}/flow/whimsical/branches/${id}`,
       data,
     );
   }
 
-  async createWhimsicalItem(branchId, data) {
+  async createWhimsicalItem(branchId, data, annexure = "1a") {
     return this.post(
-      `/admin/compliance/annexure-1a/flow/whimsical/branches/${branchId}/items`,
+      `/admin/compliance/annexure-${annexure}/flow/whimsical/branches/${branchId}/items`,
       data,
     );
   }
 
-  async updateWhimsicalItem(id, data) {
+  async updateWhimsicalItem(id, data, annexure = "1a") {
     return this.put(
-      `/admin/compliance/annexure-1a/flow/whimsical/items/${id}`,
+      `/admin/compliance/annexure-${annexure}/flow/whimsical/items/${id}`,
       data,
     );
   }
 
-  async deleteWhimsicalBranch(id) {
+  async deleteWhimsicalBranch(id, annexure = "1a") {
     return this.delete(
-      `/admin/compliance/annexure-1a/flow/whimsical/branches/${id}`,
+      `/admin/compliance/annexure-${annexure}/flow/whimsical/branches/${id}`,
     );
   }
 
-  async deleteWhimsicalItem(id) {
+  async deleteWhimsicalItem(id, annexure = "1a") {
     return this.delete(
-      `/admin/compliance/annexure-1a/flow/whimsical/items/${id}`,
+      `/admin/compliance/annexure-${annexure}/flow/whimsical/items/${id}`,
     );
   }
 }

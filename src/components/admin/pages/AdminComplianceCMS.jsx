@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import complianceApi from "../../../utils/complianceApi";
 import { AUTH_CONFIG } from "../../../config/auth";
 import {
@@ -78,12 +78,9 @@ const EXTRA_COLOR_PALETTES = [
 
 function AdminComplianceCMS() {
   const [activeTab, setActiveTab] = useState("items");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
   // ─── Categories State ───
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
-  const [categoryColors, setCategoryColors] = useState(DEFAULT_CATEGORY_COLORS);
 
   // ─── Compliance Items State ───
   const [items, setItems] = useState([]);
@@ -92,6 +89,7 @@ function AdminComplianceCMS() {
 
   // ─── Flow Tree State ───
   const [flowBranches, setFlowBranches] = useState([]);
+  const [flowBranches1B, setFlowBranches1B] = useState([]);
   const [expandedBranches, setExpandedBranches] = useState(new Set());
   const [selectedNode, setSelectedNode] = useState(null);
   const [nodeSaving, setNodeSaving] = useState(false);
@@ -113,26 +111,13 @@ function AdminComplianceCMS() {
     annexureType: "1A",
   });
 
-  // ─── Compliance Rules State ───
-  const [rules, setRules] = useState([]);
-  const [rulesLoading, setRulesLoading] = useState(true);
-  const [ruleSearch, setRuleSearch] = useState("");
-  const [showRuleModal, setShowRuleModal] = useState(false);
-  const [editingRule, setEditingRule] = useState(null);
-  const [ruleSaving, setRuleSaving] = useState(false);
-  const [ruleFormData, setRuleFormData] = useState({
-    complianceItemId: "",
-    conditionId: "",
-    optionId: "",
-    priority: 0,
-    isRequired: true,
-  });
+
 
   // ─── Fetch Data ───
   useEffect(() => {
     fetchItems();
-    fetchRules();
     fetchFlowTree();
+    fetchFlowTree1B();
   }, []);
 
   // Sync categories from fetched items (pick up any categories from DB that aren't in defaults)
@@ -154,20 +139,6 @@ function AdminComplianceCMS() {
       });
       if (newCats.length > 0) {
         setCategories((prev) => [...prev, ...newCats]);
-        setCategoryColors((prev) => {
-          const updated = { ...prev };
-          newCats.forEach((cat, i) => {
-            if (!updated[cat.value]) {
-              const paletteIndex =
-                (Object.keys(updated).length -
-                  Object.keys(DEFAULT_CATEGORY_COLORS).length +
-                  i) %
-                EXTRA_COLOR_PALETTES.length;
-              updated[cat.value] = EXTRA_COLOR_PALETTES[paletteIndex];
-            }
-          });
-          return updated;
-        });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -185,17 +156,7 @@ function AdminComplianceCMS() {
     }
   };
 
-  const fetchRules = async () => {
-    try {
-      setRulesLoading(true);
-      const data = await complianceApi.getComplianceRules();
-      setRules(data.rules || []);
-    } catch (error) {
-      console.error("Error fetching compliance rules:", error);
-    } finally {
-      setRulesLoading(false);
-    }
-  };
+
 
   const fetchFlowTree = async () => {
     try {
@@ -217,6 +178,29 @@ function AdminComplianceCMS() {
       }
     } catch (e) {
       console.error("Error fetching whimsical-db flow tree:", e);
+    }
+  };
+
+  const fetchFlowTree1B = async () => {
+    try {
+      let token = "";
+      try {
+        token = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.TOKEN);
+      } catch {
+        /* ignore */
+      }
+      if (!token) token = localStorage.getItem("token") || "";
+
+      const response = await fetch(
+        "https://oneasycompliance.oneasy.ai/admin/compliance/annexure-1b/flow/whimsical-db",
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setFlowBranches1B(data.branches || []);
+      }
+    } catch (e) {
+      console.error("Error fetching annexure-1b whimsical-db flow tree:", e);
     }
   };
 
@@ -271,193 +255,7 @@ function AdminComplianceCMS() {
     }
   };
 
-  // ─── Compliance Rules CRUD ───
-  const handleRuleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setRuleFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
 
-  const handleCreateRule = () => {
-    setEditingRule(null);
-    setRuleFormData({
-      complianceItemId: "",
-      conditionId: "",
-      optionId: "",
-      priority: 0,
-      isRequired: true,
-    });
-    setShowRuleModal(true);
-  };
-
-  const handleEditRule = (rule) => {
-    setEditingRule(rule);
-    setRuleFormData({
-      complianceItemId: rule.complianceItemId || "",
-      conditionId: rule.conditionId || "",
-      optionId: rule.optionId || "",
-      priority: rule.priority || 0,
-      isRequired: rule.isRequired ?? true,
-    });
-    setShowRuleModal(true);
-  };
-
-  const handleSaveRule = async () => {
-    if (!ruleFormData.complianceItemId || !ruleFormData.optionId) {
-      alert("Compliance Item and Option ID are required");
-      return;
-    }
-
-    try {
-      setRuleSaving(true);
-      const payload = {
-        ...ruleFormData,
-        conditionId: ruleFormData.conditionId || null,
-        priority: parseInt(ruleFormData.priority) || 0,
-      };
-
-      if (editingRule) {
-        await complianceApi.updateComplianceRule(editingRule.id, payload);
-        alert("Compliance rule updated successfully!");
-      } else {
-        await complianceApi.createComplianceRule(payload);
-        alert("Compliance rule created successfully!");
-      }
-      setShowRuleModal(false);
-      setEditingRule(null);
-      await fetchRules();
-      await fetchItems();
-    } catch (error) {
-      console.error("Error saving compliance rule:", error);
-      alert(error.message || "Failed to save compliance rule");
-    } finally {
-      setRuleSaving(false);
-    }
-  };
-
-  const handleDeleteRule = async (rule) => {
-    if (
-      !window.confirm(`Are you sure you want to delete this compliance rule?`)
-    )
-      return;
-
-    try {
-      await complianceApi.deleteComplianceRule(rule.id);
-      alert("Compliance rule deleted successfully!");
-      await fetchRules();
-      await fetchItems();
-    } catch (error) {
-      console.error("Error deleting compliance rule:", error);
-      alert(error.message || "Failed to delete compliance rule");
-    }
-  };
-
-  // ─── Filtered data ───
-
-  const filteredRules = useMemo(() => {
-    setCurrentPage(1); // Reset page on filter change
-    return rules.filter((rule) => {
-      const matchesSearch =
-        rule.id?.toLowerCase().includes(ruleSearch.toLowerCase()) ||
-        rule.optionId?.toLowerCase().includes(ruleSearch.toLowerCase()) ||
-        rule.complianceItem?.name
-          ?.toLowerCase()
-          .includes(ruleSearch.toLowerCase()) ||
-        rule.complianceItem?.code
-          ?.toLowerCase()
-          .includes(ruleSearch.toLowerCase()) ||
-        rule.option?.label?.toLowerCase().includes(ruleSearch.toLowerCase());
-      return matchesSearch;
-    });
-  }, [rules, ruleSearch]);
-
-  // Pagination Logic
-  const paginatedRules = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredRules.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredRules, currentPage]);
-
-  const totalPages = Math.ceil(
-    (activeTab === "rules" ? filteredRules.length : 0) / itemsPerPage,
-  );
-
-  const PaginationControls = () => {
-    if (totalPages <= 1) return null;
-
-    return (
-      <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/50">
-        <span className="text-sm text-gray-500">
-          Showing{" "}
-          <span className="font-semibold text-gray-900">
-            {(currentPage - 1) * itemsPerPage + 1}
-          </span>{" "}
-          to{" "}
-          <span className="font-semibold text-gray-900">
-            {Math.min(currentPage * itemsPerPage, filteredRules.length)}
-          </span>{" "}
-          of{" "}
-          <span className="font-semibold text-gray-900">
-            {filteredRules.length}
-          </span>{" "}
-          results
-        </span>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="p-2 border border-gray-200 rounded-lg hover:bg-white hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          >
-            <RiArrowLeftSLine className="w-5 h-5 text-gray-600" />
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1)
-            .filter(
-              (page) =>
-                page === 1 ||
-                page === totalPages ||
-                (page >= currentPage - 1 && page <= currentPage + 1),
-            )
-            .map((page, index, array) => (
-              <React.Fragment key={page}>
-                {index > 0 && array[index - 1] !== page - 1 && (
-                  <span className="text-gray-400 px-1">...</span>
-                )}
-                <button
-                  onClick={() => setCurrentPage(page)}
-                  className={`min-w-[32px] h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-all ${
-                    currentPage === page
-                      ? "bg-[#01334C] text-white shadow-sm"
-                      : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300"
-                  }`}
-                >
-                  {page}
-                </button>
-              </React.Fragment>
-            ))}
-          <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-            className="p-2 border border-gray-200 rounded-lg hover:bg-white hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          >
-            <RiArrowRightSLine className="w-5 h-5 text-gray-600" />
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const getCategoryStyle = (category) => {
-    return (
-      categoryColors[category] || {
-        bg: "bg-gray-50",
-        text: "text-gray-700",
-        border: "border-gray-200",
-      }
-    );
-  };
 
   // ─── Flow Tree Helpers ───
   const collectAllItems = (node) => {
@@ -503,33 +301,35 @@ function AdminComplianceCMS() {
   const handleSaveNode = async (e) => {
     e.preventDefault();
     setNodeSaving(true);
+    const annexure = activeTab === "rules" ? "1b" : "1a";
     try {
       if (selectedNode.type === "branch") {
         const payload = {
           heading: selectedNode.data.heading,
           order: Number(selectedNode.data.order),
+          parentId: selectedNode.action === "add_branch" 
+                    ? (selectedNode.parentId || null) 
+                    : (selectedNode.data.parentId || null),
         };
         if (selectedNode.action === "add_branch") {
-          if (selectedNode.parentId) {
-            payload.parentId = selectedNode.parentId;
-          }
-          await complianceApi.createWhimsicalBranch(payload);
+          await complianceApi.createWhimsicalBranch(payload, annexure);
         } else {
           await complianceApi.updateWhimsicalBranch(
             selectedNode.data.id,
             payload,
+            annexure,
           );
         }
       } else if (selectedNode.type === "item") {
         const payload = {
           code: selectedNode.data.code,
           name: selectedNode.data.name,
-          dueDateType: selectedNode.data.dueDateType || "MONTHLY",
-          reminderType: selectedNode.data.dueDateType || "MONTHLY",
           order: Number(selectedNode.data.order),
         };
 
-        if (payload.dueDateType === "MONTHLY") {
+        if (annexure === "1a") {
+          payload.dueDateType = selectedNode.data.dueDateType || "MONTHLY";
+          payload.reminderType = selectedNode.data.dueDateType || "MONTHLY";
           payload.monthBasis = selectedNode.data.monthBasis || "NEXT_MONTH";
           payload.dueDate = parseInt(selectedNode.data.dueDate) || 20;
 
@@ -608,22 +408,25 @@ function AdminComplianceCMS() {
           } catch (e) {
             payload.reminders = selectedNode.data.reminders;
           }
-        }
+        } // End 1a annexure specific payload
 
         if (selectedNode.action === "add_item") {
           await complianceApi.createWhimsicalItem(
             selectedNode.branchId,
             payload,
+            annexure,
           );
         } else {
           await complianceApi.updateWhimsicalItem(
             selectedNode.data.id,
             payload,
+            annexure,
           );
         }
       }
       setSelectedNode(null);
-      await fetchFlowTree();
+      if (annexure === "1b") await fetchFlowTree1B();
+      else await fetchFlowTree();
     } catch (err) {
       alert("Error saving: " + err.message);
     } finally {
@@ -653,18 +456,20 @@ function AdminComplianceCMS() {
   const executeDelete = async () => {
     if (!deleteModal.data) return;
     setDeleteLoading(true);
+    const annexure = activeTab === "rules" ? "1b" : "1a";
     try {
       if (deleteModal.type === "branch") {
-        await complianceApi.deleteWhimsicalBranch(deleteModal.data.id);
+        await complianceApi.deleteWhimsicalBranch(deleteModal.data.id, annexure);
         if (selectedNode?.data?.id === deleteModal.data.id)
           setSelectedNode(null);
       } else {
-        await complianceApi.deleteWhimsicalItem(deleteModal.data.id);
+        await complianceApi.deleteWhimsicalItem(deleteModal.data.id, annexure);
         if (selectedNode?.data?.id === deleteModal.data.id)
           setSelectedNode(null);
       }
       setDeleteModal({ open: false, type: null, data: null });
-      await fetchFlowTree();
+      if (annexure === "1b") await fetchFlowTree1B();
+      else await fetchFlowTree();
     } catch (err) {
       alert("Error deleting: " + err.message);
     } finally {
@@ -694,8 +499,7 @@ function AdminComplianceCMS() {
           } ${
             selectedNode &&
             selectedNode.type === "branch" &&
-            selectedNode.data.id === branch.id &&
-            selectedNode.action === "edit"
+            selectedNode.data.id === branch.id
               ? "ring-2 ring-[#00486D] shadow-sm"
               : ""
           }`}
@@ -727,7 +531,7 @@ function AdminComplianceCMS() {
               {totalCount} items
             </span>
             <div
-              className={`flex items-center gap-1 transition-opacity ${selectedNode && selectedNode.type === "branch" && selectedNode.data.id === branch.id && selectedNode.action === "edit" ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+              className={`flex items-center gap-1 transition-opacity ${selectedNode && selectedNode.type === "branch" && selectedNode.data.id === branch.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
             >
               <button
                 onClick={(e) => {
@@ -829,8 +633,8 @@ function AdminComplianceCMS() {
                           }
                           if (!Array.isArray(formattedReminders)) formattedReminders = [];
                         } else if (item.dueDateType === "QUARTERLY") {
-                          try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch(err) {}
-                          try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch(err) {}
+                          try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch { /* ignore */ }
+                          try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch { /* ignore */ }
                           if (!formattedDueDate || typeof formattedDueDate !== 'object') {
                             formattedDueDate = { Q1: { month: 6, day: 30 }, Q2: { month: 9, day: 30 }, Q3: { month: 12, day: 31 }, Q4: { month: 3, day: 31 } };
                           }
@@ -838,8 +642,8 @@ function AdminComplianceCMS() {
                             formattedReminders = { Q1: { month: 6, days: [] }, Q2: { month: 9, days: [] }, Q3: { month: 12, days: [] }, Q4: { month: 3, days: [] } };
                           }
                         } else if (item.dueDateType === "YEARLY") {
-                          try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch(err) {}
-                          try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch(err) {}
+                          try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch { /* ignore */ }
+                          try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch { /* ignore */ }
                           if (!formattedDueDate || typeof formattedDueDate !== 'object') {
                             formattedDueDate = { month: 1, day: 1 };
                           }
@@ -916,8 +720,8 @@ function AdminComplianceCMS() {
                               }
                               if (!Array.isArray(formattedReminders)) formattedReminders = [];
                             } else if (item.dueDateType === "QUARTERLY") {
-                              try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch(err) {}
-                              try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch(err) {}
+                              try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch { /* ignore */ }
+                              try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch { /* ignore */ }
                               if (!formattedDueDate || typeof formattedDueDate !== 'object') {
                                 formattedDueDate = { Q1: { month: 6, day: 30 }, Q2: { month: 9, day: 30 }, Q3: { month: 12, day: 31 }, Q4: { month: 3, day: 31 } };
                               }
@@ -925,8 +729,8 @@ function AdminComplianceCMS() {
                                 formattedReminders = { Q1: { month: 6, days: [] }, Q2: { month: 9, days: [] }, Q3: { month: 12, days: [] }, Q4: { month: 3, days: [] } };
                               }
                             } else if (item.dueDateType === "YEARLY") {
-                              try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch(err) {}
-                              try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch(err) {}
+                              try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch { /* ignore */ }
+                              try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch { /* ignore */ }
                               if (!formattedDueDate || typeof formattedDueDate !== 'object') {
                                 formattedDueDate = { month: 1, day: 1 };
                               }
@@ -999,16 +803,12 @@ function AdminComplianceCMS() {
           </div>
 
           <button
-            onClick={
-              activeTab === "items" ? handleCreateItem : handleCreateRule
-            }
+            onClick={handleCreateItem}
             className="flex items-center gap-2 px-6 py-2.5 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-all shadow-md hover:shadow-lg font-medium"
           >
             <RiAddLine className="w-5 h-5" />
             <span>
-              {activeTab === "items"
-                ? "Add Compliance Item"
-                : "Add Compliance Rule"}
+              Add Compliance Item
             </span>
           </button>
         </div>
@@ -1025,7 +825,7 @@ function AdminComplianceCMS() {
               }`}
             >
               <RiFileList3Line className="w-4 h-4" />
-              <span>Compliance Items</span>
+              <span>1a compliance</span>
               <span
                 className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-bold ${
                   activeTab === "items"
@@ -1033,7 +833,7 @@ function AdminComplianceCMS() {
                     : "bg-gray-200 text-gray-500"
                 }`}
               >
-                {items.length}
+                {flowBranches.length}
               </span>
               {activeTab === "items" && (
                 <div className="absolute bottom-0 left-4 right-4 h-[3px] bg-[#01334C] rounded-t-full" />
@@ -1048,7 +848,7 @@ function AdminComplianceCMS() {
               }`}
             >
               <RiShieldCheckLine className="w-4 h-4" />
-              <span>Compliance Rules</span>
+              <span>1b compliance</span>
               <span
                 className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-bold ${
                   activeTab === "rules"
@@ -1056,7 +856,7 @@ function AdminComplianceCMS() {
                     : "bg-gray-200 text-gray-500"
                 }`}
               >
-                {rules.length}
+                {flowBranches1B.length}
               </span>
               {activeTab === "rules" && (
                 <div className="absolute bottom-0 left-4 right-4 h-[3px] bg-[#01334C] rounded-t-full" />
@@ -1065,9 +865,11 @@ function AdminComplianceCMS() {
           </div>
 
           {/* ════════════════════════════════════════════════════════════
-             TAB: COMPLIANCE ITEMS
+             TAB: COMPLIANCE ITEMS (1A and 1B)
           ════════════════════════════════════════════════════════════ */}
-          {activeTab === "items" && (
+          {(activeTab === "items" || activeTab === "rules") && (() => {
+            const activeFlowBranches = activeTab === "items" ? flowBranches : flowBranches1B;
+            return (
             <>
               {/* Filter Bar */}
               <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4">
@@ -1105,7 +907,7 @@ function AdminComplianceCMS() {
                               parentId: null,
                               data: {
                                 heading: "",
-                                order: flowBranches.length + 1,
+                                order: activeFlowBranches.length + 1,
                               },
                             })
                           }
@@ -1115,8 +917,8 @@ function AdminComplianceCMS() {
                         </button>
                       </div>
                       <div className="space-y-1 max-h-[600px] overflow-y-auto pr-1">
-                        {filterBranches(flowBranches).length > 0 ? (
-                          filterBranches(flowBranches).map((branch) =>
+                        {filterBranches(activeFlowBranches).length > 0 ? (
+                          filterBranches(activeFlowBranches).map((branch) =>
                             renderBranch(branch),
                           )
                         ) : (
@@ -1244,6 +1046,9 @@ function AdminComplianceCMS() {
                                     }
                                   />
                                 </div>
+                                
+                                {activeTab === "items" && (
+                                <React.Fragment>
                                 <div>
                                   <label className="block text-xs font-semibold text-gray-700 mb-1.5 ml-0.5">
                                     Due Date Type
@@ -1639,7 +1444,9 @@ function AdminComplianceCMS() {
                                       placeholder='Enter JSON (e.g. [[8, 25], [9, 15]])'
                                     />
                                   )}
-                                </div>
+                                  </div>
+                                </React.Fragment>
+                                )}
                                 <div>
                                   <label className="block text-xs font-semibold text-gray-700 mb-1.5 ml-0.5">
                                     Display Order
@@ -1731,169 +1538,10 @@ function AdminComplianceCMS() {
                 )}
               </div>
             </>
-          )}
+            );
+          })()}
 
-          {/* ════════════════════════════════════════════════════════════
-             TAB: COMPLIANCE RULES
-          ════════════════════════════════════════════════════════════ */}
-          {activeTab === "rules" && (
-            <>
-              {/* Filter Bar */}
-              <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-                <div className="relative">
-                  <RiSearchLine className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    placeholder="Search by compliance item name, option label, or question..."
-                    value={ruleSearch}
-                    onChange={(e) => setRuleSearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow bg-white"
-                  />
-                </div>
-              </div>
 
-              {/* Content */}
-              <div className="min-h-[400px]">
-                {rulesLoading ? (
-                  <div className="flex flex-col items-center justify-center h-64">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00486D]"></div>
-                    <p className="mt-4 text-gray-500 font-medium">
-                      Loading compliance rules...
-                    </p>
-                  </div>
-                ) : filteredRules.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                      <RiShieldCheckLine className="w-8 h-8 text-gray-300" />
-                    </div>
-                    <p className="text-lg font-medium">
-                      No compliance rules found
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      Try adjusting your search terms
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="bg-gray-50/80 border-b border-gray-200">
-                            <th className="text-left px-5 py-4 font-bold text-gray-600 uppercase text-[11px] tracking-wider bg-gray-50/50 sticky top-0 z-10 w-[20%]">
-                              Compliance Item
-                            </th>
-                            <th className="text-left px-5 py-4 font-bold text-gray-600 uppercase text-[11px] tracking-wider bg-gray-50/50 sticky top-0 z-10 w-[20%]">
-                              Option
-                            </th>
-                            <th className="text-left px-5 py-4 font-bold text-gray-600 uppercase text-[11px] tracking-wider bg-gray-50/50 sticky top-0 z-10 w-[25%]">
-                              Question
-                            </th>
-                            <th className="text-center px-5 py-4 font-bold text-gray-600 uppercase text-[11px] tracking-wider bg-gray-50/50 sticky top-0 z-10 w-[10%]">
-                              Required
-                            </th>
-                            <th className="text-center px-5 py-4 font-bold text-gray-600 uppercase text-[11px] tracking-wider bg-gray-50/50 sticky top-0 z-10 w-[10%]">
-                              Priority
-                            </th>
-                            <th className="text-right px-5 py-4 font-bold text-gray-600 uppercase text-[11px] tracking-wider bg-gray-50/50 sticky top-0 z-10 w-[15%]">
-                              Actions
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                          {paginatedRules.map((rule) => {
-                            const catStyle = getCategoryStyle(
-                              rule.complianceItem?.category,
-                            );
-                            return (
-                              <tr
-                                key={rule.id}
-                                className="hover:bg-[#F8FAFC] transition-colors group"
-                              >
-                                <td className="px-5 py-4 align-top">
-                                  <div className="flex flex-col gap-1">
-                                    <span className="font-bold text-gray-900 text-[13px] line-clamp-2">
-                                      {rule.complianceItem?.name || "—"}
-                                    </span>
-                                    <div className="flex flex-col gap-1">
-                                      {rule.complianceItem?.category && (
-                                        <span
-                                          className={`inline-block w-fit px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded border ${catStyle.bg} ${catStyle.text} ${catStyle.border}`}
-                                        >
-                                          {rule.complianceItem.category.replace(
-                                            "_",
-                                            " ",
-                                          )}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                </td>
-                                <td className="px-5 py-4 align-top">
-                                  <div className="flex flex-col gap-1">
-                                    <span className="font-medium text-gray-800 text-[13px] line-clamp-2">
-                                      {rule.option?.label || "—"}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="px-5 py-4 align-top">
-                                  <div className="flex flex-col gap-1">
-                                    <span className="text-[13px] text-gray-700 line-clamp-3">
-                                      {rule.option?.question?.text || "—"}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="px-5 py-4 text-center align-top pt-5">
-                                  <span
-                                    className={`inline-block px-2 py-0.5 text-[10px] font-bold uppercase rounded-md border ${
-                                      rule.isRequired
-                                        ? "bg-green-50 text-green-700 border-green-200"
-                                        : "bg-gray-100 text-gray-500 border-gray-200"
-                                    }`}
-                                  >
-                                    {rule.isRequired ? "Yes" : "No"}
-                                  </span>
-                                </td>
-                                <td className="px-5 py-4 text-center align-top pt-5">
-                                  <span
-                                    className={`text-sm font-semibold font-mono ${
-                                      rule.priority > 0
-                                        ? "text-amber-600"
-                                        : "text-gray-400"
-                                    }`}
-                                  >
-                                    {rule.priority}
-                                  </span>
-                                </td>
-                                <td className="px-5 py-4 align-middle">
-                                  <div className="flex items-center justify-end gap-2">
-                                    <button
-                                      onClick={() => handleEditRule(rule)}
-                                      className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[#00486D] bg-blue-50 border border-blue-100 hover:bg-blue-100 hover:border-blue-200 rounded-lg transition-colors"
-                                    >
-                                      <RiEditLine className="w-3.5 h-3.5" />
-                                      Edit
-                                    </button>
-                                    <button
-                                      onClick={() => handleDeleteRule(rule)}
-                                      className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-100 hover:bg-red-100 hover:border-red-200 rounded-lg transition-colors"
-                                    >
-                                      <RiDeleteBinLine className="w-3.5 h-3.5" />
-                                      Delete
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                    <PaginationControls />
-                  </>
-                )}
-              </div>
-            </>
-          )}
         </div>
       </div>
 
@@ -2056,157 +1704,7 @@ function AdminComplianceCMS() {
         </div>
       )}
 
-      {/* ════════════════════════════════════════════════════════════
-         MODAL: COMPLIANCE RULE
-      ════════════════════════════════════════════════════════════ */}
-      {showRuleModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => {
-              setShowRuleModal(false);
-              setEditingRule(null);
-            }}
-          ></div>
-          <div className="relative bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
-            {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                {editingRule ? (
-                  <RiEditLine className="w-5 h-5 text-[#00486D]" />
-                ) : (
-                  <RiAddLine className="w-5 h-5 text-[#00486D]" />
-                )}
-                {editingRule
-                  ? "Edit Compliance Rule"
-                  : "Create Compliance Rule"}
-              </h2>
-              <button
-                onClick={() => {
-                  setShowRuleModal(false);
-                  setEditingRule(null);
-                }}
-                className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
-              >
-                <RiCloseLine className="w-6 h-6" />
-              </button>
-            </div>
 
-            {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Compliance Item <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="complianceItemId"
-                  value={ruleFormData.complianceItemId}
-                  onChange={handleRuleInputChange}
-                  required
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent bg-white"
-                >
-                  <option value="">Select compliance item...</option>
-                  {items.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {!editingRule && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Option ID <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="optionId"
-                    value={ruleFormData.optionId}
-                    onChange={handleRuleInputChange}
-                    required
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent font-mono"
-                    placeholder="e.g. opt_1a_gst_regular_monthly"
-                  />
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Condition ID{" "}
-                  <span className="text-gray-400 font-normal">(optional)</span>
-                </label>
-                <input
-                  type="text"
-                  name="conditionId"
-                  value={ruleFormData.conditionId}
-                  onChange={handleRuleInputChange}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent font-mono"
-                  placeholder="Leave empty if no condition"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Priority
-                  </label>
-                  <input
-                    type="number"
-                    name="priority"
-                    value={ruleFormData.priority}
-                    onChange={handleRuleInputChange}
-                    min={0}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
-                  />
-                </div>
-                <div className="flex items-end pb-1">
-                  <label className="flex items-center gap-3 cursor-pointer px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors w-full">
-                    <input
-                      type="checkbox"
-                      name="isRequired"
-                      checked={ruleFormData.isRequired}
-                      onChange={handleRuleInputChange}
-                      className="w-4 h-4 text-[#00486D] border-gray-300 rounded focus:ring-[#00486D] cursor-pointer"
-                    />
-                    <span className="text-sm font-medium text-gray-700">
-                      Is Required
-                    </span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowRuleModal(false);
-                  setEditingRule(null);
-                }}
-                className="px-6 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-white hover:border-gray-400 transition-colors font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveRule}
-                disabled={ruleSaving}
-                className="px-8 py-2.5 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-all shadow-md hover:shadow-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {ruleSaving ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Saving...
-                  </>
-                ) : (
-                  <>{editingRule ? "Update Rule" : "Create Rule"}</>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Delete Confirmation Modal */}
       {deleteModal.open && (
