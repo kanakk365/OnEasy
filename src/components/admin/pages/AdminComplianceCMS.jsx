@@ -524,10 +524,42 @@ function AdminComplianceCMS() {
         const payload = {
           code: selectedNode.data.code,
           name: selectedNode.data.name,
-          dueDate: selectedNode.data.dueDate || "",
-          reminders: selectedNode.data.reminders || "",
+          dueDateType: selectedNode.data.dueDateType || "MONTHLY",
+          reminderType: selectedNode.data.dueDateType || "MONTHLY",
           order: Number(selectedNode.data.order),
         };
+
+        if (payload.dueDateType === "MONTHLY") {
+          payload.monthBasis = selectedNode.data.monthBasis || "NEXT_MONTH";
+          payload.dueDate = parseInt(selectedNode.data.dueDate) || 20;
+          if (typeof selectedNode.data.reminders === "string") {
+            payload.reminders = selectedNode.data.reminders
+              .split(",")
+              .map((r) => parseInt(r.trim()))
+              .filter((n) => !isNaN(n));
+          } else {
+            payload.reminders = selectedNode.data.reminders || [];
+          }
+        } else {
+          try {
+            payload.dueDate =
+              typeof selectedNode.data.dueDate === "string"
+                ? JSON.parse(selectedNode.data.dueDate)
+                : selectedNode.data.dueDate;
+          } catch (e) {
+            payload.dueDate = selectedNode.data.dueDate;
+          }
+
+          try {
+            payload.reminders =
+              typeof selectedNode.data.reminders === "string"
+                ? JSON.parse(selectedNode.data.reminders)
+                : selectedNode.data.reminders;
+          } catch (e) {
+            payload.reminders = selectedNode.data.reminders;
+          }
+        }
+
         if (selectedNode.action === "add_item") {
           await complianceApi.createWhimsicalItem(
             selectedNode.branchId,
@@ -689,7 +721,9 @@ function AdminComplianceCMS() {
                     data: {
                       code: "",
                       name: "",
-                      dueDate: "",
+                      dueDateType: "MONTHLY",
+                      monthBasis: "NEXT_MONTH",
+                      dueDate: 20,
                       reminders: "",
                       order: (branch.items?.length || 0) + 1,
                     },
@@ -732,13 +766,29 @@ function AdminComplianceCMS() {
                   return (
                     <div
                       key={item.id || item.code}
-                      onClick={() =>
+                      onClick={() => {
+                        let formattedDueDate = item.dueDate;
+                        let formattedReminders = item.reminders;
+                        if (item.dueDateType === "MONTHLY") {
+                          if (Array.isArray(item.reminders)) {
+                             formattedReminders = item.reminders.join(", ");
+                          }
+                        } else {
+                          if (typeof item.dueDate === 'object') formattedDueDate = JSON.stringify(item.dueDate, null, 2);
+                          if (typeof item.reminders === 'object') formattedReminders = JSON.stringify(item.reminders, null, 2);
+                        }
                         setSelectedNode({
                           type: "item",
                           action: "edit",
-                          data: { ...item },
-                        })
-                      }
+                          data: { 
+                            ...item,
+                            dueDateType: item.dueDateType || "MONTHLY",
+                            monthBasis: item.monthBasis || "NEXT_MONTH",
+                            dueDate: formattedDueDate,
+                            reminders: formattedReminders
+                          },
+                        });
+                      }}
                       className={`flex items-start gap-3 px-3 py-2.5 rounded-lg transition-all mb-1 group cursor-pointer ${
                         selectedNode &&
                         selectedNode.type === "item" &&
@@ -781,10 +831,26 @@ function AdminComplianceCMS() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
+                            let formattedDueDate = item.dueDate;
+                            let formattedReminders = item.reminders;
+                            if (item.dueDateType === "MONTHLY") {
+                              if (Array.isArray(item.reminders)) {
+                                 formattedReminders = item.reminders.join(", ");
+                              }
+                            } else {
+                              if (typeof item.dueDate === 'object') formattedDueDate = JSON.stringify(item.dueDate, null, 2);
+                              if (typeof item.reminders === 'object') formattedReminders = JSON.stringify(item.reminders, null, 2);
+                            }
                             setSelectedNode({
                               type: "item",
                               action: "edit",
-                              data: { ...item },
+                              data: { 
+                                ...item,
+                                dueDateType: item.dueDateType || "MONTHLY",
+                                monthBasis: item.monthBasis || "NEXT_MONTH",
+                                dueDate: formattedDueDate,
+                                reminders: formattedReminders
+                              },
                             });
                           }}
                           className="px-2.5 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200/50 rounded-md text-xs font-semibold"
@@ -1084,25 +1150,90 @@ function AdminComplianceCMS() {
                                 </div>
                                 <div>
                                   <label className="block text-xs font-semibold text-gray-700 mb-1.5 ml-0.5">
-                                    Due Date{" "}
-                                    <span className="text-gray-400 font-normal">
-                                      (Optional)
-                                    </span>
+                                    Due Date Type
                                   </label>
-                                  <input
+                                  <select
                                     className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
-                                    value={selectedNode.data.dueDate}
+                                    value={selectedNode.data.dueDateType || "MONTHLY"}
                                     onChange={(e) =>
                                       setSelectedNode({
                                         ...selectedNode,
                                         data: {
                                           ...selectedNode.data,
-                                          dueDate: e.target.value,
+                                          dueDateType: e.target.value,
                                         },
                                       })
                                     }
-                                    placeholder="e.g. 11th of succeeding month"
-                                  />
+                                  >
+                                    <option value="MONTHLY">Monthly</option>
+                                    <option value="QUARTERLY">Quarterly</option>
+                                    <option value="YEARLY">Yearly</option>
+                                  </select>
+                                </div>
+
+                                {selectedNode.data.dueDateType === "MONTHLY" && (
+                                  <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1.5 ml-0.5">
+                                      Month Basis
+                                    </label>
+                                    <select
+                                      className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
+                                      value={selectedNode.data.monthBasis || "NEXT_MONTH"}
+                                      onChange={(e) =>
+                                        setSelectedNode({
+                                          ...selectedNode,
+                                          data: {
+                                            ...selectedNode.data,
+                                            monthBasis: e.target.value,
+                                          },
+                                        })
+                                      }
+                                    >
+                                      <option value="NEXT_MONTH">Next Month</option>
+                                      <option value="THIS_MONTH">This Month</option>
+                                    </select>
+                                  </div>
+                                )}
+
+                                <div>
+                                  <label className="block text-xs font-semibold text-gray-700 mb-1.5 ml-0.5">
+                                    Due Date
+                                  </label>
+                                  {selectedNode.data.dueDateType === "MONTHLY" ? (
+                                    <select
+                                      className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
+                                      value={selectedNode.data.dueDate || 1}
+                                      onChange={(e) =>
+                                        setSelectedNode({
+                                          ...selectedNode,
+                                          data: {
+                                            ...selectedNode.data,
+                                            dueDate: e.target.value,
+                                          },
+                                        })
+                                      }
+                                    >
+                                      {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                                        <option key={day} value={day}>{day}</option>
+                                      ))}
+                                    </select>
+                                  ) : (
+                                    <textarea
+                                      className="w-full text-sm p-3 border border-gray-200 rounded-lg font-mono focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all resize-y text-xs"
+                                      rows={4}
+                                      value={typeof selectedNode.data.dueDate === 'string' ? selectedNode.data.dueDate : JSON.stringify(selectedNode.data.dueDate, null, 2)}
+                                      onChange={(e) =>
+                                        setSelectedNode({
+                                          ...selectedNode,
+                                          data: {
+                                            ...selectedNode.data,
+                                            dueDate: e.target.value,
+                                          },
+                                        })
+                                      }
+                                      placeholder='Enter JSON (e.g. {"month": 10, "day": 31})'
+                                    />
+                                  )}
                                 </div>
                                 <div>
                                   <label className="block text-xs font-semibold text-gray-700 mb-1.5 ml-0.5">
@@ -1111,21 +1242,39 @@ function AdminComplianceCMS() {
                                       (Optional)
                                     </span>
                                   </label>
-                                  <textarea
-                                    className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all resize-none"
-                                    rows={2}
-                                    value={selectedNode.data.reminders}
-                                    onChange={(e) =>
-                                      setSelectedNode({
-                                        ...selectedNode,
-                                        data: {
-                                          ...selectedNode.data,
-                                          reminders: e.target.value,
-                                        },
-                                      })
-                                    }
-                                    placeholder="e.g. 3rd, 7th"
-                                  />
+                                  {selectedNode.data.dueDateType === "MONTHLY" ? (
+                                    <input
+                                      type="text"
+                                      className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
+                                      value={selectedNode.data.reminders}
+                                      onChange={(e) =>
+                                        setSelectedNode({
+                                          ...selectedNode,
+                                          data: {
+                                            ...selectedNode.data,
+                                            reminders: e.target.value,
+                                          },
+                                        })
+                                      }
+                                      placeholder="Comma separated days (e.g. 15, 17, 19)"
+                                    />
+                                  ) : (
+                                    <textarea
+                                      className="w-full text-sm p-3 border border-gray-200 rounded-lg font-mono focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all resize-y text-xs"
+                                      rows={6}
+                                      value={typeof selectedNode.data.reminders === 'string' ? selectedNode.data.reminders : JSON.stringify(selectedNode.data.reminders, null, 2)}
+                                      onChange={(e) =>
+                                        setSelectedNode({
+                                          ...selectedNode,
+                                          data: {
+                                            ...selectedNode.data,
+                                            reminders: e.target.value,
+                                          },
+                                        })
+                                      }
+                                      placeholder='Enter JSON (e.g. [[8, 25], [9, 15]])'
+                                    />
+                                  )}
                                 </div>
                                 <div>
                                   <label className="block text-xs font-semibold text-gray-700 mb-1.5 ml-0.5">
