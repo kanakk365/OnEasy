@@ -236,7 +236,9 @@ function GSTForm() {
           }
         }
 
-        setShowSuccessModal(true);
+        if (shouldNavigate) {
+          setShowSuccessModal(true);
+        }
       } catch (apiError) {
         console.error('❌ API Error:', apiError);
         if (!apiError.message?.includes('Failed to save')) {
@@ -244,11 +246,13 @@ function GSTForm() {
         }
       }
       
-      // Clear localStorage
-      localStorage.removeItem('selectedPackage');
-      localStorage.removeItem('paymentDetails');
-      localStorage.removeItem('selectedRegistrationType');
-      localStorage.removeItem('selectedRegistrationTitle');
+      // Clear localStorage only when actually submitting, not autosaving
+      if (shouldNavigate) {
+        localStorage.removeItem('selectedPackage');
+        localStorage.removeItem('paymentDetails');
+        localStorage.removeItem('selectedRegistrationType');
+        localStorage.removeItem('selectedRegistrationTitle');
+      }
       
     } catch (error) {
       console.error('❌ Error submitting registration:', error);
@@ -289,14 +293,7 @@ function GSTForm() {
     }
   };
 
-  // Debounced autosave whenever formData changes
-  useEffect(() => {
-    const t = setTimeout(() => {
-      saveDraft({ reason: 'debounced-change' });
-    }, 900);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData]);
+  // Autosave when formData changes has been removed as per user request
 
   const steps = [
     "Basic Business Details",

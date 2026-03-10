@@ -490,35 +490,7 @@ function StartupIndiaForm() {
     }
   };
 
-  // Debounced autosave whenever formData changes
-  // Skip autosave only if submitting, loading, or draft is currently saving
-  useEffect(() => {
-    // Don't autosave if:
-    // 1. Currently loading draft data (prevent saving empty form during load)
-    // 2. Currently submitting (final submit in progress)
-    // 3. Draft is currently saving (prevent concurrent saves)
-    // 4. We just loaded data (prevent autosave loop after initial load)
-    if (loadingDraft || isSubmitting || isDraftSaving || justLoadedDataRef.current) {
-      return;
-    }
-    
-    // Only autosave if we have a ticketId (editing existing) or if form has actual data
-    const hasData = formData.step1?.businessName || 
-                    formData.step2?.problemSolving || 
-                    formData.step3?.registeredOfficeAddressLine1;
-    const hasTicketId = draftTicketId || ticketId;
-    
-    // Don't autosave empty forms unless we're editing (have ticketId)
-    if (!hasData && !hasTicketId) {
-      return;
-    }
-    
-    const t = setTimeout(() => {
-      saveDraft({ reason: 'debounced-change' });
-    }, 1500); // Increased debounce time to reduce frequency
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData, loadingDraft, isSubmitting, isDraftSaving]);
+  // Autosave when formData changes has been removed as per user request
   
   // Show loading state while fetching draft
   // Also show loading if we have ticketId but formData is empty (data not loaded yet)

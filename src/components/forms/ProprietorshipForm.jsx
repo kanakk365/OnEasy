@@ -271,14 +271,7 @@ function ProprietorshipForm({
     }
   };
 
-  // Debounced autosave whenever formData changes
-  useEffect(() => {
-    const t = setTimeout(() => {
-      saveDraft({ reason: 'debounced-change' });
-    }, 900);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData]);
+  // Autosave when formData changes has been removed as per user request
 
   const handleNext = () => {
     if (step < 2) {

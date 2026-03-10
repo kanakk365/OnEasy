@@ -576,6 +576,20 @@ function AdminComplianceCMS() {
           };
           payload.dueDate = cleanQData(selectedNode.data.dueDate, false);
           payload.reminders = cleanQData(selectedNode.data.reminders, true);
+        } else if (payload.dueDateType === "YEARLY") {
+          payload.dueDate = {
+            month: parseInt(selectedNode.data.dueDate?.month) || 1,
+            day: parseInt(selectedNode.data.dueDate?.day) || 1,
+          };
+          
+          if (Array.isArray(selectedNode.data.reminders)) {
+            payload.reminders = selectedNode.data.reminders.map((r) => [
+              parseInt(r[0]) || 1,
+              parseInt(r[1]) || 1,
+            ]);
+          } else {
+            payload.reminders = [];
+          }
         } else {
           try {
             payload.dueDate =
@@ -757,10 +771,10 @@ function AdminComplianceCMS() {
                     data: {
                       code: "",
                       name: "",
-                      dueDateType: "MONTHLY",
+                      dueDateType: "",
                       monthBasis: "NEXT_MONTH",
-                      dueDate: 20,
-                      reminders: [15],
+                      dueDate: "",
+                      reminders: [],
                       order: (branch.items?.length || 0) + 1,
                     },
                   });
@@ -823,6 +837,15 @@ function AdminComplianceCMS() {
                           if (!formattedReminders || typeof formattedReminders !== 'object') {
                             formattedReminders = { Q1: { month: 6, days: [] }, Q2: { month: 9, days: [] }, Q3: { month: 12, days: [] }, Q4: { month: 3, days: [] } };
                           }
+                        } else if (item.dueDateType === "YEARLY") {
+                          try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch(err) {}
+                          try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch(err) {}
+                          if (!formattedDueDate || typeof formattedDueDate !== 'object') {
+                            formattedDueDate = { month: 1, day: 1 };
+                          }
+                          if (!Array.isArray(formattedReminders)) {
+                            formattedReminders = [];
+                          }
                         } else {
                           if (typeof item.dueDate === 'object') formattedDueDate = JSON.stringify(item.dueDate, null, 2);
                           if (typeof item.reminders === 'object') formattedReminders = JSON.stringify(item.reminders, null, 2);
@@ -832,7 +855,7 @@ function AdminComplianceCMS() {
                           action: "edit",
                           data: { 
                             ...item,
-                            dueDateType: item.dueDateType || "MONTHLY",
+                            dueDateType: item.dueDateType || "",
                             monthBasis: item.monthBasis || "NEXT_MONTH",
                             dueDate: formattedDueDate,
                             reminders: formattedReminders
@@ -901,6 +924,15 @@ function AdminComplianceCMS() {
                               if (!formattedReminders || typeof formattedReminders !== 'object') {
                                 formattedReminders = { Q1: { month: 6, days: [] }, Q2: { month: 9, days: [] }, Q3: { month: 12, days: [] }, Q4: { month: 3, days: [] } };
                               }
+                            } else if (item.dueDateType === "YEARLY") {
+                              try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch(err) {}
+                              try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch(err) {}
+                              if (!formattedDueDate || typeof formattedDueDate !== 'object') {
+                                formattedDueDate = { month: 1, day: 1 };
+                              }
+                              if (!Array.isArray(formattedReminders)) {
+                                formattedReminders = [];
+                              }
                             } else {
                               if (typeof item.dueDate === 'object') formattedDueDate = JSON.stringify(item.dueDate, null, 2);
                               if (typeof item.reminders === 'object') formattedReminders = JSON.stringify(item.reminders, null, 2);
@@ -910,7 +942,7 @@ function AdminComplianceCMS() {
                               action: "edit",
                               data: { 
                                 ...item,
-                                dueDateType: item.dueDateType || "MONTHLY",
+                                dueDateType: item.dueDateType || "",
                                 monthBasis: item.monthBasis || "NEXT_MONTH",
                                 dueDate: formattedDueDate,
                                 reminders: formattedReminders
@@ -1218,7 +1250,7 @@ function AdminComplianceCMS() {
                                   </label>
                                   <select
                                     className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
-                                    value={selectedNode.data.dueDateType || "MONTHLY"}
+                                    value={selectedNode.data.dueDateType || ""}
                                     onChange={(e) => {
                                       const newType = e.target.value;
                                       let newDueDate = selectedNode.data.dueDate;
@@ -1237,6 +1269,12 @@ function AdminComplianceCMS() {
                                           Q3: { month: 12, days: [] },
                                           Q4: { month: 3, days: [] }
                                         };
+                                      } else if (newType === "YEARLY" && selectedNode.data.dueDateType !== "YEARLY") {
+                                        newDueDate = { month: 1, day: 1 };
+                                        newReminders = [];
+                                      } else if (newType === "MONTHLY" && selectedNode.data.dueDateType !== "MONTHLY") {
+                                        newDueDate = 20;
+                                        newReminders = [15];
                                       }
                                       
                                       setSelectedNode({
@@ -1250,6 +1288,7 @@ function AdminComplianceCMS() {
                                       });
                                     }}
                                   >
+                                    <option value="" disabled>Select Due Date Type</option>
                                     <option value="MONTHLY">Monthly</option>
                                     <option value="QUARTERLY">Quarterly</option>
                                     <option value="YEARLY">Yearly</option>
@@ -1317,8 +1356,11 @@ function AdminComplianceCMS() {
                                                 setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, dueDate: newDueDate } });
                                               }}
                                             >
-                                              {[...Array(12)].map((_, i) => (
-                                                <option key={i+1} value={i+1}>Month {i+1}</option>
+                                              {[
+                                                "January", "February", "March", "April", "May", "June", 
+                                                "July", "August", "September", "October", "November", "December"
+                                              ].map((monthName, i) => (
+                                                <option key={i+1} value={i+1}>{monthName}</option>
                                               ))}
                                             </select>
                                           </div>
@@ -1339,6 +1381,44 @@ function AdminComplianceCMS() {
                                           </div>
                                         </div>
                                       ))}
+                                    </div>
+                                  ) : selectedNode.data.dueDateType === "YEARLY" && typeof selectedNode.data.dueDate === 'object' && selectedNode.data.dueDate !== null ? (
+                                    <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-xl">
+                                      <div className="flex-1">
+                                        <select
+                                          className="w-full text-sm p-2 bg-white border border-gray-200 rounded shadow-sm outline-none"
+                                          value={selectedNode.data.dueDate.month || 1}
+                                          onChange={(e) => {
+                                            setSelectedNode({
+                                              ...selectedNode,
+                                              data: { ...selectedNode.data, dueDate: { ...selectedNode.data.dueDate, month: e.target.value } }
+                                            });
+                                          }}
+                                        >
+                                          {[
+                                            "January", "February", "March", "April", "May", "June", 
+                                            "July", "August", "September", "October", "November", "December"
+                                          ].map((monthName, i) => (
+                                            <option key={i+1} value={i+1}>{monthName}</option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                      <div className="flex-1">
+                                        <select
+                                          className="w-full text-sm p-2 bg-white border border-gray-200 rounded shadow-sm outline-none"
+                                          value={selectedNode.data.dueDate.day || 1}
+                                          onChange={(e) => {
+                                            setSelectedNode({
+                                              ...selectedNode,
+                                              data: { ...selectedNode.data, dueDate: { ...selectedNode.data.dueDate, day: e.target.value } }
+                                            });
+                                          }}
+                                        >
+                                          {[...Array(31)].map((_, i) => (
+                                            <option key={i+1} value={i+1}>Day {i+1}</option>
+                                          ))}
+                                        </select>
+                                      </div>
                                     </div>
                                   ) : (
                                     <textarea
@@ -1480,6 +1560,67 @@ function AdminComplianceCMS() {
                                           </div>
                                         );
                                       })}
+                                    </div>
+                                  ) : selectedNode.data.dueDateType === "YEARLY" && Array.isArray(selectedNode.data.reminders) ? (
+                                    <div className="space-y-4">
+                                      <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-3">
+                                        <div className="space-y-2">
+                                          {selectedNode.data.reminders.map((remPair, idx) => (
+                                            <div key={`rem-y-${idx}`} className="flex items-center gap-2">
+                                              <select
+                                                className="flex-1 text-sm p-2 bg-white border border-gray-200 rounded shadow-sm outline-none focus:ring-2 focus:ring-[#00486D]/30"
+                                                value={remPair[0] || 1}
+                                                onChange={(e) => {
+                                                  const newReminders = [...selectedNode.data.reminders];
+                                                  newReminders[idx] = [e.target.value, remPair[1]];
+                                                  setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, reminders: newReminders } });
+                                                }}
+                                              >
+                                                {[
+                                                  "January", "February", "March", "April", "May", "June", 
+                                                  "July", "August", "September", "October", "November", "December"
+                                                ].map((monthName, i) => (
+                                                  <option key={i+1} value={i+1}>{monthName}</option>
+                                                ))}
+                                              </select>
+                                              <select
+                                                className="flex-1 text-sm p-2 bg-white border border-gray-200 rounded shadow-sm outline-none focus:ring-2 focus:ring-[#00486D]/30"
+                                                value={remPair[1] || 1}
+                                                onChange={(e) => {
+                                                  const newReminders = [...selectedNode.data.reminders];
+                                                  newReminders[idx] = [remPair[0], e.target.value];
+                                                  setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, reminders: newReminders } });
+                                                }}
+                                              >
+                                                {[...Array(31)].map((_, i) => (
+                                                  <option key={i+1} value={i+1}>Day {i+1}</option>
+                                                ))}
+                                              </select>
+                                              <button
+                                                type="button"
+                                                onClick={() => {
+                                                  const newReminders = selectedNode.data.reminders.filter((_, i) => i !== idx);
+                                                  setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, reminders: newReminders } });
+                                                }}
+                                                className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                                              >
+                                                <RiDeleteBinLine className="w-4 h-4" />
+                                              </button>
+                                            </div>
+                                          ))}
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const newReminders = [...selectedNode.data.reminders, [1, 1]];
+                                              setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, reminders: newReminders } });
+                                            }}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#00486D] bg-blue-50/50 border border-blue-100/50 hover:bg-blue-100 rounded-lg transition-colors justify-center w-full"
+                                          >
+                                            <RiAddLine className="w-4 h-4" />
+                                            Add Reminder Date
+                                          </button>
+                                        </div>
+                                      </div>
                                     </div>
                                   ) : (
                                     <textarea
