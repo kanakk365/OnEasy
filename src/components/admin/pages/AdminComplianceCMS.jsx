@@ -533,7 +533,6 @@ function AdminComplianceCMS() {
           payload.monthBasis = selectedNode.data.monthBasis || "NEXT_MONTH";
           payload.dueDate = parseInt(selectedNode.data.dueDate) || 20;
 
-          // Now handling array from the UI directly as strings or numbers
           if (Array.isArray(selectedNode.data.reminders)) {
             payload.reminders = selectedNode.data.reminders
               .map((r) => parseInt(r))
@@ -552,6 +551,31 @@ function AdminComplianceCMS() {
           } else {
             payload.reminders = [];
           }
+        } else if (payload.dueDateType === "QUARTERLY") {
+          const cleanQData = (obj, isReminder) => {
+            if (!obj || typeof obj !== "object") return obj;
+            const res = {};
+            ["Q1", "Q2", "Q3", "Q4"].forEach((q) => {
+              if (obj[q]) {
+                if (isReminder) {
+                  res[q] = {
+                    month: parseInt(obj[q].month) || 1,
+                    days: Array.isArray(obj[q].days)
+                      ? obj[q].days.map((d) => parseInt(d)).filter((n) => !isNaN(n))
+                      : [],
+                  };
+                } else {
+                  res[q] = {
+                    month: parseInt(obj[q].month) || 1,
+                    day: parseInt(obj[q].day) || 1,
+                  };
+                }
+              }
+            });
+            return res;
+          };
+          payload.dueDate = cleanQData(selectedNode.data.dueDate, false);
+          payload.reminders = cleanQData(selectedNode.data.reminders, true);
         } else {
           try {
             payload.dueDate =
@@ -783,15 +807,22 @@ function AdminComplianceCMS() {
                         let formattedReminders = item.reminders;
                         if (item.dueDateType === "MONTHLY") {
                           if (!Array.isArray(item.reminders)) {
-                             // Fallback if the data is a string
                              try {
                                formattedReminders = JSON.parse(item.reminders);
                              } catch (e) {
                                formattedReminders = typeof item.reminders === 'string' ? item.reminders.split(',').map(r => r.trim()).filter(Boolean) : [];
                              }
                           }
-                          // Ensure it's an array
                           if (!Array.isArray(formattedReminders)) formattedReminders = [];
+                        } else if (item.dueDateType === "QUARTERLY") {
+                          try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch(err) {}
+                          try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch(err) {}
+                          if (!formattedDueDate || typeof formattedDueDate !== 'object') {
+                            formattedDueDate = { Q1: { month: 6, day: 30 }, Q2: { month: 9, day: 30 }, Q3: { month: 12, day: 31 }, Q4: { month: 3, day: 31 } };
+                          }
+                          if (!formattedReminders || typeof formattedReminders !== 'object') {
+                            formattedReminders = { Q1: { month: 6, days: [] }, Q2: { month: 9, days: [] }, Q3: { month: 12, days: [] }, Q4: { month: 3, days: [] } };
+                          }
                         } else {
                           if (typeof item.dueDate === 'object') formattedDueDate = JSON.stringify(item.dueDate, null, 2);
                           if (typeof item.reminders === 'object') formattedReminders = JSON.stringify(item.reminders, null, 2);
@@ -861,6 +892,15 @@ function AdminComplianceCMS() {
                                  }
                               }
                               if (!Array.isArray(formattedReminders)) formattedReminders = [];
+                            } else if (item.dueDateType === "QUARTERLY") {
+                              try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch(err) {}
+                              try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch(err) {}
+                              if (!formattedDueDate || typeof formattedDueDate !== 'object') {
+                                formattedDueDate = { Q1: { month: 6, day: 30 }, Q2: { month: 9, day: 30 }, Q3: { month: 12, day: 31 }, Q4: { month: 3, day: 31 } };
+                              }
+                              if (!formattedReminders || typeof formattedReminders !== 'object') {
+                                formattedReminders = { Q1: { month: 6, days: [] }, Q2: { month: 9, days: [] }, Q3: { month: 12, days: [] }, Q4: { month: 3, days: [] } };
+                              }
                             } else {
                               if (typeof item.dueDate === 'object') formattedDueDate = JSON.stringify(item.dueDate, null, 2);
                               if (typeof item.reminders === 'object') formattedReminders = JSON.stringify(item.reminders, null, 2);
@@ -1179,15 +1219,36 @@ function AdminComplianceCMS() {
                                   <select
                                     className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
                                     value={selectedNode.data.dueDateType || "MONTHLY"}
-                                    onChange={(e) =>
+                                    onChange={(e) => {
+                                      const newType = e.target.value;
+                                      let newDueDate = selectedNode.data.dueDate;
+                                      let newReminders = selectedNode.data.reminders;
+                                      
+                                      if (newType === "QUARTERLY" && selectedNode.data.dueDateType !== "QUARTERLY") {
+                                        newDueDate = {
+                                          Q1: { month: 6, day: 30 },
+                                          Q2: { month: 9, day: 30 },
+                                          Q3: { month: 12, day: 31 },
+                                          Q4: { month: 3, day: 31 }
+                                        };
+                                        newReminders = {
+                                          Q1: { month: 6, days: [] },
+                                          Q2: { month: 9, days: [] },
+                                          Q3: { month: 12, days: [] },
+                                          Q4: { month: 3, days: [] }
+                                        };
+                                      }
+                                      
                                       setSelectedNode({
                                         ...selectedNode,
                                         data: {
                                           ...selectedNode.data,
-                                          dueDateType: e.target.value,
+                                          dueDateType: newType,
+                                          dueDate: newDueDate,
+                                          reminders: newReminders
                                         },
-                                      })
-                                    }
+                                      });
+                                    }}
                                   >
                                     <option value="MONTHLY">Monthly</option>
                                     <option value="QUARTERLY">Quarterly</option>
@@ -1241,6 +1302,44 @@ function AdminComplianceCMS() {
                                         <option key={day} value={day}>{day}</option>
                                       ))}
                                     </select>
+                                  ) : selectedNode.data.dueDateType === "QUARTERLY" && typeof selectedNode.data.dueDate === 'object' && selectedNode.data.dueDate !== null ? (
+                                    <div className="space-y-3">
+                                      {["Q1", "Q2", "Q3", "Q4"].map((q) => (
+                                        <div key={`dueDate-${q}`} className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-xl">
+                                          <div className="w-10 font-bold text-gray-700 text-sm">{q}</div>
+                                          <div className="flex-1">
+                                            <select
+                                              className="w-full text-sm p-2 bg-white border border-gray-200 rounded shadow-sm outline-none"
+                                              value={selectedNode.data.dueDate[q]?.month || 1}
+                                              onChange={(e) => {
+                                                const newDueDate = { ...selectedNode.data.dueDate };
+                                                newDueDate[q] = { ...newDueDate[q], month: e.target.value };
+                                                setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, dueDate: newDueDate } });
+                                              }}
+                                            >
+                                              {[...Array(12)].map((_, i) => (
+                                                <option key={i+1} value={i+1}>Month {i+1}</option>
+                                              ))}
+                                            </select>
+                                          </div>
+                                          <div className="flex-1">
+                                            <select
+                                              className="w-full text-sm p-2 bg-white border border-gray-200 rounded shadow-sm outline-none"
+                                              value={selectedNode.data.dueDate[q]?.day || 1}
+                                              onChange={(e) => {
+                                                const newDueDate = { ...selectedNode.data.dueDate };
+                                                newDueDate[q] = { ...newDueDate[q], day: e.target.value };
+                                                setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, dueDate: newDueDate } });
+                                              }}
+                                            >
+                                              {[...Array(31)].map((_, i) => (
+                                                <option key={i+1} value={i+1}>Day {i+1}</option>
+                                              ))}
+                                            </select>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
                                   ) : (
                                     <textarea
                                       className="w-full text-sm p-3 border border-gray-200 rounded-lg font-mono focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all resize-y text-xs"
@@ -1321,6 +1420,66 @@ function AdminComplianceCMS() {
                                         <RiAddLine className="w-4 h-4" />
                                         Add Reminder Day
                                       </button>
+                                    </div>
+                                  ) : selectedNode.data.dueDateType === "QUARTERLY" && typeof selectedNode.data.reminders === 'object' && selectedNode.data.reminders !== null ? (
+                                    <div className="space-y-4">
+                                      {["Q1", "Q2", "Q3", "Q4"].map((q) => {
+                                        const qReminders = selectedNode.data.reminders[q] || { month: 1, days: [] };
+                                        return (
+                                          <div key={`rem-${q}`} className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-3">
+                                            <div className="flex items-center gap-2">
+                                              <div className="w-10 font-bold text-gray-700 text-sm">{q}</div>
+                                              <div className="flex-1 text-sm font-semibold text-gray-700">Days to Trigger Reminder</div>
+                                            </div>
+                                            <div className="pl-12 space-y-2">
+                                              {Array.isArray(qReminders.days) && qReminders.days.map((dayVal, idx) => (
+                                                <div key={`rem-${q}-day-${idx}`} className="flex items-center gap-2">
+                                                  <input
+                                                    type="number"
+                                                    min="1"
+                                                    max="31"
+                                                    className="flex-1 text-sm p-2 bg-white border border-gray-200 rounded shadow-sm outline-none focus:ring-2 focus:ring-[#00486D]/30"
+                                                    value={dayVal}
+                                                    onChange={(e) => {
+                                                      const newReminders = { ...selectedNode.data.reminders };
+                                                      const newDays = [...(qReminders.days || [])];
+                                                      newDays[idx] = e.target.value;
+                                                      newReminders[q] = { ...qReminders, days: newDays };
+                                                      setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, reminders: newReminders } });
+                                                    }}
+                                                    placeholder="Day (e.g. 15)"
+                                                  />
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                      const newReminders = { ...selectedNode.data.reminders };
+                                                      const newDays = qReminders.days.filter((_, i) => i !== idx);
+                                                      newReminders[q] = { ...qReminders, days: newDays };
+                                                      setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, reminders: newReminders } });
+                                                    }}
+                                                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                                                  >
+                                                    <RiDeleteBinLine className="w-4 h-4" />
+                                                  </button>
+                                                </div>
+                                              ))}
+                                              <button
+                                                type="button"
+                                                onClick={() => {
+                                                  const newReminders = { ...selectedNode.data.reminders };
+                                                  const newDays = [...(qReminders.days || []), ""];
+                                                  newReminders[q] = { ...qReminders, days: newDays };
+                                                  setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, reminders: newReminders } });
+                                                }}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#00486D] bg-blue-50/50 border border-blue-100/50 hover:bg-blue-100 rounded-lg transition-colors justify-center w-full"
+                                              >
+                                                <RiAddLine className="w-4 h-4" />
+                                                Add Day
+                                              </button>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
                                     </div>
                                   ) : (
                                     <textarea
