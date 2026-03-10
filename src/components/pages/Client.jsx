@@ -30,6 +30,7 @@ function Client() {
   const [selectedComplianceOrg, setSelectedComplianceOrg] = React.useState("");
   const [allComplianceItems, setAllComplianceItems] = React.useState([]);
   const [loadingCompliances, setLoadingCompliances] = React.useState(true);
+  const [apiComplianceStats, setApiComplianceStats] = React.useState(null);
 
   React.useEffect(() => {
     // Add smooth scrolling behavior
@@ -270,6 +271,30 @@ function Client() {
       }
     };
     loadUpcomingCompliances();
+
+    // Load compliance stats for top cards
+    const loadComplianceStats = async () => {
+      try {
+        const storedUser = JSON.parse(
+          localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
+        );
+        const userId = storedUser.id;
+        if (!userId) return;
+
+        const date = new Date();
+        const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        
+        // Fetch stats from the new API
+        const res = await complianceApi.get(
+          `/compliance/annexure-1a/stats?yearMonth=${yearMonth}`
+        );
+        console.log("Compliance Stats API Response:", res);
+        setApiComplianceStats(res?.data || res || {});
+      } catch (err) {
+        console.error("Error loading compliance stats:", err);
+      }
+    };
+    loadComplianceStats();
   }, []);
 
   const formatDate = (dateString) => {
@@ -535,7 +560,7 @@ function Client() {
 
       {/* Overall Compliances Section - Wrapped in White Card */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
           {/* On-Going Service Requests */}
           <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
             <div className="text-3xl font-semibold text-[#023752] mb-2">
@@ -548,7 +573,9 @@ function Client() {
           {/* Up-coming Compliances */}
           <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
             <div className="text-3xl font-semibold text-[#023752] mb-2">
-              {complianceStats.upcoming}
+               {apiComplianceStats 
+                ? (apiComplianceStats?.upcomingCount ?? 0)
+                : complianceStats.upcoming}
             </div>
             <div className="text-sm font-medium text-gray-700">
               Up-coming Compliances
@@ -557,18 +584,13 @@ function Client() {
           {/* Overdue Compliances */}
           <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
             <div className="text-3xl font-semibold text-[#023752] mb-2">
-              {complianceStats.overdue}
+              {apiComplianceStats
+                ? (apiComplianceStats?.overdueCount ?? 0)
+                : complianceStats.overdue}
             </div>
             <div className="text-sm font-medium text-gray-700">
               Overdue Compliances
             </div>
-          </div>
-          {/* Other */}
-          <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
-            <div className="text-3xl font-semibold text-[#023752] mb-2">
-              {complianceStats.other}
-            </div>
-            <div className="text-sm font-medium text-gray-700">Other</div>
           </div>
         </div>
       </div>
