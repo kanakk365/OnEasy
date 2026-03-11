@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { IoSearchOutline, IoChevronForwardOutline } from "react-icons/io5";
+import { IoSearchOutline, IoChevronForwardOutline, IoChevronBackOutline } from "react-icons/io5";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
 import { initPaymentWithOrderId } from "../../utils/payment";
@@ -86,9 +86,15 @@ function Registrations() {
   const [search, setSearch] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [showComingSoon, setShowComingSoon] = React.useState(false);
-  const [suggestedRegistrations, setSuggestedRegistrations] = React.useState([]);
-  const [suggestedCompliances, setSuggestedCompliances] = React.useState([]);
+  const [responseSets, setResponseSets] = React.useState([]);
+  const [selectedSetId, setSelectedSetId] = React.useState(null);
   const [suggestedLoading, setSuggestedLoading] = React.useState(false);
+
+  // Helper to extract organization name from a responseSet
+  const getOrgName = React.useCallback((set) => {
+    const p = set.responses?.find((r) => r.questionKey === "organization_name");
+    return p?.answer?.value || "Unknown Organization";
+  }, []);
 
   React.useEffect(() => {
     if (view !== "suggested-registrations" && view !== "suggested-compliances") {
@@ -98,53 +104,17 @@ function Registrations() {
       setSuggestedLoading(true);
       try {
         const token = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.TOKEN);
-        const [responsesRes, flowRes] = await Promise.all([
-          fetch(`${COMPLIANCE_API_BASE}/compliance/responses`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch(`${COMPLIANCE_API_BASE}/compliance/flow/complete`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
-        const responses = responsesRes.ok
-          ? (await responsesRes.json()).responses || []
-          : [];
-        const flowData = flowRes.ok ? await flowRes.json() : {};
-        const flow = (flowData.flow || []).sort((a, b) => a.order - b.order);
-        const registrationItems = [];
-        const complianceItems = [];
-        responses.forEach((resp) => {
-          if (resp.answer?.type === "option" && resp.answer?.optionId) {
-            const q = flow.find((f) => f.key === resp.questionKey);
-            const opt = q?.options?.find((o) => o.id === resp.answer.optionId);
-            if (opt?.compliances) {
-              (opt.compliances.registration || []).forEach((r) => {
-                if (
-                  !registrationItems.find(
-                    (i) => i.code === r.code && i.name === r.name,
-                  )
-                ) {
-                  registrationItems.push({ ...r, category: "registration" });
-                }
-              });
-              (opt.compliances.compliance || []).forEach((c) => {
-                if (
-                  !complianceItems.find(
-                    (i) => i.code === c.code && i.name === c.name,
-                  )
-                ) {
-                  complianceItems.push({ ...c, category: "compliance" });
-                }
-              });
-            }
-          }
-        });
-        setSuggestedRegistrations(registrationItems);
-        setSuggestedCompliances(complianceItems);
+        const responsesRes = await fetch(
+          `${COMPLIANCE_API_BASE}/compliance/responses`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const data = responsesRes.ok ? await responsesRes.json() : {};
+        setResponseSets(data.responseSets || []);
+        // Reset selected set when toggling tabs
+        setSelectedSetId(null);
       } catch (err) {
-        console.error("Failed to load suggested compliances:", err);
-        setSuggestedRegistrations([]);
-        setSuggestedCompliances([]);
+        console.error("Failed to load suggested items:", err);
+        setResponseSets([]);
       } finally {
         setSuggestedLoading(false);
       }
@@ -823,135 +793,121 @@ function Registrations() {
           </div>
         </div>
 
-        {view === "suggested-registrations" ? (
+        {view === "suggested-registrations" || view === "suggested-compliances" ? (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             {suggestedLoading ? (
               <div className="text-sm text-gray-500 p-8 text-center">
-                Loading suggested registrations...
+                Loading suggestions...
               </div>
-            ) : suggestedRegistrations.length > 0 ? (
-              <div className="grid gap-4">
-                {suggestedRegistrations
-                  .filter((item) => {
-                    if (!search) return true;
-                    return item.name
-                      ?.toLowerCase()
-                      .includes(search.toLowerCase());
-                  })
-                  .map((item, idx) => {
-                    const route = complianceToRoute(item.name, item.code);
-                    return (
-                      <div
-                        key={`${item.code}-${idx}`}
-                        onClick={() => {
-                          try {
-                            localStorage.setItem(
-                              "suggestedComplianceMeta",
-                              JSON.stringify({
-                                source: "compliance_chat_suggested",
-                                code: item.code || null,
-                                name: item.name || null,
-                                category: item.category || null,
-                                ts: Date.now(),
-                              }),
-                            );
-                          } catch {
-                            // ignore storage issues
-                          }
-                          route ? navigate(route) : navigate("/registrations");
-                        }}
-                        className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#01334C] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-gray-100"
-                      >
-                        <div>
-                          <h3 className="text-lg font-semibold text-[#00486D] mb-1 group-hover:text-white">
-                            {item.name}
-                          </h3>
-                          <p className="text-sm text-gray-400 group-hover:text-gray-200">
-                            Registration required
+            ) : responseSets.length > 0 ? (
+              !selectedSetId ? (
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-800 mb-6">Organizations ({responseSets.length})</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {responseSets.map((set, idx) => {
+                      const count = view === "suggested-registrations" 
+                        ? (set.suggestedRegistrations?.length || 0)
+                        : (set.suggestedCompliances?.length || 0);
+
+                      return (
+                        <div
+                          key={set.submissionId || idx}
+                          onClick={() => setSelectedSetId(set.submissionId)}
+                          className="group bg-white rounded-xl p-6 border border-gray-200 hover:border-[#01466a] hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
+                        >
+                          <div className="absolute top-0 left-0 w-1 h-full bg-[#01466a] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          <div className="flex items-start justify-between">
+                            <h3 className="text-xl font-bold text-[#00486D] mb-3 line-clamp-2 pr-4">
+                              {getOrgName(set)}
+                            </h3>
+                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#00486D]/10 flex items-center justify-center">
+                              <span className="text-sm font-bold text-[#00486D]">{count}</span>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-500 mt-2 font-medium">
+                            {view === "suggested-registrations" ? "Registrations" : "Compliances"} suggested
                           </p>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-[#F5F7FA] group-hover:bg-[#246181] flex items-center justify-center transition-colors">
-                          <IoChevronForwardOutline className="text-[#00486D] text-xl group-hover:text-white" />
-                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="animate-in fade-in duration-300">
+                  <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
+                    <button
+                      onClick={() => setSelectedSetId(null)}
+                      className="flex items-center text-sm font-medium text-gray-500 hover:text-[#00486D] transition-colors"
+                    >
+                      <IoChevronBackOutline className="mr-1 w-4 h-4" />
+                      Back to Organizations
+                    </button>
+                    <div className="h-4 w-[1px] bg-gray-300 hidden sm:block"></div>
+                    <span className="text-sm text-gray-700 font-semibold hidden sm:inline-block">
+                      {getOrgName(responseSets.find(s => s.submissionId === selectedSetId))}
+                    </span>
+                  </div>
+                  
+                  {(() => {
+                    const activeSet = responseSets.find(s => s.submissionId === selectedSetId);
+                    const items = view === "suggested-registrations" 
+                      ? (activeSet?.suggestedRegistrations || [])
+                      : (activeSet?.suggestedCompliances || []);
+                    const filteredItems = items.filter(i => !search || i.name?.toLowerCase().includes(search.toLowerCase()));
+
+                    return filteredItems.length > 0 ? (
+                      <div className="grid gap-4">
+                        {filteredItems.map((item, idx) => {
+                          const route = complianceToRoute(item.name, item.code);
+                          return (
+                            <div
+                              key={`${item.code}-${idx}`}
+                              onClick={() => {
+                                try {
+                                  localStorage.setItem(
+                                    "suggestedComplianceMeta",
+                                    JSON.stringify({
+                                      source: "compliance_chat_suggested",
+                                      code: item.code || null,
+                                      name: item.name || null,
+                                      category: item.category || null,
+                                      ts: Date.now(),
+                                    }),
+                                  );
+                                } catch {
+                                  // ignore storage issues
+                                }
+                                route ? navigate(route) : navigate(view === "suggested-registrations" ? "/registrations" : "/compliance");
+                              }}
+                              className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#01334C] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-gray-100"
+                            >
+                              <div>
+                                <h3 className="text-lg font-semibold text-[#00486D] mb-1 group-hover:text-white">
+                                  {item.name}
+                                </h3>
+                                <p className="text-sm text-gray-400 group-hover:text-gray-200">
+                                  {item.category === "registration" ? "Registration required" : "Compliance filing"}
+                                </p>
+                              </div>
+                              <div className="w-10 h-10 rounded-full bg-[#F5F7FA] group-hover:bg-[#246181] flex items-center justify-center transition-colors">
+                                <IoChevronForwardOutline className="text-[#00486D] text-xl group-hover:text-white" />
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
-              </div>
+                    ) : (
+                      <div className="text-center py-10">
+                        <p className="text-gray-500">No matching suggestions found for this organization.</p>
+                      </div>
+                    )
+                  })()}
+                </div>
+              )
             ) : (
               <div className="text-center py-12">
                 <p className="text-gray-500 mb-4">
-                  No suggested registrations yet. Complete the compliance
-                  questionnaire to get personalized recommendations.
-                </p>
-                <button
-                  onClick={() => navigate("/compliance")}
-                  className="px-6 py-2 bg-[#01466a] text-white rounded-lg text-sm font-medium hover:bg-[#01334C] transition-colors"
-                >
-                  Go to Compliance
-                </button>
-              </div>
-            )}
-          </div>
-        ) : view === "suggested-compliances" ? (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            {suggestedLoading ? (
-              <div className="text-sm text-gray-500 p-8 text-center">
-                Loading suggested compliances...
-              </div>
-            ) : suggestedCompliances.length > 0 ? (
-              <div className="grid gap-4">
-                {suggestedCompliances
-                  .filter((item) => {
-                    if (!search) return true;
-                    return item.name?.toLowerCase().includes(search.toLowerCase());
-                  })
-                  .map((item, idx) => {
-                    const route = complianceToRoute(item.name, item.code);
-                    return (
-                      <div
-                        key={`${item.code}-${idx}`}
-                        onClick={() => {
-                          try {
-                            // Mark that the next purchase (if any) came from Compliance Chat suggestions.
-                            // This is consumed by the payment flow to attach order notes for admin filtering.
-                            localStorage.setItem(
-                              "suggestedComplianceMeta",
-                              JSON.stringify({
-                                source: "compliance_chat_suggested",
-                                code: item.code || null,
-                                name: item.name || null,
-                                category: item.category || null,
-                                ts: Date.now(),
-                              }),
-                            );
-                          } catch {
-                            // ignore storage issues
-                          }
-                          route ? navigate(route) : navigate("/compliance");
-                        }}
-                        className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#01334C] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-gray-100"
-                      >
-                        <div>
-                          <h3 className="text-lg font-semibold text-[#00486D] mb-1 group-hover:text-white">
-                            {item.name}
-                          </h3>
-                          <p className="text-sm text-gray-400 group-hover:text-gray-200">
-                            {item.category === "registration"
-                              ? "Registration required"
-                              : "Compliance filing"}
-                          </p>
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-[#F5F7FA] group-hover:bg-[#246181] flex items-center justify-center transition-colors">
-                          <IoChevronForwardOutline className="text-[#00486D] text-xl group-hover:text-white" />
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-500 mb-4">
-                  No suggested compliances yet. Complete the compliance
+                  No suggestions available yet. Complete the compliance
                   questionnaire to get personalized recommendations.
                 </p>
                 <button
