@@ -509,11 +509,8 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
               <table className="w-full">
                 <thead className="bg-[#00486D] text-white">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold w-24">
-                      Period
-                    </th>
                     <th className="px-6 py-4 text-left text-sm font-semibold">
-                      Month
+                      Period
                     </th>
                     <th className="px-6 py-4 text-left text-sm font-semibold">
                       Due Date
@@ -532,9 +529,6 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
                 <tbody className="divide-y divide-gray-100">
                   {instances.map((instance, idx) => {
                     const date = new Date(instance.dueDate);
-                    const monthName = !isNaN(date)
-                      ? date.toLocaleString("default", { month: "long" })
-                      : "-";
                     const formattedDate = !isNaN(date)
                       ? date.toLocaleDateString("en-GB", {
                           day: "numeric",
@@ -542,7 +536,23 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
                           year: "numeric",
                         })
                       : instance.dueDate;
-                    const label = getPillLabel(instance, idx, categoryName);
+
+                    // Format yearMonth (e.g. "2026-03") as full name: "March 2026"
+                    const periodLabel = (() => {
+                      if (instance.yearMonth) {
+                        const [, mo] = instance.yearMonth.split("-");
+                        const monthNames = [
+                          "January", "February", "March", "April", "May", "June",
+                          "July", "August", "September", "October", "November", "December"
+                        ];
+                        const monthIndex = parseInt(mo, 10) - 1;
+                        if (monthIndex >= 0 && monthIndex < 12) {
+                          return monthNames[monthIndex];
+                        }
+                      }
+                      return instance.yearMonth || getPillLabel(instance, idx, categoryName);
+                    })();
+
                     const isDone =
                       pendingUpdates[instance.id] !== undefined
                         ? pendingUpdates[instance.id]
@@ -554,10 +564,7 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
                         className="hover:bg-gray-50 transition-colors"
                       >
                         <td className="px-6 py-4 text-sm text-gray-900 font-medium">
-                          {label}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-600">
-                          {monthName}
+                          {periodLabel}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600">
                           {formattedDate}

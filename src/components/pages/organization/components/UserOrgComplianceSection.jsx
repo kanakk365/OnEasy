@@ -129,16 +129,13 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
                 "Dec",
               ];
               let period = "—";
-              let year = "";
               if (instance.yearMonth) {
                 const parts = instance.yearMonth.split("-");
-                year = parts[0] || "";
                 const mNum = parseInt(parts[1], 10);
                 period =
-                  mNum >= 1 && mNum <= 12 ? MONTH_SHORT[mNum - 1] : `M${mNum}`;
+                  mNum >= 1 && mNum <= 12 ? MONTH_NAMES[mNum - 1] : `M${mNum}`;
               } else if (!isNaN(date)) {
-                year = String(date.getFullYear());
-                period = MONTH_SHORT[date.getMonth()];
+                period = MONTH_NAMES[date.getMonth()];
               }
               // Check if quarterly compliance by name/category
               const isQuarterly =
@@ -150,7 +147,6 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
 
               return {
                 period,
-                year,
                 dueDate: !isNaN(date)
                   ? date.toLocaleDateString("en-GB", {
                       day: "numeric",
@@ -736,7 +732,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
                                 {event.dueDate}
                               </span>
                               <span>
-                                Period: {event.period} · {event.year}
+                                Period: {event.period}
                               </span>
                             </div>
 
