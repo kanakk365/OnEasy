@@ -328,30 +328,10 @@ function AdminComplianceCMS() {
         };
 
         if (annexure === "1a") {
-          payload.dueDateType = selectedNode.data.dueDateType || "MONTHLY";
-          payload.reminderType = selectedNode.data.dueDateType || "MONTHLY";
-          payload.monthBasis = selectedNode.data.monthBasis || "NEXT_MONTH";
-          payload.dueDate = parseInt(selectedNode.data.dueDate) || 20;
+          const dueDateType = selectedNode.data.dueDateType || "MONTHLY";
+          payload.dueDateType = dueDateType;
+          payload.reminderType = dueDateType;
 
-          if (Array.isArray(selectedNode.data.reminders)) {
-            payload.reminders = selectedNode.data.reminders
-              .map((r) => parseInt(r))
-              .filter((n) => !isNaN(n));
-          } else if (typeof selectedNode.data.reminders === "string") {
-            try {
-              payload.reminders = JSON.parse(selectedNode.data.reminders)
-                .map((r) => parseInt(r))
-                .filter((n) => !isNaN(n));
-            } catch (e) {
-              payload.reminders = selectedNode.data.reminders
-                .split(",")
-                .map((r) => parseInt(r.trim()))
-                .filter((n) => !isNaN(n));
-            }
-          } else {
-            payload.reminders = [];
-          }
-        } else if (payload.dueDateType === "QUARTERLY") {
           const cleanQData = (obj, isReminder) => {
             if (!obj || typeof obj !== "object") return obj;
             const res = {};
@@ -374,23 +354,49 @@ function AdminComplianceCMS() {
             });
             return res;
           };
-          payload.dueDate = cleanQData(selectedNode.data.dueDate, false);
-          payload.reminders = cleanQData(selectedNode.data.reminders, true);
-        } else if (payload.dueDateType === "YEARLY") {
-          payload.dueDate = {
-            month: parseInt(selectedNode.data.dueDate?.month) || 1,
-            day: parseInt(selectedNode.data.dueDate?.day) || 1,
-          };
-          
-          if (Array.isArray(selectedNode.data.reminders)) {
-            payload.reminders = selectedNode.data.reminders.map((r) => [
-              parseInt(r[0]) || 1,
-              parseInt(r[1]) || 1,
-            ]);
+
+          if (dueDateType === "QUARTERLY") {
+            payload.dueDate = cleanQData(selectedNode.data.dueDate, false);
+            payload.reminders = cleanQData(selectedNode.data.reminders, true);
+          } else if (dueDateType === "YEARLY") {
+            payload.dueDate = {
+              month: parseInt(selectedNode.data.dueDate?.month) || 1,
+              day: parseInt(selectedNode.data.dueDate?.day) || 1,
+            };
+            if (Array.isArray(selectedNode.data.reminders)) {
+              payload.reminders = selectedNode.data.reminders.map((r) => [
+                parseInt(r[0]) || 1,
+                parseInt(r[1]) || 1,
+              ]);
+            } else {
+              payload.reminders = [];
+            }
           } else {
-            payload.reminders = [];
+            // MONTHLY
+            payload.monthBasis = selectedNode.data.monthBasis || "NEXT_MONTH";
+            payload.dueDate = parseInt(selectedNode.data.dueDate) || 20;
+
+            if (Array.isArray(selectedNode.data.reminders)) {
+              payload.reminders = selectedNode.data.reminders
+                .map((r) => parseInt(r))
+                .filter((n) => !isNaN(n));
+            } else if (typeof selectedNode.data.reminders === "string") {
+              try {
+                payload.reminders = JSON.parse(selectedNode.data.reminders)
+                  .map((r) => parseInt(r))
+                  .filter((n) => !isNaN(n));
+              } catch (e) {
+                payload.reminders = selectedNode.data.reminders
+                  .split(",")
+                  .map((r) => parseInt(r.trim()))
+                  .filter((n) => !isNaN(n));
+              }
+            } else {
+              payload.reminders = [];
+            }
           }
         } else {
+          // 1b annexure — generic fallback
           try {
             payload.dueDate =
               typeof selectedNode.data.dueDate === "string"
@@ -408,7 +414,7 @@ function AdminComplianceCMS() {
           } catch (e) {
             payload.reminders = selectedNode.data.reminders;
           }
-        } // End 1a annexure specific payload
+        } // End annexure-specific payload
 
         if (selectedNode.action === "add_item") {
           await complianceApi.createWhimsicalItem(
