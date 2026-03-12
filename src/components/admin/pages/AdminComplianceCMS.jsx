@@ -258,6 +258,77 @@ function AdminComplianceCMS() {
 
 
   // ─── Flow Tree Helpers ───
+
+  /**
+   * Derive dueDateType and format dueDate/reminders for the right-panel edit form.
+   * The whimsical-db API may not include `dueDateType` explicitly — it's encoded
+   * in `dueDateSchedule.type` ("monthly" / "quarterly" / "yearly").
+   * Reminder days live in `reminderSchedule.days` (for monthly).
+   */
+  const resolveItemForEdit = (item) => {
+    // Determine effective type: prefer explicit dueDateType, fall back to dueDateSchedule.type
+    const scheduleType = (item.dueDateSchedule?.type || "").toUpperCase(); // e.g. "MONTHLY"
+    const effectiveDueDateType = item.dueDateType || scheduleType || "";
+
+    let formattedDueDate = item.dueDate;
+    let formattedReminders = item.reminders;
+
+    if (effectiveDueDateType === "MONTHLY") {
+      // Due date: prefer dueDateSchedule.day, then the raw value
+      const dayFromSchedule = item.dueDateSchedule?.day;
+      if (dayFromSchedule !== undefined) {
+        formattedDueDate = dayFromSchedule;
+      } else if (typeof formattedDueDate !== "number") {
+        formattedDueDate = parseInt(formattedDueDate, 10) || 20;
+      }
+
+      // Reminders: prefer reminderSchedule.days array
+      if (Array.isArray(item.reminderSchedule?.days)) {
+        formattedReminders = item.reminderSchedule.days;
+      } else if (!Array.isArray(formattedReminders)) {
+        try {
+          formattedReminders = JSON.parse(formattedReminders);
+        } catch {
+          formattedReminders =
+            typeof formattedReminders === "string"
+              ? formattedReminders.split(",").map((r) => parseInt(r.trim(), 10)).filter(Boolean)
+              : [];
+        }
+      }
+      if (!Array.isArray(formattedReminders)) formattedReminders = [];
+
+    } else if (effectiveDueDateType === "QUARTERLY") {
+      try { formattedDueDate = typeof item.dueDate === "string" ? JSON.parse(item.dueDate) : item.dueDate; } catch { /* ignore */ }
+      try { formattedReminders = typeof item.reminders === "string" ? JSON.parse(item.reminders) : item.reminders; } catch { /* ignore */ }
+      if (!formattedDueDate || typeof formattedDueDate !== "object") {
+        formattedDueDate = { Q1: { month: 6, day: 30 }, Q2: { month: 9, day: 30 }, Q3: { month: 12, day: 31 }, Q4: { month: 3, day: 31 } };
+      }
+      if (!formattedReminders || typeof formattedReminders !== "object") {
+        formattedReminders = { Q1: { month: 6, days: [] }, Q2: { month: 9, days: [] }, Q3: { month: 12, days: [] }, Q4: { month: 3, days: [] } };
+      }
+
+    } else if (effectiveDueDateType === "YEARLY") {
+      try { formattedDueDate = typeof item.dueDate === "string" ? JSON.parse(item.dueDate) : item.dueDate; } catch { /* ignore */ }
+      try { formattedReminders = typeof item.reminders === "string" ? JSON.parse(item.reminders) : item.reminders; } catch { /* ignore */ }
+      if (!formattedDueDate || typeof formattedDueDate !== "object") {
+        formattedDueDate = { month: 1, day: 1 };
+      }
+      if (!Array.isArray(formattedReminders)) formattedReminders = [];
+
+    } else {
+      if (typeof item.dueDate === "object") formattedDueDate = JSON.stringify(item.dueDate, null, 2);
+      if (typeof item.reminders === "object") formattedReminders = JSON.stringify(item.reminders, null, 2);
+    }
+
+    return {
+      ...item,
+      dueDateType: effectiveDueDateType,
+      monthBasis: item.monthBasis || item.dueDateSchedule?.monthBasis || "NEXT_MONTH",
+      dueDate: formattedDueDate,
+      reminders: formattedReminders,
+    };
+  };
+
   const collectAllItems = (node) => {
     let list = [];
     if (node.items) list = [...list, ...node.items];
@@ -627,51 +698,12 @@ function AdminComplianceCMS() {
                     <div
                       key={item.id || item.code}
                       onClick={() => {
-                        let formattedDueDate = item.dueDate;
-                        let formattedReminders = item.reminders;
-                        if (item.dueDateType === "MONTHLY") {
-                          if (!Array.isArray(item.reminders)) {
-                             try {
-                               formattedReminders = JSON.parse(item.reminders);
-                             } catch (e) {
-                               formattedReminders = typeof item.reminders === 'string' ? item.reminders.split(',').map(r => r.trim()).filter(Boolean) : [];
-                             }
-                          }
-                          if (!Array.isArray(formattedReminders)) formattedReminders = [];
-                        } else if (item.dueDateType === "QUARTERLY") {
-                          try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch { /* ignore */ }
-                          try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch { /* ignore */ }
-                          if (!formattedDueDate || typeof formattedDueDate !== 'object') {
-                            formattedDueDate = { Q1: { month: 6, day: 30 }, Q2: { month: 9, day: 30 }, Q3: { month: 12, day: 31 }, Q4: { month: 3, day: 31 } };
-                          }
-                          if (!formattedReminders || typeof formattedReminders !== 'object') {
-                            formattedReminders = { Q1: { month: 6, days: [] }, Q2: { month: 9, days: [] }, Q3: { month: 12, days: [] }, Q4: { month: 3, days: [] } };
-                          }
-                        } else if (item.dueDateType === "YEARLY") {
-                          try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch { /* ignore */ }
-                          try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch { /* ignore */ }
-                          if (!formattedDueDate || typeof formattedDueDate !== 'object') {
-                            formattedDueDate = { month: 1, day: 1 };
-                          }
-                          if (!Array.isArray(formattedReminders)) {
-                            formattedReminders = [];
-                          }
-                        } else {
-                          if (typeof item.dueDate === 'object') formattedDueDate = JSON.stringify(item.dueDate, null, 2);
-                          if (typeof item.reminders === 'object') formattedReminders = JSON.stringify(item.reminders, null, 2);
-                        }
-                        setSelectedNode({
-                          type: "item",
-                          action: "edit",
-                          data: { 
-                            ...item,
-                            dueDateType: item.dueDateType || "",
-                            monthBasis: item.monthBasis || "NEXT_MONTH",
-                            dueDate: formattedDueDate,
-                            reminders: formattedReminders
-                          },
-                        });
-                      }}
+                          setSelectedNode({
+                            type: "item",
+                            action: "edit",
+                            data: resolveItemForEdit(item),
+                          });
+                        }}
                       className={`flex items-start gap-3 px-3 py-2.5 rounded-lg transition-all mb-1 group cursor-pointer ${
                         selectedNode &&
                         selectedNode.type === "item" &&
@@ -714,49 +746,10 @@ function AdminComplianceCMS() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            let formattedDueDate = item.dueDate;
-                            let formattedReminders = item.reminders;
-                            if (item.dueDateType === "MONTHLY") {
-                              if (!Array.isArray(item.reminders)) {
-                                 try {
-                                   formattedReminders = JSON.parse(item.reminders);
-                                 } catch (err) {
-                                   formattedReminders = typeof item.reminders === 'string' ? item.reminders.split(',').map(r => r.trim()).filter(Boolean) : [];
-                                 }
-                              }
-                              if (!Array.isArray(formattedReminders)) formattedReminders = [];
-                            } else if (item.dueDateType === "QUARTERLY") {
-                              try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch { /* ignore */ }
-                              try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch { /* ignore */ }
-                              if (!formattedDueDate || typeof formattedDueDate !== 'object') {
-                                formattedDueDate = { Q1: { month: 6, day: 30 }, Q2: { month: 9, day: 30 }, Q3: { month: 12, day: 31 }, Q4: { month: 3, day: 31 } };
-                              }
-                              if (!formattedReminders || typeof formattedReminders !== 'object') {
-                                formattedReminders = { Q1: { month: 6, days: [] }, Q2: { month: 9, days: [] }, Q3: { month: 12, days: [] }, Q4: { month: 3, days: [] } };
-                              }
-                            } else if (item.dueDateType === "YEARLY") {
-                              try { formattedDueDate = typeof item.dueDate === 'string' ? JSON.parse(item.dueDate) : item.dueDate; } catch { /* ignore */ }
-                              try { formattedReminders = typeof item.reminders === 'string' ? JSON.parse(item.reminders) : item.reminders; } catch { /* ignore */ }
-                              if (!formattedDueDate || typeof formattedDueDate !== 'object') {
-                                formattedDueDate = { month: 1, day: 1 };
-                              }
-                              if (!Array.isArray(formattedReminders)) {
-                                formattedReminders = [];
-                              }
-                            } else {
-                              if (typeof item.dueDate === 'object') formattedDueDate = JSON.stringify(item.dueDate, null, 2);
-                              if (typeof item.reminders === 'object') formattedReminders = JSON.stringify(item.reminders, null, 2);
-                            }
                             setSelectedNode({
                               type: "item",
                               action: "edit",
-                              data: { 
-                                ...item,
-                                dueDateType: item.dueDateType || "",
-                                monthBasis: item.monthBasis || "NEXT_MONTH",
-                                dueDate: formattedDueDate,
-                                reminders: formattedReminders
-                              },
+                              data: resolveItemForEdit(item),
                             });
                           }}
                           className="px-2.5 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200/50 rounded-md text-xs font-semibold"
