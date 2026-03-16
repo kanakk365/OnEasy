@@ -134,6 +134,7 @@ import RegistrationDetailsRouter from "../admin/pages/RegistrationDetailsRouter"
 import AdminServices from "../admin/pages/AdminServices";
 import AdminComplianceRequests from "../admin/pages/AdminComplianceRequests";
 import AdminNoticeBoard from "../admin/pages/AdminNoticeBoard";
+import AdminResources from "../admin/pages/AdminResources";
 import AdminNoticeManagement from "../admin/pages/AdminNoticeManagement";
 import AdminCMSPackage from "../admin/pages/AdminCMSPackage";
 import AdminComplianceCMS from "../admin/pages/AdminComplianceCMS";
@@ -1264,6 +1265,7 @@ function Routers() {
           element={<AdminClientDirectorsDetail />}
         />
         <Route path="notice-board" element={<AdminNoticeBoard />} />
+        <Route path="resources" element={<AdminResources />} />
         <Route path="notice-management" element={<AdminNoticeManagement />} />
         <Route path="coupon-generator" element={<CouponCodeGenerator />} />
         <Route path="coupon-management" element={<AdminCouponManagement />} />

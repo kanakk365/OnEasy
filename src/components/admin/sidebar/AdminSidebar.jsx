@@ -121,6 +121,11 @@ function AdminSidebar() {
       path: "/admin/notice-board",
     },
     {
+      icon: <RiFolderSettingsLine />,
+      text: "Resources",
+      path: "/admin/resources",
+    },
+    {
       icon: <RiTicketLine />,
       text: "Coupon Code Generator",
       path: "/admin/coupon-generator",
