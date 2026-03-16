@@ -40,6 +40,7 @@ function AdminResources() {
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadFile, setUploadFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [selectedFolderIds, setSelectedFolderIds] = useState([]);
 
   // Success / Error Modal States
   const [successModal, setSuccessModal] = useState({ isOpen: false, title: "", message: "" });
@@ -73,6 +74,17 @@ function AdminResources() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const flattenFolders = (foldersList, prefix = "") => {
+    let flat = [];
+    foldersList.forEach(f => {
+      flat.push({ ...f, label: prefix + f.name });
+      if (f.children && f.children.length > 0) {
+        flat = flat.concat(flattenFolders(f.children, prefix + f.name + " / "));
+      }
+    });
+    return flat;
   };
 
   const findFolderById = (foldersList, id) => {
@@ -120,7 +132,7 @@ function AdminResources() {
 
   useEffect(() => {
     fetchFolders();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (currentFolder) {
@@ -128,7 +140,7 @@ function AdminResources() {
     } else {
       setCurrentDocuments([]);
     }
-  }, [currentFolder]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentFolder]);
 
   const handleFolderClick = (folder) => {
     setCurrentFolder(folder);
@@ -248,6 +260,7 @@ function AdminResources() {
     setEditDocId(null);
     setUploadTitle("");
     setUploadFile(null);
+    setSelectedFolderIds(currentFolder ? [currentFolder.id] : []);
     setShowUploadModal(true);
   };
 
@@ -271,9 +284,9 @@ function AdminResources() {
       return;
     }
     
-    // ensure we're inside a folder for create (edit doesn't strictly need currentFolder but standard flow implies we are)
-    if (!isDocEdit && !currentFolder) {
-       showError("Validation Error", "Please navigate into a folder first to upload a document.");
+    // ensure at least one folder is selected
+    if (!isDocEdit && selectedFolderIds.length === 0) {
+       showError("Validation Error", "Please select at least one folder to upload to.");
        return;
     }
 
@@ -286,8 +299,10 @@ function AdminResources() {
         formData.append("file", uploadFile);
       }
       
-      if (!isDocEdit && currentFolder) {
-        formData.append("folderIds", currentFolder.id);
+      if (!isDocEdit) {
+        selectedFolderIds.forEach(id => {
+          formData.append("folderIds", id);
+        });
       }
 
       const token = complianceApi.getToken();
@@ -354,7 +369,6 @@ function AdminResources() {
           </div>
           
           <div className="flex items-center gap-3">
-            {currentFolder && (
               <button
                 onClick={openUploadModal}
                 className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-[#00486D] rounded-xl hover:bg-gray-50 transition-colors shadow-sm font-medium"
@@ -362,7 +376,6 @@ function AdminResources() {
                 <FiUpload className="w-4 h-4" />
                 Upload File
               </button>
-            )}
             <button
               onClick={openCreateFolder}
               className="flex items-center gap-2 px-4 py-2.5 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-all shadow-md font-medium"
@@ -632,11 +645,29 @@ function AdminResources() {
             
             <form onSubmit={handleDocumentSubmit} className="p-6 space-y-5">
               {!isDocEdit && (
-                <div className="bg-blue-50 text-blue-800 text-sm p-3 rounded-lg border border-blue-100 flex items-start gap-2">
-                  <FiFolder className="w-5 h-5 shrink-0 mt-0.5" />
-                  <span>
-                    Uploading to: <strong>{currentFolder?.name || 'Unknown'}</strong>
-                  </span>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Select Folders <span className="text-red-500">*</span>
+                  </label>
+                  <div className="border border-gray-200 rounded-xl max-h-40 overflow-y-auto bg-gray-50 p-2 space-y-1">
+                    {flattenFolders(folders).map((f) => (
+                      <label key={f.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-100 p-1.5 rounded transition-colors">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedFolderIds.includes(f.id)} 
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedFolderIds([...selectedFolderIds, f.id]);
+                            else setSelectedFolderIds(selectedFolderIds.filter(id => id !== f.id));
+                          }}
+                          className="w-4 h-4 text-[#00486D] rounded focus:ring-[#00486D]" 
+                        />
+                        <span className="text-gray-700 font-medium">{f.label}</span>
+                      </label>
+                    ))}
+                    {folders.length === 0 && (
+                      <p className="text-sm text-gray-400 p-2 text-center">No folders available. Create a folder first.</p>
+                    )}
+                  </div>
                 </div>
               )}
 
