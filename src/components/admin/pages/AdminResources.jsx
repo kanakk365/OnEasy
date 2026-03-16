@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import complianceApi from "../../../utils/complianceApi";
-import { FiFolderPlus, FiFolder, FiFileText, FiChevronRight, FiUpload, FiX, FiExternalLink, FiUploadCloud } from "react-icons/fi";
+import { FiFolderPlus, FiFolder, FiFileText, FiChevronRight, FiUpload, FiX, FiExternalLink, FiUploadCloud, FiEdit2, FiTrash2, FiAlertCircle } from "react-icons/fi";
 import { BsFolderFill } from "react-icons/bs";
+import SuccessModal from "../../common/SuccessModal";
 
 function AdminResources() {
   const [folders, setFolders] = useState([]);
@@ -18,17 +19,34 @@ function AdminResources() {
   // Modals
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  
+  // Delete Target: { type: 'folder' | 'document', item: Object }
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Form State - Folder
+  const [isFolderEdit, setIsFolderEdit] = useState(false);
+  const [editFolderId, setEditFolderId] = useState(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [parentId, setParentId] = useState("");
+  const [isActive, setIsActive] = useState(true);
   const [savingFolder, setSavingFolder] = useState(false);
 
   // Form State - Upload
+  const [isDocEdit, setIsDocEdit] = useState(false);
+  const [editDocId, setEditDocId] = useState(null);
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadFile, setUploadFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+
+  // Success / Error Modal States
+  const [successModal, setSuccessModal] = useState({ isOpen: false, title: "", message: "" });
+  const [errorModal, setErrorModal] = useState({ isOpen: false, title: "", message: "" });
+
+  const showError = (title, message) => setErrorModal({ isOpen: true, title, message });
+  const showSuccess = (title, message) => setSuccessModal({ isOpen: true, title, message });
 
   const fetchFolders = async () => {
     try {
@@ -56,8 +74,6 @@ function AdminResources() {
       setLoading(false);
     }
   };
-
-
 
   const findFolderById = (foldersList, id) => {
     for (const f of foldersList) {
@@ -104,7 +120,7 @@ function AdminResources() {
 
   useEffect(() => {
     fetchFolders();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (currentFolder) {
@@ -112,7 +128,7 @@ function AdminResources() {
     } else {
       setCurrentDocuments([]);
     }
-  }, [currentFolder]);
+  }, [currentFolder]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFolderClick = (folder) => {
     setCurrentFolder(folder);
@@ -130,47 +146,134 @@ function AdminResources() {
     }
   };
 
-  const handleCreateFolder = async (e) => {
+  const openCreateFolder = () => {
+    setIsFolderEdit(false);
+    setEditFolderId(null);
+    setName("");
+    setDescription("");
+    setIsActive(true);
+    setParentId(currentFolder ? currentFolder.id : "");
+    setShowFolderModal(true);
+  };
+
+  const openEditFolder = (folder, e) => {
+    e.stopPropagation(); // prevent folder click
+    setIsFolderEdit(true);
+    setEditFolderId(folder.id);
+    setName(folder.name || "");
+    setDescription(folder.description || "");
+    setIsActive(folder.isActive ?? true);
+    setParentId(currentFolder ? currentFolder.id : "");
+    setShowFolderModal(true);
+  };
+
+  const handleFolderSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) {
-      alert("Folder name is required");
+      showError("Validation Error", "Folder name is required");
       return;
     }
     try {
       setSavingFolder(true);
-      const payload = { name, description };
-      if (parentId.trim() !== "") {
-        payload.parentId = parentId.trim();
+      if (isFolderEdit) {
+        // Edit flow
+        const payload = { 
+          name, 
+          description,
+          isActive
+        };
+        await complianceApi.put(`/admin/folders/${editFolderId}`, payload); // using PUT on apiClient usually routes correctly, but wait, API specifies PATCH /admin/folders/:id
+        // Since complianceApi wrapper might only have PUT, let's use the underlying fetch or standard .request if needed.
+        // complianceApi.request explicitly lets us override. We can also just use complianceApi.request(`/admin/folders/${editFolderId}`, { method: 'PATCH', body: JSON.stringify(payload) })
+        await complianceApi.request(`/admin/folders/${editFolderId}`, { 
+          method: 'PATCH', 
+          body: JSON.stringify(payload) 
+        });
+        showSuccess("Folder Updated", "Folder updated successfully!");
+      } else {
+        // Create flow
+        const payload = { name, description };
+        if (parentId.trim() !== "") {
+          payload.parentId = parentId.trim();
+        }
+        await complianceApi.post("/admin/folders", payload);
+        showSuccess("Folder Created", "Folder created successfully!");
       }
-
-      await complianceApi.post("/admin/folders", payload);
-      setName("");
-      setDescription("");
-      setParentId("");
+      
       setShowFolderModal(false);
       await fetchFolders();
-      alert("Folder created successfully!");
     } catch (e) {
       console.error("Failed to save folder:", e);
-      alert("Failed to save folder.");
+      showError("Save Failed", "Failed to save folder. Please try again.");
     } finally {
       setSavingFolder(false);
     }
   };
 
-  const handleUploadDocument = async (e) => {
+  const openDeletePrompt = (type, item, e) => {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    setDeleteTarget({ type, item });
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      setDeleting(true);
+      if (deleteTarget.type === 'folder') {
+        await complianceApi.delete(`/admin/folders/${deleteTarget.item.id}`);
+        showSuccess("Deleted", "Folder deleted successfully");
+        setShowDeleteModal(false);
+        setDeleteTarget(null);
+        await fetchFolders();
+      } else if (deleteTarget.type === 'document') {
+        await complianceApi.delete(`/admin/folders/documents/${deleteTarget.item.id}`);
+        showSuccess("Deleted", "Document deleted successfully");
+        setShowDeleteModal(false);
+        setDeleteTarget(null);
+        if (currentFolder) {
+          fetchDocuments(currentFolder.id);
+        }
+      }
+    } catch (err) {
+      console.error("Delete failed:", err);
+      showError("Delete Failed", "Failed to delete. Make sure it is completely empty or you have correct permissions.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const openUploadModal = () => {
+    setIsDocEdit(false);
+    setEditDocId(null);
+    setUploadTitle("");
+    setUploadFile(null);
+    setShowUploadModal(true);
+  };
+
+  const openEditDocumentModal = (doc, e) => {
+    e.preventDefault(); e.stopPropagation();
+    setIsDocEdit(true);
+    setEditDocId(doc.id);
+    setUploadTitle(doc.title || "");
+    setUploadFile(null); // File is optional on edit
+    setShowUploadModal(true);
+  };
+
+  const handleDocumentSubmit = async (e) => {
     e.preventDefault();
     if (!uploadTitle.trim()) {
-      alert("Please provide a title");
+      showError("Validation Error", "Please provide a title");
       return;
     }
-    if (!uploadFile) {
-      alert("Please select a file to upload");
+    if (!isDocEdit && !uploadFile) {
+      showError("Validation Error", "Please select a file to upload");
       return;
     }
-    // ensure we're inside a folder
-    if (!currentFolder) {
-       alert("Please navigate into a folder first to upload a document.");
+    
+    // ensure we're inside a folder for create (edit doesn't strictly need currentFolder but standard flow implies we are)
+    if (!isDocEdit && !currentFolder) {
+       showError("Validation Error", "Please navigate into a folder first to upload a document.");
        return;
     }
 
@@ -178,14 +281,26 @@ function AdminResources() {
       setUploading(true);
       const formData = new FormData();
       formData.append("title", uploadTitle);
-      formData.append("folderIds", currentFolder.id);
-      formData.append("file", uploadFile);
+      
+      if (uploadFile) {
+        formData.append("file", uploadFile);
+      }
+      
+      if (!isDocEdit && currentFolder) {
+        formData.append("folderIds", currentFolder.id);
+      }
 
-      const url = "https://oneasycompliance.oneasy.ai/admin/folders/documents/upload";
       const token = complianceApi.getToken();
+      let url = "https://oneasycompliance.oneasy.ai/admin/folders/documents/upload";
+      let method = "POST";
+
+      if (isDocEdit) {
+        url = `https://oneasycompliance.oneasy.ai/admin/folders/documents/${editDocId}`;
+        method = "PATCH";
+      }
       
       const response = await fetch(url, {
-        method: "POST",
+        method: method,
         headers: {
           "Authorization": `Bearer ${token}`
         },
@@ -195,17 +310,17 @@ function AdminResources() {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Document uploaded successfully");
+        showSuccess("Success", `Document ${isDocEdit ? 'updated' : 'uploaded'} successfully`);
         setShowUploadModal(false);
-        setUploadFile(null);
-        setUploadTitle("");
-        fetchDocuments(currentFolder.id);
+        if (currentFolder) {
+          fetchDocuments(currentFolder.id);
+        }
       } else {
-        alert(data.message || "Failed to upload document");
+        showError("Upload Failed", data.message || "Failed to process document");
       }
     } catch (error) {
-      console.error("Upload error:", error);
-      alert("Upload error. Please check console.");
+      console.error("Upload/Edit error:", error);
+      showError("Upload Error", "Error processing document. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -241,7 +356,7 @@ function AdminResources() {
           <div className="flex items-center gap-3">
             {currentFolder && (
               <button
-                onClick={() => setShowUploadModal(true)}
+                onClick={openUploadModal}
                 className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-[#00486D] rounded-xl hover:bg-gray-50 transition-colors shadow-sm font-medium"
               >
                 <FiUpload className="w-4 h-4" />
@@ -249,10 +364,7 @@ function AdminResources() {
               </button>
             )}
             <button
-              onClick={() => {
-                setParentId(currentFolder ? currentFolder.id : "");
-                setShowFolderModal(true);
-              }}
+              onClick={openCreateFolder}
               className="flex items-center gap-2 px-4 py-2.5 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-all shadow-md font-medium"
             >
               <FiFolderPlus className="w-4 h-4" />
@@ -297,10 +409,7 @@ function AdminResources() {
                 
                 {/* Create New Folder Card */}
                 <button
-                  onClick={() => {
-                    setParentId(currentFolder ? currentFolder.id : "");
-                    setShowFolderModal(true);
-                  }}
+                  onClick={openCreateFolder}
                   className="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition-colors border-2 border-dashed border-gray-200 hover:border-[#00486D] group text-center"
                 >
                   <div className="w-16 h-16 rounded-xl bg-blue-50/50 flex items-center justify-center mb-3 group-hover:bg-blue-50 transition-colors">
@@ -316,17 +425,37 @@ function AdminResources() {
                   <button
                     key={folder.id}
                     onClick={() => handleFolderClick(folder)}
-                    className="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-blue-100 group text-center"
+                    className="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-blue-100 group text-center relative"
                   >
-                    <BsFolderFill className="w-16 h-16 text-blue-400 group-hover:text-blue-500 mb-3 transition-colors drop-shadow-sm" />
-                    <span className="text-sm font-medium text-gray-800 line-clamp-2 w-full break-words" title={folder.name}>
-                      {folder.name}
-                    </span>
-                    {folder.children?.length > 0 && (
-                      <span className="text-[10px] text-gray-400 mt-1">
-                        {folder.children.length} item(s)
+                    {/* Action buttons on hover */}
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5 z-10">
+                      <div 
+                        onClick={(e) => openEditFolder(folder, e)} 
+                        className="p-1.5 text-blue-500 bg-white border border-gray-100 shadow-sm rounded-md hover:bg-blue-50 transition-colors"
+                        title="Edit Folder"
+                      >
+                        <FiEdit2 className="w-3.5 h-3.5" />
+                      </div>
+                      <div 
+                        onClick={(e) => openDeletePrompt('folder', folder, e)} 
+                        className="p-1.5 text-red-500 bg-white border border-gray-100 shadow-sm rounded-md hover:bg-red-50 transition-colors"
+                        title="Delete Folder"
+                      >
+                        <FiTrash2 className="w-3.5 h-3.5" />
+                      </div>
+                    </div>
+
+                    <div className="opacity-90 group-hover:opacity-100 transition-opacity w-full flex flex-col items-center">
+                      <BsFolderFill className="w-16 h-16 text-blue-400 group-hover:text-blue-500 mb-3 drop-shadow-sm transition-colors" />
+                      <span className="text-sm font-medium text-gray-800 line-clamp-2 w-full px-2" title={folder.name}>
+                        {folder.name}
                       </span>
-                    )}
+                      {folder.children?.length > 0 && (
+                        <span className="text-[10px] text-gray-400 mt-1">
+                          {folder.children.length} sub-item(s)
+                        </span>
+                      )}
+                    </div>
                   </button>
                 ))}
 
@@ -346,13 +475,31 @@ function AdminResources() {
                       className="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200 group text-center relative"
                       title={doc.title}
                     >
+                      {/* Action buttons on hover */}
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5 z-10">
+                        <div 
+                          onClick={(e) => openEditDocumentModal(doc, e)} 
+                          className="p-1.5 text-blue-500 bg-white border border-gray-100 shadow-sm rounded-md hover:bg-blue-50 transition-colors"
+                          title="Edit Document"
+                        >
+                          <FiEdit2 className="w-3.5 h-3.5" />
+                        </div>
+                        <div 
+                          onClick={(e) => openDeletePrompt('document', doc, e)} 
+                          className="p-1.5 text-red-500 bg-white border border-gray-100 shadow-sm rounded-md hover:bg-red-50 transition-colors"
+                          title="Delete Document"
+                        >
+                          <FiTrash2 className="w-3.5 h-3.5" />
+                        </div>
+                      </div>
+
                       <div className="w-16 h-16 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-white transition-colors shadow-sm group-hover:shadow relative text-gray-400 group-hover:text-blue-500">
                         <FiFileText className="w-8 h-8" />
                       </div>
-                      <span className="text-sm font-medium text-gray-700 line-clamp-2 w-full break-words">
+                      <span className="text-sm font-medium text-gray-700 line-clamp-2 w-full break-words px-2">
                         {doc.title}
                       </span>
-                      <span className="text-[10px] text-gray-400 mt-1 truncate w-full">
+                      <span className="text-[10px] text-gray-400 mt-1 truncate w-full px-2">
                         {doc.fileName || doc.type}
                       </span>
                     </a>
@@ -371,14 +518,14 @@ function AdminResources() {
         </div>
       </div>
 
-      {/* Create Folder Modal */}
+      {/* Create / Edit Folder Modal */}
       {showFolderModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-fade-in-up">
             <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                 <FiFolderPlus className="w-5 h-5 text-[#00486D]" />
-                Create New Folder
+                {isFolderEdit ? "Edit Folder" : "Create New Folder"}
               </h3>
               <button 
                 onClick={() => setShowFolderModal(false)}
@@ -388,7 +535,21 @@ function AdminResources() {
               </button>
             </div>
             
-            <form onSubmit={handleCreateFolder} className="p-6 space-y-5">
+            <form onSubmit={handleFolderSubmit} className="p-6 space-y-5">
+              {!isFolderEdit && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Creating inside
+                  </label>
+                  <div className="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-xl text-gray-600 text-sm font-medium flex items-center gap-2">
+                    <span className="text-[#00486D]">
+                      {currentFolder ? <FiFolder className="w-4 h-4" /> : <FiFolder className="w-4 h-4" />}
+                    </span>
+                    {currentFolder ? currentFolder.name : "Root Directory"}
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Folder Name <span className="text-red-500">*</span>
@@ -415,17 +576,20 @@ function AdminResources() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Creating inside
-                </label>
-                <div className="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-xl text-gray-600 text-sm font-medium flex items-center gap-2">
-                  <span className="text-[#00486D]">
-                    {currentFolder ? <FiFolder className="w-4 h-4" /> : <FiFolder className="w-4 h-4" />}
-                  </span>
-                  {currentFolder ? currentFolder.name : "Root Directory"}
+              {isFolderEdit && (
+                <div className="flex items-center gap-2 pt-2">
+                  <input
+                    type="checkbox"
+                    id="folderIsActive"
+                    checked={isActive}
+                    onChange={(e) => setIsActive(e.target.checked)}
+                    className="w-4 h-4 text-[#00486D] bg-gray-100 border-gray-300 rounded focus:ring-[#00486D]"
+                  />
+                  <label htmlFor="folderIsActive" className="text-sm font-medium text-gray-700">
+                    Active Folder
+                  </label>
                 </div>
-              </div>
+              )}
 
               <div className="pt-2 flex justify-end gap-3">
                 <button
@@ -441,7 +605,7 @@ function AdminResources() {
                   className="px-5 py-2.5 text-sm font-medium bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors disabled:opacity-70 flex items-center gap-2"
                 >
                   {savingFolder && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
-                  Create Folder
+                  {isFolderEdit ? "Update Folder" : "Create Folder"}
                 </button>
               </div>
             </form>
@@ -449,14 +613,14 @@ function AdminResources() {
         </div>
       )}
 
-      {/* Upload Document Modal */}
+      {/* Upload / Edit Document Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-fade-in-up">
             <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                 <FiUploadCloud className="w-5 h-5 text-[#00486D]" />
-                Upload Document
+                {isDocEdit ? "Edit Document" : "Upload Document"}
               </h3>
               <button 
                 onClick={() => setShowUploadModal(false)}
@@ -466,13 +630,15 @@ function AdminResources() {
               </button>
             </div>
             
-            <form onSubmit={handleUploadDocument} className="p-6 space-y-5">
-              <div className="bg-blue-50 text-blue-800 text-sm p-3 rounded-lg border border-blue-100 flex items-start gap-2">
-                <FiFolder className="w-5 h-5 shrink-0 mt-0.5" />
-                <span>
-                  Uploading to: <strong>{currentFolder?.name || 'Unknown'}</strong>
-                </span>
-              </div>
+            <form onSubmit={handleDocumentSubmit} className="p-6 space-y-5">
+              {!isDocEdit && (
+                <div className="bg-blue-50 text-blue-800 text-sm p-3 rounded-lg border border-blue-100 flex items-start gap-2">
+                  <FiFolder className="w-5 h-5 shrink-0 mt-0.5" />
+                  <span>
+                    Uploading to: <strong>{currentFolder?.name || 'Unknown'}</strong>
+                  </span>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -490,14 +656,15 @@ function AdminResources() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Select File <span className="text-red-500">*</span>
+                  Select File {!isDocEdit && <span className="text-red-500">*</span>}
+                  {isDocEdit && <span className="text-gray-400 ml-1 font-normal">(Leave blank to keep current)</span>}
                 </label>
                 <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:bg-gray-50 transition-colors relative">
                   <input
                     type="file"
                     onChange={(e) => setUploadFile(e.target.files[0])}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    required
+                    required={!isDocEdit}
                   />
                   <FiFileText className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                   {uploadFile ? (
@@ -522,13 +689,85 @@ function AdminResources() {
                   className="px-5 py-2.5 text-sm font-medium bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors disabled:opacity-70 flex items-center gap-2"
                 >
                   {uploading && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
-                  Upload File
+                  {isDocEdit ? "Update Document" : "Upload File"}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-fade-in-up">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FiTrash2 className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Delete {deleteTarget?.type === 'folder' ? 'Folder' : 'Document'}?
+              </h3>
+              <p className="text-sm text-gray-500">
+                Are you sure you want to delete <strong>{deleteTarget?.item?.name || deleteTarget?.item?.title}</strong>? This action cannot be undone.
+              </p>
+            </div>
+            
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-5 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deleting}
+                className="px-5 py-2.5 text-sm font-medium bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors disabled:opacity-70 flex items-center gap-2"
+              >
+                {deleting && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      <SuccessModal
+        isOpen={successModal.isOpen}
+        title={successModal.title}
+        message={successModal.message}
+        onClose={() => setSuccessModal({ ...successModal, isOpen: false })}
+      />
+
+      {/* Error Modal */}
+      {errorModal.isOpen && (
+         <div className="fixed inset-0 z-[110] flex items-center justify-center px-4 bg-black/40 backdrop-blur-sm">
+           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-fade-in-up">
+             <div className="p-6 text-center">
+               <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                 <FiAlertCircle className="w-8 h-8 text-red-500" />
+               </div>
+               <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                 {errorModal.title || "An error occurred"}
+               </h3>
+               <p className="text-sm text-gray-500">
+                 {errorModal.message || "Failed to process the request."}
+               </p>
+             </div>
+             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+               <button
+                 onClick={() => setErrorModal({ ...errorModal, isOpen: false })}
+                 className="w-full px-5 py-2.5 text-sm font-medium bg-[#01334C] hover:bg-[#00486D] text-white rounded-xl transition-colors"
+               >
+                 Okay
+               </button>
+             </div>
+           </div>
+         </div>
+      )}
+
     </div>
   );
 }
