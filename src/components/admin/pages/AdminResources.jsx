@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import complianceApi from "../../../utils/complianceApi";
-import { FiFolderPlus, FiFolder, FiFileText, FiChevronRight, FiUpload, FiX, FiExternalLink, FiUploadCloud, FiEdit2, FiTrash2, FiAlertCircle } from "react-icons/fi";
+import { FiFolderPlus, FiFolder, FiFileText, FiChevronRight, FiUpload, FiX, FiExternalLink, FiUploadCloud, FiEdit2, FiTrash2, FiAlertCircle, FiHome } from "react-icons/fi";
 import { BsFolderFill } from "react-icons/bs";
 import SuccessModal from "../../common/SuccessModal";
 
@@ -392,9 +392,10 @@ function AdminResources() {
           <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center gap-2 text-sm text-gray-600 overflow-x-auto whitespace-nowrap">
             <button 
               onClick={() => handleBreadcrumbClick(-1)}
-              className={`hover:text-[#00486D] transition-colors ${!currentFolder ? 'font-semibold text-[#00486D]' : ''}`}
+              className={`hover:text-[#00486D] transition-colors flex items-center gap-1 ${!currentFolder ? 'text-[#00486D]' : ''}`}
+              title="Home"
             >
-              Root
+              <FiHome className="w-4 h-4" />
             </button>
             {breadcrumbs.map((crumb, index) => (
               <React.Fragment key={crumb.id}>
@@ -512,9 +513,6 @@ function AdminResources() {
                       <span className="text-sm font-medium text-gray-700 line-clamp-2 w-full break-words px-2">
                         {doc.title}
                       </span>
-                      <span className="text-[10px] text-gray-400 mt-1 truncate w-full px-2">
-                        {doc.fileName || doc.type}
-                      </span>
                     </a>
                   ))
                 )}
@@ -558,7 +556,7 @@ function AdminResources() {
                     <span className="text-[#00486D]">
                       {currentFolder ? <FiFolder className="w-4 h-4" /> : <FiFolder className="w-4 h-4" />}
                     </span>
-                    {currentFolder ? currentFolder.name : "Root Directory"}
+                    {currentFolder ? currentFolder.name : <FiHome className="w-4 h-4" />}
                   </div>
                 </div>
               )}
