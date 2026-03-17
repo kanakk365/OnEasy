@@ -13,6 +13,7 @@ import ClientTasksTab from "./client-overview/ClientTasksTab";
 import ClientNotesTab from "./client-overview/ClientNotesTab";
 import ClientPersonaNotepad from "./client-overview/ClientPersonaNotepad";
 import ClientComplianceAssignmentTab from "./client-overview/ClientComplianceAssignmentTab";
+import ClientResponsesTab from "./client-overview/ClientResponsesTab";
 import ClientAssignedComplianceTab from "./client-overview/ClientAssignedComplianceTab";
 import PaymentMethodDialog from "./client-overview/PaymentMethodDialog";
 
@@ -169,6 +170,7 @@ function AdminClientOverview() {
         "organizations",
         "tasks",
         "notes",
+        "responses",
       ].includes(tabParam)
     ) {
       setActiveTab(tabParam);
@@ -2161,6 +2163,7 @@ function AdminClientOverview() {
             { key: "subscriptions", label: "Subscriptions" },
             { key: "tasks", label: "Tasks" },
             { key: "notes", label: "Notes" },
+            { key: "responses", label: "Responses" },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -2359,6 +2362,11 @@ function AdminClientOverview() {
           setSelectedUserNote={setSelectedUserNote}
           handleViewFile={handleViewFile}
         />
+      )}
+
+      {/* Responses Tab */}
+      {activeTab === "responses" && (
+        <ClientResponsesTab userId={userId} />
       )}
 
       {/* Floating Notepad Button - Admin Only */}
