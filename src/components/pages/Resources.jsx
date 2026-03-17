@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import complianceApi from "../../utils/complianceApi";
-import { FiFolder, FiFileText, FiChevronRight } from "react-icons/fi";
+import { FiFolder, FiFileText, FiChevronRight, FiHome, FiDownload, FiEye } from "react-icons/fi";
 import { BsFolderFill } from "react-icons/bs";
 
 function Resources() {
@@ -147,9 +147,10 @@ function Resources() {
           <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center gap-2 text-sm text-gray-600 overflow-x-auto whitespace-nowrap">
             <button 
               onClick={() => handleBreadcrumbClick(-1)}
-              className={`hover:text-[#00486D] transition-colors ${!currentFolder ? 'font-semibold text-[#00486D]' : ''}`}
+              className={`hover:text-[#00486D] transition-colors flex items-center gap-1 ${!currentFolder ? 'text-[#00486D]' : ''}`}
+              title="Home"
             >
-              Root
+              <FiHome className="w-4 h-4" />
             </button>
             {breadcrumbs.map((crumb, index) => (
               <React.Fragment key={crumb.id}>
@@ -202,26 +203,44 @@ function Resources() {
                       <div className="w-6 h-6 border-2 border-gray-300 border-t-[#00486D] rounded-full animate-spin mx-auto mb-2"></div>
                       Loading documents...
                     </div>
-                  ) : currentDocuments.map((doc) => (
-                    <a
-                      key={doc.id}
-                      href={doc.url || "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200 group text-center relative"
-                      title={doc.title}
-                    >
-                      <div className="w-16 h-16 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-white transition-colors shadow-sm group-hover:shadow relative text-gray-400 group-hover:text-blue-500">
-                        <FiFileText className="w-8 h-8" />
+                  ) : (
+                    currentDocuments.map((doc) => (
+                      <div
+                        key={doc.id}
+                        className="flex flex-col items-center p-4 rounded-xl bg-white hover:bg-gray-50 transition-colors border border-gray-100 hover:border-blue-100 group text-center"
+                      >
+                        <div className="w-16 h-16 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-white transition-colors shadow-sm group-hover:shadow text-gray-400 group-hover:text-blue-500">
+                          <FiFileText className="w-8 h-8" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-800 line-clamp-2 w-full break-words px-2 mb-3" title={doc.title}>
+                          {doc.title}
+                        </span>
+                        <div className="flex items-center gap-2 mt-auto">
+                          <a
+                            href={doc.url || "#"}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#022B51] text-white hover:bg-[#015079] transition-colors"
+                            title="Download file"
+                          >
+                            <FiDownload className="w-3 h-3" />
+                            
+                          </a>
+                          <a
+                            href={doc.url || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#022B51] text-[#022B51] hover:bg-[#022B51] hover:text-white transition-colors"
+                            title="View file"
+                          >
+                            <FiEye className="w-3 h-3" />
+                           
+                          </a>
+                        </div>
                       </div>
-                      <span className="text-sm font-medium text-gray-700 line-clamp-2 w-full break-words px-2">
-                        {doc.title}
-                      </span>
-                      <span className="text-[10px] text-gray-400 mt-1 truncate w-full px-2">
-                        {doc.fileName || doc.type}
-                      </span>
-                    </a>
-                  ))
+                    ))
+                  )
                 )}
 
                 {/* Empty State */}
