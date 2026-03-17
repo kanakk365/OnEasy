@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { IoSearchOutline, IoChevronForwardOutline, IoChevronBackOutline } from "react-icons/io5";
+import { IoSearchOutline, IoChevronForwardOutline, IoChevronBackOutline, IoTrashOutline } from "react-icons/io5";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
 import { initPaymentWithOrderId } from "../../utils/payment";
@@ -89,6 +89,42 @@ function Registrations() {
   const [responseSets, setResponseSets] = React.useState([]);
   const [selectedSetId, setSelectedSetId] = React.useState(null);
   const [suggestedLoading, setSuggestedLoading] = React.useState(false);
+  const [deletingSetId, setDeletingSetId] = React.useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = React.useState(null);
+  const [showDeleteSuccess, setShowDeleteSuccess] = React.useState(false);
+
+  const handleDeleteResponseSet = React.useCallback((e, submissionId) => {
+    e.stopPropagation();
+    setConfirmDeleteId(submissionId);
+  }, []);
+
+  const doConfirmDelete = React.useCallback(async () => {
+    const submissionId = confirmDeleteId;
+    setConfirmDeleteId(null);
+    setDeletingSetId(submissionId);
+    try {
+      const token = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.TOKEN);
+      const res = await fetch(
+        `${COMPLIANCE_API_BASE}/compliance/responses?submissionId=${encodeURIComponent(submissionId)}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (res.ok) {
+        setResponseSets((prev) => prev.filter((s) => s.submissionId !== submissionId));
+        if (selectedSetId === submissionId) setSelectedSetId(null);
+        setShowDeleteSuccess(true);
+      } else {
+        // re-open confirm with error — just close silently; user sees nothing changed
+        console.error("Delete response set returned non-ok:", res.status);
+      }
+    } catch (err) {
+      console.error("Delete response set failed:", err);
+    } finally {
+      setDeletingSetId(null);
+    }
+  }, [confirmDeleteId, selectedSetId]);
 
   // Helper to extract organization name from a responseSet
   const getOrgName = React.useCallback((set) => {
@@ -805,10 +841,9 @@ function Registrations() {
                   <h2 className="text-lg font-semibold text-gray-800 mb-6">Organizations ({responseSets.length})</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {responseSets.map((set, idx) => {
-                      const count = view === "suggested-registrations" 
+                      const count = view === "suggested-registrations"
                         ? (set.suggestedRegistrations?.length || 0)
                         : (set.suggestedCompliances?.length || 0);
-
                       return (
                         <div
                           key={set.submissionId || idx}
@@ -820,8 +855,25 @@ function Registrations() {
                             <h3 className="text-xl font-bold text-[#00486D] mb-3 line-clamp-2 pr-4">
                               {getOrgName(set)}
                             </h3>
-                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#00486D]/10 flex items-center justify-center">
-                              <span className="text-sm font-bold text-[#00486D]">{count}</span>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <div className="w-8 h-8 rounded-full bg-[#00486D]/10 flex items-center justify-center">
+                                <span className="text-sm font-bold text-[#00486D]">{count}</span>
+                              </div>
+                              <button
+                                onClick={(e) => handleDeleteResponseSet(e, set.submissionId)}
+                                disabled={deletingSetId === set.submissionId}
+                                title="Delete suggestion set"
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {deletingSetId === set.submissionId ? (
+                                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                                  </svg>
+                                ) : (
+                                  <IoTrashOutline className="w-4 h-4" />
+                                )}
+                              </button>
                             </div>
                           </div>
                           <p className="text-sm text-gray-500 mt-2 font-medium">
@@ -1197,6 +1249,65 @@ function Registrations() {
           </div>
         )}
       </div>
+
+      {/* ── Confirm Delete Modal ── */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setConfirmDeleteId(null)}>
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50 mx-auto mb-4">
+              <IoTrashOutline className="w-6 h-6 text-red-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Delete Suggestion Set?</h3>
+            <p className="text-sm text-gray-500 text-center mb-6">
+              This will permanently remove this organization's suggestions. This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={doConfirmDelete}
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Success Modal ── */}
+      {showDeleteSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowDeleteSuccess(false)}>
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-50 mx-auto mb-4">
+              <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Deleted Successfully</h3>
+            <p className="text-sm text-gray-500 text-center mb-6">
+              The suggestion set has been removed.
+            </p>
+            <button
+              onClick={() => setShowDeleteSuccess(false)}
+              className="w-full px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors"
+              style={{ background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)" }}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
