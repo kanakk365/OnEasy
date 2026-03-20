@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUsersPageData } from "../../utils/usersPageApi";
-import logo from "../../assets/logo.png";
+import { BsBuilding } from "react-icons/bs";
 
 function OrganizationsList() {
   const navigate = useNavigate();
@@ -16,10 +16,10 @@ function OrganizationsList() {
     try {
       setLoading(true);
       const response = await getUsersPageData();
-      
+
       if (response.success && response.data) {
         const { organisations } = response.data;
-        
+
         if (organisations && organisations.length > 0) {
           // Filter organizations that have at least one meaningful field
           const validOrgs = organisations.filter(org => {
@@ -28,13 +28,13 @@ function OrganizationsList() {
             const hasGstin = org.gstin && org.gstin.trim() !== '' && org.gstin !== '-';
             return hasLegalName || hasTradeName || hasGstin;
           });
-          
+
           setOrganizations(validOrgs.map(org => {
             // Debug: Log GSTIN value to help identify random values
             if (org.gstin && org.gstin.trim() !== '' && org.gstin !== '-') {
               console.log(`Organization ${org.id} has GSTIN:`, org.gstin);
             }
-            
+
             return {
               id: org.id,
               legalName: org.legal_name || '-',
@@ -61,10 +61,10 @@ function OrganizationsList() {
   const formatDate = (dateString) => {
     if (!dateString || dateString === '-') return '-';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-IN', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
   };
 
@@ -107,12 +107,8 @@ function OrganizationsList() {
                 onClick={() => navigate(`/company-documents/${org.id}`)}
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 rounded-lg bg-[#01334C] flex items-center justify-center overflow-hidden flex-shrink-0">
-                    <img 
-                      src={logo} 
-                      alt="Company Logo" 
-                      className="w-14 h-14 object-contain"
-                    />
+                  <div className="w-12 h-12 rounded-lg  flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <BsBuilding className="text-[#01334C] w-6 h-6" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-semibold text-gray-900 truncate">

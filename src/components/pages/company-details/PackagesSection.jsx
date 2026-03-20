@@ -86,15 +86,7 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
 
   return (
     <div className="mt-8">
-      <h2 className="text-2xl font-semibold text-center mb-2">
-        Choose your Package
-      </h2>
-      <p className="text-center text-gray-600 mb-8">
-        Our carefully designed pricing plans take into consideration the needs
-        of teams of various sizes.
-      </p>
-
-      {/* Coupon Code Section */}
+      {/* Coupon Code Section - TOP of packages */}
       <div className="max-w-md mx-auto mb-8">
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -144,6 +136,14 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
         </div>
       </div>
 
+      <h2 className="text-2xl font-semibold text-center mb-2">
+        Choose your Package
+      </h2>
+      <p className="text-center text-gray-600 mb-8">
+        Our carefully designed pricing plans take into consideration the needs
+        of teams of various sizes.
+      </p>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-9">
         {packages.map((pkg, index) => (
           <div
@@ -192,13 +192,6 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
                     ₹{pkg.originalPrice}
                   </span>
                 )}
-                <span
-                  className={`${
-                    pkg.isHighlighted ? "text-white/60" : "text-[#475467]"
-                  } text-sm`}
-                >
-                  /per month
-                </span>
               </div>
             </div>
             <p

@@ -481,15 +481,17 @@ function AdminServices() {
     "Partially Paid",
     "Pay later",
     "Open to Pay",
+    "Payment Pending",
   ];
   const WORK_STATUS_OPTIONS = [
     "Data Received",
     "Awaiting Data",
+    "On Hold",
     "WIP",
-    "Data Pending from the client",
     "Awaiting response from the Government",
     "Under Review",
     "Completed",
+    "Client Withdrawal",
   ];
   const paymentStatusToDisplay = (dbValue) => {
     if (!dbValue) return "Open to Pay";
@@ -1151,7 +1153,7 @@ function AdminServices() {
                         </td>
                         <td className="px-2 md:px-3 lg:px-4 py-3">
                           {svc.ticket_id ? (
-                            <div className="relative">
+                            <div className="relative overflow-visible">
                               <select
                                 value={paymentStatusToDisplay(
                                   svc.payment_status,
@@ -1159,7 +1161,7 @@ function AdminServices() {
                                 onChange={(e) =>
                                   handlePaymentStatusUpdate(svc, e.target.value)
                                 }
-                                className="w-full max-w-[140px] md:max-w-[160px] pl-1.5 md:pl-2 pr-5 md:pr-6 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] appearance-none cursor-pointer"
+                                className="w-full max-w-[140px] md:max-w-[160px] pl-1.5 md:pl-2 pr-6 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] appearance-none cursor-pointer"
                               >
                                 {PAYMENT_STATUS_OPTIONS.map((opt) => (
                                   <option key={opt} value={opt}>
@@ -1167,9 +1169,9 @@ function AdminServices() {
                                   </option>
                                 ))}
                               </select>
-                              <div className="absolute right-1 md:right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                              <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none">
                                 <svg
-                                  className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400"
+                                  className="w-3 h-3 text-gray-400"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -1189,13 +1191,13 @@ function AdminServices() {
                         </td>
                         <td className="px-2 md:px-3 lg:px-4 py-3">
                           {svc.ticket_id ? (
-                            <div className="relative">
+                            <div className="relative overflow-visible">
                               <select
                                 value={svc.service_status || ""}
                                 onChange={(e) =>
                                   handleWorkStatusUpdate(svc, e.target.value)
                                 }
-                                className="w-full max-w-[140px] md:max-w-[200px] pl-1.5 md:pl-2 pr-5 md:pr-6 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] appearance-none cursor-pointer"
+                                className="w-full max-w-[140px] md:max-w-[200px] pl-1.5 md:pl-2 pr-6 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] appearance-none cursor-pointer"
                               >
                                 {[
                                   ...(svc.service_status &&
@@ -1211,9 +1213,9 @@ function AdminServices() {
                                   </option>
                                 ))}
                               </select>
-                              <div className="absolute right-1 md:right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                              <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none">
                                 <svg
-                                  className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400"
+                                  className="w-3 h-3 text-gray-400"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"

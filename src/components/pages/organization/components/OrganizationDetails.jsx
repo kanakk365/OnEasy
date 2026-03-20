@@ -11,6 +11,57 @@ import ServiceNotesSection from "./ServiceNotesSection";
 import UserOrgComplianceSection from "./UserOrgComplianceSection";
 import AddComplianceSection from "./AddComplianceSection";
 
+// ─── Compliance Wrapper with inner tabs ──────────────────────────────────────
+const ComplianceTabSection = ({ selectedOrg }) => {
+  const [complianceTab, setComplianceTab] = useState("assigned");
+
+  return (
+    <div>
+      {/* Inner sub-tab bar */}
+      <div className="flex items-center gap-2 mb-6">
+        <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-0.5">
+          <button
+            id="compliance-sub-tab-assigned"
+            onClick={() => setComplianceTab("assigned")}
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${complianceTab === "assigned"
+                ? "bg-white text-[#00486D] shadow-sm"
+                : "text-gray-500 hover:text-gray-700"
+              }`}
+          >
+            Assigned Compliances
+          </button>
+          <button
+            id="compliance-sub-tab-add"
+            onClick={() => setComplianceTab("add")}
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${complianceTab === "add"
+                ? "bg-white text-[#00486D] shadow-sm"
+                : "text-gray-500 hover:text-gray-700"
+              }`}
+          >
+            Add Compliance
+          </button>
+        </div>
+
+        {/* Subtle description */}
+        <p className="text-xs text-gray-400 hidden sm:block">
+          {complianceTab === "assigned"
+            ? "View compliances assigned to this organisation"
+            : "Assign new compliance categories to this organisation"}
+        </p>
+      </div>
+
+      {/* Sub-tab content */}
+      {complianceTab === "assigned" && (
+        <UserOrgComplianceSection selectedOrg={selectedOrg} />
+      )}
+      {complianceTab === "add" && (
+        <AddComplianceSection selectedOrg={selectedOrg} />
+      )}
+    </div>
+  );
+};
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 const OrganizationDetails = ({
   selectedOrg,
   editingOrg,
@@ -53,6 +104,7 @@ const OrganizationDetails = ({
     setActiveTab(tabKey);
   };
 
+  // Merged "Compliance" tab replaces the two separate compliance tabs
   const tabs = [
     { key: "organization-details", label: "Organization Details" },
     { key: "directors-partners", label: "Directors / Partners Details" },
@@ -62,8 +114,7 @@ const OrganizationDetails = ({
     { key: "notes", label: "Notes" },
     { key: "service-notes", label: "Service Notes" },
     { key: "tasks", label: "Tasks" },
-    { key: "assigned-compliances", label: "Assigned Compliances" },
-    { key: "add-compliance", label: "Add Compliance" },
+    { key: "compliance", label: "Compliance" },
   ];
 
   return (
@@ -111,12 +162,12 @@ const OrganizationDetails = ({
             {tabs.map((tab) => (
               <button
                 key={tab.key}
+                id={`org-tab-${tab.key}`}
                 onClick={() => handleTabClick(tab.key)}
-                className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 whitespace-nowrap ${
-                  activeTab === tab.key
+                className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 whitespace-nowrap ${activeTab === tab.key
                     ? "bg-white text-[#00486D] border-b-2 border-[#00486D] -mb-px"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -145,9 +196,8 @@ const OrganizationDetails = ({
                   alert("User ID not found");
                   return;
                 }
-                const folder = `organizations/${currentUserId}/org-${
-                  editingOrg.id || "new"
-                }`;
+                const folder = `organizations/${currentUserId}/org-${editingOrg.id || "new"
+                  }`;
                 uploadFileDirect(file, folder, "pan-file").then(({ s3Url }) => {
                   updateOrganizationField("panFile", s3Url);
                 });
@@ -217,8 +267,8 @@ const OrganizationDetails = ({
               onSaveUserNote={
                 handleSaveUserNoteInline
                   ? async (editedNote, noteIndex) => {
-                      await handleSaveUserNoteInline(editedNote, noteIndex);
-                    }
+                    await handleSaveUserNoteInline(editedNote, noteIndex);
+                  }
                   : undefined
               }
               onDeleteUserNote={(index, note) => {
@@ -246,12 +296,9 @@ const OrganizationDetails = ({
             />
           )}
 
-          {activeTab === "assigned-compliances" && (
-            <UserOrgComplianceSection selectedOrg={selectedOrg} />
-          )}
-
-          {activeTab === "add-compliance" && (
-            <AddComplianceSection selectedOrg={selectedOrg} />
+          {/* Merged Compliance Tab with internal sub-tabs */}
+          {activeTab === "compliance" && (
+            <ComplianceTabSection selectedOrg={selectedOrg} />
           )}
 
           {/* Save Changes Button */}

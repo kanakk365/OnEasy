@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { IoMdNotificationsOutline } from "react-icons/io";
 import {
   IoCallOutline,
   IoMailOutline,
-  IoSearchOutline,
   IoLogOutOutline,
 } from "react-icons/io5";
 import { BiSupport } from "react-icons/bi";
@@ -67,19 +65,8 @@ function Header() {
   return (
     <header className="bg-white py-3 border-b border-gray-200 relative">
       <div className="container mx-auto flex items-center justify-between px-4 md:px-8 lg:px-12">
-        {/* Left side - Search */}
-        <div className="w-32 md:w-64">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <IoSearchOutline className="h-4 w-4 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search"
-              className="block w-full pl-7 md:pl-9 pr-2 md:pr-3 py-1.5 text-xs md:text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-slate-800 focus:border-transparent"
-            />
-          </div>
-        </div>
+        {/* Left side - empty placeholder for layout */}
+        <div></div>
 
         {/* Right side - Actions */}
         <div className="flex items-center space-x-2 md:space-x-4">
@@ -147,11 +134,8 @@ function Header() {
             )}
           </div>
 
-          {/* Notification and Avatar */}
+          {/* Avatar */}
           <div className="flex items-center space-x-3">
-            <div className="bg-[#01334C] w-8 h-8 rounded-full text-white cursor-pointer hover:bg-[#00486D] transition-colors duration-200 flex items-center justify-center">
-              <IoMdNotificationsOutline className="w-4 h-4" />
-            </div>
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}

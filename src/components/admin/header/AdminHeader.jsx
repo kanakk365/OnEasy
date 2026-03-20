@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import { IoMdNotificationsOutline } from "react-icons/io";
 import {
   IoCallOutline,
   IoMailOutline,
-  IoSearchOutline,
   IoLogOutOutline,
 } from "react-icons/io5";
 import { BiSupport } from "react-icons/bi";
@@ -69,19 +67,8 @@ function AdminHeader() {
   return (
     <header className="bg-[#F8F9FA] py-3 border-b border-gray-200 relative">
       <div className="container mx-auto flex items-center justify-between px-4 md:px-8 lg:px-12">
-        {/* Left side - Search */}
-        <div className="w-32 md:w-64">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <IoSearchOutline className="h-4 w-4 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search"
-              className="block w-full pl-7 md:pl-9 pr-2 md:pr-3 py-2 text-xs md:text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent transition-all"
-            />
-          </div>
-        </div>
+        {/* Left side - empty placeholder for layout */}
+        <div></div>
 
         {/* Right side - Actions */}
         <div className="flex items-center space-x-2 md:space-x-4">
@@ -148,16 +135,8 @@ function AdminHeader() {
             )}
           </div>
 
-          {/* Notification and Avatar */}
+          {/* Avatar only */}
           <div className="flex items-center space-x-3">
-            <button
-              className="w-10 h-10 rounded-xl text-white cursor-pointer transition-all duration-200 flex items-center justify-center hover:scale-105"
-              style={{
-                background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
-              }}
-            >
-              <IoMdNotificationsOutline className="w-5 h-5" />
-            </button>
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
