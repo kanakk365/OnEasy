@@ -6,17 +6,20 @@ import complianceApi from "../../../../utils/complianceApi";
 const PAYMENT_STATUS_OPTIONS = [
   "Paid",
   "Partially Paid",
+  "Payment Pending",
   "Pay later",
   "Open to Pay",
 ];
 const WORK_STATUS_OPTIONS = [
+  "Data pending from client",
   "Data Received",
   "Awaiting Data",
   "WIP",
-  "Data Pending from the client",
   "Awaiting response from the Government",
+  "On Hold",
   "Under Review",
   "Completed",
+  "Client Withdrawl"
 ];
 
 function paymentStatusToDisplay(dbValue) {
@@ -251,9 +254,9 @@ function ClientServicesTab({
                       >
                         {[
                           ...(registration.service_status &&
-                          !WORK_STATUS_OPTIONS.includes(
-                            registration.service_status,
-                          )
+                            !WORK_STATUS_OPTIONS.includes(
+                              registration.service_status,
+                            )
                             ? [registration.service_status]
                             : []),
                           ...WORK_STATUS_OPTIONS,
@@ -284,9 +287,8 @@ function ClientServicesTab({
 
               {/* Chevron Icon */}
               <svg
-                className={`w-5 h-5 text-gray-600 transition-transform ml-4 ${
-                  isServiceCardExpanded === index ? "rotate-180" : ""
-                }`}
+                className={`w-5 h-5 text-gray-600 transition-transform ml-4 ${isServiceCardExpanded === index ? "rotate-180" : ""
+                  }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -449,8 +451,8 @@ function ClientServicesTab({
                       {(registration.ticket_id?.startsWith("SI_") ||
                         registration.ticket_id?.startsWith("PROP_") ||
                         registration.ticket_id?.startsWith("GST_")) &&
-                      (registration.status === "draft" ||
-                        registration.status === "incomplete")
+                        (registration.status === "draft" ||
+                          registration.status === "incomplete")
                         ? "Fill Form"
                         : "View Details"}
                     </button>

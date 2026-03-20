@@ -3,7 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getUsersPageData } from "../../utils/usersPageApi";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
-import logo from "../../assets/logo.png";
+import { BsBuilding } from "react-icons/bs";
+
 
 function CompanyDocuments() {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ function CompanyDocuments() {
   const loadOrganizationAndDocuments = async () => {
     try {
       setLoading(true);
-      
+
       // Load organization details
       const orgResponse = await getUsersPageData();
       if (orgResponse.success && orgResponse.data && orgResponse.data.organisations) {
@@ -73,29 +74,29 @@ function CompanyDocuments() {
       // Extract business documents from registrations and categorize them
       const directorsPartnersDocs = [];
       const organizationDocs = [];
-      
+
       allRegistrations.forEach((reg) => {
         // Directors/Partners documents
-        if (reg.landlord_pan_card_url) directorsPartnersDocs.push({ 
-          name: "Landlord PAN Card", 
-          url: reg.landlord_pan_card_url, 
+        if (reg.landlord_pan_card_url) directorsPartnersDocs.push({
+          name: "Landlord PAN Card",
+          url: reg.landlord_pan_card_url,
           type: "landlord_pan_card",
           service: reg.ticket_id || "-"
         });
-        if (reg.landlord_aadhaar_card_url) directorsPartnersDocs.push({ 
-          name: "Landlord Aadhaar Card", 
-          url: reg.landlord_aadhaar_card_url, 
+        if (reg.landlord_aadhaar_card_url) directorsPartnersDocs.push({
+          name: "Landlord Aadhaar Card",
+          url: reg.landlord_aadhaar_card_url,
           type: "landlord_aadhaar_card",
           service: reg.ticket_id || "-"
         });
-        
+
         // Extract director documents from directors_data if available
         if (reg.directors_data) {
           try {
-            const directorsData = typeof reg.directors_data === 'string' 
-              ? JSON.parse(reg.directors_data) 
+            const directorsData = typeof reg.directors_data === 'string'
+              ? JSON.parse(reg.directors_data)
               : reg.directors_data;
-            
+
             if (Array.isArray(directorsData)) {
               directorsData.forEach((director, index) => {
                 if (director.aadhaarCardUrl || director.aadhaar_doc_path) {
@@ -144,71 +145,71 @@ function CompanyDocuments() {
             console.error("Error parsing directors_data:", e);
           }
         }
-        
+
         // Organization documents
-        if (reg.electricity_bill_url) organizationDocs.push({ 
-          name: "Electricity Bill", 
-          url: reg.electricity_bill_url, 
+        if (reg.electricity_bill_url) organizationDocs.push({
+          name: "Electricity Bill",
+          url: reg.electricity_bill_url,
           type: "electricity_bill",
           service: reg.ticket_id || "-"
         });
-        if (reg.property_tax_url) organizationDocs.push({ 
-          name: "Property Tax", 
-          url: reg.property_tax_url, 
+        if (reg.property_tax_url) organizationDocs.push({
+          name: "Property Tax",
+          url: reg.property_tax_url,
           type: "property_tax",
           service: reg.ticket_id || "-"
         });
-        if (reg.rental_agreement_url) organizationDocs.push({ 
-          name: "Rental Agreement", 
-          url: reg.rental_agreement_url, 
+        if (reg.rental_agreement_url) organizationDocs.push({
+          name: "Rental Agreement",
+          url: reg.rental_agreement_url,
           type: "rental_agreement",
           service: reg.ticket_id || "-"
         });
-        if (reg.utility_bill) organizationDocs.push({ 
-          name: "Utility Bill", 
-          url: reg.utility_bill, 
+        if (reg.utility_bill) organizationDocs.push({
+          name: "Utility Bill",
+          url: reg.utility_bill,
           type: "utility_bill",
           service: reg.ticket_id || "-"
         });
-        if (reg.logo_path) organizationDocs.push({ 
-          name: "Company Logo", 
-          url: reg.logo_path, 
+        if (reg.logo_path) organizationDocs.push({
+          name: "Company Logo",
+          url: reg.logo_path,
           type: "logo",
           service: reg.ticket_id || "-"
         });
-        if (reg.pan_entity_doc_path) organizationDocs.push({ 
-          name: "Entity PAN Card", 
-          url: reg.pan_entity_doc_path, 
+        if (reg.pan_entity_doc_path) organizationDocs.push({
+          name: "Entity PAN Card",
+          url: reg.pan_entity_doc_path,
           type: "pan_entity",
           service: reg.ticket_id || "-"
         });
-        if (reg.tan_entity_doc_path) organizationDocs.push({ 
-          name: "Entity TAN Card", 
-          url: reg.tan_entity_doc_path, 
+        if (reg.tan_entity_doc_path) organizationDocs.push({
+          name: "Entity TAN Card",
+          url: reg.tan_entity_doc_path,
           type: "tan_entity",
           service: reg.ticket_id || "-"
         });
-        if (reg.principal_place_photo_url) organizationDocs.push({ 
-          name: "Principal Place Photo", 
-          url: reg.principal_place_photo_url, 
+        if (reg.principal_place_photo_url) organizationDocs.push({
+          name: "Principal Place Photo",
+          url: reg.principal_place_photo_url,
           type: "principal_place_photo",
           service: reg.ticket_id || "-"
         });
-        if (reg.business_bank_statement_url) organizationDocs.push({ 
-          name: "Business Bank Statement", 
-          url: reg.business_bank_statement_url, 
+        if (reg.business_bank_statement_url) organizationDocs.push({
+          name: "Business Bank Statement",
+          url: reg.business_bank_statement_url,
           type: "business_bank_statement",
           service: reg.ticket_id || "-"
         });
-        if (reg.partnership_deed_url) organizationDocs.push({ 
-          name: "Partnership Deed", 
-          url: reg.partnership_deed_url, 
+        if (reg.partnership_deed_url) organizationDocs.push({
+          name: "Partnership Deed",
+          url: reg.partnership_deed_url,
           type: "partnership_deed",
           service: reg.ticket_id || "-"
         });
-        if (reg.certificate_of_incorporation_url) organizationDocs.push({ 
-          name: "Certificate of Incorporation", 
-          url: reg.certificate_of_incorporation_url, 
+        if (reg.certificate_of_incorporation_url) organizationDocs.push({
+          name: "Certificate of Incorporation",
+          url: reg.certificate_of_incorporation_url,
           type: "certificate_of_incorporation",
           service: reg.ticket_id || "-"
         });
@@ -278,16 +279,12 @@ function CompanyDocuments() {
             </svg>
             Back to Organizations
           </button>
-          
+
           {/* Company Info Card */}
           <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-lg bg-[#01334C] flex items-center justify-center overflow-hidden flex-shrink-0">
-                <img 
-                  src={logo} 
-                  alt="Company Logo" 
-                  className="w-14 h-14 object-contain"
-                />
+              <div className="w-16 h-16 rounded-lg  flex items-center justify-center overflow-hidden flex-shrink-0">
+                <BsBuilding className="text-[#01334C] w-6 h-6" />
               </div>
               <div className="flex-1">
                 <h1 className="text-2xl font-semibold text-gray-900">

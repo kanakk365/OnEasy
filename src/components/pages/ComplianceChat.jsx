@@ -370,11 +370,11 @@ const ComplianceChat = () => {
         options:
           question.type === "single_select" && question.options
             ? question.options.map((opt) => ({
-                id: opt.id,
-                label: opt.label,
-                value: opt.value,
-                compliances: opt.compliances,
-              }))
+              id: opt.id,
+              label: opt.label,
+              value: opt.value,
+              compliances: opt.compliances,
+            }))
             : null,
       };
 
@@ -1059,11 +1059,10 @@ const ComplianceChat = () => {
         {/* Branch Header */}
         <button
           onClick={() => hasChildren && toggleBranchExpand(path)}
-          className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all text-left ${
-            isExpanded
-              ? "bg-[#00486D]/5 border border-[#00486D]/20"
-              : "bg-white border border-gray-200 hover:border-[#00486D]/30 hover:bg-gray-50"
-          } ${depth > 0 ? "ml-" + Math.min(depth * 4, 12) : ""}`}
+          className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all text-left ${isExpanded
+            ? "bg-[#00486D]/5 border border-[#00486D]/20"
+            : "bg-white border border-gray-200 hover:border-[#00486D]/30 hover:bg-gray-50"
+            } ${depth > 0 ? "ml-" + Math.min(depth * 4, 12) : ""}`}
           style={depth > 0 ? { marginLeft: `${depth * 16}px` } : {}}
         >
           <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -1080,9 +1079,8 @@ const ComplianceChat = () => {
                 />
               ))}
             <span
-              className={`text-sm font-semibold truncate ${
-                isExpanded ? "text-[#00486D]" : "text-gray-800"
-              }`}
+              className={`text-sm font-semibold truncate ${isExpanded ? "text-[#00486D]" : "text-gray-800"
+                }`}
             >
               {branch.heading}
             </span>
@@ -1138,26 +1136,23 @@ const ComplianceChat = () => {
                     <div
                       key={item.code}
                       onClick={() => toggleSelection(item.code)}
-                      className={`flex items-start gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all mb-1 ${
-                        isSel
-                          ? "bg-[#00486D]/5 border border-[#00486D]/30"
-                          : "bg-white border border-gray-100 hover:border-gray-200 hover:bg-gray-50"
-                      }`}
+                      className={`flex items-start gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all mb-1 ${isSel
+                        ? "bg-[#00486D]/5 border border-[#00486D]/30"
+                        : "bg-white border border-gray-100 hover:border-gray-200 hover:bg-gray-50"
+                        }`}
                     >
                       <div
-                        className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
-                          isSel
-                            ? "bg-[#00486D] border-[#00486D]"
-                            : "bg-white border-gray-300"
-                        }`}
+                        className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${isSel
+                          ? "bg-[#00486D] border-[#00486D]"
+                          : "bg-white border-gray-300"
+                          }`}
                       >
                         {isSel && <FiCheck className="text-white w-3 h-3" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p
-                          className={`text-sm font-medium ${
-                            isSel ? "text-[#00486D]" : "text-gray-800"
-                          }`}
+                          className={`text-sm font-medium ${isSel ? "text-[#00486D]" : "text-gray-800"
+                            }`}
                         >
                           {item.name}
                         </p>
@@ -1920,9 +1915,8 @@ const ComplianceChat = () => {
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex flex-col ${
-              msg.type === "user" ? "items-end" : "items-start"
-            }`}
+            className={`flex flex-col ${msg.type === "user" ? "items-end" : "items-start"
+              }`}
           >
             {msg.type === "bot" && (
               <div className="flex items-center gap-2 mb-1">
@@ -1940,13 +1934,12 @@ const ComplianceChat = () => {
             )}
 
             <div
-              className={`max-w-[80%] md:max-w-[60%] rounded-2xl px-6 py-4 text-sm leading-relaxed shadow-sm ${
-                msg.type === "user"
-                  ? "bg-[#00486D] text-white rounded-tr-none"
-                  : msg.isCompliances || msg.isSummary
-                    ? "bg-gradient-to-br from-[#E3F2F9] to-[#F0F9FF] text-gray-800 rounded-tl-none border border-[#00486D]/10"
-                    : "bg-[#F0F4F8] text-gray-800 rounded-tl-none"
-              }`}
+              className={`max-w-[80%] md:max-w-[60%] rounded-2xl px-6 py-4 text-sm leading-relaxed shadow-sm ${msg.type === "user"
+                ? "bg-[#00486D] text-white rounded-tr-none"
+                : msg.isCompliances || msg.isSummary
+                  ? "bg-gradient-to-br from-[#E3F2F9] to-[#F0F9FF] text-gray-800 rounded-tl-none border border-[#00486D]/10"
+                  : "bg-[#F0F4F8] text-gray-800 rounded-tl-none"
+                }`}
             >
               {msg.text.split("\n").map((line, i) => (
                 <p key={i} className={i > 0 ? "mt-2" : ""}>
@@ -1984,7 +1977,7 @@ const ComplianceChat = () => {
                 {/* Go Back button - show when we're past the first question */}
                 {currentQuestionIndex > 0 &&
                   msg.questionKey ===
-                    flowQuestions[currentQuestionIndex]?.key && (
+                  flowQuestions[currentQuestionIndex]?.key && (
                     <button
                       onClick={handleGoBack}
                       className="px-4 py-2 bg-gray-100 border border-gray-300 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors flex items-center gap-1.5"
@@ -2003,18 +1996,17 @@ const ComplianceChat = () => {
                   <button
                     key={idx}
                     onClick={() => handleActionButton(btn.action)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      btn.action === "restart" ||
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${btn.action === "restart" ||
                       btn.action === "delete_and_restart"
-                        ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        : btn.action === "view_recommendations" ||
-                            btn.action === "flow_new_business" ||
-                            btn.action === "flow_existing_business" ||
-                            btn.action === "existing_knows_compliance" ||
-                            btn.action === "existing_no_compliance"
-                          ? "bg-[#00486D] text-white hover:bg-[#01334C]"
-                          : "bg-white border border-[#00486D] text-[#00486D] hover:bg-[#E3F2F9]"
-                    }`}
+                      ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      : btn.action === "view_recommendations" ||
+                        btn.action === "flow_new_business" ||
+                        btn.action === "flow_existing_business" ||
+                        btn.action === "existing_knows_compliance" ||
+                        btn.action === "existing_no_compliance"
+                        ? "bg-[#00486D] text-white hover:bg-[#01334C]"
+                        : "bg-white border border-[#00486D] text-[#00486D] hover:bg-[#E3F2F9]"
+                      }`}
                   >
                     {btn.label}
                   </button>
