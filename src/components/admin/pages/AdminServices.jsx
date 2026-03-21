@@ -1153,82 +1153,48 @@ function AdminServices() {
                         </td>
                         <td className="px-2 md:px-3 lg:px-4 py-3">
                           {svc.ticket_id ? (
-                            <div className="relative overflow-visible">
-                              <select
-                                value={paymentStatusToDisplay(
-                                  svc.payment_status,
-                                )}
-                                onChange={(e) =>
-                                  handlePaymentStatusUpdate(svc, e.target.value)
-                                }
-                                className="w-full max-w-[140px] md:max-w-[160px] pl-1.5 md:pl-2 pr-6 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] appearance-none cursor-pointer"
-                              >
-                                {PAYMENT_STATUS_OPTIONS.map((opt) => (
-                                  <option key={opt} value={opt}>
-                                    {opt}
-                                  </option>
-                                ))}
-                              </select>
-                              <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                                <svg
-                                  className="w-3 h-3 text-gray-400"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M19 9l-7 7-7-7"
-                                  ></path>
-                                </svg>
-                              </div>
-                            </div>
+                            <select
+                              value={paymentStatusToDisplay(
+                                svc.payment_status,
+                              )}
+                              onChange={(e) =>
+                                handlePaymentStatusUpdate(svc, e.target.value)
+                              }
+                              className="max-w-[140px] md:max-w-[160px] pl-1.5 md:pl-2 pr-2 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] cursor-pointer"
+                            >
+                              {PAYMENT_STATUS_OPTIONS.map((opt) => (
+                                <option key={opt} value={opt}>
+                                  {opt}
+                                </option>
+                              ))}
+                            </select>
                           ) : (
                             <span className="text-xs text-gray-400">-</span>
                           )}
                         </td>
                         <td className="px-2 md:px-3 lg:px-4 py-3">
                           {svc.ticket_id ? (
-                            <div className="relative overflow-visible">
-                              <select
-                                value={svc.service_status || ""}
-                                onChange={(e) =>
-                                  handleWorkStatusUpdate(svc, e.target.value)
-                                }
-                                className="w-full max-w-[140px] md:max-w-[200px] pl-1.5 md:pl-2 pr-6 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] appearance-none cursor-pointer"
-                              >
-                                {[
-                                  ...(svc.service_status &&
-                                  !WORK_STATUS_OPTIONS.includes(
-                                    svc.service_status,
-                                  )
-                                    ? [svc.service_status]
-                                    : []),
-                                  ...WORK_STATUS_OPTIONS,
-                                ].map((opt) => (
-                                  <option key={opt} value={opt}>
-                                    {opt}
-                                  </option>
-                                ))}
-                              </select>
-                              <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                                <svg
-                                  className="w-3 h-3 text-gray-400"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M19 9l-7 7-7-7"
-                                  ></path>
-                                </svg>
-                              </div>
-                            </div>
+                            <select
+                              value={svc.service_status || ""}
+                              onChange={(e) =>
+                                handleWorkStatusUpdate(svc, e.target.value)
+                              }
+                              className="max-w-[140px] md:max-w-[200px] pl-1.5 md:pl-2 pr-2 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] cursor-pointer"
+                            >
+                              {[
+                                ...(svc.service_status &&
+                                !WORK_STATUS_OPTIONS.includes(
+                                  svc.service_status,
+                                )
+                                  ? [svc.service_status]
+                                  : []),
+                                ...WORK_STATUS_OPTIONS,
+                              ].map((opt) => (
+                                <option key={opt} value={opt}>
+                                  {opt}
+                                </option>
+                              ))}
+                            </select>
                           ) : (
                             <span className="text-xs text-gray-400">-</span>
                           )}

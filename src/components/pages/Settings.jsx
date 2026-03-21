@@ -245,7 +245,7 @@ function Settings() {
                 registeredAddressState: org.registered_address_state || "",
                 registeredAddressCountry: org.registered_address_country || "India",
                 registeredAddressPincode: (() => {
-                  const pincode = org.registered_address_pincode 
+                  const pincode = org.registered_address_pincode
                     ? String(org.registered_address_pincode).replace(/\D/g, "").slice(0, 6)
                     : "";
                   console.log("[SETTINGS LOAD] Loading PIN code:", {
@@ -296,7 +296,7 @@ function Settings() {
               registeredAddressState: user.registered_address_state || "",
               registeredAddressCountry: user.registered_address_country || "India",
               registeredAddressPincode: (() => {
-                const pincode = user.registered_address_pincode 
+                const pincode = user.registered_address_pincode
                   ? String(user.registered_address_pincode).replace(/\D/g, "").slice(0, 6)
                   : "";
                 console.log("[SETTINGS LOAD] Loading PIN code (single org):", {
@@ -362,9 +362,9 @@ function Settings() {
             setAdminNotesList([notesList]);
           } else if (adminNotesRaw) {
             setAdminNotesList([
-              { 
-                date: "", 
-                description: adminNotesRaw, 
+              {
+                date: "",
+                description: adminNotesRaw,
                 attachments: [],
                 clientActionItems: [],
                 adminActionItems: []
@@ -374,9 +374,9 @@ function Settings() {
         } catch {
           if (adminNotesRaw) {
             setAdminNotesList([
-              { 
-                date: "", 
-                description: adminNotesRaw, 
+              {
+                date: "",
+                description: adminNotesRaw,
                 attachments: [],
                 clientActionItems: [],
                 adminActionItems: []
@@ -583,18 +583,18 @@ function Settings() {
           console.log(`✅ Uploaded ${file.name} to S3:`, s3Url);
 
           // Add the S3 URL to attachments
-        setCurrentUserNote((prev) => ({
-          ...prev,
-          attachments: [
-            ...prev.attachments,
-            {
-              name: file.name,
+          setCurrentUserNote((prev) => ({
+            ...prev,
+            attachments: [
+              ...prev.attachments,
+              {
+                name: file.name,
                 url: s3Url,
-              type: file.type,
-              size: file.size,
-            },
-          ],
-        }));
+                type: file.type,
+                size: file.size,
+              },
+            ],
+          }));
         } catch (error) {
           console.error(`Error uploading ${file.name}:`, error);
           alert(`Failed to upload ${file.name}. Please try again.`);
@@ -665,7 +665,7 @@ function Settings() {
   const updateUserNote = async (updatedNote, originalNote) => {
     try {
       setSaving(true);
-      
+
       // Update the note in the list
       const updatedNotesList = userNotesList.map(note => {
         // Match by id if available, otherwise match by date and description
@@ -702,7 +702,7 @@ function Settings() {
   const removeUserNote = async (noteToRemove) => {
     try {
       setSaving(true);
-      
+
       const updatedNotesList = userNotesList.filter(note => {
         // Remove by comparing all properties if no id exists
         if (note.id && noteToRemove.id) {
@@ -853,20 +853,20 @@ function Settings() {
       organizations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              directorsPartners: [
-                ...(org.directorsPartners || []),
-                {
-                  id: Date.now(),
-                  name: "",
-                  dinNumber: "",
-                  contact: "",
-                  email: "",
-                  dateOfAddition: "",
-                  status: "Active",
-                },
-              ],
-            }
+            ...org,
+            directorsPartners: [
+              ...(org.directorsPartners || []),
+              {
+                id: Date.now(),
+                name: "",
+                dinNumber: "",
+                contact: "",
+                email: "",
+                dateOfAddition: "",
+                status: "Active",
+              },
+            ],
+          }
           : org
       )
     );
@@ -877,11 +877,11 @@ function Settings() {
       organizations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              directorsPartners: (org.directorsPartners || []).filter(
-                (dp) => dp.id !== id
-              ),
-            }
+            ...org,
+            directorsPartners: (org.directorsPartners || []).filter(
+              (dp) => dp.id !== id
+            ),
+          }
           : org
       )
     );
@@ -892,11 +892,11 @@ function Settings() {
       organizations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              directorsPartners: (org.directorsPartners || []).map((dp) =>
-                dp.id === id ? { ...dp, [field]: value } : dp
-              ),
-            }
+            ...org,
+            directorsPartners: (org.directorsPartners || []).map((dp) =>
+              dp.id === id ? { ...dp, [field]: value } : dp
+            ),
+          }
           : org
       )
     );
@@ -908,18 +908,18 @@ function Settings() {
       organizations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              digitalSignatures: [
-                ...(org.digitalSignatures || []),
-                {
-                  id: Date.now(),
-                  name: "",
-                  dscNumber: "",
-                  expiryDate: "",
-                  status: "Active",
-                },
-              ],
-            }
+            ...org,
+            digitalSignatures: [
+              ...(org.digitalSignatures || []),
+              {
+                id: Date.now(),
+                name: "",
+                dscNumber: "",
+                expiryDate: "",
+                status: "Active",
+              },
+            ],
+          }
           : org
       )
     );
@@ -930,11 +930,11 @@ function Settings() {
       organizations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              digitalSignatures: (org.digitalSignatures || []).filter(
-                (ds) => ds.id !== id
-              ),
-            }
+            ...org,
+            digitalSignatures: (org.digitalSignatures || []).filter(
+              (ds) => ds.id !== id
+            ),
+          }
           : org
       )
     );
@@ -945,11 +945,11 @@ function Settings() {
       organizations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              digitalSignatures: (org.digitalSignatures || []).map((ds) =>
-                ds.id === id ? { ...ds, [field]: value } : ds
-              ),
-            }
+            ...org,
+            digitalSignatures: (org.digitalSignatures || []).map((ds) =>
+              ds.id === id ? { ...ds, [field]: value } : ds
+            ),
+          }
           : org
       )
     );
@@ -957,7 +957,7 @@ function Settings() {
 
   const updateOrganization = (id, field, value) => {
     console.log("[SETTINGS UPDATE] updateOrganization called:", { id, field, value, valueType: typeof value, valueLength: String(value || "").length });
-    
+
     // Use functional update to ensure we always have the latest state
     setOrganizations((prevOrganizations) => {
       return prevOrganizations.map((org) => {
@@ -990,20 +990,20 @@ function Settings() {
       organizations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              websites: [
-                ...(org.websites || []),
-                {
-                  id: Date.now(),
-                  type: "",
-                  url: "",
-                  login: "",
-                  password: "",
-                  remarks: "",
-                  showPassword: false,
-                },
-              ],
-            }
+            ...org,
+            websites: [
+              ...(org.websites || []),
+              {
+                id: Date.now(),
+                type: "",
+                url: "",
+                login: "",
+                password: "",
+                remarks: "",
+                showPassword: false,
+              },
+            ],
+          }
           : org
       )
     );
@@ -1014,9 +1014,9 @@ function Settings() {
       organizations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              websites: (org.websites || []).filter((w) => w.id !== websiteId),
-            }
+            ...org,
+            websites: (org.websites || []).filter((w) => w.id !== websiteId),
+          }
           : org
       )
     );
@@ -1027,13 +1027,13 @@ function Settings() {
       organizations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              websites: (org.websites || []).map((website) =>
-                website.id === websiteId
-                  ? { ...website, [field]: value }
-                  : website
-              ),
-            }
+            ...org,
+            websites: (org.websites || []).map((website) =>
+              website.id === websiteId
+                ? { ...website, [field]: value }
+                : website
+            ),
+          }
           : org
       )
     );
@@ -1044,13 +1044,13 @@ function Settings() {
       organizations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              websites: (org.websites || []).map((website) =>
-                website.id === websiteId
-                  ? { ...website, showPassword: !website.showPassword }
-                  : website
-              ),
-            }
+            ...org,
+            websites: (org.websites || []).map((website) =>
+              website.id === websiteId
+                ? { ...website, showPassword: !website.showPassword }
+                : website
+            ),
+          }
           : org
       )
     );
@@ -1143,7 +1143,7 @@ function Settings() {
   const updateUserTask = async (updatedTask, originalTask) => {
     try {
       setSaving(true);
-      
+
       // Update the task in the list
       const updatedTasksList = userTasksList.map(task => {
         // Match by id if available, otherwise match by date and title
@@ -1261,27 +1261,34 @@ function Settings() {
   return (
     <div className="min-h-screen bg-white p-6">
       {/* Header */}
-      <div className="max-w-7xl mx-auto mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          
-          <h1 className="text-xl font-bold text-black">Profile</h1>
-        </div>
-        
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate("/client")}
+          className="flex items-center gap-2 text-[#01334C] hover:text-[#00486D] mb-4 text-sm font-medium"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Dashboard
+        </button>
+        <h1 className="text-2xl font-semibold text-gray-900">
+          View your Profile
+        </h1>
       </div>
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
         {/* Tabs Navigation */}
-        <div className="bg-white rounded-t-xl border-b border-gray-200">
-          <div className="flex space-x-1 px-4 pt-4">
+        <div className="border-b border-gray-200 mb-6">
+          <div className="flex space-x-8">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
-                className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 ${
-                  activeTab === tab.key
-                    ? "bg-white text-[#00486D] border-b-2 border-[#00486D] -mb-px"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                }`}
+                className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${activeTab === tab.key
+                  ? "bg-[#01466a] text-white"
+                  : "text-gray-500 hover:text-gray-900"
+                  }`}
               >
                 {tab.label}
               </button>
@@ -1303,7 +1310,7 @@ function Settings() {
               handleSaveClientProfile={handleSaveClientProfile}
             />
           )}
-          
+
           {activeTab === "organizations" && (
             <OrganisationDetailsContent
               organizations={organizations}
@@ -1336,7 +1343,7 @@ function Settings() {
               updateUserNote={updateUserNote}
             />
           )}
-          
+
           {activeTab === "notes" && (
             <NotesContent
               adminNotesList={filteredAdminNotes}
@@ -1360,7 +1367,7 @@ function Settings() {
               userId={userId}
             />
           )}
-          
+
           {activeTab === "tasks" && (
             <TasksContent
               adminTasksList={filteredAdminTasks}

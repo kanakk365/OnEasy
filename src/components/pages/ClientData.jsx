@@ -24,7 +24,7 @@ function ClientData() {
   const userIdFromParams = userId || location.state?.userId;
   const isAdmin = !!userIdFromParams;
   const currentOrgId = orgId || location.state?.orgId;
-  
+
   // Debug logging
   useEffect(() => {
     console.log('ClientData - userId from params:', userId);
@@ -53,7 +53,7 @@ function ClientData() {
     try {
       let orgResponse;
       const effectiveUserId = userIdFromParams || location.state?.userId;
-      
+
       if (isAdmin && effectiveUserId) {
         // Admin view - fetch organization by userId and orgId
         orgResponse = await apiClient.get(`/users-page/user-data/${effectiveUserId}`).catch(() => ({
@@ -84,7 +84,7 @@ function ClientData() {
   const loadDocuments = async () => {
     try {
       setLoading(true);
-      
+
       let currentUserId;
       const effectiveUserId = userIdFromParams || location.state?.userId;
       if (isAdmin && effectiveUserId) {
@@ -225,7 +225,7 @@ function ClientData() {
       if (isAdmin && currentUserId) {
         endpoint = `/users-page/upload-client-data-document/${currentUserId}`;
       }
-      
+
       const response = await apiClient.post(endpoint, {
         documentType: uploadType,
         fileUrl: s3Url, // Use fileUrl instead of fileData
@@ -264,7 +264,7 @@ function ClientData() {
         await viewFile(url);
         return;
       }
-      
+
       // Only try to get signed URL if we have a valid docId (numeric ID, not userId)
       if (docId && typeof docId === 'number' && docId > 0) {
         try {
@@ -286,7 +286,7 @@ function ClientData() {
           console.warn('Failed to get signed URL, docId might be invalid:', docId);
         }
       }
-      
+
       // Fallback: if we still have a URL, try to open it directly
       if (url && typeof url === 'string' && url.trim().length > 0) {
         window.open(url, "_blank", "noopener,noreferrer");
@@ -312,7 +312,7 @@ function ClientData() {
         await downloadFile(url, fileName);
         return;
       }
-      
+
       // Only try to use API endpoint if we have a valid docId (numeric ID, not userId)
       if (docId && typeof docId === 'number' && docId > 0) {
         try {
@@ -435,14 +435,13 @@ function ClientData() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Toast Notification */}
         {status.message && (
-          <div className="fixed inset-0 z-40 flex items-start justify-end pointer-events-none">
+          <div className="fixed inset-0 z-[60] flex items-start justify-end pointer-events-none">
             <div className="mt-20 mr-6 w-full max-w-xs pointer-events-auto">
               <div
-                className={`rounded-xl px-4 py-3 text-sm shadow-lg border flex items-start justify-between gap-3 animate-fade-in ${
-                  status.type === "error"
+                className={`rounded-xl px-4 py-3 text-sm shadow-lg border flex items-start justify-between gap-3 animate-fade-in ${status.type === "error"
                     ? "bg-red-50 text-red-800 border-red-200"
                     : "bg-green-50 text-green-800 border-green-200"
-                }`}
+                  }`}
               >
                 <div className="flex-1">
                   <p className="font-medium">
@@ -468,12 +467,12 @@ function ClientData() {
             onClick={() => {
               const effectiveUserId = userIdFromParams || location.state?.userId;
               const effectiveOrgId = currentOrgId || location.state?.orgId;
-              
+
               console.log('Back button clicked - isAdmin:', isAdmin, 'userId:', effectiveUserId, 'orgId:', effectiveOrgId);
-              
+
               if (isAdmin && effectiveUserId && effectiveOrgId) {
-                navigate(`/admin/client-company-documents/${effectiveUserId}/${effectiveOrgId}/business/company-master-data`, { 
-                  state: { orgId: effectiveOrgId, userId: effectiveUserId } 
+                navigate(`/admin/client-company-documents/${effectiveUserId}/${effectiveOrgId}/business/company-master-data`, {
+                  state: { orgId: effectiveOrgId, userId: effectiveUserId }
                 });
               } else {
                 const orgIdFromState = location.state?.orgId || currentOrgId;
@@ -631,7 +630,19 @@ function ClientData() {
       {/* Upload Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+          <style>{`
+            /* Make native date picker calendar bigger */
+            input[type="date"]::-webkit-calendar-picker-indicator {
+              cursor: pointer;
+              width: 24px;
+              height: 24px;
+            }
+            input[type="date"]::-webkit-datetime-edit {
+              font-size: 16px;
+              padding: 4px 0;
+            }
+          `}</style>
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
                 Upload {uploadType === 'bank_statement' ? 'Bank' : 'Loan'} Statement
@@ -669,8 +680,9 @@ function ClientData() {
                     type="date"
                     value={formData.periodFrom}
                     onChange={(e) => setFormData(prev => ({ ...prev, periodFrom: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C]"
                     max={formData.periodTo || undefined}
+                    style={{ fontSize: '16px', minHeight: '48px' }}
                   />
                 </div>
                 <div>
@@ -681,8 +693,9 @@ function ClientData() {
                     type="date"
                     value={formData.periodTo}
                     onChange={(e) => setFormData(prev => ({ ...prev, periodTo: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C]"
                     min={formData.periodFrom || undefined}
+                    style={{ fontSize: '16px', minHeight: '48px' }}
                   />
                 </div>
               </div>

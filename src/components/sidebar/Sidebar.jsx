@@ -93,11 +93,11 @@ function Sidebar() {
     { icon: <RiFileEditLine />, text: "My Documents", path: "/documents" },
 
     { icon: <BsBuilding />, text: "My Organizations", path: "/organization" },
-    {
-      icon: <MdOutlineSubscriptions />,
-      text: "Invoices",
-      path: "/subscriptions",
-    },
+    // {
+    //   icon: <MdOutlineSubscriptions />,
+    //   text: "Invoices",
+    //   path: "/subscriptions",
+    // },
   ];
 
   return (
@@ -134,24 +134,20 @@ function Sidebar() {
 
       {/* Desktop Sidebar */}
       <div
-        className={`${
-          isCollapsed ? "w-[70px]" : "w-[240px]"
-        } h-screen bg-[#022b51] fixed left-0 top-0 hidden lg:flex flex-col transition-all duration-300 border-r border-[#022b51]`}
+        className={`${isCollapsed ? "w-[70px]" : "w-[240px]"
+          } h-screen bg-[#022b51] fixed left-0 top-0 hidden lg:flex flex-col transition-all duration-300 border-r border-[#022b51]`}
       >
         {/* Logo Section with Toggle Button */}
         <div
-          className={`${
-            isCollapsed ? "px-3" : "px-6"
-          } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-[#26496a]/30`}
+          className={`${isCollapsed ? "px-3" : "px-6"
+            } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-[#26496a]/30`}
         >
           <img
             src="/logo.jpg"
             alt="OnEasy Logo"
-            className={`${
-              isCollapsed ? "h-8" : "h-10"
-            } w-auto transition-all duration-300 ${
-              isCollapsed ? "mx-auto" : ""
-            }`}
+            className={`${isCollapsed ? "h-8" : "h-10"
+              } w-auto transition-all duration-300 ${isCollapsed ? "mx-auto" : ""
+              }`}
           />
           {!isCollapsed && (
             <button
@@ -175,38 +171,33 @@ function Sidebar() {
 
         {/* Navigation */}
         <nav
-          className={`flex-1 ${
-            isCollapsed ? "px-2" : "px-4"
-          } pt-3 space-y-2.5 transition-all duration-300`}
+          className={`flex-1 ${isCollapsed ? "px-2" : "px-4"
+            } pt-3 space-y-2.5 transition-all duration-300`}
         >
           {menuItems.map((item, index) => (
             <Link
               to={item.path}
               key={index}
-              className={`flex items-center ${
-                isCollapsed ? "justify-center px-2" : "space-x-3 px-3"
-              } py-2 rounded-lg transition-all duration-200 ${
-                (
+              className={`flex items-center ${isCollapsed ? "justify-center px-2" : "space-x-3 px-3"
+                } py-2 rounded-lg transition-all duration-200 ${(
                   item.path === "/registrations"
                     ? isRegistrationsActive
                     : location.pathname === item.path
                 )
                   ? "bg-[#26496a] text-white"
                   : "text-gray-300 hover:bg-[#26496a]/50 hover:text-white"
-              } group relative`}
+                } group relative`}
               title={isCollapsed ? item.text : ""}
             >
               <span
-                className={`${
-                  isCollapsed ? "w-auto" : "w-5"
-                } flex justify-center`}
+                className={`${isCollapsed ? "w-auto" : "w-5"
+                  } flex justify-center`}
               >
                 {React.cloneElement(item.icon, {
-                  className: `text-base ${
-                    location.pathname === item.path
+                  className: `text-base ${location.pathname === item.path
                       ? "text-white"
                       : "text-gray-400 group-hover:text-white"
-                  }`,
+                    }`,
                 })}
               </span>
               {!isCollapsed && <span className="text-[13px]">{item.text}</span>}
@@ -224,9 +215,8 @@ function Sidebar() {
         {/* Profile Section */}
         <div className="mt-auto border-t border-[#26496a]/30">
           <div
-            className={`${
-              isCollapsed ? "p-2" : "p-4"
-            } transition-all duration-300`}
+            className={`${isCollapsed ? "p-2" : "p-4"
+              } transition-all duration-300`}
           >
             <div
               className="relative group"
@@ -234,23 +224,20 @@ function Sidebar() {
               onMouseLeave={() => setIsProfileOpen(false)}
             >
               <div
-                className={`flex items-center ${
-                  isCollapsed ? "justify-center" : "space-x-3"
-                } cursor-pointer p-2 hover:bg-[#26496a]/50 rounded-lg transition-all duration-200`}
+                className={`flex items-center ${isCollapsed ? "justify-center" : "space-x-3"
+                  } cursor-pointer p-2 hover:bg-[#26496a]/50 rounded-lg transition-all duration-200`}
               >
                 {userData?.profile_image ? (
                   <img
                     src={userData.profile_image}
                     alt="Profile"
-                    className={`${
-                      isCollapsed ? "w-8 h-8" : "w-6 h-6"
-                    } rounded-full object-cover transition-all duration-300`}
+                    className={`${isCollapsed ? "w-8 h-8" : "w-6 h-6"
+                      } rounded-full object-cover transition-all duration-300`}
                   />
                 ) : (
                   <div
-                    className={`${
-                      isCollapsed ? "w-8 h-8" : "w-6 h-6"
-                    } bg-[#26496a] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
+                    className={`${isCollapsed ? "w-8 h-8" : "w-6 h-6"
+                      } bg-[#26496a] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
                   >
                     {userData?.name
                       ? userData.name.charAt(0).toUpperCase()
@@ -276,11 +263,9 @@ function Sidebar() {
 
               {isProfileOpen && (
                 <div
-                  className={`absolute bottom-full ${
-                    isCollapsed ? "left-full ml-2" : "left-0"
-                  } mb-1 ${
-                    isCollapsed ? "w-auto" : "w-full"
-                  } bg-white rounded-lg shadow-lg py-2 z-50`}
+                  className={`absolute bottom-full ${isCollapsed ? "left-full ml-2" : "left-0"
+                    } mb-1 ${isCollapsed ? "w-auto" : "w-full"
+                    } bg-white rounded-lg shadow-lg py-2 z-50`}
                 >
                   <button
                     onClick={() => {
@@ -327,8 +312,7 @@ function Sidebar() {
               <Link
                 to={item.path}
                 key={index}
-                className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors duration-200 ${
-                  (
+                className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors duration-200 ${(
                     item.path === "/client"
                       ? location.pathname === "/client"
                       : item.text === "Registrations"
@@ -337,7 +321,7 @@ function Sidebar() {
                   )
                     ? "bg-slate-800 text-white"
                     : "text-gray-700 hover:bg-gray-100"
-                }`}
+                  }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <span className="text-lg">{item.icon}</span>

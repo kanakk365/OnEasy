@@ -18,12 +18,12 @@ const OrganizationList = ({
     <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-start gap-3">
           <button
             onClick={() => window.history.back()}
-            className="text-gray-500 hover:text-gray-700 cursor-pointer"
+            className="text-gray-500 hover:text-gray-700 cursor-pointer mt-1.5"
           >
-            <FiChevronLeft className="w-5 h-5" />
+            <FiChevronLeft className="w-6 h-6" />
           </button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">

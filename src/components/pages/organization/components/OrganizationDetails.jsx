@@ -24,8 +24,8 @@ const ComplianceTabSection = ({ selectedOrg }) => {
             id="compliance-sub-tab-assigned"
             onClick={() => setComplianceTab("assigned")}
             className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${complianceTab === "assigned"
-                ? "bg-white text-[#00486D] shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+              ? "bg-white text-[#00486D] shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
               }`}
           >
             Assigned Compliances
@@ -34,8 +34,8 @@ const ComplianceTabSection = ({ selectedOrg }) => {
             id="compliance-sub-tab-add"
             onClick={() => setComplianceTab("add")}
             className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${complianceTab === "add"
-                ? "bg-white text-[#00486D] shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+              ? "bg-white text-[#00486D] shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
               }`}
           >
             Add Compliance
@@ -158,15 +158,15 @@ const OrganizationDetails = ({
 
         {/* Tabs Navigation */}
         <div className="border-b border-gray-200">
-          <div className="flex space-x-1 px-4 pt-4 overflow-x-auto overflow-y-hidden">
+          <div className="flex space-x-8 px-6 pt-4 overflow-x-auto">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 id={`org-tab-${tab.key}`}
                 onClick={() => handleTabClick(tab.key)}
-                className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 whitespace-nowrap ${activeTab === tab.key
-                    ? "bg-white text-[#00486D] border-b-2 border-[#00486D] -mb-px"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                className={`py-2 px-5 text-sm relative rounded-lg transition-colors whitespace-nowrap ${activeTab === tab.key
+                  ? "bg-[#01466a] text-white"
+                  : "text-gray-500 hover:text-gray-900"
                   }`}
               >
                 {tab.label}

@@ -90,9 +90,8 @@ function ClientOrganisationTab({
             </div>
           </div>
           <svg
-            className={`w-5 h-5 text-gray-400 transition-transform ${
-              expandedSection === "organisation" ? "rotate-180" : ""
-            }`}
+            className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === "organisation" ? "rotate-180" : ""
+              }`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -455,7 +454,7 @@ function ClientOrganisationTab({
                                           if (
                                             currentOrg &&
                                             currentOrg.registeredAddressPincode !==
-                                              pincodeToPreserve
+                                            pincodeToPreserve
                                           ) {
                                             updateOrganization(
                                               org.id,
@@ -641,10 +640,10 @@ function ClientOrganisationTab({
                       {/* Empty State */}
                       {(!org.directorsPartners ||
                         org.directorsPartners.length === 0) && (
-                        <div className="text-center py-4 text-gray-500 text-xs">
-                          No directors/partners added yet.
-                        </div>
-                      )}
+                          <div className="text-center py-4 text-gray-500 text-xs">
+                            No directors/partners added yet.
+                          </div>
+                        )}
                     </div>
 
                     {/* Digital Signature Details Section */}
@@ -769,10 +768,10 @@ function ClientOrganisationTab({
                       {/* Empty State */}
                       {(!org.digitalSignatures ||
                         org.digitalSignatures.length === 0) && (
-                        <div className="text-center py-4 text-gray-500 text-xs">
-                          No digital signatures added yet.
-                        </div>
-                      )}
+                          <div className="text-center py-4 text-gray-500 text-xs">
+                            No digital signatures added yet.
+                          </div>
+                        )}
                     </div>
 
                     {/* Attachments Section (Admin Only) */}
@@ -1161,7 +1160,7 @@ function ClientOrganisationTab({
                               try {
                                 directorsPartners =
                                   typeof org.directors_partners_details ===
-                                  "string"
+                                    "string"
                                     ? JSON.parse(org.directors_partners_details)
                                     : org.directors_partners_details;
                                 if (!Array.isArray(directorsPartners))
@@ -1177,7 +1176,7 @@ function ClientOrganisationTab({
                               try {
                                 digitalSignatures =
                                   typeof org.digital_signature_details ===
-                                  "string"
+                                    "string"
                                     ? JSON.parse(org.digital_signature_details)
                                     : org.digital_signature_details;
                                 if (!Array.isArray(digitalSignatures))
@@ -1286,11 +1285,10 @@ function ClientOrganisationTab({
                                   expandedOrgId === idx ? null : idx,
                                 )
                               }
-                              className={`border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors ${
-                                expandedOrgId === idx
-                                  ? "bg-gray-50"
-                                  : "bg-white"
-                              }`}
+                              className={`border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors ${expandedOrgId === idx
+                                ? "bg-gray-50"
+                                : "bg-white"
+                                }`}
                             >
                               <td className="px-4 py-3 text-gray-700 font-semibold text-sm">
                                 {idx + 1}
@@ -1378,10 +1376,10 @@ function ClientOrganisationTab({
                                     try {
                                       orgDirectorsPartners =
                                         typeof org.directors_partners_details ===
-                                        "string"
+                                          "string"
                                           ? JSON.parse(
-                                              org.directors_partners_details,
-                                            )
+                                            org.directors_partners_details,
+                                          )
                                           : org.directors_partners_details;
                                       if (!Array.isArray(orgDirectorsPartners))
                                         orgDirectorsPartners = [];
@@ -1393,10 +1391,10 @@ function ClientOrganisationTab({
                                     try {
                                       orgDigitalSignatures =
                                         typeof org.digital_signature_details ===
-                                        "string"
+                                          "string"
                                           ? JSON.parse(
-                                              org.digital_signature_details,
-                                            )
+                                            org.digital_signature_details,
+                                          )
                                           : org.digital_signature_details;
                                       if (!Array.isArray(orgDigitalSignatures))
                                         orgDigitalSignatures = [];
@@ -1414,9 +1412,9 @@ function ClientOrganisationTab({
                                           <h4 className="text-lg font-semibold text-gray-900">
                                             {isEditingThisOrg
                                               ? orgInState?.legalName ||
-                                                "Organization Details"
+                                              "Organization Details"
                                               : org.legal_name ||
-                                                "Organization Details"}
+                                              "Organization Details"}
                                           </h4>
                                           {!isEditingThisOrg &&
                                             !isEditingOrganisations && (
@@ -1429,10 +1427,10 @@ function ClientOrganisationTab({
                                                     try {
                                                       orgWebsites =
                                                         typeof org.websites ===
-                                                        "string"
+                                                          "string"
                                                           ? JSON.parse(
-                                                              org.websites,
-                                                            )
+                                                            org.websites,
+                                                          )
                                                           : org.websites;
                                                     } catch {
                                                       orgWebsites = [];
@@ -1447,10 +1445,10 @@ function ClientOrganisationTab({
                                                     try {
                                                       directorsPartners =
                                                         typeof org.directors_partners_details ===
-                                                        "string"
+                                                          "string"
                                                           ? JSON.parse(
-                                                              org.directors_partners_details,
-                                                            )
+                                                            org.directors_partners_details,
+                                                          )
                                                           : org.directors_partners_details;
                                                       if (
                                                         !Array.isArray(
@@ -1471,10 +1469,10 @@ function ClientOrganisationTab({
                                                     try {
                                                       digitalSignatures =
                                                         typeof org.digital_signature_details ===
-                                                        "string"
+                                                          "string"
                                                           ? JSON.parse(
-                                                              org.digital_signature_details,
-                                                            )
+                                                            org.digital_signature_details,
+                                                          )
                                                           : org.digital_signature_details;
                                                       if (
                                                         !Array.isArray(
@@ -1648,11 +1646,10 @@ function ClientOrganisationTab({
                                                 onClick={() => {
                                                   setActiveOrgTab(tab.id);
                                                 }}
-                                                className={`pb-3 px-1 text-sm font-medium transition-colors whitespace-nowrap ${
-                                                  activeOrgTab === tab.id
-                                                    ? "border-b-2 border-[#01334C] text-[#01334C]"
-                                                    : "text-gray-500 hover:text-gray-700"
-                                                }`}
+                                                className={`pb-3 px-1 text-sm font-medium transition-colors whitespace-nowrap ${activeOrgTab === tab.id
+                                                  ? "border-b-2 border-[#01334C] text-[#01334C]"
+                                                  : "text-gray-500 hover:text-gray-700"
+                                                  }`}
                                               >
                                                 {tab.label}
                                               </button>
@@ -1663,152 +1660,152 @@ function ClientOrganisationTab({
                                         {/* Organization Details Tab */}
                                         {activeOrgTab ===
                                           "organization-details" && (
-                                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                                            {/* Column 1 */}
-                                            <div className="space-y-4">
-                                              <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                  GSTIN
-                                                </label>
-                                                {isEditingThisOrg ? (
-                                                  <input
-                                                    type="text"
-                                                    value={
-                                                      orgInState?.gstin || ""
-                                                    }
-                                                    onChange={(e) =>
-                                                      updateOrganization(
-                                                        orgInState.id,
-                                                        "gstin",
-                                                        e.target.value,
-                                                      )
-                                                    }
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
-                                                  />
-                                                ) : (
-                                                  <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                                    {org.gstin || "-"}
-                                                  </div>
-                                                )}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                                              {/* Column 1 */}
+                                              <div className="space-y-4">
+                                                <div>
+                                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    GSTIN
+                                                  </label>
+                                                  {isEditingThisOrg ? (
+                                                    <input
+                                                      type="text"
+                                                      value={
+                                                        orgInState?.gstin || ""
+                                                      }
+                                                      onChange={(e) =>
+                                                        updateOrganization(
+                                                          orgInState.id,
+                                                          "gstin",
+                                                          e.target.value,
+                                                        )
+                                                      }
+                                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
+                                                    />
+                                                  ) : (
+                                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                      {org.gstin || "-"}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                                <div>
+                                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    PAN Number
+                                                  </label>
+                                                  {isEditingThisOrg ? (
+                                                    <input
+                                                      type="text"
+                                                      value={
+                                                        orgInState?.panNumber ||
+                                                        ""
+                                                      }
+                                                      onChange={(e) =>
+                                                        updateOrganization(
+                                                          orgInState.id,
+                                                          "panNumber",
+                                                          e.target.value,
+                                                        )
+                                                      }
+                                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
+                                                    />
+                                                  ) : (
+                                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                      {org.pan_number || "-"}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                                <div>
+                                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    TAN
+                                                  </label>
+                                                  {isEditingThisOrg ? (
+                                                    <input
+                                                      type="text"
+                                                      value={
+                                                        orgInState?.tan || ""
+                                                      }
+                                                      onChange={(e) =>
+                                                        updateOrganization(
+                                                          orgInState.id,
+                                                          "tan",
+                                                          e.target.value,
+                                                        )
+                                                      }
+                                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
+                                                    />
+                                                  ) : (
+                                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                      {org.tan || "-"}
+                                                    </div>
+                                                  )}
+                                                </div>
                                               </div>
-                                              <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                  PAN Number
-                                                </label>
-                                                {isEditingThisOrg ? (
-                                                  <input
-                                                    type="text"
-                                                    value={
-                                                      orgInState?.panNumber ||
-                                                      ""
-                                                    }
-                                                    onChange={(e) =>
-                                                      updateOrganization(
-                                                        orgInState.id,
-                                                        "panNumber",
-                                                        e.target.value,
-                                                      )
-                                                    }
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
-                                                  />
-                                                ) : (
-                                                  <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                                    {org.pan_number || "-"}
-                                                  </div>
-                                                )}
-                                              </div>
-                                              <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                  TAN
-                                                </label>
-                                                {isEditingThisOrg ? (
-                                                  <input
-                                                    type="text"
-                                                    value={
-                                                      orgInState?.tan || ""
-                                                    }
-                                                    onChange={(e) =>
-                                                      updateOrganization(
-                                                        orgInState.id,
-                                                        "tan",
-                                                        e.target.value,
-                                                      )
-                                                    }
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
-                                                  />
-                                                ) : (
-                                                  <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                                    {org.tan || "-"}
-                                                  </div>
-                                                )}
-                                              </div>
-                                            </div>
 
-                                            {/* Column 2 */}
-                                            <div className="space-y-4">
-                                              <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                  Legal Name
-                                                </label>
-                                                {isEditingThisOrg ? (
-                                                  <input
-                                                    type="text"
-                                                    value={
-                                                      orgInState?.legalName ||
-                                                      ""
-                                                    }
-                                                    onChange={(e) =>
-                                                      updateOrganization(
-                                                        orgInState.id,
-                                                        "legalName",
-                                                        e.target.value,
-                                                      )
-                                                    }
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                                  />
-                                                ) : (
-                                                  <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                                    {org.legal_name || "-"}
-                                                  </div>
-                                                )}
-                                              </div>
-                                              <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                  Incorporation Date
-                                                </label>
-                                                {isEditingThisOrg ? (
-                                                  <input
-                                                    type="date"
-                                                    value={
-                                                      orgInState?.incorporationDate ||
-                                                      ""
-                                                    }
-                                                    onChange={(e) =>
-                                                      updateOrganization(
-                                                        orgInState.id,
-                                                        "incorporationDate",
-                                                        e.target.value,
-                                                      )
-                                                    }
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                                  />
-                                                ) : (
-                                                  <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900 flex items-center gap-2">
-                                                    <svg
-                                                      className="w-4 h-4 text-gray-500"
-                                                      fill="none"
-                                                      stroke="currentColor"
-                                                      viewBox="0 0 24 24"
-                                                    >
-                                                      <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                                      />
-                                                    </svg>
-                                                    {org.incorporation_date
-                                                      ? new Date(
+                                              {/* Column 2 */}
+                                              <div className="space-y-4">
+                                                <div>
+                                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Legal Name
+                                                  </label>
+                                                  {isEditingThisOrg ? (
+                                                    <input
+                                                      type="text"
+                                                      value={
+                                                        orgInState?.legalName ||
+                                                        ""
+                                                      }
+                                                      onChange={(e) =>
+                                                        updateOrganization(
+                                                          orgInState.id,
+                                                          "legalName",
+                                                          e.target.value,
+                                                        )
+                                                      }
+                                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                                    />
+                                                  ) : (
+                                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                      {org.legal_name || "-"}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                                <div>
+                                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Incorporation Date
+                                                  </label>
+                                                  {isEditingThisOrg ? (
+                                                    <input
+                                                      type="date"
+                                                      value={
+                                                        orgInState?.incorporationDate ||
+                                                        ""
+                                                      }
+                                                      onChange={(e) =>
+                                                        updateOrganization(
+                                                          orgInState.id,
+                                                          "incorporationDate",
+                                                          e.target.value,
+                                                        )
+                                                      }
+                                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                                    />
+                                                  ) : (
+                                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900 flex items-center gap-2">
+                                                      <svg
+                                                        className="w-4 h-4 text-gray-500"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                      >
+                                                        <path
+                                                          strokeLinecap="round"
+                                                          strokeLinejoin="round"
+                                                          strokeWidth={2}
+                                                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                        />
+                                                      </svg>
+                                                      {org.incorporation_date
+                                                        ? new Date(
                                                           org.incorporation_date,
                                                         ).toLocaleDateString(
                                                           "en-IN",
@@ -1820,1197 +1817,1196 @@ function ClientOrganisationTab({
                                                               "Asia/Kolkata",
                                                           },
                                                         )
-                                                      : "-"}
-                                                  </div>
-                                                )}
-                                              </div>
-                                              <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                  CIN
-                                                </label>
-                                                {isEditingThisOrg ? (
-                                                  <input
-                                                    type="text"
-                                                    value={
-                                                      orgInState?.cin || ""
-                                                    }
-                                                    onChange={(e) =>
-                                                      updateOrganization(
-                                                        orgInState.id,
-                                                        "cin",
-                                                        e.target.value,
-                                                      )
-                                                    }
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
-                                                  />
-                                                ) : (
-                                                  <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                                    {org.cin || "-"}
-                                                  </div>
-                                                )}
-                                              </div>
-                                            </div>
-
-                                            {/* Column 3 */}
-                                            <div className="space-y-4">
-                                              <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                  Trade Name
-                                                </label>
-                                                {isEditingThisOrg ? (
-                                                  <input
-                                                    type="text"
-                                                    value={
-                                                      orgInState?.tradeName ||
-                                                      ""
-                                                    }
-                                                    onChange={(e) =>
-                                                      updateOrganization(
-                                                        orgInState.id,
-                                                        "tradeName",
-                                                        e.target.value,
-                                                      )
-                                                    }
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                                  />
-                                                ) : (
-                                                  <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                                    {org.trade_name || "-"}
-                                                  </div>
-                                                )}
-                                              </div>
-                                              <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                  Category
-                                                </label>
-                                                {isEditingThisOrg ? (
-                                                  <select
-                                                    value={
-                                                      orgInState?.category || ""
-                                                    }
-                                                    onChange={(e) =>
-                                                      updateOrganization(
-                                                        orgInState.id,
-                                                        "category",
-                                                        e.target.value,
-                                                      )
-                                                    }
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                                                  >
-                                                    <option value="">
-                                                      Select Category
-                                                    </option>
-                                                    <option value="Individual">
-                                                      Individual
-                                                    </option>
-                                                    <option value="Hindu undivided family">
-                                                      Hindu undivided family
-                                                    </option>
-                                                    <option value="Partnership Firm">
-                                                      Partnership Firm
-                                                    </option>
-                                                    <option value="Limited Liability Partnership">
-                                                      Limited Liability
-                                                      Partnership
-                                                    </option>
-                                                    <option value="Private Limited Company">
-                                                      Private Limited Company
-                                                    </option>
-                                                    <option value="One Person Company">
-                                                      One Person Company
-                                                    </option>
-                                                    <option value="Section 8 Company">
-                                                      Section 8 Company
-                                                    </option>
-                                                    <option value="Society">
-                                                      Society
-                                                    </option>
-                                                    <option value="Charitable Trust">
-                                                      Charitable Trust
-                                                    </option>
-                                                    <option value="Government">
-                                                      Government
-                                                    </option>
-                                                    <option value="Association of Persons">
-                                                      Association of Persons
-                                                    </option>
-                                                    <option value="Body of Individuals">
-                                                      Body of Individuals
-                                                    </option>
-                                                    <option value="Artificial Judicial Person">
-                                                      Artificial Judicial Person
-                                                    </option>
-                                                  </select>
-                                                ) : (
-                                                  <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                                    {org.category || "-"}
-                                                  </div>
-                                                )}
-                                              </div>
-                                              <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                  PAN File
-                                                </label>
-                                                {isEditingThisOrg ? (
-                                                  <div className="flex items-center gap-1.5">
+                                                        : "-"}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                                <div>
+                                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    CIN
+                                                  </label>
+                                                  {isEditingThisOrg ? (
                                                     <input
                                                       type="text"
-                                                      readOnly
                                                       value={
-                                                        orgInState?.panFile
-                                                          ? "File uploaded"
-                                                          : "No file chosen"
+                                                        orgInState?.cin || ""
                                                       }
-                                                      className="flex-1 min-w-0 px-2 py-1.5 border border-gray-300 rounded-md text-xs bg-gray-50 text-gray-500"
+                                                      onChange={(e) =>
+                                                        updateOrganization(
+                                                          orgInState.id,
+                                                          "cin",
+                                                          e.target.value,
+                                                        )
+                                                      }
+                                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
                                                     />
-                                                    <label className="cursor-pointer flex-shrink-0">
+                                                  ) : (
+                                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                      {org.cin || "-"}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </div>
+
+                                              {/* Column 3 */}
+                                              <div className="space-y-4">
+                                                <div>
+                                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Trade Name
+                                                  </label>
+                                                  {isEditingThisOrg ? (
+                                                    <input
+                                                      type="text"
+                                                      value={
+                                                        orgInState?.tradeName ||
+                                                        ""
+                                                      }
+                                                      onChange={(e) =>
+                                                        updateOrganization(
+                                                          orgInState.id,
+                                                          "tradeName",
+                                                          e.target.value,
+                                                        )
+                                                      }
+                                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                                    />
+                                                  ) : (
+                                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                      {org.trade_name || "-"}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                                <div>
+                                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Category
+                                                  </label>
+                                                  {isEditingThisOrg ? (
+                                                    <select
+                                                      value={
+                                                        orgInState?.category || ""
+                                                      }
+                                                      onChange={(e) =>
+                                                        updateOrganization(
+                                                          orgInState.id,
+                                                          "category",
+                                                          e.target.value,
+                                                        )
+                                                      }
+                                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                    >
+                                                      <option value="">
+                                                        Select Category
+                                                      </option>
+                                                      <option value="Individual">
+                                                        Individual
+                                                      </option>
+                                                      <option value="Hindu undivided family">
+                                                        Hindu undivided family
+                                                      </option>
+                                                      <option value="Partnership Firm">
+                                                        Partnership Firm
+                                                      </option>
+                                                      <option value="Limited Liability Partnership">
+                                                        Limited Liability
+                                                        Partnership
+                                                      </option>
+                                                      <option value="Private Limited Company">
+                                                        Private Limited Company
+                                                      </option>
+                                                      <option value="One Person Company">
+                                                        One Person Company
+                                                      </option>
+                                                      <option value="Section 8 Company">
+                                                        Section 8 Company
+                                                      </option>
+                                                      <option value="Society">
+                                                        Society
+                                                      </option>
+                                                      <option value="Charitable Trust">
+                                                        Charitable Trust
+                                                      </option>
+                                                      <option value="Government">
+                                                        Government
+                                                      </option>
+                                                      <option value="Association of Persons">
+                                                        Association of Persons
+                                                      </option>
+                                                      <option value="Body of Individuals">
+                                                        Body of Individuals
+                                                      </option>
+                                                      <option value="Artificial Judicial Person">
+                                                        Artificial Judicial Person
+                                                      </option>
+                                                    </select>
+                                                  ) : (
+                                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                      {org.category || "-"}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                                <div>
+                                                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    PAN File
+                                                  </label>
+                                                  {isEditingThisOrg ? (
+                                                    <div className="flex items-center gap-1.5">
                                                       <input
-                                                        type="file"
-                                                        onChange={async (e) => {
-                                                          const file =
-                                                            e.target.files[0];
-                                                          if (file) {
-                                                            try {
-                                                              // Validate file size (max 5MB)
-                                                              if (
-                                                                file.size >
-                                                                5 * 1024 * 1024
-                                                              ) {
+                                                        type="text"
+                                                        readOnly
+                                                        value={
+                                                          orgInState?.panFile
+                                                            ? "File uploaded"
+                                                            : "No file chosen"
+                                                        }
+                                                        className="flex-1 min-w-0 px-2 py-1.5 border border-gray-300 rounded-md text-xs bg-gray-50 text-gray-500"
+                                                      />
+                                                      <label className="cursor-pointer flex-shrink-0">
+                                                        <input
+                                                          type="file"
+                                                          onChange={async (e) => {
+                                                            const file =
+                                                              e.target.files[0];
+                                                            if (file) {
+                                                              try {
+                                                                // Validate file size (max 5MB)
+                                                                if (
+                                                                  file.size >
+                                                                  5 * 1024 * 1024
+                                                                ) {
+                                                                  alert(
+                                                                    "File size must be less than 5MB",
+                                                                  );
+                                                                  e.target.value =
+                                                                    "";
+                                                                  return;
+                                                                }
+
+                                                                // Upload directly to S3
+                                                                const folder = `user-profiles/${userId}/organizations/org-${orgInState.id ||
+                                                                  "new"
+                                                                  }`;
+                                                                const { s3Url } =
+                                                                  await uploadFileDirect(
+                                                                    file,
+                                                                    folder,
+                                                                    "pan-file",
+                                                                  );
+
+                                                                // Store S3 URL instead of base64
+                                                                updateOrganization(
+                                                                  orgInState.id,
+                                                                  "panFile",
+                                                                  s3Url,
+                                                                );
+                                                              } catch (error) {
+                                                                console.error(
+                                                                  "Error uploading PAN file:",
+                                                                  error,
+                                                                );
                                                                 alert(
-                                                                  "File size must be less than 5MB",
+                                                                  "Failed to upload file. Please try again.",
                                                                 );
                                                                 e.target.value =
                                                                   "";
-                                                                return;
                                                               }
-
-                                                              // Upload directly to S3
-                                                              const folder = `user-profiles/${userId}/organizations/org-${
-                                                                orgInState.id ||
-                                                                "new"
-                                                              }`;
-                                                              const { s3Url } =
-                                                                await uploadFileDirect(
-                                                                  file,
-                                                                  folder,
-                                                                  "pan-file",
-                                                                );
-
-                                                              // Store S3 URL instead of base64
-                                                              updateOrganization(
-                                                                orgInState.id,
-                                                                "panFile",
-                                                                s3Url,
-                                                              );
-                                                            } catch (error) {
-                                                              console.error(
-                                                                "Error uploading PAN file:",
-                                                                error,
-                                                              );
-                                                              alert(
-                                                                "Failed to upload file. Please try again.",
-                                                              );
-                                                              e.target.value =
-                                                                "";
                                                             }
+                                                          }}
+                                                          className="hidden"
+                                                          accept=".pdf,.jpg,.jpeg,.png"
+                                                        />
+                                                        <span className="px-2 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-xs whitespace-nowrap">
+                                                          {orgInState?.panFile
+                                                            ? "Change"
+                                                            : "Upload"}
+                                                        </span>
+                                                      </label>
+                                                    </div>
+                                                  ) : (
+                                                    <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                      {org.pan_file ? (
+                                                        <button
+                                                          onClick={() =>
+                                                            handleViewFile(
+                                                              org.pan_file,
+                                                            )
                                                           }
-                                                        }}
-                                                        className="hidden"
-                                                        accept=".pdf,.jpg,.jpeg,.png"
-                                                      />
-                                                      <span className="px-2 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-xs whitespace-nowrap">
-                                                        {orgInState?.panFile
-                                                          ? "Change"
-                                                          : "Upload"}
-                                                      </span>
-                                                    </label>
-                                                  </div>
-                                                ) : (
-                                                  <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                                    {org.pan_file ? (
-                                                      <button
-                                                        onClick={() =>
-                                                          handleViewFile(
-                                                            org.pan_file,
-                                                          )
-                                                        }
-                                                        className="text-blue-600 hover:underline"
-                                                      >
-                                                        View File
-                                                      </button>
-                                                    ) : (
-                                                      "Not uploaded"
-                                                    )}
-                                                  </div>
-                                                )}
-                                              </div>
-                                              {/* Registered Office Address Section */}
-                                              <div className="md:col-span-2">
-                                                <h5 className="text-sm font-semibold text-gray-900 mb-3">
-                                                  Registered Office Address
-                                                </h5>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                  {/* Address Line 1 */}
-                                                  <div className="md:col-span-2">
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                      Address Line 1
-                                                    </label>
-                                                    {isEditingThisOrg ? (
-                                                      <input
-                                                        type="text"
-                                                        value={
-                                                          orgInState?.registeredAddressLine1 ||
-                                                          ""
-                                                        }
-                                                        onChange={(e) =>
-                                                          updateOrganization(
-                                                            orgInState.id,
-                                                            "registeredAddressLine1",
-                                                            e.target.value,
-                                                          )
-                                                        }
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                                        placeholder="Enter Address Line 1"
-                                                      />
-                                                    ) : (
-                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                                        {org.registered_address_line1 ||
-                                                          "-"}
-                                                      </div>
-                                                    )}
-                                                  </div>
+                                                          className="text-blue-600 hover:underline"
+                                                        >
+                                                          View File
+                                                        </button>
+                                                      ) : (
+                                                        "Not uploaded"
+                                                      )}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                                {/* Registered Office Address Section */}
+                                                <div className="md:col-span-2">
+                                                  <h5 className="text-sm font-semibold text-gray-900 mb-3">
+                                                    Registered Office Address
+                                                  </h5>
+                                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {/* Address Line 1 */}
+                                                    <div className="md:col-span-2">
+                                                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Address Line 1
+                                                      </label>
+                                                      {isEditingThisOrg ? (
+                                                        <input
+                                                          type="text"
+                                                          value={
+                                                            orgInState?.registeredAddressLine1 ||
+                                                            ""
+                                                          }
+                                                          onChange={(e) =>
+                                                            updateOrganization(
+                                                              orgInState.id,
+                                                              "registeredAddressLine1",
+                                                              e.target.value,
+                                                            )
+                                                          }
+                                                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                                          placeholder="Enter Address Line 1"
+                                                        />
+                                                      ) : (
+                                                        <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                          {org.registered_address_line1 ||
+                                                            "-"}
+                                                        </div>
+                                                      )}
+                                                    </div>
 
-                                                  {/* Address Line 2 */}
-                                                  <div className="md:col-span-2">
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                      Address Line 2
-                                                    </label>
-                                                    {isEditingThisOrg ? (
-                                                      <input
-                                                        type="text"
-                                                        value={
-                                                          orgInState?.registeredAddressLine2 ||
-                                                          ""
-                                                        }
-                                                        onChange={(e) =>
-                                                          updateOrganization(
-                                                            orgInState.id,
-                                                            "registeredAddressLine2",
-                                                            e.target.value,
-                                                          )
-                                                        }
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                                        placeholder="Enter Address Line 2 (Optional)"
-                                                      />
-                                                    ) : (
-                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                                        {org.registered_address_line2 ||
-                                                          "-"}
-                                                      </div>
-                                                    )}
-                                                  </div>
+                                                    {/* Address Line 2 */}
+                                                    <div className="md:col-span-2">
+                                                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Address Line 2
+                                                      </label>
+                                                      {isEditingThisOrg ? (
+                                                        <input
+                                                          type="text"
+                                                          value={
+                                                            orgInState?.registeredAddressLine2 ||
+                                                            ""
+                                                          }
+                                                          onChange={(e) =>
+                                                            updateOrganization(
+                                                              orgInState.id,
+                                                              "registeredAddressLine2",
+                                                              e.target.value,
+                                                            )
+                                                          }
+                                                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                                          placeholder="Enter Address Line 2 (Optional)"
+                                                        />
+                                                      ) : (
+                                                        <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                          {org.registered_address_line2 ||
+                                                            "-"}
+                                                        </div>
+                                                      )}
+                                                    </div>
 
-                                                  {/* District */}
-                                                  <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                      District
-                                                    </label>
-                                                    {isEditingThisOrg ? (
-                                                      <input
-                                                        type="text"
-                                                        value={
-                                                          orgInState?.registeredAddressDistrict ||
-                                                          ""
-                                                        }
-                                                        onChange={(e) =>
-                                                          updateOrganization(
-                                                            orgInState.id,
-                                                            "registeredAddressDistrict",
-                                                            e.target.value,
-                                                          )
-                                                        }
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                                        placeholder="Enter District"
-                                                      />
-                                                    ) : (
-                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                                        {org.registered_address_district ||
-                                                          "-"}
-                                                      </div>
-                                                    )}
-                                                  </div>
+                                                    {/* District */}
+                                                    <div>
+                                                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        District
+                                                      </label>
+                                                      {isEditingThisOrg ? (
+                                                        <input
+                                                          type="text"
+                                                          value={
+                                                            orgInState?.registeredAddressDistrict ||
+                                                            ""
+                                                          }
+                                                          onChange={(e) =>
+                                                            updateOrganization(
+                                                              orgInState.id,
+                                                              "registeredAddressDistrict",
+                                                              e.target.value,
+                                                            )
+                                                          }
+                                                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                                          placeholder="Enter District"
+                                                        />
+                                                      ) : (
+                                                        <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                          {org.registered_address_district ||
+                                                            "-"}
+                                                        </div>
+                                                      )}
+                                                    </div>
 
-                                                  {/* State */}
-                                                  <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                      State
-                                                    </label>
-                                                    {isEditingThisOrg ? (
-                                                      <input
-                                                        type="text"
-                                                        value={
-                                                          orgInState?.registeredAddressState ||
-                                                          ""
-                                                        }
-                                                        onChange={(e) =>
-                                                          updateOrganization(
-                                                            orgInState.id,
-                                                            "registeredAddressState",
-                                                            e.target.value,
-                                                          )
-                                                        }
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                                        placeholder="Enter State"
-                                                      />
-                                                    ) : (
-                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                                        {org.registered_address_state ||
-                                                          "-"}
-                                                      </div>
-                                                    )}
-                                                  </div>
+                                                    {/* State */}
+                                                    <div>
+                                                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        State
+                                                      </label>
+                                                      {isEditingThisOrg ? (
+                                                        <input
+                                                          type="text"
+                                                          value={
+                                                            orgInState?.registeredAddressState ||
+                                                            ""
+                                                          }
+                                                          onChange={(e) =>
+                                                            updateOrganization(
+                                                              orgInState.id,
+                                                              "registeredAddressState",
+                                                              e.target.value,
+                                                            )
+                                                          }
+                                                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                                          placeholder="Enter State"
+                                                        />
+                                                      ) : (
+                                                        <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                          {org.registered_address_state ||
+                                                            "-"}
+                                                        </div>
+                                                      )}
+                                                    </div>
 
-                                                  {/* Country */}
-                                                  <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                      Country
-                                                    </label>
-                                                    {isEditingThisOrg ? (
-                                                      <input
-                                                        type="text"
-                                                        value={
-                                                          orgInState?.registeredAddressCountry ||
-                                                          "India"
-                                                        }
-                                                        onChange={(e) =>
-                                                          updateOrganization(
-                                                            orgInState.id,
-                                                            "registeredAddressCountry",
-                                                            e.target.value,
-                                                          )
-                                                        }
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                                        placeholder="Enter Country"
-                                                      />
-                                                    ) : (
-                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                                        {org.registered_address_country ||
-                                                          "India"}
-                                                      </div>
-                                                    )}
-                                                  </div>
+                                                    {/* Country */}
+                                                    <div>
+                                                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Country
+                                                      </label>
+                                                      {isEditingThisOrg ? (
+                                                        <input
+                                                          type="text"
+                                                          value={
+                                                            orgInState?.registeredAddressCountry ||
+                                                            "India"
+                                                          }
+                                                          onChange={(e) =>
+                                                            updateOrganization(
+                                                              orgInState.id,
+                                                              "registeredAddressCountry",
+                                                              e.target.value,
+                                                            )
+                                                          }
+                                                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                                          placeholder="Enter Country"
+                                                        />
+                                                      ) : (
+                                                        <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                          {org.registered_address_country ||
+                                                            "India"}
+                                                        </div>
+                                                      )}
+                                                    </div>
 
-                                                  {/* PIN Code */}
-                                                  <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                      PIN Code
-                                                    </label>
-                                                    {isEditingThisOrg ? (
-                                                      <input
-                                                        type="tel"
-                                                        inputMode="numeric"
-                                                        pattern="[0-9]*"
-                                                        value={
-                                                          orgInState?.registeredAddressPincode ||
-                                                          ""
-                                                        }
-                                                        onChange={async (e) => {
-                                                          // Get the raw input value
-                                                          const inputValue =
-                                                            e.target.value;
+                                                    {/* PIN Code */}
+                                                    <div>
+                                                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        PIN Code
+                                                      </label>
+                                                      {isEditingThisOrg ? (
+                                                        <input
+                                                          type="tel"
+                                                          inputMode="numeric"
+                                                          pattern="[0-9]*"
+                                                          value={
+                                                            orgInState?.registeredAddressPincode ||
+                                                            ""
+                                                          }
+                                                          onChange={async (e) => {
+                                                            // Get the raw input value
+                                                            const inputValue =
+                                                              e.target.value;
 
-                                                          // Remove all non-digit characters and limit to 6 digits
-                                                          const cleanedValue =
-                                                            inputValue
-                                                              .replace(
-                                                                /\D/g,
-                                                                "",
-                                                              )
-                                                              .slice(0, 6);
+                                                            // Remove all non-digit characters and limit to 6 digits
+                                                            const cleanedValue =
+                                                              inputValue
+                                                                .replace(
+                                                                  /\D/g,
+                                                                  "",
+                                                                )
+                                                                .slice(0, 6);
 
-                                                          // Update the field - this should allow all 6 digits
-                                                          updateOrganization(
-                                                            orgInState.id,
-                                                            "registeredAddressPincode",
-                                                            cleanedValue,
-                                                          );
+                                                            // Update the field - this should allow all 6 digits
+                                                            updateOrganization(
+                                                              orgInState.id,
+                                                              "registeredAddressPincode",
+                                                              cleanedValue,
+                                                            );
 
-                                                          // Auto-trigger lookup when exactly 6 digits are entered
-                                                          if (
-                                                            cleanedValue.length ===
-                                                            6
-                                                          ) {
-                                                            // Store PIN code to preserve it
-                                                            const pincodeToPreserve =
-                                                              cleanedValue;
+                                                            // Auto-trigger lookup when exactly 6 digits are entered
+                                                            if (
+                                                              cleanedValue.length ===
+                                                              6
+                                                            ) {
+                                                              // Store PIN code to preserve it
+                                                              const pincodeToPreserve =
+                                                                cleanedValue;
 
-                                                            try {
-                                                              const result =
-                                                                await lookupPincode(
-                                                                  cleanedValue,
-                                                                );
-                                                              if (
-                                                                result.success
-                                                              ) {
-                                                                if (
-                                                                  result.state
-                                                                ) {
-                                                                  updateOrganization(
-                                                                    orgInState.id,
-                                                                    "registeredAddressState",
-                                                                    result.state,
+                                                              try {
+                                                                const result =
+                                                                  await lookupPincode(
+                                                                    cleanedValue,
                                                                   );
-                                                                }
                                                                 if (
-                                                                  result.district
+                                                                  result.success
                                                                 ) {
-                                                                  updateOrganization(
-                                                                    orgInState.id,
-                                                                    "registeredAddressDistrict",
-                                                                    result.district,
-                                                                  );
-                                                                }
+                                                                  if (
+                                                                    result.state
+                                                                  ) {
+                                                                    updateOrganization(
+                                                                      orgInState.id,
+                                                                      "registeredAddressState",
+                                                                      result.state,
+                                                                    );
+                                                                  }
+                                                                  if (
+                                                                    result.district
+                                                                  ) {
+                                                                    updateOrganization(
+                                                                      orgInState.id,
+                                                                      "registeredAddressDistrict",
+                                                                      result.district,
+                                                                    );
+                                                                  }
 
-                                                                // Ensure PIN code is preserved after State/District updates
-                                                                setTimeout(
-                                                                  () => {
-                                                                    const currentOrg =
-                                                                      organisations.find(
-                                                                        (o) =>
-                                                                          o.id ===
-                                                                          orgInState.id,
-                                                                      );
-                                                                    if (
-                                                                      currentOrg &&
-                                                                      currentOrg.registeredAddressPincode !==
+                                                                  // Ensure PIN code is preserved after State/District updates
+                                                                  setTimeout(
+                                                                    () => {
+                                                                      const currentOrg =
+                                                                        organisations.find(
+                                                                          (o) =>
+                                                                            o.id ===
+                                                                            orgInState.id,
+                                                                        );
+                                                                      if (
+                                                                        currentOrg &&
+                                                                        currentOrg.registeredAddressPincode !==
                                                                         pincodeToPreserve
-                                                                    ) {
-                                                                      updateOrganization(
-                                                                        orgInState.id,
-                                                                        "registeredAddressPincode",
-                                                                        pincodeToPreserve,
-                                                                      );
-                                                                    }
-                                                                  },
-                                                                  200,
+                                                                      ) {
+                                                                        updateOrganization(
+                                                                          orgInState.id,
+                                                                          "registeredAddressPincode",
+                                                                          pincodeToPreserve,
+                                                                        );
+                                                                      }
+                                                                    },
+                                                                    200,
+                                                                  );
+                                                                }
+                                                              } catch (error) {
+                                                                console.error(
+                                                                  "PIN code lookup error:",
+                                                                  error,
                                                                 );
                                                               }
-                                                            } catch (error) {
-                                                              console.error(
-                                                                "PIN code lookup error:",
-                                                                error,
-                                                              );
                                                             }
-                                                          }
-                                                        }}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                                        placeholder="Enter 6-digit PIN Code"
-                                                        maxLength={6}
-                                                      />
-                                                    ) : (
-                                                      <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
-                                                        {org.registered_address_pincode ||
-                                                          "-"}
-                                                      </div>
-                                                    )}
+                                                          }}
+                                                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                                          placeholder="Enter 6-digit PIN Code"
+                                                          maxLength={6}
+                                                        />
+                                                      ) : (
+                                                        <div className="px-3 py-2 bg-gray-50 rounded-md text-gray-900">
+                                                          {org.registered_address_pincode ||
+                                                            "-"}
+                                                        </div>
+                                                      )}
+                                                    </div>
                                                   </div>
                                                 </div>
                                               </div>
                                             </div>
-                                          </div>
-                                        )}
+                                          )}
 
                                         {/* Directors/Partners Tab */}
                                         {activeOrgTab ===
                                           "directors-partners" && (
-                                          <div>
-                                            {/* Director/Partners Details Section */}
-                                            <div className="pt-6">
-                                              <div className="flex items-center justify-between mb-4">
-                                                <h5 className="text-md font-semibold text-gray-900">
-                                                  Director/Partners Details
-                                                </h5>
-                                                {isEditingThisOrg && (
-                                                  <button
-                                                    onClick={() =>
-                                                      addDirectorPartner(
-                                                        orgInState.id,
-                                                      )
-                                                    }
-                                                    className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
-                                                  >
-                                                    <AiOutlinePlus className="w-4 h-4" />
-                                                    Add Director/Partner
-                                                  </button>
-                                                )}
-                                              </div>
+                                            <div>
+                                              {/* Director/Partners Details Section */}
+                                              <div className="pt-6">
+                                                <div className="flex items-center justify-between mb-4">
+                                                  <h5 className="text-md font-semibold text-gray-900">
+                                                    Director/Partners Details
+                                                  </h5>
+                                                  {isEditingThisOrg && (
+                                                    <button
+                                                      onClick={() =>
+                                                        addDirectorPartner(
+                                                          orgInState.id,
+                                                        )
+                                                      }
+                                                      className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                                                    >
+                                                      <AiOutlinePlus className="w-4 h-4" />
+                                                      Add Director/Partner
+                                                    </button>
+                                                  )}
+                                                </div>
 
-                                              {/* Directors/Partners - Card Layout */}
-                                              {((isEditingThisOrg &&
-                                                orgInState?.directorsPartners) ||
-                                                (!isEditingThisOrg &&
-                                                  orgDirectorsPartners)) &&
-                                                (() => {
-                                                  const directorsList =
-                                                    isEditingThisOrg
-                                                      ? orgInState?.directorsPartners ||
+                                                {/* Directors/Partners - Card Layout */}
+                                                {((isEditingThisOrg &&
+                                                  orgInState?.directorsPartners) ||
+                                                  (!isEditingThisOrg &&
+                                                    orgDirectorsPartners)) &&
+                                                  (() => {
+                                                    const directorsList =
+                                                      isEditingThisOrg
+                                                        ? orgInState?.directorsPartners ||
                                                         []
-                                                      : orgDirectorsPartners ||
+                                                        : orgDirectorsPartners ||
                                                         [];
-                                                  return (
-                                                    directorsList.length > 0
-                                                  );
-                                                })() && (
-                                                  <div className="space-y-4 mb-4">
-                                                    {(() => {
-                                                      const list =
-                                                        isEditingThisOrg
-                                                          ? orgInState?.directorsPartners ||
+                                                    return (
+                                                      directorsList.length > 0
+                                                    );
+                                                  })() && (
+                                                    <div className="space-y-4 mb-4">
+                                                      {(() => {
+                                                        const list =
+                                                          isEditingThisOrg
+                                                            ? orgInState?.directorsPartners ||
                                                             []
-                                                          : orgDirectorsPartners ||
+                                                            : orgDirectorsPartners ||
                                                             [];
-                                                      return list;
-                                                    })().map((dp) => (
-                                                      <div
-                                                        key={
-                                                          dp.id ||
-                                                          `dp-${Date.now()}`
-                                                        }
-                                                        className="bg-white border border-gray-200 rounded-lg p-4 space-y-3"
-                                                      >
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                                          <div>
-                                                            <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                              Name
-                                                            </label>
-                                                            {isEditingThisOrg ? (
-                                                              <input
-                                                                type="text"
-                                                                value={
-                                                                  dp.name || ""
-                                                                }
-                                                                onChange={(e) =>
-                                                                  updateDirectorPartner(
-                                                                    orgInState.id,
-                                                                    dp.id,
-                                                                    "name",
-                                                                    e.target
-                                                                      .value,
-                                                                  )
-                                                                }
-                                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                                                                placeholder="Name"
-                                                              />
-                                                            ) : (
-                                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
-                                                                {dp.name || "-"}
-                                                              </div>
-                                                            )}
-                                                          </div>
-                                                          <div>
-                                                            <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                              DIN/Number
-                                                            </label>
-                                                            {isEditingThisOrg ? (
-                                                              <input
-                                                                type="text"
-                                                                value={
-                                                                  dp.dinNumber ||
-                                                                  ""
-                                                                }
-                                                                onChange={(e) =>
-                                                                  updateDirectorPartner(
-                                                                    orgInState.id,
-                                                                    dp.id,
-                                                                    "dinNumber",
-                                                                    e.target
-                                                                      .value,
-                                                                  )
-                                                                }
-                                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                                                                placeholder="DIN/Number"
-                                                              />
-                                                            ) : (
-                                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
-                                                                {dp.din_number ||
-                                                                  dp.dinNumber ||
-                                                                  "-"}
-                                                              </div>
-                                                            )}
-                                                          </div>
-                                                          <div>
-                                                            <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                              Contact
-                                                            </label>
-                                                            {isEditingThisOrg ? (
-                                                              <input
-                                                                type="text"
-                                                                value={
-                                                                  dp.contact ||
-                                                                  ""
-                                                                }
-                                                                onChange={(e) =>
-                                                                  updateDirectorPartner(
-                                                                    orgInState.id,
-                                                                    dp.id,
-                                                                    "contact",
-                                                                    e.target
-                                                                      .value,
-                                                                  )
-                                                                }
-                                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                                                                placeholder="Contact"
-                                                              />
-                                                            ) : (
-                                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
-                                                                {dp.contact ||
-                                                                  "-"}
-                                                              </div>
-                                                            )}
-                                                          </div>
-                                                          <div>
-                                                            <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                              Email
-                                                            </label>
-                                                            {isEditingThisOrg ? (
-                                                              <input
-                                                                type="email"
-                                                                value={
-                                                                  dp.email || ""
-                                                                }
-                                                                onChange={(e) =>
-                                                                  updateDirectorPartner(
-                                                                    orgInState.id,
-                                                                    dp.id,
-                                                                    "email",
-                                                                    e.target
-                                                                      .value,
-                                                                  )
-                                                                }
-                                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                                                                placeholder="Email"
-                                                              />
-                                                            ) : (
-                                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
-                                                                {dp.email ||
-                                                                  "-"}
-                                                              </div>
-                                                            )}
-                                                          </div>
-                                                          <div>
-                                                            <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                              Date of Addition
-                                                            </label>
-                                                            {isEditingThisOrg ? (
-                                                              <input
-                                                                type="date"
-                                                                value={
-                                                                  dp.dateOfAddition ||
-                                                                  ""
-                                                                }
-                                                                onChange={(e) =>
-                                                                  updateDirectorPartner(
-                                                                    orgInState.id,
-                                                                    dp.id,
-                                                                    "dateOfAddition",
-                                                                    e.target
-                                                                      .value,
-                                                                  )
-                                                                }
-                                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                                                              />
-                                                            ) : (
-                                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
-                                                                {dp.date_of_addition
-                                                                  ? formatDateOnly(
+                                                        return list;
+                                                      })().map((dp) => (
+                                                        <div
+                                                          key={
+                                                            dp.id ||
+                                                            `dp-${Date.now()}`
+                                                          }
+                                                          className="bg-white border border-gray-200 rounded-lg p-4 space-y-3"
+                                                        >
+                                                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                            <div>
+                                                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                                                Name
+                                                              </label>
+                                                              {isEditingThisOrg ? (
+                                                                <input
+                                                                  type="text"
+                                                                  value={
+                                                                    dp.name || ""
+                                                                  }
+                                                                  onChange={(e) =>
+                                                                    updateDirectorPartner(
+                                                                      orgInState.id,
+                                                                      dp.id,
+                                                                      "name",
+                                                                      e.target
+                                                                        .value,
+                                                                    )
+                                                                  }
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  placeholder="Name"
+                                                                />
+                                                              ) : (
+                                                                <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
+                                                                  {dp.name || "-"}
+                                                                </div>
+                                                              )}
+                                                            </div>
+                                                            <div>
+                                                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                                                DIN/Number
+                                                              </label>
+                                                              {isEditingThisOrg ? (
+                                                                <input
+                                                                  type="text"
+                                                                  value={
+                                                                    dp.dinNumber ||
+                                                                    ""
+                                                                  }
+                                                                  onChange={(e) =>
+                                                                    updateDirectorPartner(
+                                                                      orgInState.id,
+                                                                      dp.id,
+                                                                      "dinNumber",
+                                                                      e.target
+                                                                        .value,
+                                                                    )
+                                                                  }
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  placeholder="DIN/Number"
+                                                                />
+                                                              ) : (
+                                                                <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
+                                                                  {dp.din_number ||
+                                                                    dp.dinNumber ||
+                                                                    "-"}
+                                                                </div>
+                                                              )}
+                                                            </div>
+                                                            <div>
+                                                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                                                Contact
+                                                              </label>
+                                                              {isEditingThisOrg ? (
+                                                                <input
+                                                                  type="text"
+                                                                  value={
+                                                                    dp.contact ||
+                                                                    ""
+                                                                  }
+                                                                  onChange={(e) =>
+                                                                    updateDirectorPartner(
+                                                                      orgInState.id,
+                                                                      dp.id,
+                                                                      "contact",
+                                                                      e.target
+                                                                        .value,
+                                                                    )
+                                                                  }
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  placeholder="Contact"
+                                                                />
+                                                              ) : (
+                                                                <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
+                                                                  {dp.contact ||
+                                                                    "-"}
+                                                                </div>
+                                                              )}
+                                                            </div>
+                                                            <div>
+                                                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                                                Email
+                                                              </label>
+                                                              {isEditingThisOrg ? (
+                                                                <input
+                                                                  type="email"
+                                                                  value={
+                                                                    dp.email || ""
+                                                                  }
+                                                                  onChange={(e) =>
+                                                                    updateDirectorPartner(
+                                                                      orgInState.id,
+                                                                      dp.id,
+                                                                      "email",
+                                                                      e.target
+                                                                        .value,
+                                                                    )
+                                                                  }
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  placeholder="Email"
+                                                                />
+                                                              ) : (
+                                                                <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
+                                                                  {dp.email ||
+                                                                    "-"}
+                                                                </div>
+                                                              )}
+                                                            </div>
+                                                            <div>
+                                                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                                                Date of Addition
+                                                              </label>
+                                                              {isEditingThisOrg ? (
+                                                                <input
+                                                                  type="date"
+                                                                  value={
+                                                                    dp.dateOfAddition ||
+                                                                    ""
+                                                                  }
+                                                                  onChange={(e) =>
+                                                                    updateDirectorPartner(
+                                                                      orgInState.id,
+                                                                      dp.id,
+                                                                      "dateOfAddition",
+                                                                      e.target
+                                                                        .value,
+                                                                    )
+                                                                  }
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                />
+                                                              ) : (
+                                                                <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
+                                                                  {dp.date_of_addition
+                                                                    ? formatDateOnly(
                                                                       dp.date_of_addition,
                                                                     )
-                                                                  : dp.dateOfAddition
-                                                                    ? formatDateOnly(
+                                                                    : dp.dateOfAddition
+                                                                      ? formatDateOnly(
                                                                         dp.dateOfAddition,
                                                                       )
-                                                                    : "-"}
-                                                              </div>
-                                                            )}
+                                                                      : "-"}
+                                                                </div>
+                                                              )}
+                                                            </div>
+                                                            <div>
+                                                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                                                Status
+                                                              </label>
+                                                              {isEditingThisOrg ? (
+                                                                <select
+                                                                  value={
+                                                                    dp.status ||
+                                                                    "Active"
+                                                                  }
+                                                                  onChange={(e) =>
+                                                                    updateDirectorPartner(
+                                                                      orgInState.id,
+                                                                      dp.id,
+                                                                      "status",
+                                                                      e.target
+                                                                        .value,
+                                                                    )
+                                                                  }
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                >
+                                                                  <option value="Active">
+                                                                    Active
+                                                                  </option>
+                                                                  <option value="Inactive">
+                                                                    Inactive
+                                                                  </option>
+                                                                </select>
+                                                              ) : (
+                                                                <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
+                                                                  {dp.status ||
+                                                                    "Active"}
+                                                                </div>
+                                                              )}
+                                                            </div>
                                                           </div>
-                                                          <div>
-                                                            <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                              Status
-                                                            </label>
-                                                            {isEditingThisOrg ? (
-                                                              <select
-                                                                value={
-                                                                  dp.status ||
-                                                                  "Active"
-                                                                }
-                                                                onChange={(e) =>
-                                                                  updateDirectorPartner(
+                                                          {isEditingThisOrg && (
+                                                            <div className="flex justify-end pt-2 border-t border-gray-100">
+                                                              <button
+                                                                onClick={() =>
+                                                                  removeDirectorPartner(
                                                                     orgInState.id,
                                                                     dp.id,
-                                                                    "status",
-                                                                    e.target
-                                                                      .value,
                                                                   )
                                                                 }
-                                                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                className="px-4 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-sm font-medium transition-colors"
                                                               >
-                                                                <option value="Active">
-                                                                  Active
-                                                                </option>
-                                                                <option value="Inactive">
-                                                                  Inactive
-                                                                </option>
-                                                              </select>
-                                                            ) : (
-                                                              <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
-                                                                {dp.status ||
-                                                                  "Active"}
-                                                              </div>
-                                                            )}
-                                                          </div>
+                                                                Remove
+                                                              </button>
+                                                            </div>
+                                                          )}
                                                         </div>
-                                                        {isEditingThisOrg && (
-                                                          <div className="flex justify-end pt-2 border-t border-gray-100">
-                                                            <button
-                                                              onClick={() =>
-                                                                removeDirectorPartner(
-                                                                  orgInState.id,
-                                                                  dp.id,
-                                                                )
-                                                              }
-                                                              className="px-4 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-sm font-medium transition-colors"
-                                                            >
-                                                              Remove
-                                                            </button>
-                                                          </div>
-                                                        )}
-                                                      </div>
-                                                    ))}
-                                                  </div>
-                                                )}
+                                                      ))}
+                                                    </div>
+                                                  )}
 
-                                              {/* Empty State */}
-                                              {((!isEditingThisOrg &&
-                                                (!orgDirectorsPartners ||
-                                                  orgDirectorsPartners.length ===
+                                                {/* Empty State */}
+                                                {((!isEditingThisOrg &&
+                                                  (!orgDirectorsPartners ||
+                                                    orgDirectorsPartners.length ===
                                                     0)) ||
-                                                (isEditingThisOrg &&
-                                                  (!orgInState?.directorsPartners ||
-                                                    orgInState.directorsPartners
-                                                      .length === 0))) && (
-                                                <div className="text-center py-4 text-gray-500 text-xs">
-                                                  No directors/partners added
-                                                  yet.
-                                                </div>
-                                              )}
+                                                  (isEditingThisOrg &&
+                                                    (!orgInState?.directorsPartners ||
+                                                      orgInState.directorsPartners
+                                                        .length === 0))) && (
+                                                    <div className="text-center py-4 text-gray-500 text-xs">
+                                                      No directors/partners added
+                                                      yet.
+                                                    </div>
+                                                  )}
+                                              </div>
                                             </div>
-                                          </div>
-                                        )}
+                                          )}
 
                                         {/* Digital Signatures Tab */}
                                         {activeOrgTab ===
                                           "digital-signatures" && (
-                                          <div>
-                                            {/* Digital Signature Details Section */}
-                                            <div className="pt-6">
-                                              <div className="flex items-center justify-between mb-4">
-                                                <h5 className="text-md font-semibold text-gray-900">
-                                                  Digital Signature Details
-                                                </h5>
-                                                {isEditingThisOrg && (
-                                                  <button
-                                                    onClick={() =>
-                                                      addDigitalSignature(
-                                                        orgInState.id,
-                                                      )
-                                                    }
-                                                    className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
-                                                  >
-                                                    <AiOutlinePlus className="w-4 h-4" />
-                                                    Add Digital Signature
-                                                  </button>
-                                                )}
+                                            <div>
+                                              {/* Digital Signature Details Section */}
+                                              <div className="pt-6">
+                                                <div className="flex items-center justify-between mb-4">
+                                                  <h5 className="text-md font-semibold text-gray-900">
+                                                    Digital Signature Details
+                                                  </h5>
+                                                  {isEditingThisOrg && (
+                                                    <button
+                                                      onClick={() =>
+                                                        addDigitalSignature(
+                                                          orgInState.id,
+                                                        )
+                                                      }
+                                                      className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                                                    >
+                                                      <AiOutlinePlus className="w-4 h-4" />
+                                                      Add Digital Signature
+                                                    </button>
+                                                  )}
+                                                </div>
+
+                                                {/* Digital Signatures - Card Layout */}
+                                                {(() => {
+                                                  const signaturesList =
+                                                    isEditingThisOrg
+                                                      ? orgInState?.digitalSignatures ||
+                                                      []
+                                                      : orgDigitalSignatures ||
+                                                      [];
+                                                  return (
+                                                    signaturesList.length > 0
+                                                  );
+                                                })() && (
+                                                    <div className="space-y-4 mb-4">
+                                                      {(() => {
+                                                        return isEditingThisOrg
+                                                          ? orgInState?.digitalSignatures ||
+                                                          []
+                                                          : orgDigitalSignatures ||
+                                                          [];
+                                                      })().map((ds) => (
+                                                        <div
+                                                          key={
+                                                            ds.id ||
+                                                            `ds-${Date.now()}`
+                                                          }
+                                                          className="bg-white border border-gray-200 rounded-lg p-4 space-y-3"
+                                                        >
+                                                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                                            <div>
+                                                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                                                Name
+                                                              </label>
+                                                              {isEditingThisOrg ? (
+                                                                <input
+                                                                  type="text"
+                                                                  value={
+                                                                    ds.name || ""
+                                                                  }
+                                                                  onChange={(e) =>
+                                                                    updateDigitalSignature(
+                                                                      orgInState.id,
+                                                                      ds.id,
+                                                                      "name",
+                                                                      e.target
+                                                                        .value,
+                                                                    )
+                                                                  }
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  placeholder="Name"
+                                                                />
+                                                              ) : (
+                                                                <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
+                                                                  {ds.name || "-"}
+                                                                </div>
+                                                              )}
+                                                            </div>
+                                                            <div>
+                                                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                                                DSC Number
+                                                              </label>
+                                                              {isEditingThisOrg ? (
+                                                                <input
+                                                                  type="text"
+                                                                  value={
+                                                                    ds.dscNumber ||
+                                                                    ""
+                                                                  }
+                                                                  onChange={(e) =>
+                                                                    updateDigitalSignature(
+                                                                      orgInState.id,
+                                                                      ds.id,
+                                                                      "dscNumber",
+                                                                      e.target
+                                                                        .value,
+                                                                    )
+                                                                  }
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  placeholder="DSC Number"
+                                                                />
+                                                              ) : (
+                                                                <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
+                                                                  {ds.dsc_number ||
+                                                                    ds.dscNumber ||
+                                                                    "-"}
+                                                                </div>
+                                                              )}
+                                                            </div>
+                                                            <div>
+                                                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                                                Expiry Date
+                                                              </label>
+                                                              {isEditingThisOrg ? (
+                                                                <input
+                                                                  type="date"
+                                                                  value={
+                                                                    ds.expiryDate ||
+                                                                    ""
+                                                                  }
+                                                                  onChange={(e) =>
+                                                                    updateDigitalSignature(
+                                                                      orgInState.id,
+                                                                      ds.id,
+                                                                      "expiryDate",
+                                                                      e.target
+                                                                        .value,
+                                                                    )
+                                                                  }
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                />
+                                                              ) : (
+                                                                <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
+                                                                  {ds.expiry_date
+                                                                    ? formatDateOnly(
+                                                                      ds.expiry_date,
+                                                                    )
+                                                                    : ds.expiryDate
+                                                                      ? formatDateOnly(
+                                                                        ds.expiryDate,
+                                                                      )
+                                                                      : "-"}
+                                                                </div>
+                                                              )}
+                                                            </div>
+                                                            <div>
+                                                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                                                Status
+                                                              </label>
+                                                              {isEditingThisOrg ? (
+                                                                <select
+                                                                  value={
+                                                                    ds.status ||
+                                                                    "Active"
+                                                                  }
+                                                                  onChange={(e) =>
+                                                                    updateDigitalSignature(
+                                                                      orgInState.id,
+                                                                      ds.id,
+                                                                      "status",
+                                                                      e.target
+                                                                        .value,
+                                                                    )
+                                                                  }
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                >
+                                                                  <option value="Active">
+                                                                    Active
+                                                                  </option>
+                                                                  <option value="In-active">
+                                                                    In-active
+                                                                  </option>
+                                                                </select>
+                                                              ) : (
+                                                                <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
+                                                                  {ds.status ||
+                                                                    "Active"}
+                                                                </div>
+                                                              )}
+                                                            </div>
+                                                          </div>
+                                                          {isEditingThisOrg && (
+                                                            <div className="flex justify-end pt-2 border-t border-gray-100">
+                                                              <button
+                                                                onClick={() =>
+                                                                  removeDigitalSignature(
+                                                                    orgInState.id,
+                                                                    ds.id,
+                                                                  )
+                                                                }
+                                                                className="px-4 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-sm font-medium transition-colors"
+                                                              >
+                                                                Remove
+                                                              </button>
+                                                            </div>
+                                                          )}
+                                                        </div>
+                                                      ))}
+                                                    </div>
+                                                  )}
+
+                                                {/* Empty State */}
+                                                {((!isEditingThisOrg &&
+                                                  (!orgDigitalSignatures ||
+                                                    orgDigitalSignatures.length ===
+                                                    0)) ||
+                                                  (isEditingThisOrg &&
+                                                    (!orgInState?.digitalSignatures ||
+                                                      orgInState.digitalSignatures
+                                                        .length === 0))) && (
+                                                    <div className="text-center py-4 text-gray-500 text-xs">
+                                                      No digital signatures added
+                                                      yet.
+                                                    </div>
+                                                  )}
                                               </div>
 
-                                              {/* Digital Signatures - Card Layout */}
-                                              {(() => {
-                                                const signaturesList =
-                                                  isEditingThisOrg
-                                                    ? orgInState?.digitalSignatures ||
-                                                      []
-                                                    : orgDigitalSignatures ||
-                                                      [];
-                                                return (
-                                                  signaturesList.length > 0
-                                                );
-                                              })() && (
-                                                <div className="space-y-4 mb-4">
-                                                  {(() => {
-                                                    return isEditingThisOrg
-                                                      ? orgInState?.digitalSignatures ||
-                                                          []
-                                                      : orgDigitalSignatures ||
-                                                          [];
-                                                  })().map((ds) => (
-                                                    <div
-                                                      key={
-                                                        ds.id ||
-                                                        `ds-${Date.now()}`
-                                                      }
-                                                      className="bg-white border border-gray-200 rounded-lg p-4 space-y-3"
-                                                    >
-                                                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                                        <div>
-                                                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                            Name
-                                                          </label>
-                                                          {isEditingThisOrg ? (
-                                                            <input
-                                                              type="text"
-                                                              value={
-                                                                ds.name || ""
-                                                              }
-                                                              onChange={(e) =>
-                                                                updateDigitalSignature(
-                                                                  orgInState.id,
-                                                                  ds.id,
-                                                                  "name",
-                                                                  e.target
-                                                                    .value,
-                                                                )
-                                                              }
-                                                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                                                              placeholder="Name"
-                                                            />
-                                                          ) : (
-                                                            <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
-                                                              {ds.name || "-"}
+                                              {/* Attachments Section (Admin Only) */}
+                                              <div className="mt-6 pt-6 border-t border-gray-200">
+                                                <h5 className="text-md font-semibold text-gray-900 mb-4">
+                                                  Attachments
+                                                </h5>
+
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                  {/* Optional Attachment 1 */}
+                                                  <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                      Optional Attachment 1
+                                                    </label>
+                                                    {isEditingThisOrg ? (
+                                                      <div>
+                                                        <input
+                                                          type="file"
+                                                          onChange={(e) => {
+                                                            const file =
+                                                              e.target.files[0];
+                                                            if (file) {
+                                                              const reader =
+                                                                new FileReader();
+                                                              reader.onloadend =
+                                                                () => {
+                                                                  const base64 =
+                                                                    reader.result;
+                                                                  updateOrganization(
+                                                                    orgInState.id,
+                                                                    "optionalAttachment1",
+                                                                    base64,
+                                                                  );
+                                                                };
+                                                              reader.readAsDataURL(
+                                                                file,
+                                                              );
+                                                            }
+                                                          }}
+                                                          className="hidden"
+                                                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                                                          id={`optional-attachment-1-view-${idx}`}
+                                                        />
+                                                        <label
+                                                          htmlFor={`optional-attachment-1-view-${idx}`}
+                                                          className="cursor-pointer inline-block"
+                                                        >
+                                                          {orgInState?.optionalAttachment1 ? (
+                                                            <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg">
+                                                              <p className="text-xs text-gray-700">
+                                                                File uploaded
+                                                              </p>
+                                                              <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                  e.preventDefault();
+                                                                  updateOrganization(
+                                                                    orgInState.id,
+                                                                    "optionalAttachment1",
+                                                                    null,
+                                                                  );
+                                                                }}
+                                                                className="text-xs text-red-600 hover:text-red-800 mt-1"
+                                                              >
+                                                                Remove
+                                                              </button>
                                                             </div>
-                                                          )}
-                                                        </div>
-                                                        <div>
-                                                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                            DSC Number
-                                                          </label>
-                                                          {isEditingThisOrg ? (
-                                                            <input
-                                                              type="text"
-                                                              value={
-                                                                ds.dscNumber ||
-                                                                ""
-                                                              }
-                                                              onChange={(e) =>
-                                                                updateDigitalSignature(
-                                                                  orgInState.id,
-                                                                  ds.id,
-                                                                  "dscNumber",
-                                                                  e.target
-                                                                    .value,
-                                                                )
-                                                              }
-                                                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                                                              placeholder="DSC Number"
-                                                            />
                                                           ) : (
-                                                            <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
-                                                              {ds.dsc_number ||
-                                                                ds.dscNumber ||
-                                                                "-"}
-                                                            </div>
+                                                            <span className="px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-xs">
+                                                              Upload File
+                                                            </span>
                                                           )}
-                                                        </div>
-                                                        <div>
-                                                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                            Expiry Date
-                                                          </label>
-                                                          {isEditingThisOrg ? (
-                                                            <input
-                                                              type="date"
-                                                              value={
-                                                                ds.expiryDate ||
-                                                                ""
-                                                              }
-                                                              onChange={(e) =>
-                                                                updateDigitalSignature(
-                                                                  orgInState.id,
-                                                                  ds.id,
-                                                                  "expiryDate",
-                                                                  e.target
-                                                                    .value,
-                                                                )
-                                                              }
-                                                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                                                            />
-                                                          ) : (
-                                                            <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
-                                                              {ds.expiry_date
-                                                                ? formatDateOnly(
-                                                                    ds.expiry_date,
-                                                                  )
-                                                                : ds.expiryDate
-                                                                  ? formatDateOnly(
-                                                                      ds.expiryDate,
-                                                                    )
-                                                                  : "-"}
-                                                            </div>
-                                                          )}
-                                                        </div>
-                                                        <div>
-                                                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                            Status
-                                                          </label>
-                                                          {isEditingThisOrg ? (
-                                                            <select
-                                                              value={
-                                                                ds.status ||
-                                                                "Active"
-                                                              }
-                                                              onChange={(e) =>
-                                                                updateDigitalSignature(
-                                                                  orgInState.id,
-                                                                  ds.id,
-                                                                  "status",
-                                                                  e.target
-                                                                    .value,
-                                                                )
-                                                              }
-                                                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
-                                                            >
-                                                              <option value="Active">
-                                                                Active
-                                                              </option>
-                                                              <option value="In-active">
-                                                                In-active
-                                                              </option>
-                                                            </select>
-                                                          ) : (
-                                                            <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
-                                                              {ds.status ||
-                                                                "Active"}
-                                                            </div>
-                                                          )}
-                                                        </div>
+                                                        </label>
                                                       </div>
-                                                      {isEditingThisOrg && (
-                                                        <div className="flex justify-end pt-2 border-t border-gray-100">
+                                                    ) : (
+                                                      <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
+                                                        {org.optional_attachment_1 ? (
                                                           <button
                                                             onClick={() =>
-                                                              removeDigitalSignature(
-                                                                orgInState.id,
-                                                                ds.id,
+                                                              handleViewFile(
+                                                                org.optional_attachment_1,
                                                               )
                                                             }
-                                                            className="px-4 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-sm font-medium transition-colors"
+                                                            className="text-blue-600 hover:underline text-xs"
                                                           >
-                                                            Remove
+                                                            View File
                                                           </button>
-                                                        </div>
-                                                      )}
-                                                    </div>
-                                                  ))}
-                                                </div>
-                                              )}
-
-                                              {/* Empty State */}
-                                              {((!isEditingThisOrg &&
-                                                (!orgDigitalSignatures ||
-                                                  orgDigitalSignatures.length ===
-                                                    0)) ||
-                                                (isEditingThisOrg &&
-                                                  (!orgInState?.digitalSignatures ||
-                                                    orgInState.digitalSignatures
-                                                      .length === 0))) && (
-                                                <div className="text-center py-4 text-gray-500 text-xs">
-                                                  No digital signatures added
-                                                  yet.
-                                                </div>
-                                              )}
-                                            </div>
-
-                                            {/* Attachments Section (Admin Only) */}
-                                            <div className="mt-6 pt-6 border-t border-gray-200">
-                                              <h5 className="text-md font-semibold text-gray-900 mb-4">
-                                                Attachments
-                                              </h5>
-
-                                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {/* Optional Attachment 1 */}
-                                                <div>
-                                                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Optional Attachment 1
-                                                  </label>
-                                                  {isEditingThisOrg ? (
-                                                    <div>
-                                                      <input
-                                                        type="file"
-                                                        onChange={(e) => {
-                                                          const file =
-                                                            e.target.files[0];
-                                                          if (file) {
-                                                            const reader =
-                                                              new FileReader();
-                                                            reader.onloadend =
-                                                              () => {
-                                                                const base64 =
-                                                                  reader.result;
-                                                                updateOrganization(
-                                                                  orgInState.id,
-                                                                  "optionalAttachment1",
-                                                                  base64,
-                                                                );
-                                                              };
-                                                            reader.readAsDataURL(
-                                                              file,
-                                                            );
-                                                          }
-                                                        }}
-                                                        className="hidden"
-                                                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                                                        id={`optional-attachment-1-view-${idx}`}
-                                                      />
-                                                      <label
-                                                        htmlFor={`optional-attachment-1-view-${idx}`}
-                                                        className="cursor-pointer inline-block"
-                                                      >
-                                                        {orgInState?.optionalAttachment1 ? (
-                                                          <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg">
-                                                            <p className="text-xs text-gray-700">
-                                                              File uploaded
-                                                            </p>
-                                                            <button
-                                                              type="button"
-                                                              onClick={(e) => {
-                                                                e.preventDefault();
-                                                                updateOrganization(
-                                                                  orgInState.id,
-                                                                  "optionalAttachment1",
-                                                                  null,
-                                                                );
-                                                              }}
-                                                              className="text-xs text-red-600 hover:text-red-800 mt-1"
-                                                            >
-                                                              Remove
-                                                            </button>
-                                                          </div>
                                                         ) : (
-                                                          <span className="px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-xs">
-                                                            Upload File
-                                                          </span>
+                                                          <p className="text-gray-500 text-xs">
+                                                            No file uploaded
+                                                          </p>
                                                         )}
-                                                      </label>
-                                                    </div>
-                                                  ) : (
-                                                    <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
-                                                      {org.optional_attachment_1 ? (
-                                                        <button
-                                                          onClick={() =>
-                                                            handleViewFile(
-                                                              org.optional_attachment_1,
-                                                            )
-                                                          }
-                                                          className="text-blue-600 hover:underline text-xs"
-                                                        >
-                                                          View File
-                                                        </button>
-                                                      ) : (
-                                                        <p className="text-gray-500 text-xs">
-                                                          No file uploaded
-                                                        </p>
-                                                      )}
-                                                    </div>
-                                                  )}
-                                                </div>
+                                                      </div>
+                                                    )}
+                                                  </div>
 
-                                                {/* Optional Attachment 2 */}
-                                                <div>
-                                                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Optional Attachment 2
-                                                  </label>
-                                                  {isEditingThisOrg ? (
-                                                    <div>
-                                                      <input
-                                                        type="file"
-                                                        onChange={(e) => {
-                                                          const file =
-                                                            e.target.files[0];
-                                                          if (file) {
-                                                            const reader =
-                                                              new FileReader();
-                                                            reader.onloadend =
-                                                              () => {
-                                                                const base64 =
-                                                                  reader.result;
-                                                                updateOrganization(
-                                                                  orgInState.id,
-                                                                  "optionalAttachment2",
-                                                                  base64,
-                                                                );
-                                                              };
-                                                            reader.readAsDataURL(
-                                                              file,
-                                                            );
-                                                          }
-                                                        }}
-                                                        className="hidden"
-                                                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                                                        id={`optional-attachment-2-view-${idx}`}
-                                                      />
-                                                      <label
-                                                        htmlFor={`optional-attachment-2-view-${idx}`}
-                                                        className="cursor-pointer inline-block"
-                                                      >
-                                                        {orgInState?.optionalAttachment2 ? (
-                                                          <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg">
-                                                            <p className="text-xs text-gray-700">
-                                                              File uploaded
-                                                            </p>
-                                                            <button
-                                                              type="button"
-                                                              onClick={(e) => {
-                                                                e.preventDefault();
-                                                                updateOrganization(
-                                                                  orgInState.id,
-                                                                  "optionalAttachment2",
-                                                                  null,
-                                                                );
-                                                              }}
-                                                              className="text-xs text-red-600 hover:text-red-800 mt-1"
-                                                            >
-                                                              Remove
-                                                            </button>
-                                                          </div>
-                                                        ) : (
-                                                          <span className="px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-xs">
-                                                            Upload File
-                                                          </span>
-                                                        )}
-                                                      </label>
-                                                    </div>
-                                                  ) : (
-                                                    <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
-                                                      {org.optional_attachment_2 ? (
-                                                        <button
-                                                          onClick={() =>
-                                                            handleViewFile(
-                                                              org.optional_attachment_2,
-                                                            )
-                                                          }
-                                                          className="text-blue-600 hover:underline text-xs"
+                                                  {/* Optional Attachment 2 */}
+                                                  <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                      Optional Attachment 2
+                                                    </label>
+                                                    {isEditingThisOrg ? (
+                                                      <div>
+                                                        <input
+                                                          type="file"
+                                                          onChange={(e) => {
+                                                            const file =
+                                                              e.target.files[0];
+                                                            if (file) {
+                                                              const reader =
+                                                                new FileReader();
+                                                              reader.onloadend =
+                                                                () => {
+                                                                  const base64 =
+                                                                    reader.result;
+                                                                  updateOrganization(
+                                                                    orgInState.id,
+                                                                    "optionalAttachment2",
+                                                                    base64,
+                                                                  );
+                                                                };
+                                                              reader.readAsDataURL(
+                                                                file,
+                                                              );
+                                                            }
+                                                          }}
+                                                          className="hidden"
+                                                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                                                          id={`optional-attachment-2-view-${idx}`}
+                                                        />
+                                                        <label
+                                                          htmlFor={`optional-attachment-2-view-${idx}`}
+                                                          className="cursor-pointer inline-block"
                                                         >
-                                                          View File
-                                                        </button>
-                                                      ) : (
-                                                        <p className="text-gray-500 text-xs">
-                                                          No file uploaded
-                                                        </p>
-                                                      )}
-                                                    </div>
-                                                  )}
+                                                          {orgInState?.optionalAttachment2 ? (
+                                                            <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg">
+                                                              <p className="text-xs text-gray-700">
+                                                                File uploaded
+                                                              </p>
+                                                              <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                  e.preventDefault();
+                                                                  updateOrganization(
+                                                                    orgInState.id,
+                                                                    "optionalAttachment2",
+                                                                    null,
+                                                                  );
+                                                                }}
+                                                                className="text-xs text-red-600 hover:text-red-800 mt-1"
+                                                              >
+                                                                Remove
+                                                              </button>
+                                                            </div>
+                                                          ) : (
+                                                            <span className="px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-xs">
+                                                              Upload File
+                                                            </span>
+                                                          )}
+                                                        </label>
+                                                      </div>
+                                                    ) : (
+                                                      <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
+                                                        {org.optional_attachment_2 ? (
+                                                          <button
+                                                            onClick={() =>
+                                                              handleViewFile(
+                                                                org.optional_attachment_2,
+                                                              )
+                                                            }
+                                                            className="text-blue-600 hover:underline text-xs"
+                                                          >
+                                                            View File
+                                                          </button>
+                                                        ) : (
+                                                          <p className="text-gray-500 text-xs">
+                                                            No file uploaded
+                                                          </p>
+                                                        )}
+                                                      </div>
+                                                    )}
+                                                  </div>
                                                 </div>
                                               </div>
                                             </div>
-                                          </div>
-                                        )}
+                                          )}
 
                                         {/* Attachments Tab */}
                                         {activeOrgTab === "attachments" && (
@@ -3069,7 +3065,7 @@ function ClientOrganisationTab({
                                               </div>
 
                                               {orgWebsites &&
-                                              orgWebsites.length > 0 ? (
+                                                orgWebsites.length > 0 ? (
                                                 <div className="overflow-x-auto">
                                                   <table className="w-full border-collapse bg-white text-sm">
                                                     <thead>

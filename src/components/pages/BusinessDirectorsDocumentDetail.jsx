@@ -3,6 +3,99 @@ import { useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
 import { uploadFileDirect } from "../../utils/s3Upload";
+import { RiUploadCloud2Line } from "react-icons/ri";
+import { FiChevronLeft, FiEye, FiDownload, FiTrash2 } from "react-icons/fi";
+
+const renderDocumentIcon = (docType, size = "md") => {
+  const w = size === "sm" ? "w-10 h-10" : size === "lg" ? "w-14 h-14" : "w-12 h-12";
+  const iconSize = size === "sm" ? "w-4 h-4" : size === "lg" ? "w-8 h-8" : "w-6 h-6";
+  switch (docType) {
+    case "aadhar_card":
+      return (
+        <div className={`${w} bg-white rounded-xl flex items-center justify-center relative overflow-hidden shadow-sm border border-gray-200 flex-shrink-0`}>
+          <div className="absolute inset-0 flex flex-col">
+            <div className="h-1/3 bg-[#FF9933]"></div>
+            <div className="h-1/3 bg-white flex items-center justify-center relative">
+              <svg className={iconSize} viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="#000080" strokeWidth="1.5" fill="none"/>
+                <circle cx="12" cy="12" r="1.5" fill="#000080"/>
+                {[...Array(24)].map((_, i) => {
+                  const angle = (i * 15 - 90) * (Math.PI / 180);
+                  const x1 = 12 + 8 * Math.cos(angle);
+                  const y1 = 12 + 8 * Math.sin(angle);
+                  const x2 = 12 + 9.5 * Math.cos(angle);
+                  const y2 = 12 + 9.5 * Math.sin(angle);
+                  return (
+                    <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#000080" strokeWidth="0.8" strokeLinecap="round"/>
+                  );
+                })}
+              </svg>
+            </div>
+            <div className="h-1/3 bg-[#138808]"></div>
+          </div>
+        </div>
+      );
+    case "pan_card":
+      return (
+        <div className={`${w} bg-gradient-to-br from-[#FF6B35] to-[#E85A2A] rounded-xl flex items-center justify-center relative overflow-hidden shadow-sm flex-shrink-0`}>
+          <div className="absolute inset-0 flex flex-col p-1.5">
+            <div className="h-1 bg-white/30 rounded mb-0.5"></div>
+            <div className="flex-1 flex flex-col justify-center gap-0.5">
+              <div className="h-0.5 bg-white/40 rounded"></div>
+              <div className="h-0.5 bg-white/30 rounded w-4/5"></div>
+              <div className="h-0.5 bg-white/25 rounded w-3/5"></div>
+            </div>
+            <div className="absolute bottom-0.5 left-1 right-1">
+              <div className="text-[5px] font-bold text-white text-center tracking-wider">PAN</div>
+            </div>
+          </div>
+        </div>
+      );
+    case "passport":
+      return (
+        <div className={`${w} bg-gradient-to-br from-[#1E3A8A] to-[#1E40AF] rounded-xl flex items-center justify-center relative overflow-hidden shadow-sm flex-shrink-0`}>
+          <div className="absolute inset-0 flex flex-col">
+            <div className="h-1.5 bg-gradient-to-r from-yellow-400/40 to-yellow-500/40"></div>
+            <div className="flex-1 flex items-center justify-center relative">
+              <div className="w-7 h-7 rounded-full border-2 border-white/40 flex items-center justify-center bg-white/5">
+                <div className="w-4 h-4 rounded-full border border-white/50 flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-white/30"></div>
+                </div>
+              </div>
+            </div>
+            <div className="h-1 bg-gradient-to-r from-yellow-400/30 to-yellow-500/30"></div>
+            <div className="absolute bottom-0.5 left-0 right-0">
+              <div className="text-[4px] font-bold text-white/70 text-center tracking-widest">PASSPORT</div>
+            </div>
+          </div>
+        </div>
+      );
+    case "profile_image":
+      return (
+        <div className={`${w} bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center shadow-sm flex-shrink-0`}>
+          <svg className={iconSize + " text-white"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </div>
+      );
+    case "attachment":
+      return (
+        <div className={`${w} bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0`}>
+          <svg className={iconSize + " text-gray-500"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+        </div>
+      );
+    default:
+      return (
+        <div className={`${w} bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0`}>
+          <svg className={iconSize + " text-gray-500"} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+      );
+  }
+};
 
 function BusinessDirectorsDocumentDetail() {
   const navigate = useNavigate();
@@ -44,9 +137,10 @@ function BusinessDirectorsDocumentDetail() {
   const showStatus = (type, message) => {
     setStatus({ type, message });
     if (message) {
-      // Auto-hide after a few seconds
       setTimeout(() => {
-        setStatus((current) => (current.message === message ? { type: null, message: "" } : current));
+        setStatus((current) =>
+          current.message === message ? { type: null, message: "" } : current
+        );
       }, 4000);
     }
   };
@@ -99,7 +193,9 @@ function BusinessDirectorsDocumentDetail() {
 
     const maxDocs = documentType === "attachment" ? 20 : 3;
     if (documents.length >= maxDocs) {
-      showStatus("error", documentType === "attachment" ? "Maximum 20 attachments allowed" : `Maximum 3 documents allowed for ${docConfig.label}`);
+      showStatus("error", documentType === "attachment" 
+        ? "Maximum 20 attachments allowed" 
+        : `Maximum 3 documents allowed for ${docConfig.label}`);
       return;
     }
 
@@ -109,7 +205,6 @@ function BusinessDirectorsDocumentDetail() {
   const handleUpload = async (file, attachmentNameVal = null) => {
     setUploading(true);
     try {
-      // Get user ID
       const storedUser = JSON.parse(
         localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.USER) || "{}"
       );
@@ -120,7 +215,6 @@ function BusinessDirectorsDocumentDetail() {
         return;
       }
 
-      // Upload directly to S3
       const folder = `user-profiles/${currentUserId}/organizations/${orgId}/directors-partners`;
       const { s3Url } = await uploadFileDirect(
         file,
@@ -137,7 +231,6 @@ function BusinessDirectorsDocumentDetail() {
       });
 
       if (response.success) {
-        // Reload documents
         await loadDocuments();
         showStatus("success", "Document uploaded successfully");
         if (fileInputRef.current) {
@@ -161,7 +254,6 @@ function BusinessDirectorsDocumentDetail() {
     }
 
     try {
-      // If we have docId, get signed URL for viewing
       if (docId) {
         const response = await apiClient.get(`/users-page/directors-partners-documents/${docId}/view-url`);
         if (response.success && response.data && response.data.signedUrl) {
@@ -170,7 +262,6 @@ function BusinessDirectorsDocumentDetail() {
         }
       }
       
-      // Fallback to direct URL if available
       if (url) {
         window.open(url, "_blank", "noopener,noreferrer");
       }
@@ -248,95 +339,9 @@ function BusinessDirectorsDocumentDetail() {
     }
   };
 
-  // Render icon component for document type (same as KYC)
-  const renderDocumentIcon = (docType) => {
-    switch (docType) {
-      case "aadhar_card":
-        return (
-          <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center relative overflow-hidden shadow-sm border border-gray-200">
-            <div className="absolute inset-0 flex flex-col">
-              <div className="h-1/3 bg-[#FF9933]"></div>
-              <div className="h-1/3 bg-white flex items-center justify-center relative">
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="#000080" strokeWidth="1.5" fill="none"/>
-                  <circle cx="12" cy="12" r="1.5" fill="#000080"/>
-                  {[...Array(24)].map((_, i) => {
-                    const angle = (i * 15 - 90) * (Math.PI / 180);
-                    const x1 = 12 + 8 * Math.cos(angle);
-                    const y1 = 12 + 8 * Math.sin(angle);
-                    const x2 = 12 + 9.5 * Math.cos(angle);
-                    const y2 = 12 + 9.5 * Math.sin(angle);
-                    return (
-                      <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#000080" strokeWidth="0.8" strokeLinecap="round"/>
-                    );
-                  })}
-                </svg>
-              </div>
-              <div className="h-1/3 bg-[#138808]"></div>
-            </div>
-          </div>
-        );
-      case "pan_card":
-        return (
-          <div className="w-16 h-16 bg-gradient-to-br from-[#FF6B35] to-[#E85A2A] rounded-lg flex items-center justify-center relative overflow-hidden shadow-sm">
-            <div className="absolute inset-0 flex flex-col p-2.5">
-              <div className="h-2 bg-white/30 rounded mb-1.5"></div>
-              <div className="flex-1 flex flex-col justify-center gap-1">
-                <div className="h-1.5 bg-white/40 rounded"></div>
-                <div className="h-1.5 bg-white/30 rounded w-4/5"></div>
-                <div className="h-1 bg-white/25 rounded w-3/5"></div>
-              </div>
-              <div className="absolute bottom-1.5 left-1 right-1">
-                <div className="text-[8px] font-bold text-white text-center tracking-wider">PAN</div>
-              </div>
-            </div>
-          </div>
-        );
-      case "passport":
-        return (
-          <div className="w-16 h-16 bg-gradient-to-br from-[#1E3A8A] to-[#1E40AF] rounded-lg flex items-center justify-center relative overflow-hidden shadow-sm">
-            <div className="absolute inset-0 flex flex-col">
-              <div className="h-2.5 bg-gradient-to-r from-yellow-400/40 to-yellow-500/40"></div>
-              <div className="flex-1 flex items-center justify-center relative">
-                <div className="w-10 h-10 rounded-full border-2 border-white/40 flex items-center justify-center bg-white/5">
-                  <div className="w-7 h-7 rounded-full border border-white/50 flex items-center justify-center">
-                    <div className="w-4 h-4 rounded-full bg-white/30"></div>
-                  </div>
-                </div>
-                <div className="absolute top-2 left-2 w-1.5 h-1.5 bg-white/40 rounded-full"></div>
-                <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-white/40 rounded-full"></div>
-              </div>
-              <div className="h-2 bg-gradient-to-r from-yellow-400/30 to-yellow-500/30"></div>
-            </div>
-            <div className="absolute bottom-1 left-0 right-0">
-              <div className="text-[6px] font-bold text-white/70 text-center tracking-widest">PASSPORT</div>
-            </div>
-          </div>
-        );
-      case "profile_image":
-        return (
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </div>
-        );
-      case "attachment":
-        return (
-          <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center shadow-sm">
-            <svg className="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading documents...</p>
@@ -346,13 +351,13 @@ function BusinessDirectorsDocumentDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-[#F8F9FA] py-6">
+      <div className="container mx-auto px-4 md:px-8 lg:px-12">
         {status.message && (
           <div className="fixed inset-0 z-40 flex items-start justify-end pointer-events-none">
             <div className="mt-20 mr-6 w-full max-w-xs pointer-events-auto">
               <div
-                className={`rounded-xl px-4 py-3 text-sm shadow-lg border flex items-start justify-between gap-3 animate-fade-in ${
+                className={`rounded-xl px-4 py-3 text-sm shadow-lg border flex items-start justify-between gap-3 ${
                   status.type === "error"
                     ? "bg-red-50 text-red-800 border-red-200"
                     : "bg-green-50 text-green-800 border-green-200"
@@ -360,7 +365,7 @@ function BusinessDirectorsDocumentDetail() {
               >
                 <div className="flex-1">
                   <p className="font-medium">
-                    {status.type === "error" ? "Something went wrong" : "Success"}
+                    {status.type === "error" ? "Error" : "Success"}
                   </p>
                   <p className="mt-1 text-xs">{status.message}</p>
                 </div>
@@ -376,185 +381,179 @@ function BusinessDirectorsDocumentDetail() {
           </div>
         )}
 
-        {/* Header */}
-        <div className="mb-6">
-          <button
-            onClick={() => navigate(`/company-documents/${orgId}/directors`, { state: { orgId } })}
-            className="text-[#01334C] hover:text-[#00486D] mb-4 flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Directors/Partners Documents
-          </button>
-          
-          <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6">
-            <div className="flex items-center gap-4 mb-4">
-              {renderDocumentIcon(documentType)}
-              <div className="flex-1">
-                <h1 className="text-2xl font-semibold text-gray-900">{docConfig.label}</h1>
-                <p className="text-gray-600 mt-1">{docConfig.description}</p>
-              </div>
-              <span className={`px-3 py-1 text-sm font-medium rounded-full ${
+        {/* Header - matching KYC document detail layout */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <button
+              onClick={() => navigate(`/company-documents/${orgId}/directors`, { state: { orgId } })}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <FiChevronLeft className="w-6 h-6 text-gray-900" />
+            </button>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              {docConfig.label}
+            </h1>
+          </div>
+          <div className="ml-9 flex items-center justify-between">
+            <p className="text-gray-500 italic">{docConfig.description}</p>
+            <span
+              className={`px-3 py-1 text-sm font-medium rounded-full ${
                 (documentType === "attachment" ? documents.length >= 20 : documents.length >= 3)
-                  ? "bg-red-100 text-red-800" 
-                  : documents.length > 0 
-                  ? "bg-yellow-100 text-yellow-800" 
-                  : "bg-gray-100 text-gray-800"
-              }`}>
-                {documents.length}/{documentType === "attachment" ? 20 : 3}
-              </span>
-            </div>
+                  ? "bg-red-50 text-red-600"
+                  : documents.length > 0
+                  ? "bg-blue-50 text-[#00486D]"
+                  : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              {documents.length}/{documentType === "attachment" ? 20 : 3} Uploaded
+            </span>
           </div>
         </div>
 
-        {/* Uploaded Documents */}
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Uploaded Documents</h2>
-          
+        {/* Uploaded Documents List */}
+        <div className="mb-8">
           {documents.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {documents.map((doc, index) => (
                 <div
                   key={doc.id || index}
-                  className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-4 hover:shadow-md transition-shadow"
+                  className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col justify-between group hover:shadow-lg transition-all duration-300"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="w-12 h-12 bg-[#01334C] rounded-lg flex items-center justify-center flex-shrink-0">
-                      <svg
-                        className="w-6 h-6 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                  <div className="flex items-start gap-4 mb-3">
+                    {renderDocumentIcon(documentType, "sm")}
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className="font-semibold text-gray-900 truncate"
+                        title={
+                          doc.name ||
+                          doc.document_name ||
+                          `Document ${index + 1}`
+                        }
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => handleViewDocument(doc.id, doc.url || doc.document_url)}
-                        className="p-1.5 text-[#01334C] hover:bg-[#01334C] hover:text-white rounded-lg transition-colors"
-                        title="View Document"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => handleDownloadDocument(doc.id, doc.name || doc.document_name || "document")}
-                        className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                        title="Download Document"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => handleDeleteDocument(doc.id)}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete Document"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
+                        {doc.name ||
+                          doc.document_name ||
+                          `Document ${index + 1}`}
+                      </p>
+                      {doc.uploadedAt && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(doc.uploadedAt).toLocaleDateString(
+                            "en-IN",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            }
+                          )}
+                        </p>
+                      )}
                     </div>
                   </div>
-                  <div className="mb-2">
-                    <p className="text-sm font-medium text-gray-900 truncate" title={doc.name || doc.document_name || `Document ${index + 1}`}>
-                      {doc.name || doc.document_name || `Document ${index + 1}`}
-                    </p>
-                    {doc.uploadedAt && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        {new Date(doc.uploadedAt).toLocaleDateString('en-IN', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </p>
-                    )}
+
+                  <div className="flex items-center gap-2 pt-3 border-t border-gray-50">
+                    <button
+                      onClick={() =>
+                        handleViewDocument(doc.id, doc.url || doc.document_url)
+                      }
+                      className="flex-1 flex items-center justify-center gap-2 p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      title="View"
+                    >
+                      <FiEye className="w-4 h-4" /> View
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleDownloadDocument(
+                          doc.id,
+                          doc.name || doc.document_name || "document"
+                        )
+                      }
+                      className="flex-1 flex items-center justify-center gap-2 p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      title="Download"
+                    >
+                      <FiDownload className="w-4 h-4" /> Download
+                    </button>
+                    <button
+                      onClick={() => handleDeleteDocument(doc.id)}
+                      className="flex-none p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete"
+                    >
+                      <FiTrash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-12 text-center">
-              <svg
-                className="w-16 h-16 text-gray-400 mx-auto mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <p className="text-gray-500 text-sm">No documents uploaded yet</p>
-              <p className="text-gray-400 text-xs mt-1">Upload your first document below</p>
+            <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
+              <div className="mx-auto mb-4 flex justify-center">
+                {renderDocumentIcon(documentType, "lg")}
+              </div>
+              <p className="text-gray-500 font-medium">
+                No documents uploaded yet
+              </p>
+              <p className="text-gray-400 text-sm mt-1">
+                Upload your {docConfig.label} to get started
+              </p>
             </div>
           )}
         </div>
 
         {/* Upload Section */}
         {(documentType === "attachment" ? documents.length < 20 : documents.length < 3) && (
-          <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">{documentType === "attachment" ? "Add Attachment" : "Upload Document"}</h2>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+              {documentType === "attachment" ? "Add Attachment" : "Upload New Document"}
+            </h2>
             {documentType === "attachment" ? (
-              showAddForm ? (
-                <div className="border-2 border-dashed border-blue-200 rounded-xl p-6 space-y-4 bg-blue-50/30">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Attachment Name *</label>
-                    <input
-                      type="text"
-                      value={attachmentName}
-                      onChange={(e) => setAttachmentName(e.target.value)}
-                      placeholder="Enter attachment name"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
-                      disabled={uploading}
-                    />
+              <div className="space-y-4">
+                {showAddForm ? (
+                  <div className="border-2 border-dashed border-blue-200 rounded-xl p-6 space-y-4 bg-blue-50/30">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Attachment Name *</label>
+                      <input
+                        type="text"
+                        value={attachmentName}
+                        onChange={(e) => setAttachmentName(e.target.value)}
+                        placeholder="Enter attachment name"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
+                        disabled={uploading}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Select File *</label>
+                      <input
+                        type="file"
+                        ref={attachmentFileInputRef}
+                        onChange={(e) => {
+                          handleFileSelect(e, attachmentName);
+                          setShowAddForm(false);
+                          setAttachmentName("");
+                          if (attachmentFileInputRef.current) attachmentFileInputRef.current.value = "";
+                        }}
+                        accept="image/*,.pdf,.doc,.docx"
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#00486D] file:text-white hover:file:bg-[#01334C]"
+                        disabled={uploading}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => { setShowAddForm(false); setAttachmentName(""); }}
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Select File *</label>
-                    <input
-                      type="file"
-                      ref={attachmentFileInputRef}
-                      onChange={(e) => {
-                        handleFileSelect(e, attachmentName);
-                        setShowAddForm(false);
-                        setAttachmentName("");
-                        if (attachmentFileInputRef.current) attachmentFileInputRef.current.value = "";
-                      }}
-                      accept="image/*,.pdf,.doc,.docx"
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#00486D] file:text-white hover:file:bg-[#01334C]"
-                      disabled={uploading}
-                    />
-                  </div>
+                ) : (
                   <button
-                    onClick={() => { setShowAddForm(false); setAttachmentName(""); }}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                    onClick={() => setShowAddForm(true)}
+                    disabled={uploading}
+                    className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-blue-200 rounded-xl hover:border-[#00486D] hover:bg-blue-50/30 transition-colors disabled:opacity-50"
                   >
-                    Cancel
+                    <span className="w-10 h-10 rounded-full bg-[#00486D] text-white flex items-center justify-center text-xl font-bold">+</span>
+                    <span className="text-gray-700 font-medium">Add Attachment</span>
                   </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowAddForm(true)}
-                  disabled={uploading}
-                  className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-blue-200 rounded-xl hover:border-[#00486D] hover:bg-blue-50/30 transition-colors disabled:opacity-50"
-                >
-                  <span className="w-10 h-10 rounded-full bg-[#00486D] text-white flex items-center justify-center text-xl font-bold">+</span>
-                  <span className="text-gray-700 font-medium">Add Attachment</span>
-                </button>
-              )
+                )}
+              </div>
             ) : (
               <>
                 <input
@@ -565,68 +564,45 @@ function BusinessDirectorsDocumentDetail() {
                   className="hidden"
                   disabled={uploading}
                 />
-                <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="w-full px-6 py-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#01334C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-            >
-              {uploading ? (
-                <>
-                  <svg
-                    className="animate-spin h-6 w-6 text-[#01334C]"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  <span className="text-base font-medium text-[#01334C]">Uploading...</span>
-                </>
-              ) : (
-                <>
-                  <svg
-                    className="w-6 h-6 text-[#01334C]"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  <span className="text-base font-medium text-[#01334C]">
-                    {documents.length === 0 ? "Upload Document" : "Upload Another Document"}
-                  </span>
-                </>
-              )}
-            </button>
-            <p className="text-xs text-gray-500 text-center mt-3">
-              PNG, JPG, PDF up to 5MB
-            </p>
+                <div
+                  onClick={() => !uploading && fileInputRef.current?.click()}
+                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${
+                    uploading
+                      ? "border-gray-200 bg-gray-50 cursor-not-allowed"
+                      : "border-blue-200 hover:border-[#00486D] hover:bg-blue-50/30"
+                  }`}
+                >
+                  {uploading ? (
+                    <div className="flex flex-col items-center">
+                      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00486D] mb-3"></div>
+                      <p className="text-[#00486D] font-medium">
+                        Uploading your document...
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center">
+                      <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center text-[#00486D] mb-4">
+                        <RiUploadCloud2Line className="w-7 h-7" />
+                      </div>
+                      <p className="text-gray-900 font-medium text-lg mb-1">
+                        Click to upload or drag and drop
+                      </p>
+                      <p className="text-gray-500 text-sm">
+                        SVG, PNG, JPG or PDF (max. 5MB)
+                      </p>
+                    </div>
+                  )}
+                </div>
               </>
             )}
           </div>
         )}
 
         {(documentType === "attachment" ? documents.length >= 20 : documents.length >= 3) && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
-            <p className="text-sm text-yellow-800">
-              Maximum {documentType === "attachment" ? "20" : "3"} documents reached for {docConfig.label}. Delete a document to upload a new one.
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-center justify-center gap-2">
+            <span className="text-yellow-600 font-medium">ⓘ</span>
+            <p className="text-sm text-yellow-800 font-medium">
+              Maximum limit reached. Remove a document to upload a new one.
             </p>
           </div>
         )}
