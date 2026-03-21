@@ -2,6 +2,160 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
+import { FiCheckCircle, FiXCircle } from "react-icons/fi";
+
+// ─── Document Illustrations (same as KYC.jsx) ───────────────────────────────
+
+const AadhaarCardIllustration = () => (
+  <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 shadow-md" style={{ background: "linear-gradient(135deg, #1a6b3c 0%, #0d4a28 100%)" }}>
+    <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <rect width="56" height="56" fill="url(#aadhaarBgDir)" rx="12"/>
+      <defs>
+        <linearGradient id="aadhaarBgDir" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#1a6b3c"/>
+          <stop offset="1" stopColor="#0d4a28"/>
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width="56" height="6" rx="12" fill="#FF9933"/>
+      <rect x="0" y="0" width="56" height="6" fill="#FF9933"/>
+      <rect x="0" y="6" width="56" height="5" fill="white"/>
+      <rect x="0" y="11" width="56" height="6" fill="#138808"/>
+      <rect x="3" y="18" width="50" height="35" rx="4" fill="white" fillOpacity="0.95"/>
+      <circle cx="28" cy="30" r="7" stroke="#000080" strokeWidth="1" fill="none"/>
+      <circle cx="28" cy="30" r="1.5" fill="#000080"/>
+      {[...Array(24)].map((_, i) => {
+        const angle = (i * 15 - 90) * (Math.PI / 180);
+        const x1 = 28 + 4.5 * Math.cos(angle);
+        const y1 = 30 + 4.5 * Math.sin(angle);
+        const x2 = 28 + 6.5 * Math.cos(angle);
+        const y2 = 30 + 6.5 * Math.sin(angle);
+        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#000080" strokeWidth="0.7" strokeLinecap="round"/>;
+      })}
+      <text x="28" y="48" textAnchor="middle" fill="#333" fontSize="5" fontWeight="bold" fontFamily="Arial">AADHAAR</text>
+    </svg>
+  </div>
+);
+
+const PANCardIllustration = () => (
+  <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
+    <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <defs>
+        <linearGradient id="panBgDir" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#f5f0e0"/>
+          <stop offset="1" stopColor="#e8e0c8"/>
+        </linearGradient>
+      </defs>
+      <rect width="56" height="56" fill="url(#panBgDir)" rx="12"/>
+      <rect x="3" y="3" width="50" height="12" rx="4" fill="#1a3f6b"/>
+      <text x="28" y="10" textAnchor="middle" fill="white" fontSize="4" fontWeight="bold" fontFamily="Arial">INCOME TAX DEPT</text>
+      <text x="28" y="14" textAnchor="middle" fill="#aac4e8" fontSize="3" fontFamily="Arial">GOVT. OF INDIA</text>
+      <rect x="6" y="18" width="14" height="17" rx="2" fill="#c8d8e8" stroke="#a0b4c8" strokeWidth="0.5"/>
+      <circle cx="13" cy="23" r="4" fill="#8fa8c0"/>
+      <ellipse cx="13" cy="32" rx="5" ry="3" fill="#8fa8c0"/>
+      <rect x="23" y="20" width="28" height="2" rx="1" fill="#666" fillOpacity="0.5"/>
+      <rect x="23" y="25" width="22" height="2" rx="1" fill="#666" fillOpacity="0.4"/>
+      <rect x="23" y="30" width="25" height="2" rx="1" fill="#666" fillOpacity="0.4"/>
+      <rect x="6" y="39" width="44" height="8" rx="2" fill="#1a3f6b" fillOpacity="0.1" stroke="#1a3f6b" strokeOpacity="0.2" strokeWidth="0.5"/>
+      <text x="28" y="45" textAnchor="middle" fill="#1a3f6b" fontSize="5.5" fontWeight="bold" fontFamily="monospace">ABCDE1234F</text>
+      <text x="6" y="53" fill="#666" fontSize="4" fontFamily="Arial">Permanent Account Number</text>
+    </svg>
+  </div>
+);
+
+const PassportIllustration = () => (
+  <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
+    <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <defs>
+        <linearGradient id="passportBgDir" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#1a2f6b"/>
+          <stop offset="1" stopColor="#0d1f4a"/>
+        </linearGradient>
+      </defs>
+      <rect width="56" height="56" fill="url(#passportBgDir)" rx="12"/>
+      <rect x="4" y="4" width="48" height="48" rx="8" stroke="#c9a227" strokeWidth="0.7" fill="none"/>
+      <rect x="6" y="6" width="44" height="44" rx="6" stroke="#f7d774" strokeWidth="0.3" fill="none"/>
+      <circle cx="28" cy="24" r="11" fill="#c9a227" fillOpacity="0.15" stroke="#c9a227" strokeWidth="0.5"/>
+      <rect x="22" y="31" width="12" height="1.5" rx="0.7" fill="#c9a227"/>
+      <rect x="26" y="22" width="4" height="9" rx="1" fill="#c9a227" fillOpacity="0.8"/>
+      <circle cx="24" cy="22" r="2.5" fill="#c9a227" fillOpacity="0.7"/>
+      <circle cx="32" cy="22" r="2.5" fill="#c9a227" fillOpacity="0.7"/>
+      <circle cx="28" cy="30" r="2" stroke="#c9a227" strokeWidth="0.6" fill="none"/>
+      <line x1="28" y1="28" x2="28" y2="32" stroke="#c9a227" strokeWidth="0.4"/>
+      <line x1="26" y1="30" x2="30" y2="30" stroke="#c9a227" strokeWidth="0.4"/>
+      <text x="28" y="41" textAnchor="middle" fill="#f7d774" fontSize="5.5" fontWeight="bold" fontFamily="Arial" letterSpacing="2">INDIA</text>
+      <text x="28" y="50" textAnchor="middle" fill="#c9a227" fontSize="4" fontFamily="Arial" letterSpacing="1">PASSPORT</text>
+    </svg>
+  </div>
+);
+
+const ProfilePhotoIllustration = () => (
+  <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
+    <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <defs>
+        <linearGradient id="profileBgDir" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#4f9cf9"/>
+          <stop offset="1" stopColor="#2563eb"/>
+        </linearGradient>
+      </defs>
+      <rect width="56" height="56" fill="url(#profileBgDir)" rx="12"/>
+      <rect x="8" y="6" width="40" height="44" rx="4" fill="white" fillOpacity="0.15" stroke="white" strokeOpacity="0.4" strokeWidth="0.7"/>
+      <circle cx="28" cy="22" r="8" fill="white" fillOpacity="0.9"/>
+      <ellipse cx="28" cy="42" rx="13" ry="10" fill="white" fillOpacity="0.9"/>
+      <circle cx="28" cy="22" r="6" fill="#2563eb" fillOpacity="0.3"/>
+      <rect x="38" y="38" width="14" height="14" rx="7" fill="white" fillOpacity="0.2"/>
+      <circle cx="45" cy="45" r="3" stroke="white" strokeWidth="1.2" fill="none"/>
+      <circle cx="45" cy="45" r="1.2" fill="white"/>
+    </svg>
+  </div>
+);
+
+const AttachmentIllustration = () => (
+  <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
+    <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <defs>
+        <linearGradient id="attachBgDir" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#6366f1"/>
+          <stop offset="1" stopColor="#4338ca"/>
+        </linearGradient>
+      </defs>
+      <rect width="56" height="56" fill="url(#attachBgDir)" rx="12"/>
+      <rect x="12" y="8" width="26" height="34" rx="3" fill="white" fillOpacity="0.95"/>
+      <path d="M32 8L38 14H32V8Z" fill="#e0e0e0"/>
+      <rect x="16" y="20" width="16" height="1.5" rx="0.7" fill="#6366f1" fillOpacity="0.4"/>
+      <rect x="16" y="24" width="18" height="1.5" rx="0.7" fill="#6366f1" fillOpacity="0.3"/>
+      <rect x="16" y="28" width="14" height="1.5" rx="0.7" fill="#6366f1" fillOpacity="0.3"/>
+      <rect x="16" y="32" width="17" height="1.5" rx="0.7" fill="#6366f1" fillOpacity="0.3"/>
+      <path d="M36 16 Q45 16 45 26 Q45 38 33 38 Q22 38 22 28 Q22 20 30 20 Q38 20 38 27 Q38 34 32 34"
+        stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      <circle cx="44" cy="44" r="8" fill="white" fillOpacity="0.25"/>
+      <line x1="44" y1="40" x2="44" y2="48" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="40" y1="44" x2="48" y2="44" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  </div>
+);
+
+const renderDocumentIcon = (docType) => {
+  switch (docType) {
+    case "aadhar_card":
+      return <AadhaarCardIllustration />;
+    case "pan_card":
+      return <PANCardIllustration />;
+    case "passport":
+      return <PassportIllustration />;
+    case "profile_image":
+      return <ProfilePhotoIllustration />;
+    case "attachment":
+      return <AttachmentIllustration />;
+    default:
+      return (
+        <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+      );
+  }
+};
 
 function BusinessDirectorsKYC() {
   const navigate = useNavigate();
@@ -15,92 +169,6 @@ function BusinessDirectorsKYC() {
     attachment: []
   });
   const [loading, setLoading] = useState(true);
-
-  // Render icon component for each document type (same as KYC.jsx)
-  const renderDocumentIcon = (docType) => {
-    switch (docType) {
-      case "aadhar_card":
-        return (
-          <div className="w-14 h-14 bg-white rounded-lg flex items-center justify-center relative overflow-hidden shadow-sm border border-gray-200">
-            <div className="absolute inset-0 flex flex-col">
-              <div className="h-1/3 bg-[#FF9933]"></div>
-              <div className="h-1/3 bg-white flex items-center justify-center relative">
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="#000080" strokeWidth="1.5" fill="none"/>
-                  <circle cx="12" cy="12" r="1.5" fill="#000080"/>
-                  {[...Array(24)].map((_, i) => {
-                    const angle = (i * 15 - 90) * (Math.PI / 180);
-                    const x1 = 12 + 8 * Math.cos(angle);
-                    const y1 = 12 + 8 * Math.sin(angle);
-                    const x2 = 12 + 9.5 * Math.cos(angle);
-                    const y2 = 12 + 9.5 * Math.sin(angle);
-                    return (
-                      <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#000080" strokeWidth="0.8" strokeLinecap="round"/>
-                    );
-                  })}
-                </svg>
-              </div>
-              <div className="h-1/3 bg-[#138808]"></div>
-            </div>
-          </div>
-        );
-      case "pan_card":
-        return (
-          <div className="w-14 h-14 bg-gradient-to-br from-[#FF6B35] to-[#E85A2A] rounded-lg flex items-center justify-center relative overflow-hidden shadow-sm">
-            <div className="absolute inset-0 flex flex-col p-2">
-              <div className="h-1.5 bg-white/30 rounded mb-1"></div>
-              <div className="flex-1 flex flex-col justify-center gap-0.5">
-                <div className="h-1 bg-white/40 rounded"></div>
-                <div className="h-1 bg-white/30 rounded w-4/5"></div>
-                <div className="h-0.5 bg-white/25 rounded w-3/5"></div>
-              </div>
-              <div className="absolute bottom-1 left-1 right-1">
-                <div className="text-[7px] font-bold text-white text-center tracking-wider">PAN</div>
-              </div>
-            </div>
-          </div>
-        );
-      case "passport":
-        return (
-          <div className="w-14 h-14 bg-gradient-to-br from-[#1E3A8A] to-[#1E40AF] rounded-lg flex items-center justify-center relative overflow-hidden shadow-sm">
-            <div className="absolute inset-0 flex flex-col">
-              <div className="h-2 bg-gradient-to-r from-yellow-400/40 to-yellow-500/40"></div>
-              <div className="flex-1 flex items-center justify-center relative">
-                <div className="w-9 h-9 rounded-full border-2 border-white/40 flex items-center justify-center bg-white/5">
-                  <div className="w-6 h-6 rounded-full border border-white/50 flex items-center justify-center">
-                    <div className="w-3 h-3 rounded-full bg-white/30"></div>
-                  </div>
-                </div>
-                <div className="absolute top-2 left-2 w-1 h-1 bg-white/40 rounded-full"></div>
-                <div className="absolute top-2 right-2 w-1 h-1 bg-white/40 rounded-full"></div>
-              </div>
-              <div className="h-1.5 bg-gradient-to-r from-yellow-400/30 to-yellow-500/30"></div>
-            </div>
-            <div className="absolute bottom-0.5 left-0 right-0">
-              <div className="text-[5px] font-bold text-white/70 text-center tracking-widest">PASSPORT</div>
-            </div>
-          </div>
-        );
-      case "profile_image":
-        return (
-          <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </div>
-        );
-      case "attachment":
-        return (
-          <div className="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center shadow-sm">
-            <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
 
   const documentTypes = [
     { 
@@ -187,7 +255,7 @@ function BusinessDirectorsKYC() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading documents...</p>
@@ -197,61 +265,74 @@ function BusinessDirectorsKYC() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
+    <div className="min-h-screen bg-[#F8F9FA] py-6">
+      <div className="container mx-auto px-4 md:px-8 lg:px-12">
+        {/* Header - matching KYC.jsx layout */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-2">
             <button
               onClick={() => {
-                // Check if we came from a company page (has orgId in state or pathname)
-                const orgId = location.state?.orgId || (location.pathname.includes('/company-documents/') ? location.pathname.split('/company-documents/')[1]?.split('/')[0] : null);
-                if (orgId) {
-                  navigate(`/company-documents/${orgId}`);
+                const currentOrgId = location.state?.orgId || (location.pathname.includes('/company-documents/') ? location.pathname.split('/company-documents/')[1]?.split('/')[0] : null);
+                if (currentOrgId) {
+                  navigate(`/company-documents/${currentOrgId}`);
                 } else {
                   navigate("/organizations-list");
                 }
               }}
-              className="text-[#01334C] hover:text-[#00486D] mb-2 flex items-center gap-2"
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Back
             </button>
             <h1 className="text-2xl font-semibold text-gray-900">Directors/Partners Documents</h1>
-            <p className="text-gray-600 mt-1">Upload and manage directors/partners documents by type</p>
           </div>
+          <p className="text-gray-500 italic ml-9">Upload and manage directors/partners documents by type</p>
         </div>
 
-        {/* Document Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Document List - Same layout as KYC.jsx */}
+        <div className="space-y-4">
           {documentTypes.map((docType) => {
             const docList = documents[docType.value] || [];
+            const isUploaded = docList.length > 0;
 
             return (
               <div
                 key={docType.value}
-                className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 hover:shadow-md transition-shadow cursor-pointer"
                 onClick={() => navigate(`/company-documents/${orgId}/directors/${docType.value}`, { state: { orgId } })}
+                className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer transition-all duration-300 group hover:shadow-lg hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] flex items-center justify-between"
               >
-                {/* Card Header */}
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`rounded-xl transition-opacity ${
+                      isUploaded
+                        ? "opacity-100"
+                        : "opacity-80 group-hover:opacity-100"
+                    }`}
+                  >
                     {renderDocumentIcon(docType.value)}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{docType.label}</h3>
-                      <p className="text-xs text-gray-500 mt-1">{docType.description}</p>
-                    </div>
                   </div>
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                    docList.length > 0 
-                      ? "bg-yellow-100 text-yellow-800" 
-                      : "bg-gray-100 text-gray-800"
-                  }`}>
-                    {docList.length}
-                  </span>
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 group-hover:text-white transition-colors">
+                      {docType.label}
+                    </h3>
+                    <p className="text-sm text-gray-400 group-hover:text-white/60 transition-colors mt-0.5">
+                      {docType.description}
+                    </p>
+                  </div>
                 </div>
+
+                {isUploaded ? (
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-600 rounded-full group-hover:bg-white/20 group-hover:text-white transition-colors">
+                    <FiCheckCircle className="w-4 h-4" />
+                    <span className="text-sm font-medium">{docList.length} Uploaded</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 text-gray-500 rounded-full group-hover:bg-white/20 group-hover:text-white transition-colors">
+                    <FiXCircle className="w-4 h-4" />
+                    <span className="text-sm font-medium">Not Uploaded</span>
+                  </div>
+                )}
               </div>
             );
           })}

@@ -90,11 +90,11 @@ function AdminSidebar() {
       path: "/admin/custom-payment",
     },
     { icon: <RiSettings3Line />, text: "Services", path: "/admin/services" },
-    {
-      icon: <RiFileList3Line />,
-      text: "Compliance Requests",
-      path: "/admin/compliance-requests",
-    },
+    // {
+    //   icon: <RiFileList3Line />,
+    //   text: "Compliance Requests",
+    //   path: "/admin/compliance-requests",
+    // },
     {
       icon: <BsBuilding />,
       text: "Organizations",
@@ -179,24 +179,20 @@ function AdminSidebar() {
 
       {/* Desktop Sidebar */}
       <div
-        className={`${
-          isCollapsed ? "w-[70px]" : "w-[240px]"
-        } h-screen bg-[#022b51] fixed left-0 top-0 flex-col hidden lg:flex transition-all duration-300 border-r border-[#022b51]`}
+        className={`${isCollapsed ? "w-[70px]" : "w-[240px]"
+          } h-screen bg-[#022b51] fixed left-0 top-0 flex-col hidden lg:flex transition-all duration-300 border-r border-[#022b51]`}
       >
         {/* Logo Section */}
         <div
-          className={`${
-            isCollapsed ? "px-3" : "px-6"
-          } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-[#26496a]/30`}
+          className={`${isCollapsed ? "px-3" : "px-6"
+            } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-[#26496a]/30`}
         >
           <img
             src="/logo.jpg"
             alt="OnEasy Logo"
-            className={`${
-              isCollapsed ? "h-8" : "h-10"
-            } w-auto transition-all duration-300 ${
-              isCollapsed ? "mx-auto" : ""
-            }`}
+            className={`${isCollapsed ? "h-8" : "h-10"
+              } w-auto transition-all duration-300 ${isCollapsed ? "mx-auto" : ""
+              }`}
           />
           {!isCollapsed && (
             <button
@@ -220,32 +216,27 @@ function AdminSidebar() {
 
         {/* Navigation */}
         <nav
-          className={`flex-1 min-h-0 ${
-            isCollapsed ? "px-2" : "px-3"
-          } pt-2 pb-0 space-y-0.5 transition-all duration-300 overflow-y-auto overflow-x-hidden`}
+          className={`flex-1 min-h-0 ${isCollapsed ? "px-2" : "px-3"
+            } pt-2 pb-0 space-y-0.5 transition-all duration-300 overflow-y-auto overflow-x-hidden`}
         >
           {menuItems.map((item, index) => (
             <Link
               to={item.path}
               key={index}
-              className={`flex items-center ${
-                isCollapsed ? "justify-center px-3" : "space-x-2 px-3"
-              } py-1.5 rounded-lg transition-all duration-200 ${
-                isActive(item)
+              className={`flex items-center ${isCollapsed ? "justify-center px-3" : "space-x-2 px-3"
+                } py-1.5 rounded-lg transition-all duration-200 ${isActive(item)
                   ? "bg-[#26496a] text-white"
                   : "text-gray-300 hover:bg-[#26496a]/50 hover:text-white"
-              } group relative`}
+                } group relative`}
               title={isCollapsed ? item.text : ""}
             >
               <span
-                className={`${
-                  isCollapsed ? "w-auto" : "w-4"
-                } flex justify-center`}
+                className={`${isCollapsed ? "w-auto" : "w-4"
+                  } flex justify-center`}
               >
                 {React.cloneElement(item.icon, {
-                  className: `text-sm ${
-                    isActive(item) ? "text-white" : "text-gray-400"
-                  }`,
+                  className: `text-sm ${isActive(item) ? "text-white" : "text-gray-400"
+                    }`,
                 })}
               </span>
               {!isCollapsed && (
@@ -265,9 +256,8 @@ function AdminSidebar() {
         {/* Profile Section */}
         <div className="mt-0 border-t border-[#26496a]/30 flex-shrink-0">
           <div
-            className={`${
-              isCollapsed ? "p-1.5" : "p-2"
-            } transition-all duration-300`}
+            className={`${isCollapsed ? "p-1.5" : "p-2"
+              } transition-all duration-300`}
           >
             <div
               className="relative group"
@@ -275,23 +265,20 @@ function AdminSidebar() {
               onMouseLeave={() => setIsProfileOpen(false)}
             >
               <div
-                className={`flex items-center ${
-                  isCollapsed ? "justify-center" : "space-x-1.5"
-                } cursor-pointer p-1.5 hover:bg-[#26496a]/50 rounded-lg transition-all duration-200`}
+                className={`flex items-center ${isCollapsed ? "justify-center" : "space-x-1.5"
+                  } cursor-pointer p-1.5 hover:bg-[#26496a]/50 rounded-lg transition-all duration-200`}
               >
                 {userData?.profile_image ? (
                   <img
                     src={userData.profile_image}
                     alt="Profile"
-                    className={`${
-                      isCollapsed ? "w-6 h-6" : "w-6 h-6"
-                    } rounded-full object-cover transition-all duration-300 flex-shrink-0`}
+                    className={`${isCollapsed ? "w-6 h-6" : "w-6 h-6"
+                      } rounded-full object-cover transition-all duration-300 flex-shrink-0`}
                   />
                 ) : (
                   <div
-                    className={`${
-                      isCollapsed ? "w-6 h-6" : "w-6 h-6"
-                    } bg-[#26496a] rounded-full flex items-center justify-center text-white text-xs font-medium transition-all duration-300 flex-shrink-0`}
+                    className={`${isCollapsed ? "w-6 h-6" : "w-6 h-6"
+                      } bg-[#26496a] rounded-full flex items-center justify-center text-white text-xs font-medium transition-all duration-300 flex-shrink-0`}
                   >
                     {userData?.name
                       ? userData.name.charAt(0).toUpperCase()
@@ -321,11 +308,9 @@ function AdminSidebar() {
 
               {isProfileOpen && (
                 <div
-                  className={`absolute bottom-full ${
-                    isCollapsed ? "left-full ml-2" : "left-0"
-                  } mb-1 ${
-                    isCollapsed ? "w-auto" : "w-full"
-                  } bg-[#1a3d5c] rounded-lg shadow-lg py-2 z-50 border border-[#26496a]`}
+                  className={`absolute bottom-full ${isCollapsed ? "left-full ml-2" : "left-0"
+                    } mb-1 ${isCollapsed ? "w-auto" : "w-full"
+                    } bg-[#1a3d5c] rounded-lg shadow-lg py-2 z-50 border border-[#26496a]`}
                 >
                   {!isCollapsed && (
                     <div className="px-4 py-2 border-b border-[#26496a]">
@@ -369,9 +354,8 @@ function AdminSidebar() {
 
       {/* Mobile Sidebar */}
       <div
-        className={`lg:hidden fixed left-0 top-0 h-screen w-[280px] bg-[#022b51] z-[60] transform transition-transform duration-300 ease-in-out ${
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } shadow-xl`}
+        className={`lg:hidden fixed left-0 top-0 h-screen w-[280px] bg-[#022b51] z-[60] transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+          } shadow-xl`}
       >
         {/* Mobile Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#26496a]/30">
@@ -393,11 +377,10 @@ function AdminSidebar() {
                 key={index}
                 to={item.path}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center px-6 py-3 transition-all duration-200 ${
-                  active
+                className={`flex items-center px-6 py-3 transition-all duration-200 ${active
                     ? "bg-[#26496a] border-r-4 border-white text-white"
                     : "text-gray-300 hover:bg-[#26496a]/50 hover:text-white"
-                }`}
+                  }`}
               >
                 <span className="text-2xl mr-4">{item.icon}</span>
                 <span className="font-medium text-[15px]">{item.text}</span>
