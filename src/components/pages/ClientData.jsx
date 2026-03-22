@@ -4,6 +4,27 @@ import { getUsersPageData } from "../../utils/usersPageApi";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
 import { uploadFileDirect, viewFile, downloadFile } from "../../utils/s3Upload";
+import { RiUploadCloud2Line } from "react-icons/ri";
+import { FiChevronLeft, FiEye, FiDownload, FiTrash2 } from "react-icons/fi";
+
+const renderStatementIcon = (type) => {
+  if (type === "bank_statement") {
+    return (
+      <div className="w-10 h-10 bg-gradient-to-br from-[#1E3A8A] to-[#3B82F6] rounded-xl flex items-center justify-center relative overflow-hidden shadow-sm flex-shrink-0">
+        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+        </svg>
+      </div>
+    );
+  }
+  return (
+    <div className="w-10 h-10 bg-gradient-to-br from-[#065F46] to-[#10B981] rounded-xl flex items-center justify-center relative overflow-hidden shadow-sm flex-shrink-0">
+      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    </div>
+  );
+};
 
 function ClientData() {
   const navigate = useNavigate();
@@ -419,9 +440,11 @@ function ClientData() {
     }
   };
 
+  const totalDocs = bankStatements.length + loanStatements.length;
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
@@ -431,14 +454,14 @@ function ClientData() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-[#F8F9FA] py-6">
+      <div className="container mx-auto px-4 md:px-8 lg:px-12">
         {/* Toast Notification */}
         {status.message && (
           <div className="fixed inset-0 z-[60] flex items-start justify-end pointer-events-none">
             <div className="mt-20 mr-6 w-full max-w-xs pointer-events-auto">
               <div
-                className={`rounded-xl px-4 py-3 text-sm shadow-lg border flex items-start justify-between gap-3 animate-fade-in ${status.type === "error"
+                className={`rounded-xl px-4 py-3 text-sm shadow-lg border flex items-start justify-between gap-3 ${status.type === "error"
                     ? "bg-red-50 text-red-800 border-red-200"
                     : "bg-green-50 text-green-800 border-green-200"
                   }`}
@@ -461,167 +484,187 @@ function ClientData() {
           </div>
         )}
 
-        {/* Header */}
-        <div className="mb-6">
-          <button
-            onClick={() => {
-              const effectiveUserId = userIdFromParams || location.state?.userId;
-              const effectiveOrgId = currentOrgId || location.state?.orgId;
+        {/* Header - matching KYCDocumentDetail layout */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <button
+              onClick={() => {
+                const effectiveUserId = userIdFromParams || location.state?.userId;
+                const effectiveOrgId = currentOrgId || location.state?.orgId;
 
-              console.log('Back button clicked - isAdmin:', isAdmin, 'userId:', effectiveUserId, 'orgId:', effectiveOrgId);
+                console.log('Back button clicked - isAdmin:', isAdmin, 'userId:', effectiveUserId, 'orgId:', effectiveOrgId);
 
-              if (isAdmin && effectiveUserId && effectiveOrgId) {
-                navigate(`/admin/client-company-documents/${effectiveUserId}/${effectiveOrgId}/business/company-master-data`, {
-                  state: { orgId: effectiveOrgId, userId: effectiveUserId }
-                });
-              } else {
-                const orgIdFromState = location.state?.orgId || currentOrgId;
-                if (orgIdFromState) {
-                  navigate(`/company-documents/${orgIdFromState}/business/company-master-data`, { state: { orgId: orgIdFromState } });
+                if (isAdmin && effectiveUserId && effectiveOrgId) {
+                  navigate(`/admin/client-company-documents/${effectiveUserId}/${effectiveOrgId}/business/company-master-data`, {
+                    state: { orgId: effectiveOrgId, userId: effectiveUserId }
+                  });
                 } else {
-                  navigate("/organizations-list");
+                  const orgIdFromState = location.state?.orgId || currentOrgId;
+                  if (orgIdFromState) {
+                    navigate(`/company-documents/${orgIdFromState}/business/company-master-data`, { state: { orgId: orgIdFromState } });
+                  } else {
+                    navigate("/organizations-list");
+                  }
                 }
-              }
-            }}
-            className="text-[#01334C] hover:text-[#00486D] mb-4 flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Company Master Data
-          </button>
-
-          {organization && (
-            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
-              <h1 className="text-2xl font-semibold text-gray-900">
-                {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
-              </h1>
-              {organization.tradeName !== '-' && organization.legalName !== '-' && organization.tradeName !== organization.legalName && (
-                <p className="text-gray-600 mt-1">{organization.tradeName}</p>
-              )}
-              {organization.gstin !== '-' && (
-                <p className="text-sm text-gray-500 mt-1 font-mono">GSTIN: {organization.gstin}</p>
-              )}
-            </div>
-          )}
-
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Client Data</h2>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleOpenUploadModal('bank_statement')}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-              >
-                + Upload Bank Statement
-              </button>
-              <button
-                onClick={() => handleOpenUploadModal('loan_statement')}
-                className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors"
-              >
-                + Upload Loan Statement
-              </button>
-            </div>
+              }}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <FiChevronLeft className="w-6 h-6 text-gray-900" />
+            </button>
+            <h1 className="text-2xl font-semibold text-gray-900">Client Data</h1>
+          </div>
+          <div className="ml-9 flex items-center justify-between">
+            <p className="text-gray-500 italic">Upload and manage bank & loan statements</p>
+            <span
+              className={`px-3 py-1 text-sm font-medium rounded-full ${
+                totalDocs > 0
+                  ? "bg-blue-50 text-[#00486D]"
+                  : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              {totalDocs} {totalDocs === 1 ? "Document" : "Documents"}
+            </span>
           </div>
         </div>
 
         {/* Bank Statements Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Bank Statements</h3>
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Bank Statements</h2>
+            <button
+              onClick={() => handleOpenUploadModal('bank_statement')}
+              className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors"
+              style={{ background: 'linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)' }}
+            >
+              + Upload Bank Statement
+            </button>
+          </div>
           {bankStatements.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {bankStatements.map((doc) => (
-                <div key={doc.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900">{doc.bank_name}</p>
+                <div
+                  key={doc.id}
+                  className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col justify-between group hover:shadow-lg transition-all duration-300"
+                >
+                  <div className="flex items-start gap-4 mb-3">
+                    {renderStatementIcon("bank_statement")}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 truncate" title={doc.bank_name}>
+                        {doc.bank_name}
+                      </p>
                       <p className="text-xs text-gray-500 mt-1">
                         {formatDate(doc.period_from)} - {formatDate(doc.period_to)}
                       </p>
                       {doc.document_name && (
-                        <p className="text-xs text-gray-400 mt-1 truncate">{doc.document_name}</p>
+                        <p className="text-xs text-gray-400 mt-1 truncate" title={doc.document_name}>{doc.document_name}</p>
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2 mt-3">
+
+                  <div className="flex items-center gap-2 pt-3 border-t border-gray-50">
                     <button
                       onClick={() => handleViewDocument(doc.id, doc.document_url || doc.url)}
-                      className="flex-1 px-3 py-1.5 text-xs font-medium text-[#01334C] border border-[#01334C] rounded-md hover:bg-[#01334C] hover:text-white transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      title="View"
                     >
-                      View
+                      <FiEye className="w-4 h-4" /> View
                     </button>
                     <button
                       onClick={() => handleDownloadDocument(doc.id, doc.document_name, doc.document_url || doc.url)}
-                      className="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 border border-green-600 rounded-md hover:bg-green-600 hover:text-white transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      title="Download"
                     >
-                      Download
+                      <FiDownload className="w-4 h-4" /> Download
                     </button>
                     <button
                       onClick={() => handleDeleteDocument(doc.id)}
-                      className="px-3 py-1.5 text-xs font-medium text-red-600 border border-red-600 rounded-md hover:bg-red-600 hover:text-white transition-colors"
+                      className="flex-none p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete"
                     >
-                      Delete
+                      <FiTrash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <p className="text-gray-500 text-sm">No bank statements uploaded yet</p>
+            <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
+              <div className="mx-auto mb-4 flex justify-center">
+                {renderStatementIcon("bank_statement")}
+              </div>
+              <p className="text-gray-500 font-medium">No bank statements uploaded yet</p>
+              <p className="text-gray-400 text-sm mt-1">Upload your bank statements to get started</p>
             </div>
           )}
         </div>
 
         {/* Loan Statements Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Loan Statements</h3>
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Loan Statements</h2>
+            <button
+              onClick={() => handleOpenUploadModal('loan_statement')}
+              className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors"
+              style={{ background: 'linear-gradient(160.12deg, #065F46 13.28%, #10B981 109.67%)' }}
+            >
+              + Upload Loan Statement
+            </button>
+          </div>
           {loanStatements.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {loanStatements.map((doc) => (
-                <div key={doc.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900">{doc.bank_name}</p>
+                <div
+                  key={doc.id}
+                  className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col justify-between group hover:shadow-lg transition-all duration-300"
+                >
+                  <div className="flex items-start gap-4 mb-3">
+                    {renderStatementIcon("loan_statement")}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 truncate" title={doc.bank_name}>
+                        {doc.bank_name}
+                      </p>
                       <p className="text-xs text-gray-500 mt-1">
                         {formatDate(doc.period_from)} - {formatDate(doc.period_to)}
                       </p>
                       {doc.document_name && (
-                        <p className="text-xs text-gray-400 mt-1 truncate">{doc.document_name}</p>
+                        <p className="text-xs text-gray-400 mt-1 truncate" title={doc.document_name}>{doc.document_name}</p>
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2 mt-3">
+
+                  <div className="flex items-center gap-2 pt-3 border-t border-gray-50">
                     <button
                       onClick={() => handleViewDocument(doc.id, doc.document_url || doc.url)}
-                      className="flex-1 px-3 py-1.5 text-xs font-medium text-[#01334C] border border-[#01334C] rounded-md hover:bg-[#01334C] hover:text-white transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      title="View"
                     >
-                      View
+                      <FiEye className="w-4 h-4" /> View
                     </button>
                     <button
                       onClick={() => handleDownloadDocument(doc.id, doc.document_name, doc.document_url || doc.url)}
-                      className="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 border border-green-600 rounded-md hover:bg-green-600 hover:text-white transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      title="Download"
                     >
-                      Download
+                      <FiDownload className="w-4 h-4" /> Download
                     </button>
                     <button
                       onClick={() => handleDeleteDocument(doc.id)}
-                      className="px-3 py-1.5 text-xs font-medium text-red-600 border border-red-600 rounded-md hover:bg-red-600 hover:text-white transition-colors"
+                      className="flex-none p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete"
                     >
-                      Delete
+                      <FiTrash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <p className="text-gray-500 text-sm">No loan statements uploaded yet</p>
+            <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
+              <div className="mx-auto mb-4 flex justify-center">
+                {renderStatementIcon("loan_statement")}
+              </div>
+              <p className="text-gray-500 font-medium">No loan statements uploaded yet</p>
+              <p className="text-gray-400 text-sm mt-1">Upload your loan statements to get started</p>
             </div>
           )}
         </div>
@@ -642,14 +685,14 @@ function ClientData() {
               padding: 4px 0;
             }
           `}</style>
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full mx-4 p-8 border border-gray-100">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-gray-900">
                 Upload {uploadType === 'bank_statement' ? 'Bank' : 'Loan'} Statement
               </h3>
               <button
                 onClick={handleCloseUploadModal}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -657,43 +700,43 @@ function ClientData() {
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Bank Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.bankName}
                   onChange={(e) => setFormData(prev => ({ ...prev, bankName: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
                   placeholder="Enter bank name"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Period From <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="date"
                     value={formData.periodFrom}
                     onChange={(e) => setFormData(prev => ({ ...prev, periodFrom: e.target.value }))}
-                    className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-4 py-3 text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
                     max={formData.periodTo || undefined}
                     style={{ fontSize: '16px', minHeight: '48px' }}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Period To <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="date"
                     value={formData.periodTo}
                     onChange={(e) => setFormData(prev => ({ ...prev, periodTo: e.target.value }))}
-                    className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-4 py-3 text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
                     min={formData.periodFrom || undefined}
                     style={{ fontSize: '16px', minHeight: '48px' }}
                   />
@@ -701,26 +744,55 @@ function ClientData() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Document <span className="text-red-500">*</span>
                 </label>
                 <input
-                  ref={fileInputRef}
                   type="file"
+                  ref={fileInputRef}
                   onChange={handleFileSelect}
                   accept=".pdf,.jpg,.jpeg,.png"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                  className="hidden"
                 />
-                {formData.file && (
-                  <p className="text-xs text-gray-500 mt-1">{formData.file.name}</p>
-                )}
+                <div
+                  onClick={() => !uploading && fileInputRef.current?.click()}
+                  className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200 ${
+                    uploading
+                      ? "border-gray-200 bg-gray-50 cursor-not-allowed"
+                      : formData.file
+                      ? "border-green-300 bg-green-50/30"
+                      : "border-blue-200 hover:border-[#00486D] hover:bg-blue-50/30"
+                  }`}
+                >
+                  {formData.file ? (
+                    <div className="flex flex-col items-center">
+                      <svg className="w-8 h-8 text-green-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <p className="text-gray-900 font-medium text-sm">{formData.file.name}</p>
+                      <p className="text-gray-500 text-xs mt-1">Click to change file</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center">
+                      <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-[#00486D] mb-3">
+                        <RiUploadCloud2Line className="w-6 h-6" />
+                      </div>
+                      <p className="text-gray-900 font-medium text-sm mb-1">
+                        Click to upload or drag and drop
+                      </p>
+                      <p className="text-gray-500 text-xs">
+                        PDF, JPG, JPEG or PNG (max. 10MB)
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-3 mt-8">
               <button
                 onClick={handleCloseUploadModal}
-                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                className="flex-1 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
                 disabled={uploading}
               >
                 Cancel
@@ -728,7 +800,8 @@ function ClientData() {
               <button
                 onClick={handleUpload}
                 disabled={uploading}
-                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[#01334C] rounded-md hover:bg-[#00486D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 text-sm font-medium text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ background: 'linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)' }}
               >
                 {uploading ? "Uploading..." : "Upload"}
               </button>
@@ -741,4 +814,3 @@ function ClientData() {
 }
 
 export default ClientData;
-
