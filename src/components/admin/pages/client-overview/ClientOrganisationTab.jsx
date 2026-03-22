@@ -51,13 +51,8 @@ function ClientOrganisationTab({
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)] overflow-hidden">
-        <button
-          onClick={() =>
-            setExpandedSection(
-              expandedSection === "organisation" ? null : "organisation",
-            )
-          }
-          className="w-full px-6 py-5 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
+        <div
+          className="w-full px-6 py-5 flex items-center justify-between text-left"
         >
           <div className="flex items-center gap-3">
             <div
@@ -89,22 +84,8 @@ function ClientOrganisationTab({
               </p>
             </div>
           </div>
-          <svg
-            className={`w-5 h-5 text-gray-400 transition-transform ${expandedSection === "organisation" ? "rotate-180" : ""
-              }`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </button>
-        {expandedSection === "organisation" && (
+        </div>
+        {true && (
           <div className="px-6 py-6 border-t border-gray-100 bg-[#FAFBFC]">
             {isEditingOrganisations ? (
               <div className="space-y-6">
@@ -1342,7 +1323,7 @@ function ClientOrganisationTab({
                                 </button>
                               </td>
                             </tr>
-                            {expandedOrgId === idx &&
+                            {true &&
                               (() => {
                                 const isEditingThisOrg = editingOrgId === idx;
                                 // Find or get organization from state
