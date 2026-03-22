@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { getUsersPageData } from "../../utils/usersPageApi";
 import apiClient from "../../utils/api";
+import { BsBuilding } from "react-icons/bs";
+import { FiChevronLeft } from "react-icons/fi";
 
 function CompanyMasterData() {
   const navigate = useNavigate();
@@ -61,7 +63,7 @@ function CompanyMasterData() {
       title: "Client Data",
       description: "View and manage client data documents",
       icon: (
-        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-8 h-8 text-blue-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
       ),
@@ -72,7 +74,7 @@ function CompanyMasterData() {
       title: "Accounting",
       description: "View and manage accounting documents",
       icon: (
-        <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-8 h-8 text-green-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
         </svg>
       ),
@@ -83,7 +85,7 @@ function CompanyMasterData() {
       title: "Compliance",
       description: "View and manage compliance documents",
       icon: (
-        <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-8 h-8 text-purple-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
         </svg>
       ),
@@ -94,7 +96,7 @@ function CompanyMasterData() {
       title: "Annual Compliance",
       description: "View and manage annual compliance documents",
       icon: (
-        <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-8 h-8 text-orange-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       ),
@@ -130,7 +132,7 @@ function CompanyMasterData() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
@@ -140,56 +142,61 @@ function CompanyMasterData() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header */}
-        <div className="mb-6">
-          <button
-            onClick={() => {
-              if (isAdmin) {
-                navigate(`/admin/client-company-documents/${userId}/${currentOrgId}/business`, { state: { orgId: currentOrgId, userId } });
-              } else {
-                const orgIdFromState = location.state?.orgId || currentOrgId;
-                if (orgIdFromState) {
-                  navigate(`/company-documents/${orgIdFromState}/business`, { state: { orgId: orgIdFromState } });
+    <div className="min-h-screen bg-[#F8F9FA] py-6">
+      <div className="container mx-auto px-4 md:px-8 lg:px-12">
+        {/* Header - matching OrganizationBusinessDocuments layout */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <button
+              onClick={() => {
+                if (isAdmin) {
+                  navigate(`/admin/client-company-documents/${userId}/${currentOrgId}/business`, { state: { orgId: currentOrgId, userId } });
                 } else {
-                  navigate("/organizations-list");
+                  const orgIdFromState = location.state?.orgId || currentOrgId;
+                  if (orgIdFromState) {
+                    navigate(`/company-documents/${orgIdFromState}/business`, { state: { orgId: orgIdFromState } });
+                  } else {
+                    navigate("/organizations-list");
+                  }
                 }
-              }
-            }}
-            className="text-[#01334C] hover:text-[#00486D] mb-4 flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Business Documents
-          </button>
-
-          {organization && (
-            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
-              <h1 className="text-2xl font-semibold text-gray-900">
-                {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
-              </h1>
-              {organization.tradeName !== '-' && organization.legalName !== '-' && organization.tradeName !== organization.legalName && (
-                <p className="text-gray-600 mt-1">{organization.tradeName}</p>
-              )}
-              {organization.gstin !== '-' && (
-                <p className="text-sm text-gray-500 mt-1 font-mono">GSTIN: {organization.gstin}</p>
-              )}
-            </div>
-          )}
-
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Company Master Data</h2>
+              }}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <FiChevronLeft className="w-6 h-6 text-gray-900" />
+            </button>
+            <h1 className="text-2xl font-semibold text-gray-900">Company Master Data</h1>
+          </div>
+          <p className="text-gray-500 italic ml-9">Select a document category to view and manage</p>
         </div>
 
-        {/* Master Data Categories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Company Info Card with building icon - matching OrganizationBusinessDocuments */}
+        {organization && (
+          <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 p-5 mb-6 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white flex-shrink-0" style={{ background: 'linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)' }}>
+              <BsBuilding className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
+              </h2>
+              {organization.tradeName !== '-' && organization.legalName !== '-' && organization.tradeName !== organization.legalName && (
+                <p className="text-sm text-gray-500 mt-0.5">{organization.tradeName}</p>
+              )}
+              {organization.gstin !== '-' && (
+                <p className="text-xs text-gray-400 mt-0.5 font-mono">GSTIN: {organization.gstin}</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Master Data Categories - Vertical list like OrganizationBusinessDocuments */}
+        <div className="space-y-4">
           {masterDataCategories.map((category) => {
             const colorClasses = getColorClasses(category.color);
             return (
               <div
                 key={category.id}
-                className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 cursor-pointer hover:shadow-md transition-shadow"
+                className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer transition-all duration-300 group hover:shadow-lg hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] flex items-center justify-between"
                 onClick={() => {
                   if (category.id === "client-data") {
                     if (isAdmin) {
@@ -218,20 +225,18 @@ function CompanyMasterData() {
                   }
                 }}
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 ${colorClasses.iconBg} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                      {category.icon}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900">{category.title}</h3>
-                      <p className="text-xs text-gray-500 mt-1">{category.description}</p>
-                    </div>
+                <div className="flex items-center gap-4">
+                  <div className={`w-14 h-14 ${colorClasses.iconBg} group-hover:bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors`}>
+                    {category.icon}
                   </div>
-                  <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-white transition-colors">{category.title}</h3>
+                    <p className="text-sm text-gray-400 group-hover:text-white/60 mt-0.5 transition-colors">{category.description}</p>
+                  </div>
                 </div>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-white flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </div>
             );
           })}
@@ -242,4 +247,3 @@ function CompanyMasterData() {
 }
 
 export default CompanyMasterData;
-

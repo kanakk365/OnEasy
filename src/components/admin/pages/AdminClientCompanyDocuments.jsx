@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../../utils/api";
 import logo from "../../../assets/logo.png";
+import { BsArrowRight } from "react-icons/bs";
+import { FiChevronLeft } from "react-icons/fi";
+import { RiUserLine, RiFileTextLine } from "react-icons/ri";
 
 function AdminClientCompanyDocuments() {
   const navigate = useNavigate();
@@ -135,7 +138,7 @@ function AdminClientCompanyDocuments() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading documents...</p>
@@ -146,7 +149,7 @@ function AdminClientCompanyDocuments() {
 
   if (!organization) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600">Organization not found</p>
           <button
@@ -161,123 +164,117 @@ function AdminClientCompanyDocuments() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-[#F8F9FA] py-6">
+      <div className="container mx-auto px-4 md:px-8 lg:px-12">
         {/* Header */}
-        <div className="mb-6">
-          <button
-            onClick={() => navigate(`/admin/client-organizations/${userId}`)}
-            className="text-[#01334C] hover:text-[#00486D] mb-4 flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Organizations
-          </button>
-          
-          {/* Company Info Card */}
-          <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-lg bg-[#01334C] flex items-center justify-center overflow-hidden flex-shrink-0">
-                <img 
-                  src={logo} 
-                  alt="Company Logo" 
-                  className="w-14 h-14 object-contain"
-                />
-              </div>
-              <div className="flex-1">
-                <h1 className="text-2xl font-semibold text-gray-900">
-                  {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
-                </h1>
-                {organization.tradeName !== '-' && organization.legalName !== '-' && organization.tradeName !== organization.legalName && (
-                  <p className="text-gray-600 mt-1">{organization.tradeName}</p>
-                )}
-                {organization.gstin !== '-' && (
-                  <p className="text-sm text-gray-500 mt-1 font-mono">GSTIN: {organization.gstin}</p>
-                )}
-              </div>
-            </div>
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <button
+              onClick={() => navigate(`/admin/client-organizations/${userId}`)}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <FiChevronLeft className="w-6 h-6 text-gray-900" />
+            </button>
+            <h1 className="text-2xl font-semibold text-gray-900">Company Documents</h1>
           </div>
-
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Company Documents</h2>
+          <p className="text-gray-500 italic ml-9">Select your document type</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Company Info Card */}
+        <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 p-5 mb-6 flex items-center gap-4">
+          <div className="w-14 h-14 rounded-xl bg-[#01334C] flex items-center justify-center overflow-hidden flex-shrink-0">
+            <img 
+              src={logo} 
+              alt="Company Logo" 
+              className="w-12 h-12 object-contain"
+            />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-xl font-semibold text-gray-900">
+              {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
+            </h2>
+            {organization.tradeName !== '-' && organization.legalName !== '-' && organization.tradeName !== organization.legalName && (
+              <p className="text-sm text-gray-500 mt-0.5">{organization.tradeName}</p>
+            )}
+            {organization.gstin !== '-' && (
+              <p className="text-xs text-gray-400 mt-0.5 font-mono">GSTIN: {organization.gstin}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Directors/Partners Documents Card */}
           <div
-            className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 cursor-pointer hover:shadow-md transition-shadow"
             onClick={() => navigate(`/admin/client-directors/${userId}/${orgId}`, { state: { orgId, userId } })}
+            className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Directors/Partners</h2>
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">
-                  {directorsPartnersDocuments.length} {directorsPartnersDocuments.length === 1 ? "document" : "documents"}
-                </span>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+            <div className="flex justify-between items-start mb-4">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-white"
+                style={{
+                  background:
+                    "linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)",
+                }}
+              >
+                <RiUserLine className="w-6 h-6" />
+              </div>
+              <div className="text-[#00486D] group-hover:text-white group-hover:translate-x-1 transition-all duration-300">
+                <BsArrowRight className="w-6 h-6" />
               </div>
             </div>
-            <div className="text-center py-8">
-              <svg
-                className="w-16 h-16 text-purple-400 mx-auto mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-              <p className="text-gray-500 text-sm mb-2">
-                {directorsPartnersDocuments.length > 0
-                  ? `You have ${directorsPartnersDocuments.length} directors/partners ${directorsPartnersDocuments.length === 1 ? 'document' : 'documents'}`
-                  : "No directors/partners documents found"}
-              </p>
-              <p className="text-gray-400 text-xs">Click to view documents by type</p>
+
+            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-white mb-2 transition-colors">
+              Directors/Partners
+            </h3>
+            <p className="text-gray-500 text-sm mb-8 leading-relaxed group-hover:text-white/80 transition-colors">
+              View and manage directors/partners KYC documents
+            </p>
+
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#E6F6FD] group-hover:bg-white/20 flex items-center justify-center text-[#00486D] group-hover:text-white font-semibold text-sm transition-colors">
+                {directorsPartnersDocuments.length}
+              </div>
+              <span className="text-gray-600 text-sm group-hover:text-white/80 transition-colors">
+                {directorsPartnersDocuments.length === 1 ? "Document" : "Documents"}
+              </span>
             </div>
           </div>
 
           {/* Business Documents Card */}
           <div
-            className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 cursor-pointer hover:shadow-md transition-shadow"
             onClick={() => navigate(`/admin/client-company-documents/${userId}/${orgId}/business`, { state: { orgId, userId } })}
+            className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Business Documents</h2>
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                  {organizationDocuments.length} {organizationDocuments.length === 1 ? "document" : "documents"}
-                </span>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+            <div className="flex justify-between items-start mb-4">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-white"
+                style={{
+                  background:
+                    "linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)",
+                }}
+              >
+                <RiFileTextLine className="w-6 h-6" />
+              </div>
+              <div className="text-[#00486D] group-hover:text-white group-hover:translate-x-1 transition-all duration-300">
+                <BsArrowRight className="w-6 h-6" />
               </div>
             </div>
-            <div className="text-center py-8">
-              <svg
-                className="w-16 h-16 text-green-400 mx-auto mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <p className="text-gray-500 text-sm mb-2">
-                {organizationDocuments.length > 0
-                  ? `${organizationDocuments.length} business ${organizationDocuments.length === 1 ? 'document' : 'documents'} available`
-                  : "No business documents found"}
-              </p>
-              <p className="text-gray-400 text-xs">Click to view and manage business documents</p>
+
+            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-white mb-2 transition-colors">
+              Business Documents
+            </h3>
+            <p className="text-gray-500 text-sm mb-8 leading-relaxed group-hover:text-white/80 transition-colors">
+              Access company documents, registrations, and compliance files
+            </p>
+
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#E6F6FD] group-hover:bg-white/20 flex items-center justify-center text-[#00486D] group-hover:text-white font-semibold text-sm transition-colors">
+                {organizationDocuments.length}
+              </div>
+              <span className="text-gray-600 text-sm group-hover:text-white/80 transition-colors">
+                {organizationDocuments.length === 1 ? "Document" : "Documents"}
+              </span>
             </div>
           </div>
         </div>
@@ -287,4 +284,3 @@ function AdminClientCompanyDocuments() {
 }
 
 export default AdminClientCompanyDocuments;
-
