@@ -121,12 +121,7 @@ function ClientServicesTab({
           >
             {/* Top Section - Light Blue Background - Clickable */}
             <div
-              onClick={() =>
-                setIsServiceCardExpanded(
-                  isServiceCardExpanded === index ? null : index,
-                )
-              }
-              className="bg-blue-50 p-6 flex items-center justify-between border-b border-gray-200 cursor-pointer hover:bg-blue-100 transition-colors rounded-t-xl"
+              className="bg-blue-50 p-6 flex items-center justify-between border-b border-gray-200 rounded-t-xl"
             >
               <div className="flex items-center gap-4 flex-1">
                 {/* Avatar */}
@@ -285,25 +280,10 @@ function ClientServicesTab({
                 </div>
               </div>
 
-              {/* Chevron Icon */}
-              <svg
-                className={`w-5 h-5 text-gray-600 transition-transform ml-4 ${isServiceCardExpanded === index ? "rotate-180" : ""
-                  }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
             </div>
 
             {/* Bottom Section - White Background - Expandable */}
-            {isServiceCardExpanded === index && (
+            {true && (
               <div className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
