@@ -27,13 +27,20 @@ function paymentStatusToDisplay(dbValue) {
   const v = String(dbValue).toLowerCase().replace(/_/g, " ");
   const map = {
     paid: "Paid",
-    partially_paid: "Partially Paid",
+    "partially paid": "Partially Paid",
     "pay later": "Pay later",
     "open to pay": "Open to Pay",
+    "payment pending": "Payment Pending",
     pending: "Open to Pay",
     unpaid: "Open to Pay",
   };
-  return map[v] || dbValue;
+  return (
+    map[v] ||
+    PAYMENT_STATUS_OPTIONS.find(
+      (o) => o.toLowerCase().replace(/\s/g, "") === v.replace(/\s/g, ""),
+    ) ||
+    dbValue
+  );
 }
 
 function ClientServicesTab({
