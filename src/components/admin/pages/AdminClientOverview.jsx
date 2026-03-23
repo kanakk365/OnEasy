@@ -678,39 +678,23 @@ function AdminClientOverview() {
         allServices,
       );
 
-      // Include both paid and pending payment registrations
-      // Show services that are either paid OR have pending payment status (created by admin with payment link)
+      // Show all services that belong to this user
+      // Any service with a ticket_id OR a payment_id should always be visible
+      // regardless of the current payment_status value
       const filterServices = (r) => {
-        // Paid services (has payment_id)
-        const isPaid =
+        // Always show if service has a ticket_id
+        if (r.ticket_id) return true;
+
+        // Also show if it has any payment identifier
+        if (
           (r.razorpay_payment_id &&
             String(r.razorpay_payment_id).trim() !== "") ||
-          (r.payment_id && String(r.payment_id).trim() !== "") ||
-          (r.payment_status &&
-            String(r.payment_status).toLowerCase() === "paid");
-
-        // Pending payment services (created by admin with payment link)
-        // More lenient: show if payment_status is pending/unpaid and has ticket_id (admin created it)
-        const isPendingPayment =
-          r.ticket_id &&
-          r.payment_status &&
-          (String(r.payment_status).toLowerCase() === "pending" ||
-            String(r.payment_status).toLowerCase() === "unpaid");
-
-        const result = isPaid || isPendingPayment;
-
-        // Debug logging for pending payments
-        if (isPendingPayment && !isPaid) {
-          console.log("🔍 Found pending payment service:", {
-            ticket_id: r.ticket_id,
-            payment_status: r.payment_status,
-            service_status: r.service_status,
-            user_id: r.user_id,
-            package_name: r.package_name,
-          });
+          (r.payment_id && String(r.payment_id).trim() !== "")
+        ) {
+          return true;
         }
 
-        return result;
+        return false;
       };
 
       // Filter generic services - also filter by userId to ensure we only get this client's services
@@ -1030,13 +1014,13 @@ function AdminClientOverview() {
         updatedTasksList = adminTasksList.map((task, idx) =>
           idx === editingAdminTaskIndex
             ? {
-                ...task,
-                date: currentAdminTask.date,
-                title: currentAdminTask.title,
-                description: currentAdminTask.description,
-                type: currentAdminTask.type,
-                organizationId: currentAdminTask.organizationId || null,
-              }
+              ...task,
+              date: currentAdminTask.date,
+              title: currentAdminTask.title,
+              description: currentAdminTask.description,
+              type: currentAdminTask.type,
+              organizationId: currentAdminTask.organizationId || null,
+            }
             : task,
         );
       } else {
@@ -1167,16 +1151,16 @@ function AdminClientOverview() {
         updatedNotesList = adminNotesList.map((note, idx) =>
           idx === editingNoteIndex
             ? {
-                ...note,
-                organizationId:
-                  currentNote.organizationId || note.organizationId || null,
-                date: currentNote.date,
-                description: currentNote.description,
-                attachments: currentNote.attachments,
-                adminActionItems: cleanedAdmin,
-                clientActionItems: cleanedClient,
-                updatedAt: new Date().toISOString(),
-              }
+              ...note,
+              organizationId:
+                currentNote.organizationId || note.organizationId || null,
+              date: currentNote.date,
+              description: currentNote.description,
+              attachments: currentNote.attachments,
+              adminActionItems: cleanedAdmin,
+              clientActionItems: cleanedClient,
+              updatedAt: new Date().toISOString(),
+            }
             : note,
         );
       } else {
@@ -1248,15 +1232,15 @@ function AdminClientOverview() {
       const updatedNotesList = adminNotesList.map((note, idx) =>
         idx === noteIndex
           ? {
-              ...note,
-              organizationId: editedNote.organizationId || note.organizationId || null,
-              date: editedNote.date,
-              description: editedNote.description,
-              attachments: editedNote.attachments,
-              adminActionItems: cleanedAdmin,
-              clientActionItems: cleanedClient,
-              updatedAt: new Date().toISOString(),
-            }
+            ...note,
+            organizationId: editedNote.organizationId || note.organizationId || null,
+            date: editedNote.date,
+            description: editedNote.description,
+            attachments: editedNote.attachments,
+            adminActionItems: cleanedAdmin,
+            clientActionItems: cleanedClient,
+            updatedAt: new Date().toISOString(),
+          }
           : note,
       );
 
@@ -1347,20 +1331,20 @@ function AdminClientOverview() {
       organisations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              websites: [
-                ...(org.websites || []),
-                {
-                  id: Date.now(),
-                  type: "",
-                  url: "",
-                  login: "",
-                  password: "",
-                  remarks: "",
-                  showPassword: false,
-                },
-              ],
-            }
+            ...org,
+            websites: [
+              ...(org.websites || []),
+              {
+                id: Date.now(),
+                type: "",
+                url: "",
+                login: "",
+                password: "",
+                remarks: "",
+                showPassword: false,
+              },
+            ],
+          }
           : org,
       ),
     );
@@ -1371,9 +1355,9 @@ function AdminClientOverview() {
       organisations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              websites: (org.websites || []).filter((w) => w.id !== websiteId),
-            }
+            ...org,
+            websites: (org.websites || []).filter((w) => w.id !== websiteId),
+          }
           : org,
       ),
     );
@@ -1384,13 +1368,13 @@ function AdminClientOverview() {
       organisations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              websites: (org.websites || []).map((website) =>
-                website.id === websiteId
-                  ? { ...website, [field]: value }
-                  : website,
-              ),
-            }
+            ...org,
+            websites: (org.websites || []).map((website) =>
+              website.id === websiteId
+                ? { ...website, [field]: value }
+                : website,
+            ),
+          }
           : org,
       ),
     );
@@ -1401,13 +1385,13 @@ function AdminClientOverview() {
       organisations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              websites: (org.websites || []).map((website) =>
-                website.id === websiteId
-                  ? { ...website, showPassword: !website.showPassword }
-                  : website,
-              ),
-            }
+            ...org,
+            websites: (org.websites || []).map((website) =>
+              website.id === websiteId
+                ? { ...website, showPassword: !website.showPassword }
+                : website,
+            ),
+          }
           : org,
       ),
     );
@@ -1419,20 +1403,20 @@ function AdminClientOverview() {
       organisations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              directorsPartners: [
-                ...(org.directorsPartners || []),
-                {
-                  id: Date.now(),
-                  name: "",
-                  dinNumber: "",
-                  contact: "",
-                  email: "",
-                  dateOfAddition: "",
-                  status: "Active",
-                },
-              ],
-            }
+            ...org,
+            directorsPartners: [
+              ...(org.directorsPartners || []),
+              {
+                id: Date.now(),
+                name: "",
+                dinNumber: "",
+                contact: "",
+                email: "",
+                dateOfAddition: "",
+                status: "Active",
+              },
+            ],
+          }
           : org,
       ),
     );
@@ -1443,11 +1427,11 @@ function AdminClientOverview() {
       organisations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              directorsPartners: (org.directorsPartners || []).filter(
-                (dp) => dp.id !== id,
-              ),
-            }
+            ...org,
+            directorsPartners: (org.directorsPartners || []).filter(
+              (dp) => dp.id !== id,
+            ),
+          }
           : org,
       ),
     );
@@ -1458,11 +1442,11 @@ function AdminClientOverview() {
       organisations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              directorsPartners: (org.directorsPartners || []).map((dp) =>
-                dp.id === id ? { ...dp, [field]: value } : dp,
-              ),
-            }
+            ...org,
+            directorsPartners: (org.directorsPartners || []).map((dp) =>
+              dp.id === id ? { ...dp, [field]: value } : dp,
+            ),
+          }
           : org,
       ),
     );
@@ -1474,18 +1458,18 @@ function AdminClientOverview() {
       organisations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              digitalSignatures: [
-                ...(org.digitalSignatures || []),
-                {
-                  id: Date.now(),
-                  name: "",
-                  dscNumber: "",
-                  expiryDate: "",
-                  status: "Active",
-                },
-              ],
-            }
+            ...org,
+            digitalSignatures: [
+              ...(org.digitalSignatures || []),
+              {
+                id: Date.now(),
+                name: "",
+                dscNumber: "",
+                expiryDate: "",
+                status: "Active",
+              },
+            ],
+          }
           : org,
       ),
     );
@@ -1496,11 +1480,11 @@ function AdminClientOverview() {
       organisations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              digitalSignatures: (org.digitalSignatures || []).filter(
-                (ds) => ds.id !== id,
-              ),
-            }
+            ...org,
+            digitalSignatures: (org.digitalSignatures || []).filter(
+              (ds) => ds.id !== id,
+            ),
+          }
           : org,
       ),
     );
@@ -1511,11 +1495,11 @@ function AdminClientOverview() {
       organisations.map((org) =>
         org.id === orgId
           ? {
-              ...org,
-              digitalSignatures: (org.digitalSignatures || []).map((ds) =>
-                ds.id === id ? { ...ds, [field]: value } : ds,
-              ),
-            }
+            ...org,
+            digitalSignatures: (org.digitalSignatures || []).map((ds) =>
+              ds.id === id ? { ...ds, [field]: value } : ds,
+            ),
+          }
           : org,
       ),
     );
@@ -1920,7 +1904,36 @@ function AdminClientOverview() {
       );
 
       if (response.success) {
-        await fetchAllRegistrations();
+        // Convert display value to DB format for local state consistency
+        const paymentDisplayToDb = (display) => {
+          const dbMap = {
+            "Paid": "paid",
+            "Partially Paid": "partially_paid",
+            "Pay later": "pay_later",
+            "Open to Pay": "open_to_pay",
+            "Payment Pending": "payment_pending",
+          };
+          return dbMap[display] || display;
+        };
+
+        // Update local state immediately so the service stays visible
+        setAllRegistrations((prev) =>
+          prev.map((r) =>
+            r.ticket_id === ticketId
+              ? {
+                ...r,
+                ...(newStatus != null &&
+                  newStatus !== "" && { service_status: newStatus }),
+                ...(paymentStatusDisplay != null &&
+                  paymentStatusDisplay !== "" && {
+                  payment_status: paymentDisplayToDb(paymentStatusDisplay),
+                }),
+              }
+              : r,
+          ),
+        );
+        // Re-fetch registrations to ensure consistency across all data sources
+        fetchAllRegistrations();
         fetchClientProfile();
         return;
       }
@@ -2177,28 +2190,26 @@ function AdminClientOverview() {
                 }
                 navigate(`/admin/client-overview/${userId}?${newParams.toString()}`, { replace: true });
               }}
-              className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
-                activeTab === tab.key
-                  ? "text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
+              className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${activeTab === tab.key
+                ? "text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
               style={
                 activeTab === tab.key
                   ? {
-                      background:
-                        "linear-gradient(180deg, #022B51 0%, #015079 100%)",
-                    }
+                    background:
+                      "linear-gradient(180deg, #022B51 0%, #015079 100%)",
+                  }
                   : {}
               }
             >
               {tab.label}
               {tab.count > 0 && (
                 <span
-                  className={`ml-2 px-2 py-0.5 rounded-full text-xs font-semibold ${
-                    activeTab === tab.key
-                      ? "bg-white/20 text-white"
-                      : "bg-[#00486D] text-white"
-                  }`}
+                  className={`ml-2 px-2 py-0.5 rounded-full text-xs font-semibold ${activeTab === tab.key
+                    ? "bg-white/20 text-white"
+                    : "bg-[#00486D] text-white"
+                    }`}
                 >
                   {tab.count}
                 </span>

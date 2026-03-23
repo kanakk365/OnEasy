@@ -145,7 +145,7 @@ function ClientServices() {
   const paymentStatusToDisplay = (dbValue) => {
     if (!dbValue) return "Open to Pay";
     const v = String(dbValue).toLowerCase().replace(/_/g, " ");
-    const map = { paid: "Paid", partially_paid: "Partially Paid", "pay later": "Pay later", "open to pay": "Open to Pay", pending: "Open to Pay", unpaid: "Open to Pay" };
+    const map = { paid: "Paid", "partially paid": "Partially Paid", "pay later": "Pay later", "open to pay": "Open to Pay", "payment pending": "Payment Pending", pending: "Open to Pay", unpaid: "Open to Pay" };
     return map[v] || dbValue;
   };
 

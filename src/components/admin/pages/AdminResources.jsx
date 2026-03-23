@@ -1,26 +1,33 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import complianceApi from "../../../utils/complianceApi";
-import { FiFolderPlus, FiFolder, FiFileText, FiChevronRight, FiUpload, FiX, FiExternalLink, FiUploadCloud, FiEdit2, FiTrash2, FiAlertCircle, FiHome } from "react-icons/fi";
+import { FiFolderPlus, FiFolder, FiFileText, FiChevronRight, FiUpload, FiX, FiExternalLink, FiUploadCloud, FiEdit2, FiTrash2, FiAlertCircle, FiHome, FiSearch, FiDownload, FiEye } from "react-icons/fi";
 import { BsFolderFill } from "react-icons/bs";
 import SuccessModal from "../../common/SuccessModal";
 
 function AdminResources() {
   const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Navigation State
   const [currentFolder, setCurrentFolder] = useState(null); // null means root
   const [breadcrumbs, setBreadcrumbs] = useState([]);
-  
+
   // Current Folder Contents
   const [currentDocuments, setCurrentDocuments] = useState([]);
   const [loadingDocs, setLoadingDocs] = useState(false);
+
+  // Search State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [allDocuments, setAllDocuments] = useState([]);
+  const [loadingAllDocs, setLoadingAllDocs] = useState(false);
+  const [allDocsLoaded, setAllDocsLoaded] = useState(false);
+  const searchInputRef = useRef(null);
 
   // Modals
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  
+
   // Delete Target: { type: 'folder' | 'document', item: Object }
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -55,7 +62,7 @@ function AdminResources() {
       const res = await complianceApi.get("/admin/folders?page=1&limit=50");
       if (res && res.items) {
         setFolders(res.items);
-        
+
         // If we are currently inside a folder, we might need to update its reference
         if (currentFolder) {
           const updatedCurrent = findFolderById(res.items, currentFolder.id);
@@ -85,6 +92,88 @@ function AdminResources() {
       }
     });
     return flat;
+  };
+
+  // Flatten folders for search (with parent path display)
+  const flattenFoldersForSearch = (foldersList, parentPath = []) => {
+    let result = [];
+    for (const folder of foldersList) {
+      const pathNames = [...parentPath, folder.name];
+      result.push({
+        ...folder,
+        type: "folder",
+        pathNames,
+        parentPathDisplay: parentPath.length > 0 ? parentPath.join(" / ") : "Root",
+      });
+      if (folder.children && folder.children.length > 0) {
+        result = result.concat(flattenFoldersForSearch(folder.children, pathNames));
+      }
+    }
+    return result;
+  };
+
+  // Build breadcrumb path for a folder from the tree
+  const getFolderPath = (foldersList, targetId, currentPath = []) => {
+    for (const f of foldersList) {
+      if (f.id === targetId) return [...currentPath, f];
+      if (f.children && f.children.length > 0) {
+        const path = getFolderPath(f.children, targetId, [...currentPath, f]);
+        if (path) return path;
+      }
+    }
+    return null;
+  };
+
+  // Collect all folder IDs recursively
+  const collectAllFolderIds = (foldersList) => {
+    let ids = [];
+    for (const f of foldersList) {
+      ids.push(f.id);
+      if (f.children && f.children.length > 0) {
+        ids = ids.concat(collectAllFolderIds(f.children));
+      }
+    }
+    return ids;
+  };
+
+  // Fetch documents from all folders for search
+  const fetchAllDocuments = async () => {
+    if (allDocsLoaded || loadingAllDocs) return;
+    setLoadingAllDocs(true);
+    try {
+      const allFolderIds = collectAllFolderIds(folders);
+      const allDocs = [];
+
+      const batchSize = 5;
+      for (let i = 0; i < allFolderIds.length; i += batchSize) {
+        const batch = allFolderIds.slice(i, i + batchSize);
+        const results = await Promise.all(
+          batch.map(async (folderId) => {
+            try {
+              const res = await complianceApi.get(`/admin/folders/${folderId}/documents?page=1&limit=50`);
+              if (res && res.items) {
+                return res.items.map(doc => ({
+                  ...doc,
+                  folderId,
+                  type: "document",
+                }));
+              }
+              return [];
+            } catch {
+              return [];
+            }
+          })
+        );
+        results.forEach(docs => allDocs.push(...docs));
+      }
+
+      setAllDocuments(allDocs);
+      setAllDocsLoaded(true);
+    } catch (error) {
+      console.error("Failed to fetch all documents:", error);
+    } finally {
+      setLoadingAllDocs(false);
+    }
   };
 
   const findFolderById = (foldersList, id) => {
@@ -142,6 +231,13 @@ function AdminResources() {
     }
   }, [currentFolder]);
 
+  // Load all documents when user starts searching
+  useEffect(() => {
+    if (searchQuery.trim().length > 0 && !allDocsLoaded) {
+      fetchAllDocuments();
+    }
+  }, [searchQuery]);
+
   const handleFolderClick = (folder) => {
     setCurrentFolder(folder);
     setBreadcrumbs([...breadcrumbs, folder]);
@@ -156,6 +252,89 @@ function AdminResources() {
       setCurrentFolder(targetFolder);
       setBreadcrumbs(breadcrumbs.slice(0, index + 1));
     }
+  };
+
+  // Navigate to a folder from search results
+  const handleSearchFolderClick = (folder) => {
+    const path = getFolderPath(folders, folder.id);
+    if (path) {
+      setCurrentFolder(folder);
+      setBreadcrumbs(path);
+    } else {
+      setCurrentFolder(folder);
+      setBreadcrumbs([folder]);
+    }
+    setSearchQuery("");
+  };
+
+  // Navigate to a document's parent folder from search results
+  const handleSearchDocumentClick = (doc) => {
+    const parentFolder = findFolderById(folders, doc.folderId);
+    if (parentFolder) {
+      const path = getFolderPath(folders, doc.folderId);
+      if (path) {
+        setCurrentFolder(parentFolder);
+        setBreadcrumbs(path);
+      } else {
+        setCurrentFolder(parentFolder);
+        setBreadcrumbs([parentFolder]);
+      }
+    }
+    setSearchQuery("");
+  };
+
+  // Compute search results
+  const searchResults = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (query.length === 0) return [];
+
+    const results = [];
+
+    // Search folders
+    const flatFolders = flattenFoldersForSearch(folders);
+    flatFolders.forEach(folder => {
+      if (folder.name.toLowerCase().includes(query) ||
+        (folder.description && folder.description.toLowerCase().includes(query))) {
+        results.push(folder);
+      }
+    });
+
+    // Search documents
+    allDocuments.forEach(doc => {
+      const title = (doc.title || doc.name || "").toLowerCase();
+      if (title.includes(query)) {
+        const parentFolder = findFolderById(folders, doc.folderId);
+        const folderPath = parentFolder
+          ? getFolderPath(folders, doc.folderId)
+          : null;
+        const pathDisplay = folderPath
+          ? folderPath.map(f => f.name).join(" / ")
+          : "Unknown folder";
+        results.push({
+          ...doc,
+          parentPathDisplay: pathDisplay,
+          parentFolder,
+        });
+      }
+    });
+
+    return results;
+  }, [searchQuery, folders, allDocuments]);
+
+  const isSearching = searchQuery.trim().length > 0;
+
+  // Highlight matching text in search results
+  const highlightMatch = (text, query) => {
+    if (!query.trim()) return text;
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+    const parts = text.split(regex);
+    return parts.map((part, i) =>
+      regex.test(part) ? (
+        <span key={i} className="bg-yellow-200 text-yellow-900 rounded-sm px-0.5 font-semibold">{part}</span>
+      ) : (
+        <span key={i}>{part}</span>
+      )
+    );
   };
 
   const openCreateFolder = () => {
@@ -189,17 +368,17 @@ function AdminResources() {
       setSavingFolder(true);
       if (isFolderEdit) {
         // Edit flow
-        const payload = { 
-          name, 
+        const payload = {
+          name,
           description,
           isActive
         };
         await complianceApi.put(`/admin/folders/${editFolderId}`, payload); // using PUT on apiClient usually routes correctly, but wait, API specifies PATCH /admin/folders/:id
         // Since complianceApi wrapper might only have PUT, let's use the underlying fetch or standard .request if needed.
         // complianceApi.request explicitly lets us override. We can also just use complianceApi.request(`/admin/folders/${editFolderId}`, { method: 'PATCH', body: JSON.stringify(payload) })
-        await complianceApi.request(`/admin/folders/${editFolderId}`, { 
-          method: 'PATCH', 
-          body: JSON.stringify(payload) 
+        await complianceApi.request(`/admin/folders/${editFolderId}`, {
+          method: 'PATCH',
+          body: JSON.stringify(payload)
         });
         showSuccess("Folder Updated", "Folder updated successfully!");
       } else {
@@ -211,7 +390,7 @@ function AdminResources() {
         await complianceApi.post("/admin/folders", payload);
         showSuccess("Folder Created", "Folder created successfully!");
       }
-      
+
       setShowFolderModal(false);
       await fetchFolders();
     } catch (e) {
@@ -283,22 +462,22 @@ function AdminResources() {
       showError("Validation Error", "Please select a file to upload");
       return;
     }
-    
+
     // ensure at least one folder is selected
     if (!isDocEdit && selectedFolderIds.length === 0) {
-       showError("Validation Error", "Please select at least one folder to upload to.");
-       return;
+      showError("Validation Error", "Please select at least one folder to upload to.");
+      return;
     }
 
     try {
       setUploading(true);
       const formData = new FormData();
       formData.append("title", uploadTitle);
-      
+
       if (uploadFile) {
         formData.append("file", uploadFile);
       }
-      
+
       if (!isDocEdit) {
         selectedFolderIds.forEach(id => {
           formData.append("folderIds", id);
@@ -313,7 +492,7 @@ function AdminResources() {
         url = `https://oneasycompliance.oneasy.ai/admin/folders/documents/${editDocId}`;
         method = "PATCH";
       }
-      
+
       const response = await fetch(url, {
         method: method,
         headers: {
@@ -367,15 +546,15 @@ function AdminResources() {
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3">
-              <button
-                onClick={openUploadModal}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-[#00486D] rounded-xl hover:bg-gray-50 transition-colors shadow-sm font-medium"
-              >
-                <FiUpload className="w-4 h-4" />
-                Upload File
-              </button>
+            <button
+              onClick={openUploadModal}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-[#00486D] rounded-xl hover:bg-gray-50 transition-colors shadow-sm font-medium"
+            >
+              <FiUpload className="w-4 h-4" />
+              Upload File
+            </button>
             <button
               onClick={openCreateFolder}
               className="flex items-center gap-2 px-4 py-2.5 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-all shadow-md font-medium"
@@ -388,27 +567,74 @@ function AdminResources() {
 
         {/* File Explorer */}
         <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden flex flex-col min-h-[500px]">
-          {/* Breadcrumbs */}
-          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center gap-2 text-sm text-gray-600 overflow-x-auto whitespace-nowrap">
-            <button 
-              onClick={() => handleBreadcrumbClick(-1)}
-              className={`hover:text-[#00486D] transition-colors flex items-center gap-1 ${!currentFolder ? 'text-[#00486D]' : ''}`}
-              title="Home"
-            >
-              <FiHome className="w-4 h-4" />
-            </button>
-            {breadcrumbs.map((crumb, index) => (
-              <React.Fragment key={crumb.id}>
-                <FiChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
+          {/* Search Bar + Breadcrumbs Row */}
+          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            {/* Search Bar */}
+            <div className="relative w-full sm:w-72 flex-shrink-0">
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search folders & files..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-9 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent placeholder:text-gray-400 transition-all"
+              />
+              {searchQuery && (
                 <button
-                  onClick={() => handleBreadcrumbClick(index)}
-                  className={`hover:text-[#00486D] transition-colors ${index === breadcrumbs.length - 1 ? 'font-semibold text-[#00486D]' : ''}`}
-                  title={crumb.name}
+                  onClick={() => {
+                    setSearchQuery("");
+                    searchInputRef.current?.focus();
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <span className="truncate max-w-[150px] inline-block align-bottom">{crumb.name}</span>
+                  <FiX className="w-4 h-4" />
                 </button>
-              </React.Fragment>
-            ))}
+              )}
+            </div>
+
+            {/* Breadcrumbs - only when not searching */}
+            {!isSearching && (
+              <div className="flex items-center gap-2 text-sm text-gray-600 overflow-x-auto whitespace-nowrap">
+                <button
+                  onClick={() => handleBreadcrumbClick(-1)}
+                  className={`hover:text-[#00486D] transition-colors flex items-center gap-1 ${!currentFolder ? 'text-[#00486D]' : ''}`}
+                  title="Home"
+                >
+                  <FiHome className="w-4 h-4" />
+                </button>
+                {breadcrumbs.map((crumb, index) => (
+                  <React.Fragment key={crumb.id}>
+                    <FiChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
+                    <button
+                      onClick={() => handleBreadcrumbClick(index)}
+                      className={`hover:text-[#00486D] transition-colors ${index === breadcrumbs.length - 1 ? 'font-semibold text-[#00486D]' : ''}`}
+                      title={crumb.name}
+                    >
+                      <span className="truncate max-w-[150px] inline-block align-bottom">{crumb.name}</span>
+                    </button>
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
+
+            {/* Search indicator */}
+            {isSearching && (
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <span>
+                  {loadingAllDocs ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-3 h-3 border-2 border-gray-300 border-t-[#00486D] rounded-full animate-spin"></span>
+                      Searching...
+                    </span>
+                  ) : (
+                    <>
+                      {searchResults.length} {searchResults.length === 1 ? "result" : "results"} found
+                    </>
+                  )}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Content Area */}
@@ -419,111 +645,214 @@ function AdminResources() {
                 <p>Loading Explorer...</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 align-top">
-                
-                {/* Create New Folder Card */}
-                <button
-                  onClick={openCreateFolder}
-                  className="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition-colors border-2 border-dashed border-gray-200 hover:border-[#00486D] group text-center"
-                >
-                  <div className="w-16 h-16 rounded-xl bg-blue-50/50 flex items-center justify-center mb-3 group-hover:bg-blue-50 transition-colors">
-                     <FiFolderPlus className="w-8 h-8 text-[#00486D]/70 group-hover:text-[#00486D]" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-500 group-hover:text-[#00486D]">
-                    New Folder
-                  </span>
-                </button>
+              isSearching ? (
+                /* Search Results View */
+                <div>
+                  {searchResults.length > 0 ? (
+                    <div className="space-y-2">
+                      {searchResults.map((item) => (
+                        item.type === "folder" ? (
+                          /* Folder Search Result */
+                          <button
+                            key={`folder-${item.id}`}
+                            onClick={() => handleSearchFolderClick(item)}
+                            className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-blue-50/60 transition-all border border-transparent hover:border-blue-100 text-left group"
+                          >
+                            <div className="w-11 h-11 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition-colors">
+                              <BsFolderFill className="w-6 h-6 text-blue-400 group-hover:text-blue-500 transition-colors" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-gray-900 truncate">
+                                {highlightMatch(item.name, searchQuery)}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-0.5 truncate flex items-center gap-1">
+                                <FiFolder className="w-3 h-3 flex-shrink-0" />
+                                {item.parentPathDisplay}
+                                {item.children?.length > 0 && (
+                                  <span className="ml-2 text-gray-300">·</span>
+                                )}
+                                {item.children?.length > 0 && (
+                                  <span>{item.children.length} sub-item{item.children.length > 1 ? "s" : ""}</span>
+                                )}
+                              </p>
+                              {item.description && (
+                                <p className="text-xs text-gray-400 mt-1 line-clamp-1">
+                                  {highlightMatch(item.description, searchQuery)}
+                                </p>
+                              )}
+                            </div>
+                            <FiChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#00486D] flex-shrink-0 transition-colors" />
+                          </button>
+                        ) : (
+                          /* Document Search Result */
+                          <div
+                            key={`doc-${item.id}`}
+                            className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all border border-transparent hover:border-gray-100 group"
+                          >
+                            <div className="w-11 h-11 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0 group-hover:bg-white group-hover:shadow-sm transition-all">
+                              <FiFileText className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-gray-900 truncate">
+                                {highlightMatch(item.title || item.name || "Untitled", searchQuery)}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-0.5 truncate flex items-center gap-1">
+                                <FiFolder className="w-3 h-3 flex-shrink-0" />
+                                {item.parentPathDisplay}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <a
+                                href={item.url || "#"}
+                                download
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#022B51] text-white hover:bg-[#015079] transition-colors"
+                                title="Download file"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <FiDownload className="w-3.5 h-3.5" />
+                              </a>
+                              <a
+                                href={item.url || "#"}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#022B51] text-[#022B51] hover:bg-[#022B51] hover:text-white transition-colors"
+                                title="View file"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <FiEye className="w-3.5 h-3.5" />
+                              </a>
+                              <button
+                                onClick={() => handleSearchDocumentClick(item)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-[#00486D] hover:bg-blue-50 transition-colors"
+                                title="Go to folder"
+                              >
+                                <FiFolder className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  ) : (
+                    !loadingAllDocs && (
+                      <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+                        <FiSearch className="w-12 h-12 mb-4 text-gray-200" />
+                        <p className="text-sm font-medium text-gray-500">No results found</p>
+                        <p className="text-xs mt-1">Try a different search term</p>
+                      </div>
+                    )
+                  )}
+                </div>
+              ) : (
+                /* Normal Explorer View */
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 align-top">
 
-                {/* Folders */}
-                {displayFolders.map((folder) => (
+                  {/* Create New Folder Card */}
                   <button
-                    key={folder.id}
-                    onClick={() => handleFolderClick(folder)}
-                    className="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-blue-100 group text-center relative"
+                    onClick={openCreateFolder}
+                    className="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition-colors border-2 border-dashed border-gray-200 hover:border-[#00486D] group text-center"
                   >
-                    {/* Action buttons on hover */}
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5 z-10">
-                      <div 
-                        onClick={(e) => openEditFolder(folder, e)} 
-                        className="p-1.5 text-blue-500 bg-white border border-gray-100 shadow-sm rounded-md hover:bg-blue-50 transition-colors"
-                        title="Edit Folder"
-                      >
-                        <FiEdit2 className="w-3.5 h-3.5" />
-                      </div>
-                      <div 
-                        onClick={(e) => openDeletePrompt('folder', folder, e)} 
-                        className="p-1.5 text-red-500 bg-white border border-gray-100 shadow-sm rounded-md hover:bg-red-50 transition-colors"
-                        title="Delete Folder"
-                      >
-                        <FiTrash2 className="w-3.5 h-3.5" />
-                      </div>
+                    <div className="w-16 h-16 rounded-xl bg-blue-50/50 flex items-center justify-center mb-3 group-hover:bg-blue-50 transition-colors">
+                      <FiFolderPlus className="w-8 h-8 text-[#00486D]/70 group-hover:text-[#00486D]" />
                     </div>
-
-                    <div className="opacity-90 group-hover:opacity-100 transition-opacity w-full flex flex-col items-center">
-                      <BsFolderFill className="w-16 h-16 text-blue-400 group-hover:text-blue-500 mb-3 drop-shadow-sm transition-colors" />
-                      <span className="text-sm font-medium text-gray-800 line-clamp-2 w-full px-2" title={folder.name}>
-                        {folder.name}
-                      </span>
-                      {folder.children?.length > 0 && (
-                        <span className="text-[10px] text-gray-400 mt-1">
-                          {folder.children.length} sub-item(s)
-                        </span>
-                      )}
-                    </div>
+                    <span className="text-sm font-medium text-gray-500 group-hover:text-[#00486D]">
+                      New Folder
+                    </span>
                   </button>
-                ))}
 
-                {/* Documents (only inside a folder) */}
-                {currentFolder && (
-                  loadingDocs ? (
-                    <div className="col-span-full py-8 text-center text-sm text-gray-400">
-                      <div className="w-6 h-6 border-2 border-gray-300 border-t-[#00486D] rounded-full animate-spin mx-auto mb-2"></div>
-                      Loading documents...
-                    </div>
-                  ) : currentDocuments.map((doc) => (
-                    <a
-                      key={doc.id}
-                      href={doc.url || "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200 group text-center relative"
-                      title={doc.title}
+                  {/* Folders */}
+                  {displayFolders.map((folder) => (
+                    <button
+                      key={folder.id}
+                      onClick={() => handleFolderClick(folder)}
+                      className="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-blue-100 group text-center relative"
                     >
                       {/* Action buttons on hover */}
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5 z-10">
-                        <div 
-                          onClick={(e) => openEditDocumentModal(doc, e)} 
+                        <div
+                          onClick={(e) => openEditFolder(folder, e)}
                           className="p-1.5 text-blue-500 bg-white border border-gray-100 shadow-sm rounded-md hover:bg-blue-50 transition-colors"
-                          title="Edit Document"
+                          title="Edit Folder"
                         >
                           <FiEdit2 className="w-3.5 h-3.5" />
                         </div>
-                        <div 
-                          onClick={(e) => openDeletePrompt('document', doc, e)} 
+                        <div
+                          onClick={(e) => openDeletePrompt('folder', folder, e)}
                           className="p-1.5 text-red-500 bg-white border border-gray-100 shadow-sm rounded-md hover:bg-red-50 transition-colors"
-                          title="Delete Document"
+                          title="Delete Folder"
                         >
                           <FiTrash2 className="w-3.5 h-3.5" />
                         </div>
                       </div>
 
-                      <div className="w-16 h-16 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-white transition-colors shadow-sm group-hover:shadow relative text-gray-400 group-hover:text-blue-500">
-                        <FiFileText className="w-8 h-8" />
+                      <div className="opacity-90 group-hover:opacity-100 transition-opacity w-full flex flex-col items-center">
+                        <BsFolderFill className="w-16 h-16 text-blue-400 group-hover:text-blue-500 mb-3 drop-shadow-sm transition-colors" />
+                        <span className="text-sm font-medium text-gray-800 line-clamp-2 w-full px-2" title={folder.name}>
+                          {folder.name}
+                        </span>
+                        {folder.children?.length > 0 && (
+                          <span className="text-[10px] text-gray-400 mt-1">
+                            {folder.children.length} sub-item(s)
+                          </span>
+                        )}
                       </div>
-                      <span className="text-sm font-medium text-gray-700 line-clamp-2 w-full break-words px-2">
-                        {doc.title}
-                      </span>
-                    </a>
-                  ))
-                )}
+                    </button>
+                  ))}
 
-                {/* Empty State */}
-                {displayFolders.length === 0 && (!currentFolder || (currentFolder && currentDocuments.length === 0 && !loadingDocs)) && (
-                  <div className="col-span-full py-12 flex flex-col items-center justify-center text-gray-400">
-                    <p className="text-sm">Create a folder or upload a document.</p>
-                  </div>
-                )}
-              </div>
+                  {/* Documents (only inside a folder) */}
+                  {currentFolder && (
+                    loadingDocs ? (
+                      <div className="col-span-full py-8 text-center text-sm text-gray-400">
+                        <div className="w-6 h-6 border-2 border-gray-300 border-t-[#00486D] rounded-full animate-spin mx-auto mb-2"></div>
+                        Loading documents...
+                      </div>
+                    ) : currentDocuments.map((doc) => (
+                      <a
+                        key={doc.id}
+                        href={doc.url || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200 group text-center relative"
+                        title={doc.title}
+                      >
+                        {/* Action buttons on hover */}
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5 z-10">
+                          <div
+                            onClick={(e) => openEditDocumentModal(doc, e)}
+                            className="p-1.5 text-blue-500 bg-white border border-gray-100 shadow-sm rounded-md hover:bg-blue-50 transition-colors"
+                            title="Edit Document"
+                          >
+                            <FiEdit2 className="w-3.5 h-3.5" />
+                          </div>
+                          <div
+                            onClick={(e) => openDeletePrompt('document', doc, e)}
+                            className="p-1.5 text-red-500 bg-white border border-gray-100 shadow-sm rounded-md hover:bg-red-50 transition-colors"
+                            title="Delete Document"
+                          >
+                            <FiTrash2 className="w-3.5 h-3.5" />
+                          </div>
+                        </div>
+
+                        <div className="w-16 h-16 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-white transition-colors shadow-sm group-hover:shadow relative text-gray-400 group-hover:text-blue-500">
+                          <FiFileText className="w-8 h-8" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700 line-clamp-2 w-full break-words px-2">
+                          {doc.title}
+                        </span>
+                      </a>
+                    ))
+                  )}
+
+                  {/* Empty State */}
+                  {displayFolders.length === 0 && (!currentFolder || (currentFolder && currentDocuments.length === 0 && !loadingDocs)) && (
+                    <div className="col-span-full py-12 flex flex-col items-center justify-center text-gray-400">
+                      <p className="text-sm">Create a folder or upload a document.</p>
+                    </div>
+                  )}
+                </div>
+              )
             )}
           </div>
         </div>
@@ -538,14 +867,14 @@ function AdminResources() {
                 <FiFolderPlus className="w-5 h-5 text-[#00486D]" />
                 {isFolderEdit ? "Edit Folder" : "Create New Folder"}
               </h3>
-              <button 
+              <button
                 onClick={() => setShowFolderModal(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <FiX className="w-5 h-5" />
               </button>
             </div>
-            
+
             <form onSubmit={handleFolderSubmit} className="p-6 space-y-5">
               {!isFolderEdit && (
                 <div>
@@ -633,14 +962,14 @@ function AdminResources() {
                 <FiUploadCloud className="w-5 h-5 text-[#00486D]" />
                 {isDocEdit ? "Edit Document" : "Upload Document"}
               </h3>
-              <button 
+              <button
                 onClick={() => setShowUploadModal(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <FiX className="w-5 h-5" />
               </button>
             </div>
-            
+
             <form onSubmit={handleDocumentSubmit} className="p-6 space-y-5">
               {!isDocEdit && (
                 <div>
@@ -650,14 +979,14 @@ function AdminResources() {
                   <div className="border border-gray-200 rounded-xl max-h-40 overflow-y-auto bg-gray-50 p-2 space-y-1">
                     {flattenFolders(folders).map((f) => (
                       <label key={f.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-100 p-1.5 rounded transition-colors">
-                        <input 
-                          type="checkbox" 
-                          checked={selectedFolderIds.includes(f.id)} 
+                        <input
+                          type="checkbox"
+                          checked={selectedFolderIds.includes(f.id)}
                           onChange={(e) => {
                             if (e.target.checked) setSelectedFolderIds([...selectedFolderIds, f.id]);
                             else setSelectedFolderIds(selectedFolderIds.filter(id => id !== f.id));
                           }}
-                          className="w-4 h-4 text-[#00486D] rounded focus:ring-[#00486D]" 
+                          className="w-4 h-4 text-[#00486D] rounded focus:ring-[#00486D]"
                         />
                         <span className="text-gray-700 font-medium">{f.label}</span>
                       </label>
@@ -741,7 +1070,7 @@ function AdminResources() {
                 Are you sure you want to delete <strong>{deleteTarget?.item?.name || deleteTarget?.item?.title}</strong>? This action cannot be undone.
               </p>
             </div>
-            
+
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
               <button
                 onClick={() => setShowDeleteModal(false)}
@@ -772,29 +1101,29 @@ function AdminResources() {
 
       {/* Error Modal */}
       {errorModal.isOpen && (
-         <div className="fixed inset-0 z-[110] flex items-center justify-center px-4 bg-black/40 backdrop-blur-sm">
-           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-fade-in-up">
-             <div className="p-6 text-center">
-               <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                 <FiAlertCircle className="w-8 h-8 text-red-500" />
-               </div>
-               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                 {errorModal.title || "An error occurred"}
-               </h3>
-               <p className="text-sm text-gray-500">
-                 {errorModal.message || "Failed to process the request."}
-               </p>
-             </div>
-             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-               <button
-                 onClick={() => setErrorModal({ ...errorModal, isOpen: false })}
-                 className="w-full px-5 py-2.5 text-sm font-medium bg-[#01334C] hover:bg-[#00486D] text-white rounded-xl transition-colors"
-               >
-                 Okay
-               </button>
-             </div>
-           </div>
-         </div>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center px-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-fade-in-up">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FiAlertCircle className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {errorModal.title || "An error occurred"}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {errorModal.message || "Failed to process the request."}
+              </p>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+              <button
+                onClick={() => setErrorModal({ ...errorModal, isOpen: false })}
+                className="w-full px-5 py-2.5 text-sm font-medium bg-[#01334C] hover:bg-[#00486D] text-white rounded-xl transition-colors"
+              >
+                Okay
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
     </div>

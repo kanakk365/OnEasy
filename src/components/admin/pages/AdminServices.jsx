@@ -231,7 +231,7 @@ function AdminServices() {
       "Public Limited Company",
       "MCA Name Approval",
       "Indian Subsidiary Company",
-      "Start - Up India Certificate",
+      "Startup India Registration",
       "Professional Tax Registration",
       "Labour License Registration",
       "Provident Fund Registration",
@@ -299,15 +299,15 @@ function AdminServices() {
       return "One Person Company";
     if (lower.includes("propriet")) return "Proprietorship";
     if (
-      lower.includes("partnership firm") ||
-      (lower.includes("partnership") && !lower.includes("llp"))
-    )
-      return "Partnership Firm";
-    if (
       lower.includes("llp") ||
       lower.includes("limited liability partnership")
     )
       return "Limited Liability Partnership";
+    if (
+      lower.includes("partnership firm") ||
+      (lower.includes("partnership") && !lower.includes("llp") && !lower.includes("limited liability"))
+    )
+      return "Partnership Firm";
     if (lower.includes("section 8") || lower.includes("sec 8"))
       return "Section 8 Company";
     if (lower.includes("public limited")) return "Public Limited Company";
@@ -498,9 +498,10 @@ function AdminServices() {
     const v = String(dbValue).toLowerCase().replace(/_/g, " ");
     const map = {
       paid: "Paid",
-      partially_paid: "Partially Paid",
+      "partially paid": "Partially Paid",
       "pay later": "Pay later",
       "open to pay": "Open to Pay",
+      "payment pending": "Payment Pending",
       pending: "Open to Pay",
       unpaid: "Open to Pay",
     };
@@ -567,7 +568,7 @@ function AdminServices() {
       } else {
         alert(
           "Failed to update payment status: " +
-            (error.message || "Unknown error"),
+          (error.message || "Unknown error"),
         );
       }
     }
@@ -622,8 +623,8 @@ function AdminServices() {
         ...(newStatus != null && newStatus !== "" && { status: newStatus }),
         ...(paymentStatusDisplay != null &&
           paymentStatusDisplay !== "" && {
-            paymentStatus: paymentStatusDisplay,
-          }),
+          paymentStatus: paymentStatusDisplay,
+        }),
         ...(paymentMethod && { paymentMethod }),
         ...(paymentDetails && {
           dateOfPayment: paymentDetails.dateOfPayment,
@@ -749,11 +750,9 @@ function AdminServices() {
           const frontendUrl = window.location.origin;
           const orderId = svc.razorpay_order_id || svc.order_id;
           const registrationType = getRegistrationTypeSlug(svc.ticket_id);
-          return `${frontendUrl}/payment?orderId=${orderId}&ticketId=${
-            svc.ticket_id || ""
-          }&userId=${svc.user_id || ""}&type=${
-            registrationType || "service"
-          }&autoOpen=true`;
+          return `${frontendUrl}/payment?orderId=${orderId}&ticketId=${svc.ticket_id || ""
+            }&userId=${svc.user_id || ""}&type=${registrationType || "service"
+            }&autoOpen=true`;
         })();
       await navigator.clipboard.writeText(paymentUrl);
       alert("Payment link copied to clipboard!");
@@ -945,9 +944,8 @@ function AdminServices() {
             <span className="truncate">
               {serviceFilters.length === 0
                 ? "All Services"
-                : `${serviceFilters.length} service${
-                    serviceFilters.length > 1 ? "s" : ""
-                  } selected`}
+                : `${serviceFilters.length} service${serviceFilters.length > 1 ? "s" : ""
+                } selected`}
             </span>
             <FiFilter className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
           </button>
@@ -990,9 +988,8 @@ function AdminServices() {
             <span className="truncate">
               {statusFilters.length === 0
                 ? "All Statuses"
-                : `${statusFilters.length} status${
-                    statusFilters.length > 1 ? "es" : ""
-                  } selected`}
+                : `${statusFilters.length} status${statusFilters.length > 1 ? "es" : ""
+                } selected`}
             </span>
             <FiFilter className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
           </button>
@@ -1183,9 +1180,9 @@ function AdminServices() {
                             >
                               {[
                                 ...(svc.service_status &&
-                                !WORK_STATUS_OPTIONS.includes(
-                                  svc.service_status,
-                                )
+                                  !WORK_STATUS_OPTIONS.includes(
+                                    svc.service_status,
+                                  )
                                   ? [svc.service_status]
                                   : []),
                                 ...WORK_STATUS_OPTIONS,
@@ -1202,8 +1199,8 @@ function AdminServices() {
                         <td className="px-2 md:px-3 lg:px-4 py-3 text-xs text-gray-500 hidden lg:table-cell">
                           {formatDateTime(
                             svc.updated_at ||
-                              svc.confirmed_at ||
-                              svc.created_at,
+                            svc.confirmed_at ||
+                            svc.created_at,
                           )}
                         </td>
                         <td className="px-2 md:px-3 lg:px-4 py-3">
@@ -1211,12 +1208,10 @@ function AdminServices() {
                             <button
                               onClick={() =>
                                 navigate(
-                                  `/admin/client-overview/${
-                                    svc.user_id || svc.id
-                                  }?tab=services${
-                                    svc.ticket_id
-                                      ? `&ticketId=${svc.ticket_id}`
-                                      : ""
+                                  `/admin/client-overview/${svc.user_id || svc.id
+                                  }?tab=services${svc.ticket_id
+                                    ? `&ticketId=${svc.ticket_id}`
+                                    : ""
                                   }`,
                                 )
                               }
@@ -1266,23 +1261,23 @@ function AdminServices() {
                                 (svc.razorpay_order_id || svc.order_id)
                               );
                             })() && (
-                              <>
-                                <button
-                                  onClick={() => handlePayClick(svc)}
-                                  className="p-1 md:p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                                  title="Pay Now"
-                                >
-                                  <FiCreditCard className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                                </button>
-                                <button
-                                  onClick={() => handleCopyLinkClick(svc)}
-                                  className="p-1 md:p-1.5 text-[#00486D] hover:bg-blue-50 rounded-lg transition-colors"
-                                  title="Copy Link"
-                                >
-                                  <FiLink className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                                </button>
-                              </>
-                            )}
+                                <>
+                                  <button
+                                    onClick={() => handlePayClick(svc)}
+                                    className="p-1 md:p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                    title="Pay Now"
+                                  >
+                                    <FiCreditCard className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleCopyLinkClick(svc)}
+                                    className="p-1 md:p-1.5 text-[#00486D] hover:bg-blue-50 rounded-lg transition-colors"
+                                    title="Copy Link"
+                                  >
+                                    <FiLink className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                  </button>
+                                </>
+                              )}
                           </div>
                         </td>
                       </tr>
