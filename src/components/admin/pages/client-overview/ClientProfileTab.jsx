@@ -22,40 +22,7 @@ function ClientProfileTab({
     <div className="space-y-6">
       {/* Personal Details */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)] overflow-hidden">
-        <div
-          className="w-full px-6 py-5 flex items-center justify-between"
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0"
-              style={{
-                background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
-              }}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-            </div>
-            <div className="text-left">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Personal Details
-              </h3>
-              <p className="text-sm text-gray-500">
-                Basic information and contact details
-              </p>
-            </div>
-          </div>
-        </div>
+
         {true && (
           <div className="px-6 py-6 border-t border-gray-100 bg-[#FAFBFC]">
             {/* Edit Button */}
@@ -294,14 +261,13 @@ function ClientProfileTab({
                       Client Status
                     </p>
                     <span
-                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                        (clientProfile?.user?.client_status || "Active") ===
+                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${(clientProfile?.user?.client_status || "Active") ===
                         "Active"
-                          ? "bg-green-100 text-green-700"
-                          : clientProfile?.user?.client_status === "Inactive"
-                            ? "bg-gray-100 text-gray-700"
-                            : "bg-orange-100 text-orange-700"
-                      }`}
+                        ? "bg-green-100 text-green-700"
+                        : clientProfile?.user?.client_status === "Inactive"
+                          ? "bg-gray-100 text-gray-700"
+                          : "bg-orange-100 text-orange-700"
+                        }`}
                     >
                       {clientProfile?.user?.client_status || "Active"}
                     </span>
@@ -397,8 +363,8 @@ function ClientProfileTab({
                   </span>
                   {(documentUrls.aadhar_card &&
                     typeof documentUrls.aadhar_card === "string") ||
-                  (clientProfile.user?.aadhar_card &&
-                    typeof clientProfile.user.aadhar_card === "string") ? (
+                    (clientProfile.user?.aadhar_card &&
+                      typeof clientProfile.user.aadhar_card === "string") ? (
                     <button
                       type="button"
                       onClick={async (e) => {
@@ -443,8 +409,8 @@ function ClientProfileTab({
                   <span className="font-medium text-gray-700">PAN Card:</span>
                   {(documentUrls.pan_card &&
                     typeof documentUrls.pan_card === "string") ||
-                  (clientProfile.user?.pan_card &&
-                    typeof clientProfile.user.pan_card === "string") ? (
+                    (clientProfile.user?.pan_card &&
+                      typeof clientProfile.user.pan_card === "string") ? (
                     <button
                       type="button"
                       onClick={async (e) => {
@@ -488,8 +454,8 @@ function ClientProfileTab({
                   <span className="font-medium text-gray-700">Signature:</span>
                   {(documentUrls.signature &&
                     typeof documentUrls.signature === "string") ||
-                  (clientProfile.user?.signature &&
-                    typeof clientProfile.user.signature === "string") ? (
+                    (clientProfile.user?.signature &&
+                      typeof clientProfile.user.signature === "string") ? (
                     <button
                       type="button"
                       onClick={async (e) => {

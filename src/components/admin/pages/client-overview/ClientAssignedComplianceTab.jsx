@@ -421,10 +421,10 @@ const ClientAssignedComplianceTab = ({ userId }) => {
                     const date = new Date(instance.dueDate);
                     const formattedDate = !isNaN(date)
                       ? date.toLocaleDateString("en-GB", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })
                       : instance.dueDate;
 
                     // Format yearMonth (e.g. "2026-03") as full name: "March 2026"
@@ -624,11 +624,10 @@ const ClientAssignedComplianceTab = ({ userId }) => {
               return (
                 <div
                   key={assignment.id}
-                  className={`bg-white border rounded-xl p-6 hover:shadow-md transition-all ${
-                    isSelected
+                  className={`bg-white border rounded-xl p-6 hover:shadow-md transition-all ${isSelected
                       ? "border-red-300 bg-red-50/30 shadow-sm"
                       : "border-gray-200"
-                  }`}
+                    }`}
                 >
                   {/* Top Row: Checkbox, Title, Badge, Status */}
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
@@ -675,10 +674,9 @@ const ClientAssignedComplianceTab = ({ userId }) => {
                           onClick={() => handleComplianceClick(assignment)}
                           className={`
                             h-9 px-4 rounded-full text-sm font-medium border transition-all
-                            ${
-                              instance.isDone
-                                ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
-                                : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+                            ${instance.isDone
+                              ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                              : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
                             }
                           `}
                         >
@@ -740,10 +738,7 @@ const ClientAssignedComplianceTab = ({ userId }) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-bold text-gray-900">Assigned Compliance</h2>
-      <p className="text-sm text-gray-500 -mt-4">
-        Select an organisation to view its assigned compliances
-      </p>
+
 
       {assignments.length === 0 ? (
         <div className="text-center py-12 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
@@ -755,9 +750,9 @@ const ClientAssignedComplianceTab = ({ userId }) => {
             const progressPercent =
               orgGroup.totalInstances > 0
                 ? Math.round(
-                    (orgGroup.completedInstances / orgGroup.totalInstances) *
-                      100,
-                  )
+                  (orgGroup.completedInstances / orgGroup.totalInstances) *
+                  100,
+                )
                 : 0;
 
             return (

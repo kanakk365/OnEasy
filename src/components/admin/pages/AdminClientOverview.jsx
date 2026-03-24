@@ -1932,8 +1932,9 @@ function AdminClientOverview() {
               : r,
           ),
         );
-        // Re-fetch registrations to ensure consistency across all data sources
-        fetchAllRegistrations();
+        // Don't re-fetch registrations immediately - the local state update above is sufficient
+        // Re-fetching can cause a race condition where stale data overwrites the optimistic update,
+        // making the service card disappear from the UI
         fetchClientProfile();
         return;
       }
