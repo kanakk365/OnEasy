@@ -126,7 +126,10 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
           </div>
           {appliedCoupon && appliedCoupon.valid && (
             <div className="mt-2 text-sm text-green-600 font-medium">
-              ✓ Coupon applied! {appliedCoupon.discountPercentage}% discount
+              ✓ Coupon applied!{" "}
+              {appliedCoupon.discountPercentage > 0
+                ? `${appliedCoupon.discountPercentage}% discount`
+                : `₹${Math.round(appliedCoupon.discountAmount || 0).toLocaleString("en-IN")} discount`}{" "}
               will be applied at checkout.
             </div>
           )}
@@ -227,7 +230,17 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
                 </li>
               ))}
             </ul>
-            {appliedCoupon && appliedCoupon.valid && (
+            {appliedCoupon && appliedCoupon.valid && (() => {
+              // Calculate discount: use percentage if > 0, otherwise use fixed discountAmount
+              const discountAmt = appliedCoupon.discountPercentage > 0
+                ? Math.round((pkg.priceValue * appliedCoupon.discountPercentage) / 100)
+                : Math.round(appliedCoupon.discountAmount || 0);
+              const cappedDiscount = Math.min(discountAmt, pkg.priceValue);
+              const finalPrice = pkg.priceValue - cappedDiscount;
+              const discountLabel = appliedCoupon.discountPercentage > 0
+                ? `Discount (${appliedCoupon.discountPercentage}%):`
+                : `Discount (₹${Math.round(appliedCoupon.discountAmount || 0).toLocaleString("en-IN")} OFF):`;
+              return (
               <div className="mb-3 text-sm">
                 <div className="flex justify-between items-center">
                   <span
@@ -255,7 +268,7 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
                         : "text-[#101828] font-medium"
                     }
                   >
-                    Discount ({appliedCoupon.discountPercentage}%):
+                    {discountLabel}
                   </span>
                   <span
                     className={
@@ -264,10 +277,7 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
                         : "text-green-600 font-medium"
                     }
                   >
-                    -₹
-                    {Math.round(
-                      (pkg.priceValue * appliedCoupon.discountPercentage) / 100
-                    ).toLocaleString("en-IN")}
+                    -₹{cappedDiscount.toLocaleString("en-IN")}
                   </span>
                 </div>
                 <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-300">
@@ -287,18 +297,12 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
                         : "text-[#01334C] font-semibold text-lg"
                     }
                   >
-                    ₹
-                    {(
-                      pkg.priceValue -
-                      Math.round(
-                        (pkg.priceValue * appliedCoupon.discountPercentage) /
-                          100
-                      )
-                    ).toLocaleString("en-IN")}
+                    ₹{finalPrice.toLocaleString("en-IN")}
                   </span>
                 </div>
               </div>
-            )}
+              );
+            })()}
             <button
               onClick={() => handleGetStartedWithCoupon(pkg)}
               className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 mt-auto ${
