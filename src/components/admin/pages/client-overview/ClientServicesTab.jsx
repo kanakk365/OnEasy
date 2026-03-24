@@ -93,7 +93,7 @@ function ClientServicesTab({
     <div className="space-y-4">
       {/* Header with Add Button */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Services</h2>
+        <h2 className="text-xl font-semibold text-gray-900"></h2>
         <div className="flex items-center gap-3">
           <button
             onClick={handleViewNotes}

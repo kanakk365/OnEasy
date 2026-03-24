@@ -123,32 +123,25 @@ const ClientResponsesTab = ({ userId }) => {
     <div className="space-y-6">
       {/* Header + sub-tab pills — mirrors Registrations.jsx exactly */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="text-lg font-bold text-gray-900">Client Responses</h2>
-          <p className="text-sm text-gray-500">
-            Suggested registrations and compliances for this client
-          </p>
-        </div>
+
 
         {/* Sub-tab toggle */}
         <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
           <button
             onClick={() => setView("suggested-registrations")}
-            className={`py-2 px-4 text-sm font-medium rounded-lg transition-colors ${
-              view === "suggested-registrations"
+            className={`py-2 px-4 text-sm font-medium rounded-lg transition-colors ${view === "suggested-registrations"
                 ? "bg-[#01466a] text-white shadow-sm"
                 : "text-gray-500 hover:text-gray-900"
-            }`}
+              }`}
           >
             Suggested Registrations
           </button>
           <button
             onClick={() => setView("suggested-compliances")}
-            className={`py-2 px-4 text-sm font-medium rounded-lg transition-colors ${
-              view === "suggested-compliances"
+            className={`py-2 px-4 text-sm font-medium rounded-lg transition-colors ${view === "suggested-compliances"
                 ? "bg-[#01466a] text-white shadow-sm"
                 : "text-gray-500 hover:text-gray-900"
-            }`}
+              }`}
           >
             Suggested Compliances
           </button>
@@ -295,11 +288,10 @@ const ClientResponsesTab = ({ userId }) => {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={`Search ${
-                  view === "suggested-registrations"
+                placeholder={`Search ${view === "suggested-registrations"
                     ? "registrations"
                     : "compliances"
-                }...`}
+                  }...`}
                 className="w-full max-w-xs px-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D]"
               />
             </div>
@@ -334,7 +326,7 @@ const ClientResponsesTab = ({ userId }) => {
                           {item.category === "registration"
                             ? "Registration required"
                             : item.category?.replace(/_/g, " ") ||
-                              "Compliance filing"}
+                            "Compliance filing"}
                         </p>
                       </div>
                       <div className="w-10 h-10 rounded-full bg-[#F5F7FA] group-hover:bg-[#246181] flex items-center justify-center transition-colors flex-shrink-0">

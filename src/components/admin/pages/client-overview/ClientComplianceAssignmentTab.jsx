@@ -227,11 +227,10 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
         {/* Branch Header */}
         <button
           onClick={() => hasChildren && toggleBranchExpand(path)}
-          className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all text-left ${
-            isExpanded
+          className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all text-left ${isExpanded
               ? "bg-[#00486D]/5 border border-[#00486D]/20"
               : "bg-white border border-gray-200 hover:border-[#00486D]/30 hover:bg-gray-50"
-          }`}
+            }`}
           style={depth > 0 ? { marginLeft: `${depth * 16}px` } : {}}
         >
           <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -248,9 +247,8 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
                 />
               ))}
             <span
-              className={`text-sm font-semibold truncate ${
-                isExpanded ? "text-[#00486D]" : "text-gray-800"
-              }`}
+              className={`text-sm font-semibold truncate ${isExpanded ? "text-[#00486D]" : "text-gray-800"
+                }`}
             >
               {branch.heading}
             </span>
@@ -306,26 +304,23 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
                     <div
                       key={item.code}
                       onClick={() => toggleItem(item)}
-                      className={`flex items-start gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all mb-1 ${
-                        isSel
+                      className={`flex items-start gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all mb-1 ${isSel
                           ? "bg-[#00486D]/5 border border-[#00486D]/30"
                           : "bg-white border border-gray-100 hover:border-gray-200 hover:bg-gray-50"
-                      }`}
+                        }`}
                     >
                       <div
-                        className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
-                          isSel
+                        className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${isSel
                             ? "bg-[#00486D] border-[#00486D]"
                             : "bg-white border-gray-300"
-                        }`}
+                          }`}
                       >
                         {isSel && <FiCheck className="text-white w-3 h-3" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p
-                          className={`text-sm font-medium ${
-                            isSel ? "text-[#00486D]" : "text-gray-800"
-                          }`}
+                          className={`text-sm font-medium ${isSel ? "text-[#00486D]" : "text-gray-800"
+                            }`}
                         >
                           {item.name}
                         </p>
@@ -374,12 +369,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
   if (!selectedOrg) {
     return (
       <div className="bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)] p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          Select Organisation
-        </h2>
-        <p className="text-sm text-gray-500 mb-6">
-          Choose an organisation to assign compliance to
-        </p>
+
 
         {userOrgs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-200">
