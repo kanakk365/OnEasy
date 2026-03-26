@@ -320,7 +320,8 @@ function RegistrationPackageSelection() {
           <p className="text-gray-600 mb-4">No registration type selected</p>
           <button
             onClick={() => navigate('/registration-categories')}
-            className="px-6 py-2 bg-[#022B51] text-white rounded-lg hover:bg-[#015079]"
+            className="px-6 py-2 text-white rounded-lg"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             Go Back
           </button>

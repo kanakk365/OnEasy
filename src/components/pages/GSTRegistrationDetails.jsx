@@ -183,7 +183,7 @@ function GSTRegistrationDetails() {
         if (packagesLoading) {
           return (
             <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#01334C]"></div>
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#022B51]"></div>
               <p className="mt-2 text-gray-600">Loading packages...</p>
             </div>
           );
@@ -267,7 +267,8 @@ function GSTRegistrationDetails() {
           </button>
           <button
             onClick={() => navigate('/gst-dashboard')}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#022B51] text-white rounded-lg hover:bg-[#015079] transition-colors font-medium shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 text-white rounded-lg hover:opacity-90 transition-all font-medium shadow-sm"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

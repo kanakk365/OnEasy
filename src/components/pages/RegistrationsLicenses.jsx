@@ -850,7 +850,8 @@ function RegistrationsLicenses() {
             <h2 className="text-xl font-semibold text-gray-900">Registrations and Licenses Documents</h2>
             <button
               onClick={handleOpenUploadModal}
-              className="px-4 py-2 text-sm font-medium text-white bg-[#022B51] rounded-md hover:bg-[#015079] transition-colors"
+              className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-all"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               + Upload Document
             </button>
@@ -1022,7 +1023,8 @@ function RegistrationsLicenses() {
                 <button
                   onClick={handleUpload}
                   disabled={uploading || !formData.file || !formData.category}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[#022B51] rounded-md hover:bg-[#015079] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   {uploading ? "Uploading..." : "Upload"}
                 </button>

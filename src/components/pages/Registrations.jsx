@@ -786,41 +786,45 @@ function Registrations() {
             <div className="flex space-x-8">
               <button
                 onClick={() => setView("services")}
-                className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
+                className={`py-2 px-5 text-sm relative rounded-lg transition-all ${
                   view === "services"
-                    ? "bg-[#022B51] text-white"
+                    ? "text-white"
                     : "text-gray-500 hover:text-gray-900"
                 }`}
+                style={view === "services" ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
               >
                 Services
               </button>
               <button
                 onClick={() => setView("my")}
-                className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
+                className={`py-2 px-5 text-sm relative rounded-lg transition-all ${
                   view === "my"
-                    ? "bg-[#022B51] text-white"
+                    ? "text-white"
                     : "text-gray-500 hover:text-gray-900"
                 }`}
+                style={view === "my" ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
               >
                 My Registrations
               </button>
               <button
                 onClick={() => setView("suggested-registrations")}
-                className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
+                className={`py-2 px-5 text-sm relative rounded-lg transition-all ${
                   view === "suggested-registrations"
-                    ? "bg-[#022B51] text-white"
+                    ? "text-white"
                     : "text-gray-500 hover:text-gray-900"
                 }`}
+                style={view === "suggested-registrations" ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
               >
                 Suggested Registrations
               </button>
               <button
                 onClick={() => setView("suggested-compliances")}
-                className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
+                className={`py-2 px-5 text-sm relative rounded-lg transition-all ${
                   view === "suggested-compliances"
-                    ? "bg-[#022B51] text-white"
+                    ? "text-white"
                     : "text-gray-500 hover:text-gray-900"
                 }`}
+                style={view === "suggested-compliances" ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
               >
                 Suggested Compliances
               </button>
@@ -930,7 +934,7 @@ function Registrations() {
                                 }
                                 route ? navigate(route) : navigate(view === "suggested-registrations" ? "/registrations" : "/compliance");
                               }}
-                              className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#022B51] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-gray-100"
+                              className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-gray-100"
                             >
                               <div>
                                 <h3 className="text-lg font-semibold text-[#022B51] mb-1 group-hover:text-white">
@@ -963,7 +967,8 @@ function Registrations() {
                 </p>
                 <button
                   onClick={() => navigate("/compliance")}
-                  className="px-6 py-2 bg-[#022B51] text-white rounded-lg text-sm font-medium hover:bg-[#022B51] transition-colors"
+                  className="px-6 py-2 text-white rounded-lg text-sm font-medium hover:hover:opacity-90 transition-all"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   Go to Compliance
                 </button>
@@ -1013,7 +1018,7 @@ function Registrations() {
               ].map((service, idx) => (
                 <div
                   key={idx}
-                  className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#022B51] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-transparent hover:border-gray-100/10"
+                  className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-transparent hover:border-gray-100/10"
                   onClick={service.onClick}
                 >
                   <div>
@@ -1070,7 +1075,8 @@ function Registrations() {
                     </p>
                     <button
                       onClick={() => setShowComingSoon(false)}
-                      className="w-full bg-[#022B51] text-white py-3 px-6 rounded-lg font-medium hover:bg-[#015079] transition-colors duration-200"
+                      className="w-full text-white py-3 px-6 rounded-lg font-medium hover:opacity-90 transition-all duration-200"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       Got it!
                     </button>
@@ -1089,7 +1095,7 @@ function Registrations() {
               ) : filtered.length > 0 ? (
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-[#022B51] text-white">
+                    <tr className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                       <th className="px-6 py-4 text-left text-sm font-medium tracking-wide first:rounded-tl-lg">
                         Service
                       </th>
@@ -1216,7 +1222,7 @@ function Registrations() {
                                 className="px-8 py-2 text-xs font-semibold text-white rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide"
                                 style={{
                                   background:
-                                    "linear-gradient(90deg, #00486D 0%, #023752 100%)",
+                                    "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                                 }}
                               >
                                 View
@@ -1227,7 +1233,7 @@ function Registrations() {
                                 className="px-8 py-2 text-xs font-semibold text-white rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide"
                                 style={{
                                   background:
-                                    "linear-gradient(90deg, #00486D 0%, #023752 100%)",
+                                    "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                                 }}
                               >
                                 View
@@ -1300,7 +1306,7 @@ function Registrations() {
             <button
               onClick={() => setShowDeleteSuccess(false)}
               className="w-full px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors"
-              style={{ background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)" }}
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               Done
             </button>
