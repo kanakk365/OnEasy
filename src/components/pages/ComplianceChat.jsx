@@ -1992,25 +1992,29 @@ const ComplianceChat = () => {
             {/* Action buttons at the end */}
             {msg.actionButtons && (
               <div className="flex flex-wrap gap-3 mt-3">
-                {msg.actionButtons.map((btn, idx) => (
+                {msg.actionButtons.map((btn, idx) => {
+                  const isGray = btn.action === "restart" || btn.action === "delete_and_restart";
+                  const isFilled = btn.action === "view_recommendations" ||
+                    btn.action === "flow_new_business" ||
+                    btn.action === "flow_existing_business" ||
+                    btn.action === "existing_knows_compliance" ||
+                    btn.action === "existing_no_compliance";
+                  return (
                   <button
                     key={idx}
                     onClick={() => handleActionButton(btn.action)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${btn.action === "restart" ||
-                      btn.action === "delete_and_restart"
+                    className={`px-4 py-2 rounded-full text-sm font-medium hover:opacity-90 transition-all ${isGray
                       ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      : btn.action === "view_recommendations" ||
-                        btn.action === "flow_new_business" ||
-                        btn.action === "flow_existing_business" ||
-                        btn.action === "existing_knows_compliance" ||
-                        btn.action === "existing_no_compliance"
-                        ? "bg-[#022B51] text-white hover:bg-[#015079]"
+                      : isFilled
+                        ? "text-white"
                         : "bg-white border border-[#022B51] text-[#022B51] hover:bg-[#E3F2F9]"
                       }`}
+                    style={isFilled ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
                   >
                     {btn.label}
                   </button>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

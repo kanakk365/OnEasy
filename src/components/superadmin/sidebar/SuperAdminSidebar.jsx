@@ -127,9 +127,10 @@ function SuperAdminSidebar() {
                 isCollapsed ? "justify-center px-2" : "space-x-3 px-3"
               } py-2 rounded-lg transition-all duration-200 ${
                 location.pathname === item.path
-                  ? "bg-[#022B51] text-white"
+                  ? "text-white"
                   : "text-gray-700 hover:bg-gray-50"
               } group relative`}
+              style={location.pathname === item.path ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
               title={isCollapsed ? item.text : ""}
             >
               <span

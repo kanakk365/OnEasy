@@ -317,9 +317,10 @@ function ClientServices() {
                 onClick={() => setActiveServiceTab('Open')}
                 className={`pb-2 mr-4 md:mr-6 text-xs md:text-sm font-medium whitespace-nowrap transition-colors ${
                   activeServiceTab === 'Open' 
-                    ? 'text-[#022B51] border-b-2 border-[#022B51]' 
+                    ? 'text-[#022B51] border-b-2' 
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
+                style={activeServiceTab === 'Open' ? { borderImage: "linear-gradient(90deg, #022B51, #015079) 1" } : {}}
               >
                 Open
               </button>
@@ -327,9 +328,10 @@ function ClientServices() {
                 onClick={() => setActiveServiceTab('In progress')}
                 className={`pb-2 mr-4 md:mr-6 text-xs md:text-sm font-medium whitespace-nowrap transition-colors ${
                   activeServiceTab === 'In progress' 
-                    ? 'text-[#022B51] border-b-2 border-[#022B51]' 
+                    ? 'text-[#022B51] border-b-2' 
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
+                style={activeServiceTab === 'In progress' ? { borderImage: "linear-gradient(90deg, #022B51, #015079) 1" } : {}}
               >
                 In progress
               </button>
@@ -337,9 +339,10 @@ function ClientServices() {
                 onClick={() => setActiveServiceTab('Completed')}
                 className={`pb-2 text-xs md:text-sm font-medium whitespace-nowrap transition-colors ${
                   activeServiceTab === 'Completed' 
-                    ? 'text-[#022B51] border-b-2 border-[#022B51]' 
+                    ? 'text-[#022B51] border-b-2' 
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
+                style={activeServiceTab === 'Completed' ? { borderImage: "linear-gradient(90deg, #022B51, #015079) 1" } : {}}
               >
                 Completed
               </button>

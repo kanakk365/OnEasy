@@ -1298,7 +1298,7 @@ function Settings() {
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white rounded-b-xl border border-gray-200 border-t border-gray-200 p-6 min-h-[400px]">
+        <div className="bg-white rounded-b-xl border border-gray-200 p-6 min-h-[400px]">
           {activeTab === "profile" && (
             <ClientProfileContent
               formData={formData}

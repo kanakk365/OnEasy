@@ -619,9 +619,10 @@ function Client() {
                   onClick={() => setActiveServiceTab(tab)}
                   className={`flex-1 py-3 text-sm font-medium transition-all relative ${
                     activeServiceTab === tab
-                      ? "bg-[#022B51] text-white rounded-tl-2xl rounded-br-2xl"
+                      ? "text-white rounded-tl-2xl rounded-br-2xl"
                       : "text-gray-400 hover:text-gray-600 bg-gray-50/50"
                   }`}
+                  style={activeServiceTab === tab ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
                 >
                   {tab}
                 </button>
@@ -722,9 +723,10 @@ function Client() {
                 onClick={() => setActiveNoticeTab("All Notices")}
                 className={`pb-2 mr-6 text-sm font-medium transition-colors ${
                   activeNoticeTab === "All Notices"
-                    ? "text-[#022B51] border-b-2 border-[#022B51]"
+                    ? "text-[#022B51] border-b-2 border-[#015079]"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
+                style={activeNoticeTab === "All Notices" ? { borderImage: "linear-gradient(90deg, #022B51, #015079) 1" } : {}}
               >
                 All Notices
               </button>
@@ -732,9 +734,10 @@ function Client() {
                 onClick={() => setActiveNoticeTab("My Notices")}
                 className={`pb-2 text-sm font-medium transition-colors ${
                   activeNoticeTab === "My Notices"
-                    ? "text-[#022B51] border-b-2 border-[#022B51]"
+                    ? "text-[#022B51] border-b-2 border-[#015079]"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
+                style={activeNoticeTab === "My Notices" ? { borderImage: "linear-gradient(90deg, #022B51, #015079) 1" } : {}}
               >
                 My Notices
               </button>
