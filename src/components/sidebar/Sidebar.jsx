@@ -104,18 +104,21 @@ function Sidebar() {
     <>
       {/* Mobile Hamburger Menu Button */}
       {!isMobileMenuOpen && (
-        <button
-          onClick={() => {
-            console.log(
-              "Mobile menu button clicked, current state:",
-              isMobileMenuOpen,
-            );
-            setIsMobileMenuOpen(true);
-          }}
-          className="lg:hidden absolute top-3 left-4 z-[70] bg-white p-2 rounded-lg shadow-lg border border-gray-200"
-        >
-          <MdMenu className="w-6 h-6 text-gray-700" />
-        </button>
+        <div className="lg:hidden fixed top-3 left-4 z-[70] flex items-center space-x-3">
+          <button
+            onClick={() => {
+              console.log(
+                "Mobile menu button clicked, current state:",
+                isMobileMenuOpen,
+              );
+              setIsMobileMenuOpen(true);
+            }}
+            className="bg-white p-2 rounded-lg shadow-lg border border-gray-200"
+          >
+            <MdMenu className="w-6 h-6 text-gray-700" />
+          </button>
+          <img src="/newlogo.PNG" alt="OnEasy Logo" className="h-8 w-auto" />
+        </div>
       )}
 
       {/* Mobile Sidebar Overlay */}
@@ -143,7 +146,7 @@ function Sidebar() {
             } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-[#26496a]/30`}
         >
           <img
-            src="/logo.jpg"
+            src="/logo-white.png"
             alt="OnEasy Logo"
             className={`${isCollapsed ? "h-8" : "h-10"
               } w-auto transition-all duration-300 ${isCollapsed ? "mx-auto" : ""
@@ -294,7 +297,7 @@ function Sidebar() {
           )}
           {/* Mobile Sidebar Header */}
           <div className="px-6 pt-4 pb-4 flex justify-between items-center border-b border-gray-200">
-            <img src="/logo.jpg" alt="OnEasy Logo" className="h-10 w-auto" />
+            <img src="/newlogo.PNG" alt="OnEasy Logo" className="h-10 w-auto" />
             <button
               onClick={() => {
                 console.log("Close button clicked");

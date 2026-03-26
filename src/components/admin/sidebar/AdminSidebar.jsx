@@ -188,7 +188,7 @@ function AdminSidebar() {
             } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-[#26496a]/30`}
         >
           <img
-            src="/logo.jpg"
+            src="/logo-white.png"
             alt="OnEasy Logo"
             className={`${isCollapsed ? "h-8" : "h-10"
               } w-auto transition-all duration-300 ${isCollapsed ? "mx-auto" : ""
@@ -359,7 +359,7 @@ function AdminSidebar() {
       >
         {/* Mobile Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#26496a]/30">
-          <img src="/logo.jpg" alt="OnEasy Logo" className="h-10 w-auto" />
+          <img src="/logo-white.png" alt="OnEasy Logo" className="h-10 w-auto" />
           <button
             onClick={() => setIsMobileMenuOpen(false)}
             className="p-2 hover:bg-[#26496a] rounded-lg transition-colors"

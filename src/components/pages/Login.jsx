@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import apiClient from "../../utils/api";
 import { AUTH_CONFIG } from "../../config/auth";
-const logo = "/logo.jpg";
+const logo = "/newlogo.PNG";
 import ChangePasswordModal from "../common/ChangePasswordModal";
 import SetEmailPasswordModal from "../common/SetEmailPasswordModal";
 import ForgotPasswordModal from "../common/ForgotPasswordModal";
