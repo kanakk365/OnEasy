@@ -563,7 +563,7 @@ function Client() {
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
           {/* On-Going Service Requests */}
           <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
-            <div className="text-3xl font-semibold text-[#023752] mb-2">
+            <div className="text-3xl font-semibold text-[#022B51] mb-2">
               {complianceStats.ongoing}
             </div>
             <div className="text-sm font-medium text-gray-700">
@@ -572,7 +572,7 @@ function Client() {
           </div>
           {/* Up-coming Compliances */}
           <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
-            <div className="text-3xl font-semibold text-[#023752] mb-2">
+            <div className="text-3xl font-semibold text-[#022B51] mb-2">
                {apiComplianceStats 
                 ? (apiComplianceStats?.upcomingCount ?? 0)
                 : complianceStats.upcoming}
@@ -583,7 +583,7 @@ function Client() {
           </div>
           {/* Overdue Compliances */}
           <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
-            <div className="text-3xl font-semibold text-[#023752] mb-2">
+            <div className="text-3xl font-semibold text-[#022B51] mb-2">
               {apiComplianceStats
                 ? (apiComplianceStats?.overdueCount ?? 0)
                 : complianceStats.overdue}
@@ -605,7 +605,7 @@ function Client() {
               </h2>
               <button
                 onClick={() => navigate("/client-services")}
-                className="text-sm font-medium text-[#00486D] hover:underline cursor-pointer"
+                className="text-sm font-medium text-[#022B51] hover:underline cursor-pointer"
               >
                 View all
               </button>
@@ -619,7 +619,7 @@ function Client() {
                   onClick={() => setActiveServiceTab(tab)}
                   className={`flex-1 py-3 text-sm font-medium transition-all relative ${
                     activeServiceTab === tab
-                      ? "bg-[#01334C] text-white rounded-tl-2xl rounded-br-2xl"
+                      ? "bg-[#022B51] text-white rounded-tl-2xl rounded-br-2xl"
                       : "text-gray-400 hover:text-gray-600 bg-gray-50/50"
                   }`}
                 >
@@ -710,7 +710,7 @@ function Client() {
               </h2>
               <button
                 onClick={() => navigate("/notice-board")}
-                className="text-sm font-medium text-[#00486D] hover:underline cursor-pointer"
+                className="text-sm font-medium text-[#022B51] hover:underline cursor-pointer"
               >
                 View all
               </button>
@@ -722,7 +722,7 @@ function Client() {
                 onClick={() => setActiveNoticeTab("All Notices")}
                 className={`pb-2 mr-6 text-sm font-medium transition-colors ${
                   activeNoticeTab === "All Notices"
-                    ? "text-[#01334C] border-b-2 border-[#01334C]"
+                    ? "text-[#022B51] border-b-2 border-[#022B51]"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
@@ -732,7 +732,7 @@ function Client() {
                 onClick={() => setActiveNoticeTab("My Notices")}
                 className={`pb-2 text-sm font-medium transition-colors ${
                   activeNoticeTab === "My Notices"
-                    ? "text-[#01334C] border-b-2 border-[#01334C]"
+                    ? "text-[#022B51] border-b-2 border-[#022B51]"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
@@ -774,7 +774,7 @@ function Client() {
                                 href={noticeItem.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[#023752] font-medium text-sm hover:underline"
+                                className="text-[#022B51] font-medium text-sm hover:underline"
                               >
                                 File Now.
                               </a>
@@ -821,7 +821,7 @@ function Client() {
                 <select
                   value={selectedComplianceOrg}
                   onChange={(e) => setSelectedComplianceOrg(e.target.value)}
-                  className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#00486D] bg-white max-w-[180px] truncate"
+                  className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#022B51] bg-white max-w-[180px] truncate"
                 >
                   {complianceOrgs.map((org) => (
                     <option key={org.id} value={org.id}>
@@ -957,7 +957,7 @@ function Client() {
             </h2>
             <button
               onClick={() => navigate("/organization")}
-              className="text-sm font-medium text-[#00486D] hover:underline cursor-pointer"
+              className="text-sm font-medium text-[#022B51] hover:underline cursor-pointer"
             >
               View all
             </button>
@@ -966,7 +966,7 @@ function Client() {
           <div className="overflow-x-auto">
             <div className="min-w-[700px]">
               {/* Table Header */}
-              <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-[#f2f6f7] rounded-xl text-sm font-medium text-[#023752]">
+              <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-[#f2f6f7] rounded-xl text-sm font-medium text-[#022B51]">
                 <div className="col-span-4">Name</div>
                 <div className="col-span-6">GST number</div>
                 <div className="col-span-2 text-right">Action</div>
@@ -998,7 +998,7 @@ function Client() {
                         className="text-white text-xs px-4 py-2 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer"
                         style={{
                           background:
-                            "linear-gradient(90deg, #00486D 0%, #023752 100%)",
+                            "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                         }}
                       >
                         View all

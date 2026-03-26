@@ -88,7 +88,7 @@ function ForgotPasswordModal({ isOpen, onClose }) {
               <button
                 type="button"
                 onClick={handleClose}
-                className="w-full h-12 bg-[#01334C] hover:bg-[#00486D] text-white font-medium rounded-lg transition-colors"
+                className="w-full h-12 text-white font-medium rounded-lg hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 Back to Sign In
               </button>
@@ -104,7 +104,7 @@ function ForgotPasswordModal({ isOpen, onClose }) {
                   id="forgot-email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                  className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                   placeholder="Enter your email"
                   disabled={loading}
                   autoFocus
@@ -128,7 +128,7 @@ function ForgotPasswordModal({ isOpen, onClose }) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 h-12 px-6 bg-[#01334C] hover:bg-[#00486D] text-white font-medium rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="flex-1 h-12 px-6 text-white font-medium rounded-lg hover:opacity-90 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   {loading ? (
                     <>

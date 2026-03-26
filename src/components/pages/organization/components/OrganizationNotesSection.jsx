@@ -58,7 +58,7 @@ const OrganizationNotesSection = ({
         {filteredAdminNotes.length > 0 ? (
           <div className="overflow-x-auto rounded-lg">
             <table className="w-full text-sm">
-              <thead className="bg-[#00486D] text-white">
+              <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                 <tr>
                   <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                     Date
@@ -87,7 +87,7 @@ const OrganizationNotesSection = ({
                     <td className="p-3">
                       <button
                         onClick={() => setSelectedAdminNote(note)}
-                        className="flex items-center gap-1 px-3 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs font-medium"
+                        className="flex items-center gap-1 px-3 py-2 text-white rounded-md hover:opacity-90 transition-all text-xs font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                       >
                         <AiOutlineEye className="w-4 h-4" />
                         View Details
@@ -111,7 +111,7 @@ const OrganizationNotesSection = ({
             <button
               type="button"
               onClick={onAddNote}
-              className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold flex items-center gap-2"
+              className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all text-xs font-semibold flex items-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               <AiOutlinePlus className="w-3 h-3" /> Add Note
             </button>
@@ -120,7 +120,7 @@ const OrganizationNotesSection = ({
         {filteredUserNotes.length > 0 ? (
           <div className="overflow-x-auto rounded-lg">
             <table className="w-full text-sm">
-              <thead className="bg-[#00486D] text-white">
+              <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                 <tr>
                   <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                     Date
@@ -150,7 +150,7 @@ const OrganizationNotesSection = ({
                       </div>
                     </td>
                     <td className="p-3">
-                      <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-[#00486D]">
+                      <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-[#022B51]">
                         {note.attachments && note.attachments.length > 0
                           ? `${note.attachments.length} file(s)`
                           : "-"}
@@ -159,7 +159,7 @@ const OrganizationNotesSection = ({
                     <td className="p-3">
                       <button
                         onClick={() => setSelectedUserNote(note)}
-                        className="flex items-center gap-1 px-3 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs font-medium"
+                        className="flex items-center gap-1 px-3 py-2 text-white rounded-md hover:opacity-90 transition-all text-xs font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                       >
                         <AiOutlineEye className="w-4 h-4" />
                         View Details
@@ -212,7 +212,7 @@ const OrganizationNotesSection = ({
                             organizationId: e.target.value || "",
                           })
                         }
-                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#00486D]"
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                       >
                         <option value="">Select organization</option>
                         {organisations.map((org, idx) => (
@@ -238,7 +238,7 @@ const OrganizationNotesSection = ({
                           date: e.target.value,
                         })
                       }
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#00486D]"
+                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                     />
                   </div>
 
@@ -256,7 +256,7 @@ const OrganizationNotesSection = ({
                         })
                       }
                       placeholder="Enter note description..."
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#00486D] min-h-[100px]"
+                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#022B51] min-h-[100px]"
                     />
                   </div>
 
@@ -278,7 +278,7 @@ const OrganizationNotesSection = ({
                               clientActionItems: updated,
                             });
                           }}
-                          className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#00486D]"
+                          className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                           placeholder="Add client action item"
                         />
                         {(editedAdminNote.clientActionItems || []).length > 1 && (
@@ -306,7 +306,7 @@ const OrganizationNotesSection = ({
                           clientActionItems: [...(editedAdminNote.clientActionItems || []), ""],
                         })
                       }
-                      className="text-xs text-[#00486D] hover:underline"
+                      className="text-xs text-[#022B51] hover:underline"
                     >
                       + Add client action item
                     </button>
@@ -330,7 +330,7 @@ const OrganizationNotesSection = ({
                               adminActionItems: updated,
                             });
                           }}
-                          className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#00486D]"
+                          className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                           placeholder="Add admin action item"
                         />
                         {(editedAdminNote.adminActionItems || []).length > 1 && (
@@ -358,7 +358,7 @@ const OrganizationNotesSection = ({
                           adminActionItems: [...(editedAdminNote.adminActionItems || []), ""],
                         })
                       }
-                      className="text-xs text-[#00486D] hover:underline"
+                      className="text-xs text-[#022B51] hover:underline"
                     >
                       + Add admin action item
                     </button>
@@ -373,12 +373,12 @@ const OrganizationNotesSection = ({
                       className={`flex items-center justify-center gap-2 px-3 py-3 border-2 border-dashed rounded-lg ${
                         uploadingAttachments
                           ? "border-gray-200 bg-gray-50 cursor-not-allowed"
-                          : "border-gray-200 hover:border-[#00486D] cursor-pointer bg-white"
+                          : "border-gray-200 hover:border-[#022B51] cursor-pointer bg-white"
                       }`}
                     >
                       {uploadingAttachments ? (
                         <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#00486D]"></div>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#022B51]"></div>
                           <span className="text-xs text-gray-600">Uploading...</span>
                         </>
                       ) : (
@@ -447,7 +447,7 @@ const OrganizationNotesSection = ({
                                   <button
                                     type="button"
                                     onClick={() => handleViewFile(fileUrl)}
-                                    className="p-1 text-[#00486D] hover:text-[#01334C]"
+                                    className="p-1 text-[#022B51] hover:text-[#022B51]"
                                     title="View file"
                                   >
                                     <AiOutlineEye className="w-4 h-4" />
@@ -583,7 +583,7 @@ const OrganizationNotesSection = ({
                               {fileUrl && handleViewFile && (
                                 <button
                                   onClick={() => handleViewFile(fileUrl)}
-                                  className="p-1 text-[#00486D] hover:text-[#01334C] transition-colors flex-shrink-0"
+                                  className="p-1 text-[#022B51] hover:text-[#022B51] transition-colors flex-shrink-0"
                                   title="View file"
                                 >
                                   <AiOutlineEye className="w-4 h-4" />
@@ -652,7 +652,7 @@ const OrganizationNotesSection = ({
                         }}
                         className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg"
                         style={{
-                          background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+                          background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                         }}
                       >
                         Save
@@ -717,7 +717,7 @@ const OrganizationNotesSection = ({
                         }}
                         className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg"
                         style={{
-                          background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+                          background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                         }}
                       >
                         Edit
@@ -768,7 +768,7 @@ const OrganizationNotesSection = ({
                             organizationId: e.target.value || "",
                           })
                         }
-                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#00486D]"
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                       >
                         <option value="">Select organization</option>
                         {organisations.map((org, idx) => (
@@ -794,7 +794,7 @@ const OrganizationNotesSection = ({
                           date: e.target.value,
                         })
                       }
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#00486D]"
+                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                     />
                   </div>
 
@@ -812,7 +812,7 @@ const OrganizationNotesSection = ({
                         })
                       }
                       placeholder="Enter note description..."
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#00486D] min-h-[100px]"
+                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#022B51] min-h-[100px]"
                     />
                   </div>
 
@@ -825,12 +825,12 @@ const OrganizationNotesSection = ({
                       className={`flex items-center justify-center gap-2 px-3 py-3 border-2 border-dashed rounded-lg ${
                         uploadingAttachments
                           ? "border-gray-200 bg-gray-50 cursor-not-allowed"
-                          : "border-gray-200 hover:border-[#00486D] cursor-pointer bg-white"
+                          : "border-gray-200 hover:border-[#022B51] cursor-pointer bg-white"
                       }`}
                     >
                       {uploadingAttachments ? (
                         <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#00486D]"></div>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#022B51]"></div>
                           <span className="text-xs text-gray-600">Uploading...</span>
                         </>
                       ) : (
@@ -899,7 +899,7 @@ const OrganizationNotesSection = ({
                                   <button
                                     type="button"
                                     onClick={() => handleViewFile(fileUrl)}
-                                    className="p-1 text-[#00486D] hover:text-[#01334C]"
+                                    className="p-1 text-[#022B51] hover:text-[#022B51]"
                                     title="View file"
                                   >
                                     <AiOutlineEye className="w-4 h-4" />
@@ -1003,7 +1003,7 @@ const OrganizationNotesSection = ({
                               {fileUrl && handleViewFile && (
                                 <button
                                   onClick={() => handleViewFile(fileUrl)}
-                                  className="p-1 text-[#00486D] hover:text-[#01334C] transition-colors flex-shrink-0"
+                                  className="p-1 text-[#022B51] hover:text-[#022B51] transition-colors flex-shrink-0"
                                   title="View file"
                                 >
                                   <AiOutlineEye className="w-4 h-4" />
@@ -1081,7 +1081,7 @@ const OrganizationNotesSection = ({
                         }}
                         className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg"
                         style={{
-                          background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+                          background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                         }}
                       >
                         Save
@@ -1138,7 +1138,7 @@ const OrganizationNotesSection = ({
                         }}
                         className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg"
                         style={{
-                          background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+                          background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                         }}
                       >
                         Edit

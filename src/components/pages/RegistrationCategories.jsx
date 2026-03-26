@@ -201,7 +201,7 @@ function RegistrationCategories() {
               }}
               className="relative cursor-pointer rounded-xl p-8 transition-all duration-200 flex flex-col items-center text-center group bg-[#FAFBFF] border border-[#EFEFEF] shadow-[0_4px_16px_0_#9797970D] hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] hover:text-white"
             >
-              <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4 bg-[#022B51] group-hover:bg-[#015079]">
+              <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4 group-" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                 {React.cloneElement(registration.icon, {
                   className: "w-7 h-7 text-white",
                 })}

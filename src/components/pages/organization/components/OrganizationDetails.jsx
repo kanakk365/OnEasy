@@ -24,7 +24,7 @@ const ComplianceTabSection = ({ selectedOrg }) => {
             id="compliance-sub-tab-assigned"
             onClick={() => setComplianceTab("assigned")}
             className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${complianceTab === "assigned"
-              ? "bg-white text-[#00486D] shadow-sm"
+              ? "bg-white text-[#022B51] shadow-sm"
               : "text-gray-500 hover:text-gray-700"
               }`}
           >
@@ -34,7 +34,7 @@ const ComplianceTabSection = ({ selectedOrg }) => {
             id="compliance-sub-tab-add"
             onClick={() => setComplianceTab("add")}
             className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${complianceTab === "add"
-              ? "bg-white text-[#00486D] shadow-sm"
+              ? "bg-white text-[#022B51] shadow-sm"
               : "text-gray-500 hover:text-gray-700"
               }`}
           >
@@ -149,7 +149,7 @@ const OrganizationDetails = ({
           {!editingOrg && (
             <button
               onClick={handleEditOrganization}
-              className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors font-medium text-sm"
+              className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all font-medium text-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               Edit Details
             </button>
@@ -165,7 +165,7 @@ const OrganizationDetails = ({
                 id={`org-tab-${tab.key}`}
                 onClick={() => handleTabClick(tab.key)}
                 className={`py-2 px-5 text-sm relative rounded-lg transition-colors whitespace-nowrap ${activeTab === tab.key
-                  ? "bg-[#01466a] text-white"
+                  ? "bg-[#022B51] text-white"
                   : "text-gray-500 hover:text-gray-900"
                   }`}
               >
@@ -314,7 +314,7 @@ const OrganizationDetails = ({
                 <button
                   onClick={handleSaveOrganization}
                   disabled={saving}
-                  className="px-8 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium text-sm disabled:opacity-50"
+                  className="px-8 py-2.5 text-white rounded-lg hover:opacity-90 transition-all font-medium text-sm disabled:opacity-50" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   {saving ? "Saving..." : "Save Changes"}
                 </button>

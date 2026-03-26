@@ -304,7 +304,7 @@ function ClientServices() {
           </div>
           <button
             onClick={() => navigate('/client')}
-            className="px-4 py-2 text-sm font-medium text-[#00486D] border border-[#00486D] rounded-lg hover:bg-[#00486D] hover:text-white transition-colors"
+            className="px-4 py-2 text-sm font-medium text-[#022B51] border border-[#022B51] rounded-lg hover:bg-[#015079] hover:text-white transition-colors"
           >
             Back to Dashboard
           </button>
@@ -317,7 +317,7 @@ function ClientServices() {
                 onClick={() => setActiveServiceTab('Open')}
                 className={`pb-2 mr-4 md:mr-6 text-xs md:text-sm font-medium whitespace-nowrap transition-colors ${
                   activeServiceTab === 'Open' 
-                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
+                    ? 'text-[#022B51] border-b-2 border-[#022B51]' 
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -327,7 +327,7 @@ function ClientServices() {
                 onClick={() => setActiveServiceTab('In progress')}
                 className={`pb-2 mr-4 md:mr-6 text-xs md:text-sm font-medium whitespace-nowrap transition-colors ${
                   activeServiceTab === 'In progress' 
-                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
+                    ? 'text-[#022B51] border-b-2 border-[#022B51]' 
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -337,7 +337,7 @@ function ClientServices() {
                 onClick={() => setActiveServiceTab('Completed')}
                 className={`pb-2 text-xs md:text-sm font-medium whitespace-nowrap transition-colors ${
                   activeServiceTab === 'Completed' 
-                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
+                    ? 'text-[#022B51] border-b-2 border-[#022B51]' 
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -438,7 +438,7 @@ function ClientServices() {
                                     e.stopPropagation();
                                     handleServiceClick(service);
                                   }}
-                                  className="px-3 py-1 text-xs font-medium text-[#00486D] bg-white border border-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
+                                  className="px-3 py-1 text-xs font-medium text-[#022B51] bg-white border border-[#022B51] rounded-md hover:bg-[#015079] hover:text-white transition-colors"
                                 >
                                   View Details
                                 </button>

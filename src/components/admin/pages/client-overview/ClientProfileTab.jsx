@@ -76,7 +76,7 @@ function ClientProfileTab({
                           customClientId: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all"
                       placeholder="Enter custom client ID"
                     />
                   </div>
@@ -94,7 +94,7 @@ function ClientProfileTab({
                           clientStatus: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all"
                     >
                       <option value="Active">Active</option>
                       <option value="Inactive">Inactive</option>
@@ -117,7 +117,7 @@ function ClientProfileTab({
                           name: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all"
                       placeholder="Enter name"
                     />
                   </div>
@@ -134,7 +134,7 @@ function ClientProfileTab({
                           whatsapp: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all"
                       placeholder="Enter WhatsApp number"
                     />
                   </div>
@@ -151,7 +151,7 @@ function ClientProfileTab({
                           email: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all"
                       placeholder="Enter email"
                     />
                   </div>

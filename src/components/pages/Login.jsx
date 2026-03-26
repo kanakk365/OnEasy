@@ -548,13 +548,13 @@ function Login() {
               onClick={() => setLoginMethod("phone")}
               className={`flex-1 pb-3 text-sm font-semibold transition-all relative ${
                 loginMethod === "phone"
-                  ? "text-[#01334C]"
+                  ? "text-[#022B51]"
                   : "text-gray-400 hover:text-gray-600"
               }`}
             >
               Phone Number
               {loginMethod === "phone" && (
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#01334C]"></div>
+                <div className="absolute bottom-0 left-0 w-full h-0.5" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}></div>
               )}
             </button>
             <button
@@ -562,13 +562,13 @@ function Login() {
               onClick={() => setLoginMethod("email")}
               className={`flex-1 pb-3 text-sm font-semibold transition-all relative ${
                 loginMethod === "email"
-                  ? "text-[#01334C]"
+                  ? "text-[#022B51]"
                   : "text-gray-400 hover:text-gray-600"
               }`}
             >
               Email Id
               {loginMethod === "email" && (
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#01334C]"></div>
+                <div className="absolute bottom-0 left-0 w-full h-0.5" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}></div>
               )}
             </button>
           </div>
@@ -587,7 +587,7 @@ function Login() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter your full name"
-                className="w-full h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#01334C] placeholder-gray-400 text-sm transition-all"
+                className="w-full h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#022B51] placeholder-gray-400 text-sm transition-all"
                 disabled={isLoading}
               />
             </div>
@@ -607,7 +607,7 @@ function Login() {
                   }
                   placeholder="Enter your Phone Number"
                   maxLength="10"
-                  className="flex-1 h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#01334C] placeholder-gray-400 text-sm transition-all"
+                  className="flex-1 h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#022B51] placeholder-gray-400 text-sm transition-all"
                   disabled={isLoading}
                 />
               </div>
@@ -621,7 +621,7 @@ function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="w-full h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#01334C] placeholder-gray-400 text-sm transition-all"
+                className="w-full h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#022B51] placeholder-gray-400 text-sm transition-all"
                 disabled={isLoading}
               />
             </div>
@@ -634,7 +634,7 @@ function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Create a password"
-                className="w-full h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#01334C] placeholder-gray-400 text-sm transition-all"
+                className="w-full h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#022B51] placeholder-gray-400 text-sm transition-all"
                 disabled={isLoading}
               />
             </div>
@@ -647,7 +647,7 @@ function Login() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm your password"
-                className="w-full h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#01334C] placeholder-gray-400 text-sm transition-all"
+                className="w-full h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#022B51] placeholder-gray-400 text-sm transition-all"
                 disabled={isLoading}
               />
             </div>
@@ -655,7 +655,7 @@ function Login() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 bg-[#01334C] hover:bg-[#024466] text-white font-medium rounded-lg transition-colors flex items-center justify-center mt-6"
+              className="w-full h-12 text-white font-medium rounded-lg hover:opacity-90 transition-all flex items-center justify-center mt-6" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               {isLoading ? "Creating Account..." : "Sign Up"}
             </button>
@@ -683,7 +683,7 @@ function Login() {
                         }
                         placeholder="Enter your Phone Number"
                         maxLength="10"
-                        className="flex-1 h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#01334C] placeholder-gray-400 text-sm transition-all"
+                        className="flex-1 h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#022B51] placeholder-gray-400 text-sm transition-all"
                         disabled={isLoading}
                       />
                     </div>
@@ -692,7 +692,7 @@ function Login() {
                   <button
                     type="submit"
                     disabled={isLoading || phoneNumber.trim().length !== 10}
-                    className="w-full h-12 bg-[#01334C] hover:bg-[#024466] text-white font-medium rounded-lg transition-colors flex items-center justify-center"
+                    className="w-full h-12 text-white font-medium rounded-lg hover:opacity-90 transition-all flex items-center justify-center" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                   >
                     {isLoading ? "Sending OTP..." : "Send OTP"}
                   </button>
@@ -718,7 +718,7 @@ function Login() {
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
                         onPaste={index === 0 ? handleOtpPaste : undefined}
-                        className="w-10 h-10 text-center text-lg font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                        className="w-10 h-10 text-center text-lg font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                         disabled={isLoading}
                       />
                     ))}
@@ -727,7 +727,7 @@ function Login() {
                   <button
                     type="submit"
                     disabled={isLoading || otp.join("").length !== 4}
-                    className="w-full h-12 bg-[#01334C] hover:bg-[#024466] text-white font-medium rounded-lg transition-colors flex items-center justify-center disabled:bg-blue-400"
+                    className="w-full h-12 text-white font-medium rounded-lg hover:opacity-90 transition-all flex items-center justify-center disabled:bg-blue-400" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                   >
                     {isLoading ? "Verifying..." : "Verify & Continue"}
                   </button>
@@ -762,7 +762,7 @@ function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
-                    className="w-full h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#01334C] placeholder-gray-400 text-sm transition-all"
+                    className="w-full h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#022B51] placeholder-gray-400 text-sm transition-all"
                     disabled={isLoading}
                   />
                 </div>
@@ -775,14 +775,14 @@ function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your Password"
-                    className="w-full h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#01334C] placeholder-gray-400 text-sm transition-all"
+                    className="w-full h-12 px-4 rounded-lg bg-gray-100 border-none focus:ring-2 focus:ring-[#022B51] placeholder-gray-400 text-sm transition-all"
                     disabled={isLoading}
                   />
                   <div className="text-right mt-2">
                     <button
                       type="button"
                       onClick={() => setShowForgotPasswordModal(true)}
-                      className="text-sm text-[#01334C] font-medium hover:underline"
+                      className="text-sm text-[#022B51] font-medium hover:underline"
                     >
                       Forgot Password?
                     </button>
@@ -792,7 +792,7 @@ function Login() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-12 bg-[#01334C] hover:bg-[#024466] text-white font-medium rounded-lg transition-colors flex items-center justify-center"
+                  className="w-full h-12 text-white font-medium rounded-lg hover:opacity-90 transition-all flex items-center justify-center" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   {isLoading ? "Signing In..." : "Sign In"}
                 </button>

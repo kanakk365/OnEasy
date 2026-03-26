@@ -404,7 +404,7 @@ function MCANameApprovalDetails() {
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-[#01334C] hover:text-[#00486D] text-sm font-medium"
+            className="flex items-center gap-2 text-[#022B51] hover:text-[#022B51] text-sm font-medium"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
@@ -413,7 +413,7 @@ function MCANameApprovalDetails() {
           </button>
           <button
             onClick={() => navigate('/registrations/mca-name-approval')}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 text-white rounded-lg hover:opacity-90 transition-all font-medium shadow-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -440,21 +440,21 @@ function MCANameApprovalDetails() {
             <div className="flex justify-between items-center">
               <button
                 onClick={handleBack}
-                className="px-6 py-2 border border-[#00486D] text-[#00486D] rounded-lg font-semibold transition-all duration-300 hover:bg-[#00486D] hover:text-white cursor-pointer"
+                className="px-6 py-2 border border-[#022B51] text-[#022B51] rounded-lg font-semibold transition-all duration-300 hover:bg-[#015079] hover:text-white cursor-pointer"
               >
                 Back
               </button>
               {isLastStep ? (
                 <button
                   onClick={handleContinue}
-                  className="px-6 py-2 bg-[#00486D] text-white rounded-lg font-semibold transition-all duration-300 hover:bg-[#01334C] cursor-pointer"
+                  className="px-6 py-2 text-white rounded-lg font-semibold transition-all duration-300 cursor-pointer" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   Continue
                 </button>
               ) : (
                 <button
                   onClick={handleNext}
-                  className="px-6 py-2 bg-[#00486D] text-white rounded-lg font-semibold transition-all duration-300 hover:bg-[#01334C] cursor-pointer"
+                  className="px-6 py-2 text-white rounded-lg font-semibold transition-all duration-300 cursor-pointer" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   Next
                 </button>

@@ -26,7 +26,7 @@ const DigitalSignaturesSection = ({
       {editingOrg && (
         <button
           onClick={addDigitalSignature}
-          className="bg-[#00486D] text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-[#01334C] transition-colors"
+          className="text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
         >
           Add Digital Signature
         </button>
@@ -43,7 +43,7 @@ const DigitalSignaturesSection = ({
         {editingOrg && digitalSignatures.length > 0 && (
           <button
             onClick={addDigitalSignature}
-            className="bg-[#00486D] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#01334C] transition-colors flex items-center gap-2"
+            className="text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-all flex items-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             <AiOutlinePlus className="w-4 h-4" /> Add Digital Signature
           </button>
@@ -57,7 +57,7 @@ const DigitalSignaturesSection = ({
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-[#00486D] text-white">
+                <tr className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                   <th className="px-4 py-3 text-left text-sm font-medium">
                     Name
                   </th>
@@ -92,7 +92,7 @@ const DigitalSignaturesSection = ({
                               e.target.value
                             )
                           }
-                          className="w-full px-2 py-1 bg-gray-50 border border-gray-200 rounded text-sm focus:outline-none focus:border-[#00486D]"
+                          className="w-full px-2 py-1 bg-gray-50 border border-gray-200 rounded text-sm focus:outline-none focus:border-[#022B51]"
                           placeholder="Name"
                         />
                       ) : (
@@ -113,7 +113,7 @@ const DigitalSignaturesSection = ({
                               e.target.value
                             )
                           }
-                          className="w-full px-2 py-1 bg-gray-50 border border-gray-200 rounded text-sm focus:outline-none focus:border-[#00486D]"
+                          className="w-full px-2 py-1 bg-gray-50 border border-gray-200 rounded text-sm focus:outline-none focus:border-[#022B51]"
                           placeholder="DSC Number"
                         />
                       ) : (
@@ -135,7 +135,7 @@ const DigitalSignaturesSection = ({
                             )
                           }
                           placeholder="DD/MM/YYYY"
-                          className="w-full px-2 py-1 bg-gray-50 border border-gray-200 rounded text-sm focus:outline-none focus:border-[#00486D]"
+                          className="w-full px-2 py-1 bg-gray-50 border border-gray-200 rounded text-sm focus:outline-none focus:border-[#022B51]"
                         />
                       ) : (
                         <span className="text-sm text-gray-700">

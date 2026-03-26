@@ -87,7 +87,7 @@ function ClientOrganisationTab({
                               e.target.value,
                             )
                           }
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                           placeholder="Legal name as per registration"
                         />
                       </div>
@@ -122,7 +122,7 @@ function ClientOrganisationTab({
                               e.target.value,
                             )
                           }
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent bg-white"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent bg-white"
                         >
                           <option value="">Select Category</option>
                           <option value="Individual">Individual</option>
@@ -170,7 +170,7 @@ function ClientOrganisationTab({
                           onChange={(e) =>
                             updateOrganization(org.id, "gstin", e.target.value)
                           }
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent font-mono"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent font-mono"
                           placeholder="GSTIN number"
                         />
                       </div>
@@ -188,7 +188,7 @@ function ClientOrganisationTab({
                               e.target.value,
                             )
                           }
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent font-mono"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent font-mono"
                           placeholder="PAN number"
                         />
                       </div>
@@ -202,7 +202,7 @@ function ClientOrganisationTab({
                           onChange={(e) =>
                             updateOrganization(org.id, "tan", e.target.value)
                           }
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent font-mono"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent font-mono"
                           placeholder="TAN number"
                         />
                       </div>
@@ -216,7 +216,7 @@ function ClientOrganisationTab({
                           onChange={(e) =>
                             updateOrganization(org.id, "cin", e.target.value)
                           }
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent font-mono"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent font-mono"
                           placeholder="CIN number"
                         />
                       </div>
@@ -234,7 +234,7 @@ function ClientOrganisationTab({
                               e.target.value,
                             )
                           }
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                         />
                       </div>
                       {/* Registered Office Address Section */}
@@ -258,7 +258,7 @@ function ClientOrganisationTab({
                                   e.target.value,
                                 )
                               }
-                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                               placeholder="Enter Address Line 1"
                             />
                           </div>
@@ -278,7 +278,7 @@ function ClientOrganisationTab({
                                   e.target.value,
                                 )
                               }
-                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                               placeholder="Enter Address Line 2 (Optional)"
                             />
                           </div>
@@ -298,7 +298,7 @@ function ClientOrganisationTab({
                                   e.target.value,
                                 )
                               }
-                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                               placeholder="Enter District"
                             />
                           </div>
@@ -318,7 +318,7 @@ function ClientOrganisationTab({
                                   e.target.value,
                                 )
                               }
-                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                               placeholder="Enter State"
                             />
                           </div>
@@ -338,7 +338,7 @@ function ClientOrganisationTab({
                                   e.target.value,
                                 )
                               }
-                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                               placeholder="Enter Country"
                             />
                           </div>
@@ -420,7 +420,7 @@ function ClientOrganisationTab({
                                     }
                                   }
                                 }}
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                                 placeholder="Enter 6-digit PIN Code"
                                 maxLength={6}
                               />
@@ -438,7 +438,7 @@ function ClientOrganisationTab({
                         </h5>
                         <button
                           onClick={() => addDirectorPartner(org.id)}
-                          className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                          className="px-3 py-1.5 text-white rounded-md hover:opacity-90 transition-all text-sm inline-flex items-center gap-1" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                         >
                           <AiOutlinePlus className="w-4 h-4" />
                           Add Director/Partner
@@ -470,7 +470,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                       placeholder="Name"
                                     />
                                   </div>
@@ -489,7 +489,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                       placeholder="DIN/Number"
                                     />
                                   </div>
@@ -508,7 +508,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                       placeholder="Contact"
                                     />
                                   </div>
@@ -527,7 +527,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                       placeholder="Email"
                                     />
                                   </div>
@@ -546,7 +546,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                     />
                                   </div>
                                   <div>
@@ -563,7 +563,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                     >
                                       <option value="Active">Active</option>
                                       <option value="Inactive">Inactive</option>
@@ -602,7 +602,7 @@ function ClientOrganisationTab({
                         </h5>
                         <button
                           onClick={() => addDigitalSignature(org.id)}
-                          className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                          className="px-3 py-1.5 text-white rounded-md hover:opacity-90 transition-all text-sm inline-flex items-center gap-1" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                         >
                           <AiOutlinePlus className="w-4 h-4" />
                           Add Digital Signature
@@ -634,7 +634,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                       placeholder="Name"
                                     />
                                   </div>
@@ -653,7 +653,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                       placeholder="DSC Number"
                                     />
                                   </div>
@@ -672,7 +672,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                     />
                                   </div>
                                   <div>
@@ -689,7 +689,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                     >
                                       <option value="Active">Active</option>
                                       <option value="In-active">
@@ -780,7 +780,7 @@ function ClientOrganisationTab({
                                 </button>
                               </div>
                             ) : (
-                              <span className="px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-xs">
+                              <span className="px-3 py-2 text-white rounded-lg hover:opacity-90 transition-all inline-block text-xs" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                                 Upload File
                               </span>
                             )}
@@ -838,7 +838,7 @@ function ClientOrganisationTab({
                                 </button>
                               </div>
                             ) : (
-                              <span className="px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-xs">
+                              <span className="px-3 py-2 text-white rounded-lg hover:opacity-90 transition-all inline-block text-xs" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                                 Upload File
                               </span>
                             )}
@@ -855,7 +855,7 @@ function ClientOrganisationTab({
                         </h5>
                         <button
                           onClick={() => addWebsiteToOrg(org.id)}
-                          className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                          className="px-3 py-1.5 text-white rounded-md hover:opacity-90 transition-all text-sm inline-flex items-center gap-1" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                         >
                           <AiOutlinePlus className="w-4 h-4" />
                           Add Website
@@ -1047,7 +1047,7 @@ function ClientOrganisationTab({
                 ))}
                 <button
                   onClick={addOrganization}
-                  className="w-full py-2 border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-[#01334C] hover:text-[#01334C] transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-2 border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-[#022B51] hover:text-[#022B51] transition-colors flex items-center justify-center gap-2"
                 >
                   <AiOutlinePlus className="w-5 h-5" />
                   Add Another Organization
@@ -1067,7 +1067,7 @@ function ClientOrganisationTab({
                   <button
                     onClick={handleSaveOrganisations}
                     disabled={savingOrg}
-                    className="px-6 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors text-sm font-medium disabled:opacity-50 shadow-md hover:shadow-lg"
+                    className="px-6 py-2.5 text-white rounded-lg hover:opacity-90 transition-all text-sm font-medium disabled:opacity-50 shadow-md hover:shadow-lg" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                   >
                     {savingOrg ? "Saving..." : "Save Organizations"}
                   </button>
@@ -1177,7 +1177,7 @@ function ClientOrganisationTab({
                       }
                       setIsEditingOrganisations(true);
                     }}
-                    className="px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-flex items-center gap-2 font-medium shadow-md hover:shadow-lg"
+                    className="px-5 py-2.5 text-white rounded-lg hover:opacity-90 transition-all inline-flex items-center gap-2 font-medium shadow-md hover:shadow-lg" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                   >
                     <AiOutlinePlus className="w-5 h-5" />
                     Add Organization
@@ -1196,7 +1196,7 @@ function ClientOrganisationTab({
                         <col className="w-24" />
                         <col className="w-24" />
                       </colgroup>
-                      <thead className="bg-[#01334C]">
+                      <thead className="" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         <tr>
                           <th className="px-4 py-3 text-left font-semibold text-white text-sm">
                             ID
@@ -1547,7 +1547,7 @@ function ClientOrganisationTab({
                                                   setOrganisations(updatedOrgs);
                                                   setEditingOrgId(idx);
                                                 }}
-                                                className="px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+                                                className="px-5 py-2.5 text-white rounded-lg hover:opacity-90 transition-all text-sm font-medium shadow-sm hover:shadow-md" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                               >
                                                 Edit
                                               </button>
@@ -1595,7 +1595,7 @@ function ClientOrganisationTab({
                                                   setActiveOrgTab(tab.id);
                                                 }}
                                                 className={`pb-3 px-1 text-sm font-medium transition-colors whitespace-nowrap ${activeOrgTab === tab.id
-                                                  ? "border-b-2 border-[#01334C] text-[#01334C]"
+                                                  ? "border-b-2 border-[#022B51] text-[#022B51]"
                                                   : "text-gray-500 hover:text-gray-700"
                                                   }`}
                                               >
@@ -1840,7 +1840,7 @@ function ClientOrganisationTab({
                                                           e.target.value,
                                                         )
                                                       }
-                                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                     >
                                                       <option value="">
                                                         Select Category
@@ -1962,7 +1962,7 @@ function ClientOrganisationTab({
                                                           className="hidden"
                                                           accept=".pdf,.jpg,.jpeg,.png"
                                                         />
-                                                        <span className="px-2 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-xs whitespace-nowrap">
+                                                        <span className="px-2 py-1.5 text-white rounded-md hover:opacity-90 transition-all text-xs whitespace-nowrap" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                                                           {orgInState?.panFile
                                                             ? "Change"
                                                             : "Upload"}
@@ -2281,7 +2281,7 @@ function ClientOrganisationTab({
                                                           orgInState.id,
                                                         )
                                                       }
-                                                      className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                                                      className="px-3 py-1.5 text-white rounded-md hover:opacity-90 transition-all text-sm inline-flex items-center gap-1" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                                     >
                                                       <AiOutlinePlus className="w-4 h-4" />
                                                       Add Director/Partner
@@ -2342,7 +2342,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                   placeholder="Name"
                                                                 />
                                                               ) : (
@@ -2371,7 +2371,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                   placeholder="DIN/Number"
                                                                 />
                                                               ) : (
@@ -2402,7 +2402,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                   placeholder="Contact"
                                                                 />
                                                               ) : (
@@ -2431,7 +2431,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                   placeholder="Email"
                                                                 />
                                                               ) : (
@@ -2461,7 +2461,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                 />
                                                               ) : (
                                                                 <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
@@ -2496,7 +2496,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                 >
                                                                   <option value="Active">
                                                                     Active
@@ -2568,7 +2568,7 @@ function ClientOrganisationTab({
                                                           orgInState.id,
                                                         )
                                                       }
-                                                      className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                                                      className="px-3 py-1.5 text-white rounded-md hover:opacity-90 transition-all text-sm inline-flex items-center gap-1" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                                     >
                                                       <AiOutlinePlus className="w-4 h-4" />
                                                       Add Digital Signature
@@ -2623,7 +2623,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                   placeholder="Name"
                                                                 />
                                                               ) : (
@@ -2652,7 +2652,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                   placeholder="DSC Number"
                                                                 />
                                                               ) : (
@@ -2683,7 +2683,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                 />
                                                               ) : (
                                                                 <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
@@ -2718,7 +2718,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                 >
                                                                   <option value="Active">
                                                                     Active
@@ -2837,7 +2837,7 @@ function ClientOrganisationTab({
                                                               </button>
                                                             </div>
                                                           ) : (
-                                                            <span className="px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-xs">
+                                                            <span className="px-3 py-2 text-white rounded-lg hover:opacity-90 transition-all inline-block text-xs" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                                                               Upload File
                                                             </span>
                                                           )}
@@ -2924,7 +2924,7 @@ function ClientOrganisationTab({
                                                               </button>
                                                             </div>
                                                           ) : (
-                                                            <span className="px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-xs">
+                                                            <span className="px-3 py-2 text-white rounded-lg hover:opacity-90 transition-all inline-block text-xs" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                                                               Upload File
                                                             </span>
                                                           )}
@@ -2981,7 +2981,7 @@ function ClientOrganisationTab({
                                                   },
                                                 )
                                               }
-                                              className="px-6 py-2 bg-[#00486D] text-white rounded-lg text-sm font-semibold hover:bg-[#01334C] transition-colors"
+                                              className="px-6 py-2 text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                             >
                                               Go to Company Documents
                                             </button>
@@ -3004,7 +3004,7 @@ function ClientOrganisationTab({
                                                         orgInState.id,
                                                       )
                                                     }
-                                                    className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                                                    className="px-3 py-1.5 text-white rounded-md hover:opacity-90 transition-all text-sm inline-flex items-center gap-1" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                                   >
                                                     <AiOutlinePlus className="w-4 h-4" />
                                                     Add Website
@@ -3355,7 +3355,7 @@ function ClientOrganisationTab({
                                                 await handleSaveOrganisations();
                                               }}
                                               disabled={savingOrg}
-                                              className="px-4 py-2 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm disabled:opacity-50"
+                                              className="px-4 py-2 text-white rounded-md hover:opacity-90 transition-all text-sm disabled:opacity-50" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                             >
                                               {savingOrg
                                                 ? "Saving..."
@@ -3401,7 +3401,7 @@ function ClientOrganisationTab({
                     ]);
                     setIsEditingOrganisations(true);
                   }}
-                  className="px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-flex items-center gap-2 font-medium shadow-md hover:shadow-lg"
+                  className="px-5 py-2.5 text-white rounded-lg hover:opacity-90 transition-all inline-flex items-center gap-2 font-medium shadow-md hover:shadow-lg" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   <AiOutlinePlus className="w-5 h-5" />
                   Add Organization

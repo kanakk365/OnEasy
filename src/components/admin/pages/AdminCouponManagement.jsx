@@ -167,7 +167,7 @@ function AdminCouponManagement() {
                 onClick={() => setFilterActive('all')}
                 className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
                   filterActive === 'all'
-                    ? 'bg-[#01334C] text-white'
+                    ? 'bg-[#022B51] text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -177,7 +177,7 @@ function AdminCouponManagement() {
                 onClick={() => setFilterActive('active')}
                 className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
                   filterActive === 'active'
-                    ? 'bg-[#01334C] text-white'
+                    ? 'bg-[#022B51] text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -187,7 +187,7 @@ function AdminCouponManagement() {
                 onClick={() => setFilterActive('inactive')}
                 className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
                   filterActive === 'inactive'
-                    ? 'bg-[#01334C] text-white'
+                    ? 'bg-[#022B51] text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -240,7 +240,7 @@ function AdminCouponManagement() {
                   filteredCoupons.map((coupon) => (
                     <tr key={coupon.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4">
-                        <code className="font-mono font-semibold text-[#01334C] bg-blue-50 px-2 py-1 rounded">
+                        <code className="font-mono font-semibold text-[#022B51] bg-blue-50 px-2 py-1 rounded">
                           {coupon.coupon_code}
                         </code>
                       </td>

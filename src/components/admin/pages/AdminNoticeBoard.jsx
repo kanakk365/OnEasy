@@ -94,7 +94,7 @@ function AdminNoticeBoard() {
     return (
       <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading notices...</p>
         </div>
       </div>
@@ -127,7 +127,7 @@ function AdminNoticeBoard() {
 
           <button
             onClick={() => navigate("/admin/notice-management")}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-[#00486D] rounded-xl hover:bg-gray-50 transition-colors shadow-sm font-medium"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-[#022B51] rounded-xl hover:bg-gray-50 transition-colors shadow-sm font-medium"
           >
             <FiList className="w-5 h-5" />
             Manage All Notices
@@ -140,7 +140,7 @@ function AdminNoticeBoard() {
             <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <FiBell className="w-5 h-5 text-[#00486D]" />
+                  <FiBell className="w-5 h-5 text-[#022B51]" />
                   Create New Notice
                 </h2>
               </div>
@@ -154,7 +154,7 @@ function AdminNoticeBoard() {
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
                     placeholder="Enter notice title"
                   />
                 </div>
@@ -166,7 +166,7 @@ function AdminNoticeBoard() {
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow h-32 resize-none"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow h-32 resize-none"
                     placeholder="Enter detailed description..."
                   />
                 </div>
@@ -181,7 +181,7 @@ function AdminNoticeBoard() {
                         type="text"
                         value={link}
                         onChange={(e) => setLink(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
                         placeholder="https://"
                       />
                       <FiLink className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -196,7 +196,7 @@ function AdminNoticeBoard() {
                       <select
                         value={selectedClientId}
                         onChange={(e) => setSelectedClientId(e.target.value)}
-                        className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] appearance-none bg-white transition-shadow"
+                        className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] appearance-none bg-white transition-shadow"
                         disabled={loadingClients}
                       >
                         <option value="">All Clients (Global)</option>
@@ -233,7 +233,7 @@ function AdminNoticeBoard() {
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex items-center gap-2 px-6 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-all shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed font-medium transform active:scale-95"
+                    className="flex items-center gap-2 px-6 py-3 text-white rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed font-medium transform active:scale-95" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                   >
                     {saving ? (
                       <>
@@ -317,7 +317,7 @@ function AdminNoticeBoard() {
                               href={n.link}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1 text-xs text-[#00486D] font-medium hover:underline"
+                              className="inline-flex items-center gap-1 text-xs text-[#022B51] font-medium hover:underline"
                             >
                               <FiLink className="w-3 h-3" /> Open Link
                             </a>
@@ -333,7 +333,7 @@ function AdminNoticeBoard() {
                 <div className="p-4 border-t border-gray-100 bg-gray-50/50">
                   <button
                     onClick={() => navigate("/admin/notice-management")}
-                    className="w-full flex items-center justify-center gap-2 py-2 text-sm text-[#00486D] font-medium hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200"
+                    className="w-full flex items-center justify-center gap-2 py-2 text-sm text-[#022B51] font-medium hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200"
                   >
                     View All Notices <FiChevronRight className="w-4 h-4" />
                   </button>

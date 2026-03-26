@@ -41,7 +41,7 @@ function CustomDropdown({ options = [], placeholder = "Select an option", value,
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className={`w-full px-4 py-3 rounded-lg outline-none border border-transparent hover:border-[#CFD6DC] focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D] flex items-center justify-between transition-colors ${displayColor} ${
+        className={`w-full px-4 py-3 rounded-lg outline-none border border-transparent hover:border-[#CFD6DC] focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51] flex items-center justify-between transition-colors ${displayColor} ${
           disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : 'bg-white cursor-pointer'
         }`}
       >
@@ -70,7 +70,7 @@ function CustomDropdown({ options = [], placeholder = "Select an option", value,
                   onClick={() => handleSelect(optionValue)}
                   className={`w-full px-4 py-3 text-left text-sm transition-colors ${
                     isSelected
-                      ? "bg-[#F0F7FA] text-[#00486D] font-medium"
+                      ? "bg-[#F0F7FA] text-[#022B51] font-medium"
                       : "text-[#28303F] hover:bg-[#F9FAFB]"
                   } ${index === 0 ? "rounded-t-lg" : ""} ${
                     index === options.length - 1 ? "rounded-b-lg" : ""

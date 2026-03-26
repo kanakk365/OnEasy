@@ -197,7 +197,7 @@ function AdminAddUser() {
                   value={formData.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   placeholder="Enter user's name"
-                  className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent placeholder-gray-400 text-sm transition-all"
+                  className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent placeholder-gray-400 text-sm transition-all"
                   disabled={loading}
                 />
               </div>
@@ -221,7 +221,7 @@ function AdminAddUser() {
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   placeholder="user@example.com"
-                  className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent placeholder-gray-400 text-sm transition-all"
+                  className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent placeholder-gray-400 text-sm transition-all"
                   disabled={loading}
                   required
                 />
@@ -246,7 +246,7 @@ function AdminAddUser() {
                   value={formData.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
                   placeholder="Enter 10-digit mobile number"
-                  className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent placeholder-gray-400 text-sm transition-all"
+                  className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent placeholder-gray-400 text-sm transition-all"
                   disabled={loading}
                   maxLength="10"
                   required
@@ -279,7 +279,7 @@ function AdminAddUser() {
                       handleInputChange("password", e.target.value)
                     }
                     placeholder="Enter password (min. 6 characters)"
-                    className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent placeholder-gray-400 text-sm transition-all"
+                    className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent placeholder-gray-400 text-sm transition-all"
                     disabled={loading}
                     required
                   />

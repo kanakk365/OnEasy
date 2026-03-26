@@ -104,7 +104,7 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
                 }
               }}
               placeholder="Enter coupon code"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
               disabled={validatingCoupon}
             />
             {appliedCoupon ? (
@@ -118,7 +118,7 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
               <button
                 onClick={handleApplyCoupon}
                 disabled={validatingCoupon || !couponCode.trim()}
-                className="px-4 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 {validatingCoupon ? "Applying..." : "Apply"}
               </button>
@@ -153,7 +153,7 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
             key={index}
             className={`relative flex flex-col h-full transition-all duration-300 cursor-pointer group rounded-[36px] p-10 shadow-sm ${
               pkg.isHighlighted
-                ? "bg-gradient-to-b from-[#00486D] to-[#014365] text-white hover:shadow-lg"
+                ? "bg-gradient-to-b from-[#022B51] to-[#015079] text-white hover:shadow-lg"
                 : "bg-gradient-to-b from-white to-[#EAEAEA] border border-[#E2E2E2] text-[#101828] hover:shadow-md"
             }`}
           >
@@ -209,12 +209,12 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
                 <li key={i} className="flex items-center space-x-3">
                   <div
                     className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                      pkg.isHighlighted ? "bg-white" : "bg-[#01334C]"
+                      pkg.isHighlighted ? "bg-white" : "bg-[#022B51]"
                     }`}
                   >
                     <span
                       className={`text-[10px] ${
-                        pkg.isHighlighted ? "text-[#01334C]" : "text-white"
+                        pkg.isHighlighted ? "text-[#022B51]" : "text-white"
                       }`}
                     >
                       ✓
@@ -294,7 +294,7 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
                     className={
                       pkg.isHighlighted
                         ? "text-white font-semibold text-lg"
-                        : "text-[#01334C] font-semibold text-lg"
+                        : "text-[#022B51] font-semibold text-lg"
                     }
                   >
                     ₹{finalPrice.toLocaleString("en-IN")}
@@ -308,7 +308,7 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
               className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 mt-auto ${
                 pkg.isHighlighted
                   ? "bg-white/20 text-white shadow-sm hover:bg-white/30"
-                  : "border border-[#00486D] text-[#00486D] hover:bg-[#00486D] hover:text-white"
+                  : "border border-[#022B51] text-[#022B51] hover:bg-[#015079] hover:text-white"
               }`}
             >
               Get Started

@@ -195,7 +195,7 @@ function CouponCodeGenerator() {
               <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
                  <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                     <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                       <FiTag className="w-4 h-4 text-[#00486D]" />
+                       <FiTag className="w-4 h-4 text-[#022B51]" />
                        Generator Settings
                     </h2>
                  </div>
@@ -210,7 +210,7 @@ function CouponCodeGenerator() {
                                 type="text"
                                 value={prefix}
                                 onChange={(e) => setPrefix(e.target.value.toUpperCase())}
-                                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow uppercase"
+                                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow uppercase"
                                 placeholder="ONEASY"
                                 maxLength={10}
                              />
@@ -227,7 +227,7 @@ function CouponCodeGenerator() {
                                 onClick={() => setDiscountType('percentage')}
                                 className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border transition-all ${
                                    discountType === 'percentage' 
-                                   ? 'bg-[#E0F2FE] border-[#00486D] text-[#00486D] font-medium' 
+                                   ? 'bg-[#E0F2FE] border-[#022B51] text-[#022B51] font-medium' 
                                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
                                 }`}
                              >
@@ -237,7 +237,7 @@ function CouponCodeGenerator() {
                                 onClick={() => setDiscountType('amount')}
                                 className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border transition-all ${
                                    discountType === 'amount' 
-                                   ? 'bg-[#E0F2FE] border-[#00486D] text-[#00486D] font-medium' 
+                                   ? 'bg-[#E0F2FE] border-[#022B51] text-[#022B51] font-medium' 
                                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
                                 }`}
                              >
@@ -258,7 +258,7 @@ function CouponCodeGenerator() {
                              type="number"
                              value={usageLimit}
                              onChange={(e) => setUsageLimit(Math.max(1, parseInt(e.target.value) || 1))}
-                             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+                             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
                              min="1"
                              placeholder="1"
                           />
@@ -294,7 +294,7 @@ function CouponCodeGenerator() {
                                     const val = Math.min(100, Math.max(0, parseFloat(e.target.value) || 0));
                                     setDiscountPercentage(val);
                                  }}
-                                 className="w-full pl-4 pr-12 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow disabled:bg-gray-50"
+                                 className="w-full pl-4 pr-12 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow disabled:bg-gray-50"
                                  min="0" max="100"
                                  disabled={discountType !== 'percentage'}
                               />
@@ -322,7 +322,7 @@ function CouponCodeGenerator() {
                                  type="number"
                                  value={discountAmount}
                                  onChange={(e) => setDiscountAmount(parseFloat(e.target.value) || 0)}
-                                 className="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow disabled:bg-gray-50"
+                                 className="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow disabled:bg-gray-50"
                                  min="0"
                                  disabled={discountType !== 'amount'}
                               />
@@ -345,7 +345,7 @@ function CouponCodeGenerator() {
                     <div className="pt-4 flex items-center justify-end gap-3 border-t border-gray-100">
                        <button
                           onClick={generateCode}
-                          className="px-6 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-all shadow-md hover:shadow-lg font-medium active:scale-95"
+                          className="px-6 py-3 text-white rounded-xl transition-all shadow-md hover:shadow-lg font-medium active:scale-95" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                        >
                           Generate Code
                        </button>
@@ -387,10 +387,10 @@ function CouponCodeGenerator() {
                     <h2 className="text-lg font-semibold text-gray-900">Generated Code</h2>
                     {generatedCodes.length > 0 && (
                        <div className="flex gap-2">
-                          <button onClick={copyAllCodes} className="p-1.5 text-gray-500 hover:text-[#00486D] hover:bg-blue-50 rounded-lg transition-colors" title="Copy All">
+                          <button onClick={copyAllCodes} className="p-1.5 text-gray-500 hover:text-[#022B51] hover:bg-blue-50 rounded-lg transition-colors" title="Copy All">
                              <MdContentCopy className="w-4 h-4" />
                           </button>
-                          <button onClick={downloadCodes} className="p-1.5 text-gray-500 hover:text-[#00486D] hover:bg-blue-50 rounded-lg transition-colors" title="Download">
+                          <button onClick={downloadCodes} className="p-1.5 text-gray-500 hover:text-[#022B51] hover:bg-blue-50 rounded-lg transition-colors" title="Download">
                              <FiDownload className="w-4 h-4" />
                           </button>
                        </div>
@@ -400,7 +400,7 @@ function CouponCodeGenerator() {
                  <div className="flex-1 p-6">
                     {generatedCodes.length > 0 ? (
                        <div className="space-y-4">
-                          <div className="bg-gradient-to-br from-[#01334C] to-[#00507A] rounded-2xl p-6 text-center shadow-lg relative overflow-hidden group">
+                          <div className="bg-gradient-to-br from-[#022B51] to-[#015079] rounded-2xl p-6 text-center shadow-lg relative overflow-hidden group">
                              <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-bl-full -mr-4 -mt-4"></div>
                              <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/5 rounded-tr-full -ml-4 -mb-4"></div>
                              

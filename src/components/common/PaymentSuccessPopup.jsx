@@ -55,7 +55,7 @@ function PaymentSuccessPopup({ isOpen = true, onClose }) {
         {/* Action button */}
         <button
           onClick={onClose}
-          className="w-full px-6 py-3 bg-[#00486D] text-white rounded-lg hover:bg-[#003855] transition-colors font-medium"
+          className="w-full px-6 py-3 text-white rounded-lg hover:opacity-90 transition-all font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
         >
           Got it
         </button>

@@ -438,7 +438,7 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00486D]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#022B51]"></div>
       </div>
     );
   }
@@ -507,7 +507,7 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
 
             <div className="overflow-x-auto rounded-lg border border-gray-200">
               <table className="w-full">
-                <thead className="bg-[#00486D] text-white">
+                <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold">
                       Period
@@ -588,7 +588,7 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
                               onChange={() =>
                                 toggleInstanceStatus(instance.id, isDone)
                               }
-                              className="w-5 h-5 rounded border-gray-300 text-[#00486D] focus:ring-[#00486D] cursor-pointer"
+                              className="w-5 h-5 rounded border-gray-300 text-[#022B51] focus:ring-[#022B51] cursor-pointer"
                             />
                           </div>
                         </td>
@@ -613,7 +613,7 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-8 py-3 bg-[#00486D] text-white text-sm font-semibold rounded-lg hover:bg-[#003855] disabled:opacity-70 transition-colors shadow-lg shadow-blue-900/10"
+                className="px-8 py-3 text-white text-sm font-semibold rounded-lg disabled:opacity-70 hover:opacity-90 transition-all shadow-lg shadow-blue-900/10" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 {saving ? "Saving..." : "Save & Continue"}
               </button>
@@ -752,7 +752,7 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
                   if (allSelected) setSelectedForDelete(new Set());
                   else setSelectedForDelete(new Set(allCodes));
                 }}
-                className="text-sm font-medium text-[#00486D] hover:text-[#003855] hover:underline transition-colors"
+                className="text-sm font-medium text-[#022B51] hover:text-[#015079] hover:underline transition-colors"
               >
                 {assignments
                   .map((a) => a.compliance?.code)
@@ -845,7 +845,7 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
                       })}
                       <button
                         onClick={() => handleComplianceClick(assignment)}
-                        className="h-9 px-4 rounded-full text-sm font-medium bg-[#00486D]/5 text-[#00486D] border border-[#00486D]/10 hover:bg-[#00486D]/10 transition-colors"
+                        className="h-9 px-4 rounded-full text-sm font-medium bg-[#022B51]/5 text-[#022B51] border border-[#022B51]/10 hover:bg-[#015079]/10 transition-colors"
                       >
                         View Details
                       </button>
@@ -882,7 +882,7 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
           {/* Calendar Panel */}
           <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             {/* Calendar Header */}
-            <div className="px-6 py-5 flex items-center justify-between bg-gradient-to-r from-[#022B51] to-[#034b6e]">
+            <div className="px-6 py-5 flex items-center justify-between bg-gradient-to-r from-[#022B51] to-[#015079]">
               <div className="flex items-center gap-2">
                 <button
                   onClick={prevMonth}

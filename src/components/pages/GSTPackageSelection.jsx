@@ -48,7 +48,7 @@ function GSTPackageSelection() {
         <div className="mb-6">
           <button
             onClick={() => navigate('/registration-categories')}
-            className="flex items-center gap-2 text-[#01334C] hover:text-[#00486D] mb-4"
+            className="flex items-center gap-2 text-[#022B51] hover:text-[#022B51] mb-4"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
@@ -73,7 +73,7 @@ function GSTPackageSelection() {
 
         {packagesLoading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#01334C]"></div>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#022B51]"></div>
             <p className="mt-2 text-gray-600">Loading packages...</p>
           </div>
         ) : (

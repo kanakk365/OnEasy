@@ -59,7 +59,7 @@ const ServiceNotesSection = ({ orgId }) => {
     return (
       <div className="flex items-center justify-center py-16">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-sm text-gray-400">Loading service notes...</p>
         </div>
       </div>
@@ -112,7 +112,7 @@ const ServiceNotesSection = ({ orgId }) => {
               {/* Service name badge */}
               {note.serviceName && (
                 <div className="mt-3">
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-[#00486D] border border-blue-100">
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-[#022B51] border border-blue-100">
                     {note.serviceName}
                   </span>
                 </div>

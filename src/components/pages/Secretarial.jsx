@@ -491,7 +491,7 @@ function Secretarial() {
     return (
       <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -541,7 +541,7 @@ function Secretarial() {
                 }
               }
             }}
-            className="text-[#01334C] hover:text-[#00486D] mb-4 flex items-center gap-2"
+            className="text-[#022B51] hover:text-[#022B51] mb-4 flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -567,7 +567,7 @@ function Secretarial() {
             <h2 className="text-xl font-semibold text-gray-900">Secretarial Documents</h2>
             <button
               onClick={handleOpenUploadModal}
-              className="px-4 py-2 text-sm font-medium text-white bg-[#01334C] rounded-md hover:bg-[#00486D] transition-colors"
+              className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               + Upload Document
             </button>
@@ -579,7 +579,7 @@ function Secretarial() {
           <div className="mb-4 flex items-center gap-2 text-sm">
             <button
               onClick={goToRoot}
-              className="text-[#01334C] hover:text-[#00486D] font-medium"
+              className="text-[#022B51] hover:text-[#022B51] font-medium"
             >
               Secretarial
             </button>
@@ -588,7 +588,7 @@ function Secretarial() {
                 <span className="text-gray-400">/</span>
                 <button
                   onClick={item.onClick}
-                  className="text-[#01334C] hover:text-[#00486D] font-medium"
+                  className="text-[#022B51] hover:text-[#022B51] font-medium"
                 >
                   {item.label}
                 </button>
@@ -626,7 +626,7 @@ function Secretarial() {
                   <select
                     value={formData.category}
                     onChange={handleCategoryChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                   >
                     <option value="">Select Category</option>
                     {Object.entries(secretarialStructure).map(([key, data]) => (
@@ -643,7 +643,7 @@ function Secretarial() {
                     <select
                       value={formData.subCategory}
                       onChange={handleSubCategoryChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                     >
                       <option value="">Select Sub-Category</option>
                       {Object.entries(secretarialStructure[formData.category].subCategories).map(([key, label]) => (
@@ -661,7 +661,7 @@ function Secretarial() {
                     type="text"
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                     placeholder="Enter description..."
                   />
                 </div>
@@ -675,7 +675,7 @@ function Secretarial() {
                     type="file"
                     onChange={handleFileSelect}
                     accept=".pdf,.xls,.xlsx,.csv,.txt,.doc,.docx,.jpg,.jpeg,.png"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                   />
                   {formData.file && (
                     <p className="text-xs text-gray-500 mt-1">{formData.file.name}</p>
@@ -694,7 +694,7 @@ function Secretarial() {
                 <button
                   onClick={handleUpload}
                   disabled={uploading || !formData.file || !formData.category || !formData.subCategory}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[#01334C] rounded-md hover:bg-[#00486D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   {uploading ? "Uploading..." : "Upload"}
                 </button>

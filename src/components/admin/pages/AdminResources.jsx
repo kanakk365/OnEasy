@@ -550,14 +550,14 @@ function AdminResources() {
           <div className="flex items-center gap-3">
             <button
               onClick={openUploadModal}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-[#00486D] rounded-xl hover:bg-gray-50 transition-colors shadow-sm font-medium"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-[#022B51] rounded-xl hover:bg-gray-50 transition-colors shadow-sm font-medium"
             >
               <FiUpload className="w-4 h-4" />
               Upload File
             </button>
             <button
               onClick={openCreateFolder}
-              className="flex items-center gap-2 px-4 py-2.5 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-all shadow-md font-medium"
+              className="flex items-center gap-2 px-4 py-2.5 text-white rounded-xl transition-all shadow-md font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               <FiFolderPlus className="w-4 h-4" />
               New Folder
@@ -578,7 +578,7 @@ function AdminResources() {
                 placeholder="Search folders & files..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-9 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent placeholder:text-gray-400 transition-all"
+                className="w-full pl-9 pr-9 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent placeholder:text-gray-400 transition-all"
               />
               {searchQuery && (
                 <button
@@ -598,7 +598,7 @@ function AdminResources() {
               <div className="flex items-center gap-2 text-sm text-gray-600 overflow-x-auto whitespace-nowrap">
                 <button
                   onClick={() => handleBreadcrumbClick(-1)}
-                  className={`hover:text-[#00486D] transition-colors flex items-center gap-1 ${!currentFolder ? 'text-[#00486D]' : ''}`}
+                  className={`hover:text-[#022B51] transition-colors flex items-center gap-1 ${!currentFolder ? 'text-[#022B51]' : ''}`}
                   title="Home"
                 >
                   <FiHome className="w-4 h-4" />
@@ -608,7 +608,7 @@ function AdminResources() {
                     <FiChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
                     <button
                       onClick={() => handleBreadcrumbClick(index)}
-                      className={`hover:text-[#00486D] transition-colors ${index === breadcrumbs.length - 1 ? 'font-semibold text-[#00486D]' : ''}`}
+                      className={`hover:text-[#022B51] transition-colors ${index === breadcrumbs.length - 1 ? 'font-semibold text-[#022B51]' : ''}`}
                       title={crumb.name}
                     >
                       <span className="truncate max-w-[150px] inline-block align-bottom">{crumb.name}</span>
@@ -624,7 +624,7 @@ function AdminResources() {
                 <span>
                   {loadingAllDocs ? (
                     <span className="flex items-center gap-2">
-                      <span className="w-3 h-3 border-2 border-gray-300 border-t-[#00486D] rounded-full animate-spin"></span>
+                      <span className="w-3 h-3 border-2 border-gray-300 border-t-[#022B51] rounded-full animate-spin"></span>
                       Searching...
                     </span>
                   ) : (
@@ -641,7 +641,7 @@ function AdminResources() {
           <div className="flex-1 p-6 relative">
             {loading ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500 bg-white/80 z-10">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00486D] mb-4"></div>
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#022B51] mb-4"></div>
                 <p>Loading Explorer...</p>
               </div>
             ) : (
@@ -681,7 +681,7 @@ function AdminResources() {
                                 </p>
                               )}
                             </div>
-                            <FiChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#00486D] flex-shrink-0 transition-colors" />
+                            <FiChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#022B51] flex-shrink-0 transition-colors" />
                           </button>
                         ) : (
                           /* Document Search Result */
@@ -707,7 +707,7 @@ function AdminResources() {
                                 download
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#022B51] text-white hover:bg-[#015079] transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                 title="Download file"
                                 onClick={(e) => e.stopPropagation()}
                               >
@@ -717,7 +717,7 @@ function AdminResources() {
                                 href={item.url || "#"}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#022B51] text-[#022B51] hover:bg-[#022B51] hover:text-white transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#022B51] text-[#022B51] hover:hover:text-white hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                 title="View file"
                                 onClick={(e) => e.stopPropagation()}
                               >
@@ -725,7 +725,7 @@ function AdminResources() {
                               </a>
                               <button
                                 onClick={() => handleSearchDocumentClick(item)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-[#00486D] hover:bg-blue-50 transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-[#022B51] hover:bg-blue-50 transition-colors"
                                 title="Go to folder"
                               >
                                 <FiFolder className="w-3.5 h-3.5" />
@@ -752,12 +752,12 @@ function AdminResources() {
                   {/* Create New Folder Card */}
                   <button
                     onClick={openCreateFolder}
-                    className="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition-colors border-2 border-dashed border-gray-200 hover:border-[#00486D] group text-center"
+                    className="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition-colors border-2 border-dashed border-gray-200 hover:border-[#022B51] group text-center"
                   >
                     <div className="w-16 h-16 rounded-xl bg-blue-50/50 flex items-center justify-center mb-3 group-hover:bg-blue-50 transition-colors">
-                      <FiFolderPlus className="w-8 h-8 text-[#00486D]/70 group-hover:text-[#00486D]" />
+                      <FiFolderPlus className="w-8 h-8 text-[#022B51]/70 group-hover:text-[#022B51]" />
                     </div>
-                    <span className="text-sm font-medium text-gray-500 group-hover:text-[#00486D]">
+                    <span className="text-sm font-medium text-gray-500 group-hover:text-[#022B51]">
                       New Folder
                     </span>
                   </button>
@@ -805,7 +805,7 @@ function AdminResources() {
                   {currentFolder && (
                     loadingDocs ? (
                       <div className="col-span-full py-8 text-center text-sm text-gray-400">
-                        <div className="w-6 h-6 border-2 border-gray-300 border-t-[#00486D] rounded-full animate-spin mx-auto mb-2"></div>
+                        <div className="w-6 h-6 border-2 border-gray-300 border-t-[#022B51] rounded-full animate-spin mx-auto mb-2"></div>
                         Loading documents...
                       </div>
                     ) : currentDocuments.map((doc) => (
@@ -864,7 +864,7 @@ function AdminResources() {
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-fade-in-up">
             <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <FiFolderPlus className="w-5 h-5 text-[#00486D]" />
+                <FiFolderPlus className="w-5 h-5 text-[#022B51]" />
                 {isFolderEdit ? "Edit Folder" : "Create New Folder"}
               </h3>
               <button
@@ -882,7 +882,7 @@ function AdminResources() {
                     Creating inside
                   </label>
                   <div className="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-xl text-gray-600 text-sm font-medium flex items-center gap-2">
-                    <span className="text-[#00486D]">
+                    <span className="text-[#022B51]">
                       {currentFolder ? <FiFolder className="w-4 h-4" /> : <FiFolder className="w-4 h-4" />}
                     </span>
                     {currentFolder ? currentFolder.name : <FiHome className="w-4 h-4" />}
@@ -898,7 +898,7 @@ function AdminResources() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D]/20 focus:border-[#00486D] transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]/20 focus:border-[#022B51] transition-all"
                   placeholder="e.g. Q1 Reports"
                   required
                 />
@@ -911,7 +911,7 @@ function AdminResources() {
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D]/20 focus:border-[#00486D] transition-all resize-none h-20"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]/20 focus:border-[#022B51] transition-all resize-none h-20"
                   placeholder="Optional details..."
                 />
               </div>
@@ -923,7 +923,7 @@ function AdminResources() {
                     id="folderIsActive"
                     checked={isActive}
                     onChange={(e) => setIsActive(e.target.checked)}
-                    className="w-4 h-4 text-[#00486D] bg-gray-100 border-gray-300 rounded focus:ring-[#00486D]"
+                    className="w-4 h-4 text-[#022B51] bg-gray-100 border-gray-300 rounded focus:ring-[#022B51]"
                   />
                   <label htmlFor="folderIsActive" className="text-sm font-medium text-gray-700">
                     Active Folder
@@ -942,7 +942,7 @@ function AdminResources() {
                 <button
                   type="submit"
                   disabled={savingFolder}
-                  className="px-5 py-2.5 text-sm font-medium bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors disabled:opacity-70 flex items-center gap-2"
+                  className="px-5 py-2.5 text-sm font-medium text-white rounded-xl hover:opacity-90 transition-all disabled:opacity-70 flex items-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   {savingFolder && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
                   {isFolderEdit ? "Update Folder" : "Create Folder"}
@@ -959,7 +959,7 @@ function AdminResources() {
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-fade-in-up">
             <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <FiUploadCloud className="w-5 h-5 text-[#00486D]" />
+                <FiUploadCloud className="w-5 h-5 text-[#022B51]" />
                 {isDocEdit ? "Edit Document" : "Upload Document"}
               </h3>
               <button
@@ -986,7 +986,7 @@ function AdminResources() {
                             if (e.target.checked) setSelectedFolderIds([...selectedFolderIds, f.id]);
                             else setSelectedFolderIds(selectedFolderIds.filter(id => id !== f.id));
                           }}
-                          className="w-4 h-4 text-[#00486D] rounded focus:ring-[#00486D]"
+                          className="w-4 h-4 text-[#022B51] rounded focus:ring-[#022B51]"
                         />
                         <span className="text-gray-700 font-medium">{f.label}</span>
                       </label>
@@ -1006,7 +1006,7 @@ function AdminResources() {
                   type="text"
                   value={uploadTitle}
                   onChange={(e) => setUploadTitle(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D]/20 focus:border-[#00486D] transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]/20 focus:border-[#022B51] transition-all"
                   placeholder="e.g. Q1 Income Tax Return"
                   required
                 />
@@ -1044,7 +1044,7 @@ function AdminResources() {
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="px-5 py-2.5 text-sm font-medium bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors disabled:opacity-70 flex items-center gap-2"
+                  className="px-5 py-2.5 text-sm font-medium text-white rounded-xl hover:opacity-90 transition-all disabled:opacity-70 flex items-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   {uploading && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
                   {isDocEdit ? "Update Document" : "Upload File"}
@@ -1117,7 +1117,7 @@ function AdminResources() {
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
               <button
                 onClick={() => setErrorModal({ ...errorModal, isOpen: false })}
-                className="w-full px-5 py-2.5 text-sm font-medium bg-[#01334C] hover:bg-[#00486D] text-white rounded-xl transition-colors"
+                className="w-full px-5 py-2.5 text-sm font-medium text-white rounded-xl hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 Okay
               </button>

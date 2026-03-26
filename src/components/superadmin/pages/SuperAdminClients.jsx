@@ -85,7 +85,7 @@ function SuperAdminClients() {
     return (
       <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading clients...</p>
         </div>
       </div>
@@ -111,7 +111,7 @@ function SuperAdminClients() {
               onClick={() => setFilter('all')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === 'all'
-                  ? 'bg-[#01334C] text-white'
+                  ? 'bg-[#022B51] text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -121,7 +121,7 @@ function SuperAdminClients() {
               onClick={() => setFilter('registered')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === 'registered'
-                  ? 'bg-[#01334C] text-white'
+                  ? 'bg-[#022B51] text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -131,7 +131,7 @@ function SuperAdminClients() {
               onClick={() => setFilter('team-fill')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === 'team-fill'
-                  ? 'bg-[#01334C] text-white'
+                  ? 'bg-[#022B51] text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -176,7 +176,7 @@ function SuperAdminClients() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
                       {/* Avatar */}
-                      <div className="w-12 h-12 rounded-full bg-[#01334C] text-white flex items-center justify-center font-semibold text-lg">
+                      <div className="w-12 h-12 rounded-full text-white flex items-center justify-center font-semibold text-lg" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         {client.name ? client.name.charAt(0).toUpperCase() : 'C'}
                       </div>
                       
@@ -230,7 +230,7 @@ function SuperAdminClients() {
                     {client.ticket_id && (
                       <button
                         onClick={() => navigate(`/superadmin/client-details/${client.ticket_id}`)}
-                        className="px-4 py-2 text-sm bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors"
+                        className="px-4 py-2 text-sm text-white rounded-md hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                       >
                         View Details
                       </button>

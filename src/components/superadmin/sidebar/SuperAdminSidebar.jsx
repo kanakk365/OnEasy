@@ -127,7 +127,7 @@ function SuperAdminSidebar() {
                 isCollapsed ? "justify-center px-2" : "space-x-3 px-3"
               } py-2 rounded-lg transition-all duration-200 ${
                 location.pathname === item.path
-                  ? "bg-[#01334C] text-white"
+                  ? "bg-[#022B51] text-white"
                   : "text-gray-700 hover:bg-gray-50"
               } group relative`}
               title={isCollapsed ? item.text : ""}
@@ -196,7 +196,7 @@ function SuperAdminSidebar() {
                   <div
                     className={`${
                       isCollapsed ? "w-8 h-8" : "w-6 h-6"
-                    } bg-[#01334C] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
+                    } bg-[#022B51] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
                   >
                     {userData?.name
                       ? userData.name.charAt(0).toUpperCase()
@@ -273,7 +273,7 @@ function SuperAdminSidebar() {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center px-6 py-3 transition-all duration-200 ${
                   isActive
-                    ? "bg-gradient-to-r from-[#e8f4f8] to-transparent border-r-4 border-[#00486D] text-[#00486D]"
+                    ? "bg-gradient-to-r from-[#e8f4f8] to-transparent border-r-4 border-[#022B51] text-[#022B51]"
                     : "text-[#5A5A5A] hover:bg-gray-50"
                 }`}
               >

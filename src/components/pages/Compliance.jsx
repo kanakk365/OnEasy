@@ -484,7 +484,7 @@ function Compliance() {
     return (
       <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -540,7 +540,7 @@ function Compliance() {
                 }
               }
             }}
-            className="text-[#01334C] hover:text-[#00486D] mb-4 flex items-center gap-2"
+            className="text-[#022B51] hover:text-[#022B51] mb-4 flex items-center gap-2"
           >
             <svg
               className="w-5 h-5"
@@ -584,7 +584,7 @@ function Compliance() {
             </h2>
             <button
               onClick={handleOpenUploadModal}
-              className="px-4 py-2 text-sm font-medium text-white bg-[#01334C] rounded-md hover:bg-[#00486D] transition-colors"
+              className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               + Upload Document
             </button>
@@ -788,7 +788,7 @@ function Compliance() {
                   <select
                     value={formData.category}
                     onChange={handleCategoryChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                   >
                     <option value="">Select Category</option>
                     {Object.entries(complianceStructure).map(([key, data]) => (
@@ -808,7 +808,7 @@ function Compliance() {
                       <select
                         value={formData.subCategory}
                         onChange={handleSubCategoryChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                       >
                         <option value="">Select Sub-Category</option>
                         {Object.entries(
@@ -839,7 +839,7 @@ function Compliance() {
                       <select
                         value={formData.subSubCategory}
                         onChange={handleSubSubCategoryChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                       >
                         <option value="">Select Sub-Sub-Category</option>
                         {Object.entries(
@@ -868,7 +868,7 @@ function Compliance() {
                         description: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                     placeholder="Enter description..."
                   />
                 </div>
@@ -882,7 +882,7 @@ function Compliance() {
                     type="file"
                     onChange={handleFileSelect}
                     accept=".pdf,.xls,.xlsx,.csv,.txt,.doc,.docx"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                   />
                   {formData.file && (
                     <p className="text-xs text-gray-500 mt-1">
@@ -903,7 +903,7 @@ function Compliance() {
                 <button
                   onClick={handleUpload}
                   disabled={uploading || !formData.file || !formData.category}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[#01334C] rounded-md hover:bg-[#00486D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   {uploading ? "Uploading..." : "Upload"}
                 </button>

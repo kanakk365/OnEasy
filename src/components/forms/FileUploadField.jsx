@@ -55,7 +55,7 @@ function FileUploadField({ label, buttonLabel, required = false, accept, onFileS
         className={`h-[48px] w-[48px] rounded-r-lg text-white flex items-center justify-center text-xl transition-all ${
           disabled 
             ? 'bg-gray-400 cursor-not-allowed' 
-            : 'bg-gradient-to-b from-[#00486D] to-[#015A88] cursor-pointer hover:from-[#015A88] hover:to-[#00486D]'
+            : 'bg-gradient-to-b from-[#022B51] to-[#015079] cursor-pointer hover:from-[#015079] hover:to-[#022B51]'
         }`}
       >
         +

@@ -100,14 +100,14 @@ function AdminHeader() {
                   href="tel:+919100152222"
                   className="flex items-center space-x-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200"
                 >
-                  <IoCallOutline className="w-4 h-4 text-[#00486D]" />
+                  <IoCallOutline className="w-4 h-4 text-[#022B51]" />
                   <span className="text-sm text-gray-700">Call Support</span>
                 </a>
                 <a
                   href="mailto:support@oneasy.in"
                   className="flex items-center space-x-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200"
                 >
-                  <IoMailOutline className="w-4 h-4 text-[#00486D]" />
+                  <IoMailOutline className="w-4 h-4 text-[#022B51]" />
                   <span className="text-sm text-gray-700">Email Support</span>
                 </a>
                 <div className="border-t border-gray-100 my-1"></div>
@@ -115,7 +115,7 @@ function AdminHeader() {
                   href="tel:+919876543210"
                   className="flex items-center space-x-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200"
                 >
-                  <BiSupport className="w-4 h-4 text-[#00486D]" />
+                  <BiSupport className="w-4 h-4 text-[#022B51]" />
                   <span className="text-sm text-gray-700">
                     Talk to Customer Care
                   </span>
@@ -126,7 +126,7 @@ function AdminHeader() {
                   rel="noopener noreferrer"
                   className="flex items-center space-x-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200"
                 >
-                  <IoMailOutline className="w-4 h-4 text-[#00486D]" />
+                  <IoMailOutline className="w-4 h-4 text-[#022B51]" />
                   <span className="text-sm text-gray-700">
                     Email Customer Care
                   </span>
@@ -140,7 +140,7 @@ function AdminHeader() {
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="w-10 h-10 rounded-xl overflow-hidden hover:ring-2 hover:ring-[#00486D] transition-all duration-200"
+                className="w-10 h-10 rounded-xl overflow-hidden hover:ring-2 hover:ring-[#022B51] transition-all duration-200"
               >
                 {userData?.profile_image ? (
                   <img

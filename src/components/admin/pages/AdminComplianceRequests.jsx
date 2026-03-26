@@ -98,7 +98,7 @@ function AdminComplianceRequests() {
         <div className="flex items-center gap-3 self-start md:self-auto">
           <button
             onClick={fetchRequests}
-            className="p-2.5 text-[#00486D] bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
+            className="p-2.5 text-[#022B51] bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
             title="Refresh"
           >
             <FiRefreshCw className="w-5 h-5" />
@@ -110,7 +110,7 @@ function AdminComplianceRequests() {
               placeholder="Search by client, company, service..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent text-sm w-full md:w-64"
+              className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent text-sm w-full md:w-64"
             />
           </div>
         </div>
@@ -119,7 +119,7 @@ function AdminComplianceRequests() {
       {/* Table Card */}
       <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-100 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-[#00486D]">
+          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-[#022B51]">
             <FiFileText className="w-4 h-4" />
           </div>
           <h2 className="text-lg font-semibold text-gray-900">
@@ -144,7 +144,7 @@ function AdminComplianceRequests() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-[#00486D] text-white">
+                <tr className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                   <th className="px-4 py-3 text-left text-xs font-medium">
                     Client Name
                   </th>
@@ -197,7 +197,7 @@ function AdminComplianceRequests() {
                         {viewRoute ? (
                           <button
                             onClick={() => navigate(viewRoute)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#00486D] text-white text-xs font-medium rounded-lg hover:bg-[#01334C] transition-colors"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-lg hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                           >
                             <FiEye className="w-3.5 h-3.5" />
                             View

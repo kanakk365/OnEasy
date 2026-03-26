@@ -324,7 +324,7 @@ function GSTForm() {
     return (
       <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading form data...</p>
         </div>
       </div>
@@ -483,7 +483,7 @@ function GSTForm() {
           className={`fixed bottom-8 right-8 px-6 py-4 rounded-full shadow-2xl font-medium text-white transition-all duration-300 hover:scale-105 z-40 ${
             oneasyTeamFill 
               ? 'bg-green-600 hover:bg-green-700' 
-              : 'bg-[#01334C] hover:bg-[#00486D]'
+              : 'bg-[#022B51] hover:bg-[#015079]'
           }`}
         >
           {oneasyTeamFill ? (
@@ -511,7 +511,7 @@ function GSTForm() {
           </h1>
           {formData.packageDetails && (
             <p className="text-sm text-gray-600">
-              Package: <span className="font-medium">{formData.packageDetails.name}</span> - <span className="font-semibold text-[#00486D]">₹{formData.packageDetails.price || formData.packageDetails.priceValue}</span>
+              Package: <span className="font-medium">{formData.packageDetails.name}</span> - <span className="font-semibold text-[#022B51]">₹{formData.packageDetails.price || formData.packageDetails.priceValue}</span>
             </p>
           )}
         </div>
@@ -529,7 +529,7 @@ function GSTForm() {
           <button
             onClick={prevStep}
             disabled={step === 1 || (oneasyTeamFill && !isAdminOrSuperadmin) || (clientFillRequest && isAdminOrSuperadmin)}
-            className={`px-6 py-1.5 rounded-md border border-[#00486D] text-[#00486D] ${
+            className={`px-6 py-1.5 rounded-md border border-[#022B51] text-[#022B51] ${
               (step === 1 || (oneasyTeamFill && !isAdminOrSuperadmin) || (clientFillRequest && isAdminOrSuperadmin && !isAdminFilling))
                 ? 'opacity-50 cursor-not-allowed'
                 : 'cursor-pointer'
@@ -554,7 +554,7 @@ function GSTForm() {
                 ? 'opacity-50 cursor-not-allowed'
                 : 'cursor-pointer'
             }`}
-            style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
+            style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}
           >
             {(oneasyTeamFill && !isAdminOrSuperadmin) ? 'Go to Dashboard' : (isSubmitting ? 'Submitting...' : (step < steps.length ? 'Next' : 'Submit'))}
           </button>
@@ -582,7 +582,7 @@ function GSTForm() {
                   setShowSuccessModal(false);
                   navigate('/gst-dashboard');
                 }}
-                className="px-6 py-3 bg-[#00486D] text-white rounded-lg font-medium hover:bg-[#01334C] transition-colors"
+                className="px-6 py-3 text-white rounded-lg font-medium hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 Go to Dashboard
               </button>

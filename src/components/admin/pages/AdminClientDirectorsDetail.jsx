@@ -407,7 +407,7 @@ function AdminClientDirectorsDetail() {
     return (
       <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading documents...</p>
         </div>
       </div>
@@ -449,7 +449,7 @@ function AdminClientDirectorsDetail() {
         <div className="mb-6">
           <button
             onClick={() => navigate(`/admin/client-directors/${userId}`)}
-            className="text-[#01334C] hover:text-[#00486D] mb-4 flex items-center gap-2"
+            className="text-[#022B51] hover:text-[#022B51] mb-4 flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -499,7 +499,7 @@ function AdminClientDirectorsDetail() {
                   className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-4 hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <div className="w-12 h-12 bg-[#01334C] rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                       <svg
                         className="w-6 h-6 text-white"
                         fill="none"
@@ -517,7 +517,7 @@ function AdminClientDirectorsDetail() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => handleViewDocument(doc.id, doc.url || doc.document_url)}
-                        className="p-1.5 text-[#01334C] hover:bg-[#01334C] hover:text-white rounded-lg transition-colors"
+                        className="p-1.5 text-[#022B51] hover:bg-[#015079] hover:text-white rounded-lg transition-colors"
                         title="View Document"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -598,12 +598,12 @@ function AdminClientDirectorsDetail() {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="w-full px-6 py-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#01334C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+              className="w-full px-6 py-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#022B51] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
             >
               {uploading ? (
                 <>
                   <svg
-                    className="animate-spin h-6 w-6 text-[#01334C]"
+                    className="animate-spin h-6 w-6 text-[#022B51]"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -622,12 +622,12 @@ function AdminClientDirectorsDetail() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  <span className="text-base font-medium text-[#01334C]">Uploading...</span>
+                  <span className="text-base font-medium text-[#022B51]">Uploading...</span>
                 </>
               ) : (
                 <>
                   <svg
-                    className="w-6 h-6 text-[#01334C]"
+                    className="w-6 h-6 text-[#022B51]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -639,7 +639,7 @@ function AdminClientDirectorsDetail() {
                       d="M12 4v16m8-8H4"
                     />
                   </svg>
-                  <span className="text-base font-medium text-[#01334C]">
+                  <span className="text-base font-medium text-[#022B51]">
                     {documents.length === 0 ? "Upload Document" : "Upload Another Document"}
                   </span>
                 </>

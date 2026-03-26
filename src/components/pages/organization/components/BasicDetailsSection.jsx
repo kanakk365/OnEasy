@@ -108,7 +108,7 @@ const BasicDetailsSection = ({
               onChange={(e) =>
                 updateOrganizationField("legalName", e.target.value)
               }
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
               placeholder="Enter Legal Name"
             />
           ) : (
@@ -132,7 +132,7 @@ const BasicDetailsSection = ({
               onChange={(e) =>
                 updateOrganizationField("tradeName", e.target.value)
               }
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
               placeholder="Enter Trade Name"
             />
           ) : (
@@ -156,7 +156,7 @@ const BasicDetailsSection = ({
                 onChange={(e) =>
                   updateOrganizationField("category", e.target.value)
                 }
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow appearance-none"
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow appearance-none"
               >
                 <option value="">Select Category</option>
                 {CATEGORY_OPTIONS.map((cat) => (
@@ -198,7 +198,7 @@ const BasicDetailsSection = ({
               type="text"
               value={data.gstin && data.gstin !== "-" ? data.gstin : ""}
               onChange={(e) => updateOrganizationField("gstin", e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
               placeholder="Enter GSTIN"
             />
           ) : (
@@ -218,7 +218,7 @@ const BasicDetailsSection = ({
               type="text"
               value={data.panNumber && data.panNumber !== "-" ? data.panNumber : ""}
               onChange={(e) => updateOrganizationField("panNumber", e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
               placeholder="Enter PAN Number"
             />
           ) : (
@@ -245,7 +245,7 @@ const BasicDetailsSection = ({
                 onChange={(e) =>
                   updateOrganizationField("incorporationDate", e.target.value)
                 }
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
               />
             ) : (
               <div className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 flex items-center justify-between">
@@ -270,7 +270,7 @@ const BasicDetailsSection = ({
               {data.panFile ? "File uploaded" : "Upload file"}
             </div>
             {editingOrg ? (
-              <label className="bg-[#00486D] text-white w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#01334C] transition-colors flex-shrink-0">
+              <label className=" text-white w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer hover:opacity-90 transition-all flex-shrink-0" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                 <input
                   type="file"
                   onChange={handlePanFileUpload}
@@ -283,7 +283,7 @@ const BasicDetailsSection = ({
               data.panFile && (
                 <button
                   onClick={() => handleViewFile(data.panFile)}
-                  className="bg-[#00486D] text-white w-10 h-10 rounded-lg flex items-center justify-center hover:bg-[#01334C] transition-colors flex-shrink-0"
+                  className=" text-white w-10 h-10 rounded-lg flex items-center justify-center hover:opacity-90 transition-all flex-shrink-0" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   <AiOutlineCloudUpload className="w-5 h-5" />
                 </button>
@@ -302,7 +302,7 @@ const BasicDetailsSection = ({
               type="text"
               value={data.tan && data.tan !== "-" ? data.tan : ""}
               onChange={(e) => updateOrganizationField("tan", e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
               placeholder="Enter TAN"
             />
           ) : (
@@ -322,7 +322,7 @@ const BasicDetailsSection = ({
               type="text"
               value={data.cin && data.cin !== "-" ? data.cin : ""}
               onChange={(e) => updateOrganizationField("cin", e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
               placeholder="Enter CIN"
             />
           ) : (
@@ -352,7 +352,7 @@ const BasicDetailsSection = ({
                   onChange={(e) =>
                     updateOrganizationField("registeredAddressLine1", e.target.value)
                   }
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
                   placeholder="Enter Address Line 1"
                 />
               ) : (
@@ -378,7 +378,7 @@ const BasicDetailsSection = ({
                   onChange={(e) =>
                     updateOrganizationField("registeredAddressLine2", e.target.value)
                   }
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
                   placeholder="Enter Address Line 2 (Optional)"
                 />
               ) : (
@@ -404,7 +404,7 @@ const BasicDetailsSection = ({
                   onChange={(e) =>
                     updateOrganizationField("registeredAddressDistrict", e.target.value)
                   }
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
                   placeholder="Enter District"
                 />
               ) : (
@@ -462,7 +462,7 @@ const BasicDetailsSection = ({
                       updateOrganizationField("registeredAddressState", lastAutoFilledState);
                     }
                   }}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
                   placeholder="Enter State"
                 />
               ) : (
@@ -488,7 +488,7 @@ const BasicDetailsSection = ({
                   onChange={(e) =>
                     updateOrganizationField("registeredAddressCountry", e.target.value)
                   }
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
                   placeholder="Enter Country"
                 />
               ) : (
@@ -597,13 +597,13 @@ const BasicDetailsSection = ({
                           }
                         }
                       }}
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
                       placeholder="Enter 6-digit PIN Code"
                       maxLength={6}
                     />
                     {pincodeLoading && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#00486D]"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#022B51]"></div>
                       </div>
                     )}
                   </div>

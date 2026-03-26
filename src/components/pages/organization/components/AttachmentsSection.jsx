@@ -21,7 +21,7 @@ const AttachmentsSection = ({ editingOrg, selectedOrg }) => {
       <button
         type="button"
         onClick={() => navigate(`/company-documents/${data.id}`)}
-        className="px-6 py-2 bg-[#00486D] text-white rounded-lg text-sm font-semibold hover:bg-[#01334C] transition-colors"
+        className="px-6 py-2 text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
       >
         Go to Company Documents
       </button>

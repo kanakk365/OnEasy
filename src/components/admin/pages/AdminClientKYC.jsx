@@ -189,7 +189,7 @@ function AdminClientKYC() {
     return (
       <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading documents...</p>
         </div>
       </div>
@@ -204,7 +204,7 @@ function AdminClientKYC() {
           <div>
             <button
               onClick={() => navigate(`/admin/client-documents/${userId}`)}
-              className="text-[#01334C] hover:text-[#00486D] mb-2 flex items-center gap-2"
+              className="text-[#022B51] hover:text-[#022B51] mb-2 flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

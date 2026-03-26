@@ -47,7 +47,7 @@ const CredentialsSection = ({
       {editingOrg && (
         <button
           onClick={addWebsite}
-          className="bg-[#00486D] text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-[#01334C] transition-colors"
+          className="text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
         >
           Add Website Details
         </button>
@@ -62,7 +62,7 @@ const CredentialsSection = ({
         {editingOrg && (
           <button
             onClick={addWebsite}
-            className="bg-[#00486D] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#01334C] transition-colors flex items-center gap-2"
+            className="text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-all flex items-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             <AiOutlinePlus className="w-4 h-4" /> Add Credentials
           </button>
@@ -74,7 +74,7 @@ const CredentialsSection = ({
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-[#00486D] text-white">
+            <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
               <tr>
                 <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                   Type
@@ -108,7 +108,7 @@ const CredentialsSection = ({
                         onChange={(e) =>
                           updateWebsite(website.id, "type", e.target.value)
                         }
-                        className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#00486D]"
+                        className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#022B51]"
                       >
                         <option value="">Select Type</option>
                         {WEBSITE_TYPES.map((type) => (
@@ -129,7 +129,7 @@ const CredentialsSection = ({
                         onChange={(e) =>
                           updateWebsite(website.id, "url", e.target.value)
                         }
-                        className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#00486D]"
+                        className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#022B51]"
                         placeholder="Enter URL"
                       />
                     ) : (
@@ -159,7 +159,7 @@ const CredentialsSection = ({
                         onChange={(e) =>
                           updateWebsite(website.id, "login", e.target.value)
                         }
-                        className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#00486D]"
+                        className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#022B51]"
                         placeholder="Enter Login"
                       />
                     ) : (
@@ -175,7 +175,7 @@ const CredentialsSection = ({
                           onChange={(e) =>
                             updateWebsite(website.id, "password", e.target.value)
                           }
-                          className="flex-1 px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#00486D]"
+                          className="flex-1 px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#022B51]"
                           placeholder="Enter Password"
                         />
                       ) : (

@@ -109,7 +109,7 @@ function ReferralCode() {
                   setError('')
                 }}
                 placeholder="Enter referral ID / Code"
-                className="w-full h-10 md:h-12 px-3 md:px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent placeholder-gray-400 text-sm md:text-base"
+                className="w-full h-10 md:h-12 px-3 md:px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent placeholder-gray-400 text-sm md:text-base"
                 disabled={isLoading}
               />
             </div>
@@ -118,8 +118,8 @@ function ReferralCode() {
             <button
               type="submit"
               disabled={isLoading || !referralCode.trim()}
-              style={{ background: 'linear-gradient(90deg, #01334C 0%, #00486D 100%)' }}
-              className="w-full disabled:bg-blue-400 text-white font-medium py-2.5 md:py-3 px-4 rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:ring-offset-2 flex items-center justify-center text-sm md:text-base"
+              style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}
+              className="w-full disabled:bg-blue-400 text-white font-medium py-2.5 md:py-3 px-4 rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:ring-offset-2 flex items-center justify-center text-sm md:text-base"
             >
               {isLoading ? (
                 <>

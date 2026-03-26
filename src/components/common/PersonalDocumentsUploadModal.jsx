@@ -157,7 +157,7 @@ function PersonalDocumentsUploadModal({ isOpen, onClose, onUploadSuccess }) {
             <select
               value={selectedDocType}
               onChange={(e) => setSelectedDocType(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
               disabled={uploading}
             >
               <option value="">Select document type</option>
@@ -174,7 +174,7 @@ function PersonalDocumentsUploadModal({ isOpen, onClose, onUploadSuccess }) {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Upload File <span className="text-red-500">*</span>
             </label>
-            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-[#01334C] transition-colors">
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-[#022B51] transition-colors">
               <div className="space-y-1 text-center">
                 <svg
                   className="mx-auto h-12 w-12 text-gray-400"
@@ -192,7 +192,7 @@ function PersonalDocumentsUploadModal({ isOpen, onClose, onUploadSuccess }) {
                 <div className="flex text-sm text-gray-600">
                   <label
                     htmlFor="file-upload"
-                    className="relative cursor-pointer bg-white rounded-md font-medium text-[#01334C] hover:text-[#00486D] focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-[#01334C]"
+                    className="relative cursor-pointer bg-white rounded-md font-medium text-[#022B51] hover:text-[#022B51] focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-[#022B51]"
                   >
                     <span>Upload a file</span>
                     <input
@@ -248,7 +248,7 @@ function PersonalDocumentsUploadModal({ isOpen, onClose, onUploadSuccess }) {
             <button
               onClick={handleUpload}
               disabled={uploading || !selectedDocType || !selectedFile}
-              className="flex-1 px-4 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="flex-1 px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               {uploading ? (
                 <>

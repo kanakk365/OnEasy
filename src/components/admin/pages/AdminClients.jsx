@@ -180,7 +180,7 @@ function AdminClients() {
     return (
       <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading clients...</p>
         </div>
       </div>
@@ -211,7 +211,7 @@ function AdminClients() {
                 setCurrentPage(1);
               }}
               placeholder="Search by client name, email, phone, or organization name..."
-              className="w-full pl-11 pr-4 py-3 bg-[#F8F9FA] border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent transition-all"
+              className="w-full pl-11 pr-4 py-3 bg-[#F8F9FA] border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all"
             />
           </div>
           {searchTerm && (
@@ -287,24 +287,24 @@ function AdminClients() {
             <table className="w-full border-separate border-spacing-0">
               <thead>
                 <tr className="text-white">
-                  <th className="px-3 py-3 text-left text-sm font-medium bg-[#00486D] rounded-l-xl">
+                  <th className="px-3 py-3 text-left text-sm font-medium rounded-l-xl" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                     Client Name
                   </th>
-                  <th className="px-3 py-3 text-left text-sm font-medium bg-[#00486D]">
+                  <th className="px-3 py-3 text-left text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                     Organisation Name
                   </th>
-                  <th className="px-3 py-3 text-left text-sm font-medium bg-[#00486D]">
+                  <th className="px-3 py-3 text-left text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                     Email
                   </th>
-                  <th className="px-3 py-3 text-left text-sm font-medium bg-[#00486D]">
+                  <th className="px-3 py-3 text-left text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                     Phone Number
                   </th>
                   {filter === "support-requests" && (
-                    <th className="px-3 py-3 text-left text-sm font-medium bg-[#00486D]">
+                    <th className="px-3 py-3 text-left text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                       Support Request
                     </th>
                   )}
-                  <th className="px-3 py-3 text-center text-sm font-medium bg-[#00486D] rounded-r-xl">
+                  <th className="px-3 py-3 text-center text-sm font-medium rounded-r-xl" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                     Actions
                   </th>
                 </tr>
@@ -382,7 +382,7 @@ function AdminClients() {
                           className="p-2 text-white rounded-lg hover:opacity-90 transition-opacity"
                           style={{
                             background:
-                              "linear-gradient(90deg, #00486D 0%, #023752 100%)",
+                              "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                           }}
                           title="View"
                         >

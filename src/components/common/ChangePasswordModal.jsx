@@ -111,7 +111,7 @@ function ChangePasswordModal({ isOpen, onClose, onSuccess, required = false }) {
                 id="currentPassword"
                 value={formData.currentPassword}
                 onChange={(e) => handleChange('currentPassword', e.target.value)}
-                className="w-full h-12 px-4 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                className="w-full h-12 px-4 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                 placeholder="Enter current password"
                 disabled={loading}
                 required
@@ -146,7 +146,7 @@ function ChangePasswordModal({ isOpen, onClose, onSuccess, required = false }) {
                 id="newPassword"
                 value={formData.newPassword}
                 onChange={(e) => handleChange('newPassword', e.target.value)}
-                className="w-full h-12 px-4 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                className="w-full h-12 px-4 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                 placeholder="Enter new password (min. 6 characters)"
                 disabled={loading}
                 required
@@ -181,7 +181,7 @@ function ChangePasswordModal({ isOpen, onClose, onSuccess, required = false }) {
                 id="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                className="w-full h-12 px-4 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                className="w-full h-12 px-4 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                 placeholder="Confirm new password"
                 disabled={loading}
                 required
@@ -217,7 +217,7 @@ function ChangePasswordModal({ isOpen, onClose, onSuccess, required = false }) {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 h-12 px-6 bg-[#01334C] hover:bg-[#00486D] text-white font-medium rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+              className="flex-1 h-12 px-6 text-white font-medium rounded-lg hover:opacity-90 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               {loading ? (
                 <>

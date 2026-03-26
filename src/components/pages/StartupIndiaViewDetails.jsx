@@ -142,7 +142,7 @@ function StartupIndiaViewDetails() {
     return (
       <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading registration details...</p>
         </div>
       </div>
@@ -157,7 +157,7 @@ function StartupIndiaViewDetails() {
           <p className="text-gray-600 mb-6">{error || 'The requested registration could not be found.'}</p>
           <button
             onClick={() => navigate(getBackRoute())}
-            className="px-6 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#003855]"
+            className="px-6 py-2 text-white rounded-lg" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             Go Back
           </button>
@@ -204,7 +204,7 @@ function StartupIndiaViewDetails() {
                       navigate('/startup-india-form');
                     }
                   }}
-                  className="px-4 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors flex items-center gap-2"
+                  className="px-4 py-2 text-white rounded-md hover:opacity-90 transition-all flex items-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -214,7 +214,7 @@ function StartupIndiaViewDetails() {
               )}
             <button
                 onClick={() => navigate(getBackRoute())}
-              className="px-4 py-2 text-[#00486D] border border-[#00486D] rounded-lg hover:bg-[#00486D] hover:text-white transition-colors"
+              className="px-4 py-2 text-[#022B51] border border-[#022B51] rounded-lg hover:bg-[#015079] hover:text-white transition-colors"
             >
               ← Back to Dashboard
             </button>
@@ -386,13 +386,13 @@ function StartupIndiaViewDetails() {
                     <div className="space-x-2">
                       <button
                         onClick={() => handleViewDocument(registration.logo_url)}
-                        className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                        className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                       >
                         View
                       </button>
                       <button
                         onClick={() => handleDownloadDocument(registration.logo_url, 'logo')}
-                        className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                        className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                       >
                         Download
                       </button>
@@ -405,13 +405,13 @@ function StartupIndiaViewDetails() {
                     <div className="space-x-2">
                       <button
                         onClick={() => handleViewDocument(registration.udyam_registration_url)}
-                        className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                        className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                       >
                         View
                       </button>
                       <button
                         onClick={() => handleDownloadDocument(registration.udyam_registration_url, 'udyam')}
-                        className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                        className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                       >
                         Download
                       </button>
@@ -424,13 +424,13 @@ function StartupIndiaViewDetails() {
                     <div className="space-x-2">
                       <button
                         onClick={() => handleViewDocument(registration.certificate_of_incorporation_url)}
-                        className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                        className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                       >
                         View
                       </button>
                       <button
                         onClick={() => handleDownloadDocument(registration.certificate_of_incorporation_url, 'certificate')}
-                        className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                        className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                       >
                         Download
                       </button>
@@ -443,13 +443,13 @@ function StartupIndiaViewDetails() {
                     <div className="space-x-2">
                       <button
                         onClick={() => handleViewDocument(registration.pan_entity_url)}
-                        className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                        className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                       >
                         View
                       </button>
                       <button
                         onClick={() => handleDownloadDocument(registration.pan_entity_url, 'pan-entity')}
-                        className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                        className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                       >
                         Download
                       </button>
@@ -462,13 +462,13 @@ function StartupIndiaViewDetails() {
                     <div className="space-x-2">
                       <button
                         onClick={() => handleViewDocument(registration.tan_entity_url)}
-                        className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                        className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                       >
                         View
                       </button>
                       <button
                         onClick={() => handleDownloadDocument(registration.tan_entity_url, 'tan-entity')}
-                        className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                        className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                       >
                         Download
                       </button>
@@ -514,13 +514,13 @@ function StartupIndiaViewDetails() {
                 <div className="flex items-center gap-2 mt-1">
                   <button
                     onClick={() => handleViewDocument(registration.ipr_document_url)}
-                    className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                    className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                   >
                     View
                   </button>
                   <button
                     onClick={() => handleDownloadDocument(registration.ipr_document_url, 'ipr-document')}
-                    className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                    className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                   >
                     Download
                   </button>
@@ -564,13 +564,13 @@ function StartupIndiaViewDetails() {
                 <div className="flex items-center gap-2 mt-1">
                   <button
                     onClick={() => handleViewDocument(registration.registered_office_proof_url)}
-                    className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                    className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                   >
                     View
                   </button>
                   <button
                     onClick={() => handleDownloadDocument(registration.registered_office_proof_url, 'office-proof')}
-                    className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                    className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                   >
                     Download
                   </button>
@@ -611,13 +611,13 @@ function StartupIndiaViewDetails() {
                         <div className="flex items-center gap-2 mt-1">
                           <button
                             onClick={() => handleViewDocument(director.aadhaarCard)}
-                            className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                            className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                           >
                             View
                           </button>
                           <button
                             onClick={() => handleDownloadDocument(director.aadhaarCard, `director-${index + 1}-aadhaar`)}
-                            className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                            className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                           >
                             Download
                           </button>
@@ -630,13 +630,13 @@ function StartupIndiaViewDetails() {
                         <div className="flex items-center gap-2 mt-1">
                           <button
                             onClick={() => handleViewDocument(director.panCard)}
-                            className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                            className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                           >
                             View
                           </button>
                           <button
                             onClick={() => handleDownloadDocument(director.panCard, `director-${index + 1}-pan`)}
-                            className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                            className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                           >
                             Download
                           </button>
@@ -672,13 +672,13 @@ function StartupIndiaViewDetails() {
                 <div className="flex items-center gap-2 mt-1">
                   <button
                     onClick={() => handleViewDocument(registration.authorization_letter_url)}
-                    className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                    className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                   >
                     View
                   </button>
                   <button
                     onClick={() => handleDownloadDocument(registration.authorization_letter_url, 'authorization-letter')}
-                    className="px-4 py-2 text-[#00486D] hover:bg-[#00486D] hover:text-white border border-[#00486D] rounded transition-colors text-sm"
+                    className="px-4 py-2 text-[#022B51] hover:bg-[#015079] hover:text-white border border-[#022B51] rounded transition-colors text-sm"
                   >
                     Download
                   </button>

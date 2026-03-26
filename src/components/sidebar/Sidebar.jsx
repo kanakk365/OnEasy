@@ -344,7 +344,7 @@ function Sidebar() {
                     className="w-8 h-8 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-8 h-8 bg-[#01334C] text-white rounded-full flex items-center justify-center text-sm font-medium">
+                  <div className="w-8 h-8 text-white rounded-full flex items-center justify-center text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                     {userData?.name
                       ? userData.name.charAt(0).toUpperCase()
                       : "A"}

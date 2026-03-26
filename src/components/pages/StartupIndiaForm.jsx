@@ -500,7 +500,7 @@ function StartupIndiaForm() {
     return (
       <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading registration data...</p>
           <p className="mt-2 text-sm text-gray-500">Ticket ID: {ticketId}</p>
         </div>
@@ -757,7 +757,7 @@ function StartupIndiaForm() {
             <button
               type="button"
               onClick={goBack}
-              className="px-6 py-1.5 rounded-md border border-[#CFE6F0] text-[#00486D] cursor-pointer disabled:opacity-50"
+              className="px-6 py-1.5 rounded-md border border-[#CFE6F0] text-[#022B51] cursor-pointer disabled:opacity-50"
               disabled={isSubmitting || (oneasyTeamFill && !isAdminOrSuperadmin) || (clientFillRequest && isAdminOrSuperadmin)}
             >
               Back
@@ -779,7 +779,7 @@ function StartupIndiaForm() {
                 navigate('/startup-india-dashboard');
               } : goNext}
               className="px-6 py-1.5 rounded-md text-white font-medium cursor-pointer disabled:opacity-50"
-              style={{ background: 'linear-gradient(90deg, #01334C 0%, #00486D 100%)' }}
+              style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}
               disabled={isSubmitting}
             >
               {(oneasyTeamFill && !isAdminOrSuperadmin) ? 'Go to Dashboard' : (isSubmitting ? 'Submitting...' : (step === 5 ? 'Submit' : 'Next'))}
@@ -896,7 +896,7 @@ function StartupIndiaForm() {
           className={`fixed bottom-8 right-8 px-6 py-4 rounded-full shadow-2xl font-medium text-white transition-all duration-300 hover:scale-105 z-40 ${
             oneasyTeamFill 
               ? 'bg-green-600 hover:bg-green-700' 
-              : 'bg-[#01334C] hover:bg-[#00486D]'
+              : 'bg-[#022B51] hover:bg-[#015079]'
           }`}
         >
           {oneasyTeamFill ? (

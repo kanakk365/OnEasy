@@ -16,7 +16,7 @@ function DocumentsSection({ illustration, documents }) {
 
   return (
     <div className="mt-8 bg-white p-8 rounded-lg">
-      <h2 className="text-2xl font-semibold mb-6" style={{ color: "#00486D" }}>
+      <h2 className="text-2xl font-semibold mb-6" style={{ color: "#022B51" }}>
         Documents Required
       </h2>
       <div className="flex flex-col md:flex-row justify-between items-start md:space-x-8">
@@ -27,7 +27,7 @@ function DocumentsSection({ illustration, documents }) {
                 className="w-6 h-6 rounded-full text-white text-xs font-medium flex items-center justify-center"
                 style={{
                   background:
-                    "linear-gradient(180deg, #00486D 0%, #01334C 100%)",
+                    "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                 }}
               >
                 {index + 1}

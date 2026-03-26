@@ -99,7 +99,7 @@ const ClientResponsesTab = ({ userId }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00486D]" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#022B51]" />
       </div>
     );
   }
@@ -130,7 +130,7 @@ const ClientResponsesTab = ({ userId }) => {
           <button
             onClick={() => setView("suggested-registrations")}
             className={`py-2 px-4 text-sm font-medium rounded-lg transition-colors ${view === "suggested-registrations"
-                ? "bg-[#01466a] text-white shadow-sm"
+                ? "bg-[#022B51] text-white shadow-sm"
                 : "text-gray-500 hover:text-gray-900"
               }`}
           >
@@ -139,7 +139,7 @@ const ClientResponsesTab = ({ userId }) => {
           <button
             onClick={() => setView("suggested-compliances")}
             className={`py-2 px-4 text-sm font-medium rounded-lg transition-colors ${view === "suggested-compliances"
-                ? "bg-[#01466a] text-white shadow-sm"
+                ? "bg-[#022B51] text-white shadow-sm"
                 : "text-gray-500 hover:text-gray-900"
               }`}
           >
@@ -191,19 +191,19 @@ const ClientResponsesTab = ({ userId }) => {
                   <div
                     key={set.submissionId || idx}
                     onClick={() => setSelectedSetId(set.submissionId)}
-                    className="group bg-white rounded-xl p-6 border border-gray-200 hover:border-[#01466a] hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
+                    className="group bg-white rounded-xl p-6 border border-gray-200 hover:border-[#022B51] hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
                   >
                     {/* Left accent bar on hover */}
-                    <div className="absolute top-0 left-0 w-1 h-full bg-[#01466a] opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute top-0 left-0 w-1 h-full bg-[#022B51] opacity-0 group-hover:opacity-100 transition-opacity" />
 
                     <div className="flex items-start justify-between">
-                      <h4 className="text-base font-bold text-[#00486D] mb-2 line-clamp-2 pr-4">
+                      <h4 className="text-base font-bold text-[#022B51] mb-2 line-clamp-2 pr-4">
                         {getOrgName(set)}
                       </h4>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {/* Count badge */}
-                        <div className="w-8 h-8 rounded-full bg-[#00486D]/10 flex items-center justify-center">
-                          <span className="text-sm font-bold text-[#00486D]">
+                        <div className="w-8 h-8 rounded-full bg-[#022B51]/10 flex items-center justify-center">
+                          <span className="text-sm font-bold text-[#022B51]">
                             {count}
                           </span>
                         </div>
@@ -271,7 +271,7 @@ const ClientResponsesTab = ({ userId }) => {
             <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
               <button
                 onClick={() => setSelectedSetId(null)}
-                className="flex items-center text-sm font-medium text-gray-500 hover:text-[#00486D] transition-colors"
+                className="flex items-center text-sm font-medium text-gray-500 hover:text-[#022B51] transition-colors"
               >
                 <IoChevronBackOutline className="mr-1 w-4 h-4" />
                 Back to Organizations
@@ -292,7 +292,7 @@ const ClientResponsesTab = ({ userId }) => {
                     ? "registrations"
                     : "compliances"
                   }...`}
-                className="w-full max-w-xs px-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D]"
+                className="w-full max-w-xs px-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51]/30 focus:border-[#022B51]"
               />
             </div>
 
@@ -316,10 +316,10 @@ const ClientResponsesTab = ({ userId }) => {
                   {filtered.map((item, idx) => (
                     <div
                       key={`${item.code}-${idx}`}
-                      className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#01334C] hover:text-white transition-all duration-200 flex items-center justify-between w-full border border-gray-100"
+                      className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#015079] hover:text-white transition-all duration-200 flex items-center justify-between w-full border border-gray-100"
                     >
                       <div>
-                        <h5 className="text-base font-semibold text-[#00486D] mb-1 group-hover:text-white">
+                        <h5 className="text-base font-semibold text-[#022B51] mb-1 group-hover:text-white">
                           {item.name}
                         </h5>
                         <p className="text-sm text-gray-400 group-hover:text-gray-200 capitalize">
@@ -330,7 +330,7 @@ const ClientResponsesTab = ({ userId }) => {
                         </p>
                       </div>
                       <div className="w-10 h-10 rounded-full bg-[#F5F7FA] group-hover:bg-[#246181] flex items-center justify-center transition-colors flex-shrink-0">
-                        <IoChevronForwardOutline className="text-[#00486D] text-xl group-hover:text-white" />
+                        <IoChevronForwardOutline className="text-[#022B51] text-xl group-hover:text-white" />
                       </div>
                     </div>
                   ))}
@@ -422,7 +422,7 @@ const ClientResponsesTab = ({ userId }) => {
               onClick={() => setShowDeleteSuccess(false)}
               className="w-full px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors"
               style={{
-                background: "linear-gradient(90deg,#01334C 0%,#00486D 100%)",
+                background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
               }}
             >
               Done

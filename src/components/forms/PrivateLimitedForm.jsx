@@ -570,7 +570,7 @@ function PrivateLimitedForm({
             </h1>
             {packageDetails && (
               <p className="text-sm text-gray-600">
-                Package: <span className="font-medium">{packageDetails.name}</span> - <span className="font-semibold text-[#00486D]">₹{packageDetails.price}</span>
+                Package: <span className="font-medium">{packageDetails.name}</span> - <span className="font-semibold text-[#022B51]">₹{packageDetails.price}</span>
               </p>
             )}
           </div>
@@ -655,7 +655,7 @@ function PrivateLimitedForm({
               type="button"
               onClick={goBack}
               disabled={isSubmitting || (oneasyTeamFill && !isAdminOrSuperadmin) || (clientFillRequest && isAdminOrSuperadmin)}
-              className={`px-6 py-1.5 rounded-md border border-[#00486D] text-[#00486D] ${(isSubmitting || (oneasyTeamFill && !isAdminOrSuperadmin) || (clientFillRequest && isAdminOrSuperadmin && !isFillingOnBehalf)) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              className={`px-6 py-1.5 rounded-md border border-[#022B51] text-[#022B51] ${(isSubmitting || (oneasyTeamFill && !isAdminOrSuperadmin) || (clientFillRequest && isAdminOrSuperadmin && !isFillingOnBehalf)) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
               Back
             </button>
@@ -679,7 +679,7 @@ function PrivateLimitedForm({
               } : goNext}
               disabled={isSubmitting}
               className={`px-6 py-1.5 rounded-md text-white font-medium ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-              style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
+              style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}
             >
               {(oneasyTeamFill && !isAdminOrSuperadmin) ? 'Go to Dashboard' : (isSubmitting ? 'Submitting...' : (step === 3 ? 'Submit' : 'Next'))}
             </button>
@@ -816,7 +816,7 @@ function PrivateLimitedForm({
           className={`fixed bottom-8 right-8 px-6 py-4 rounded-full shadow-2xl font-medium text-white transition-all duration-300 hover:scale-105 z-40 ${
             oneasyTeamFill 
               ? 'bg-green-600 hover:bg-green-700' 
-              : 'bg-[#01334C] hover:bg-[#00486D]'
+              : 'bg-[#022B51] hover:bg-[#015079]'
           }`}
         >
           {oneasyTeamFill ? (

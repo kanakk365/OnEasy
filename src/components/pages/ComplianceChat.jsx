@@ -1060,8 +1060,8 @@ const ComplianceChat = () => {
         <button
           onClick={() => hasChildren && toggleBranchExpand(path)}
           className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all text-left ${isExpanded
-            ? "bg-[#00486D]/5 border border-[#00486D]/20"
-            : "bg-white border border-gray-200 hover:border-[#00486D]/30 hover:bg-gray-50"
+            ? "bg-[#022B51]/5 border border-[#022B51]/20"
+            : "bg-white border border-gray-200 hover:border-[#022B51]/30 hover:bg-gray-50"
             } ${depth > 0 ? "ml-" + Math.min(depth * 4, 12) : ""}`}
           style={depth > 0 ? { marginLeft: `${depth * 16}px` } : {}}
         >
@@ -1069,7 +1069,7 @@ const ComplianceChat = () => {
             {hasChildren &&
               (isExpanded ? (
                 <FiChevronDown
-                  className="text-[#00486D] flex-shrink-0"
+                  className="text-[#022B51] flex-shrink-0"
                   size={16}
                 />
               ) : (
@@ -1079,7 +1079,7 @@ const ComplianceChat = () => {
                 />
               ))}
             <span
-              className={`text-sm font-semibold truncate ${isExpanded ? "text-[#00486D]" : "text-gray-800"
+              className={`text-sm font-semibold truncate ${isExpanded ? "text-[#022B51]" : "text-gray-800"
                 }`}
             >
               {branch.heading}
@@ -1087,7 +1087,7 @@ const ComplianceChat = () => {
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {selCount > 0 && (
-              <span className="text-xs font-semibold text-[#00486D] bg-[#00486D]/10 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-semibold text-[#022B51] bg-[#022B51]/10 px-2 py-0.5 rounded-full">
                 {selCount}/{totalCount}
               </span>
             )}
@@ -1123,7 +1123,7 @@ const ComplianceChat = () => {
                       e.stopPropagation();
                       toggleAllItems(branch.items);
                     }}
-                    className="text-xs text-[#00486D] hover:underline font-medium"
+                    className="text-xs text-[#022B51] hover:underline font-medium"
                   >
                     {branch.items.every((i) => selectedCodes.includes(i.code))
                       ? "Deselect All"
@@ -1137,13 +1137,13 @@ const ComplianceChat = () => {
                       key={item.code}
                       onClick={() => toggleSelection(item.code)}
                       className={`flex items-start gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all mb-1 ${isSel
-                        ? "bg-[#00486D]/5 border border-[#00486D]/30"
+                        ? "bg-[#022B51]/5 border border-[#022B51]/30"
                         : "bg-white border border-gray-100 hover:border-gray-200 hover:bg-gray-50"
                         }`}
                     >
                       <div
                         className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${isSel
-                          ? "bg-[#00486D] border-[#00486D]"
+                          ? "bg-[#022B51] border-[#022B51]"
                           : "bg-white border-gray-300"
                           }`}
                       >
@@ -1151,7 +1151,7 @@ const ComplianceChat = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p
-                          className={`text-sm font-medium ${isSel ? "text-[#00486D]" : "text-gray-800"
+                          className={`text-sm font-medium ${isSel ? "text-[#022B51]" : "text-gray-800"
                             }`}
                         >
                           {item.name}
@@ -1226,7 +1226,7 @@ const ComplianceChat = () => {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading compliance data...</p>
         </div>
       </div>
@@ -1266,7 +1266,7 @@ const ComplianceChat = () => {
           </p>
           {orgLoading ? (
             <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00486D]"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#022B51]"></div>
             </div>
           ) : (
             <>
@@ -1275,11 +1275,11 @@ const ComplianceChat = () => {
                   <div
                     key={org.id}
                     onClick={() => handleOrgSelect(org)}
-                    className="bg-white rounded-xl p-5 border border-gray-200 hover:border-[#00486D] hover:shadow-lg transition-all duration-200 cursor-pointer group"
+                    className="bg-white rounded-xl p-5 border border-gray-200 hover:border-[#022B51] hover:shadow-lg transition-all duration-200 cursor-pointer group"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="w-11 h-11 rounded-xl bg-[#023752]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#023752]/20 transition-colors">
-                        <HiOutlineBuildingOffice2 className="w-5 h-5 text-[#023752]" />
+                      <div className="w-11 h-11 rounded-xl bg-[#022B51]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#015079]/20 transition-colors">
+                        <HiOutlineBuildingOffice2 className="w-5 h-5 text-[#022B51]" />
                       </div>
                       <div className="min-w-0">
                         <h3
@@ -1302,7 +1302,7 @@ const ComplianceChat = () => {
                           </p>
                         )}
                         {org.category && (
-                          <span className="inline-block mt-2 px-2 py-0.5 bg-blue-50 text-[#00486D] text-xs rounded-full">
+                          <span className="inline-block mt-2 px-2 py-0.5 bg-blue-50 text-[#022B51] text-xs rounded-full">
                             {org.category}
                           </span>
                         )}
@@ -1314,12 +1314,12 @@ const ComplianceChat = () => {
                 {/* Add New Organisation Card */}
                 <div
                   onClick={() => setShowAddOrgForm(true)}
-                  className="bg-white rounded-xl p-5 border-2 border-dashed border-gray-300 hover:border-[#00486D] hover:bg-[#00486D]/5 transition-all duration-200 cursor-pointer group flex items-center justify-center min-h-[120px]"
+                  className="bg-white rounded-xl p-5 border-2 border-dashed border-gray-300 hover:border-[#022B51] hover:bg-[#015079]/5 transition-all duration-200 cursor-pointer group flex items-center justify-center min-h-[120px]"
                 >
                   <div className="text-center">
-                    <div className="w-11 h-11 rounded-xl bg-[#00486D]/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-[#00486D]/20 transition-colors">
+                    <div className="w-11 h-11 rounded-xl bg-[#022B51]/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-[#015079]/20 transition-colors">
                       <svg
-                        className="w-6 h-6 text-[#00486D]"
+                        className="w-6 h-6 text-[#022B51]"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -1332,7 +1332,7 @@ const ComplianceChat = () => {
                         />
                       </svg>
                     </div>
-                    <p className="font-semibold text-gray-700 group-hover:text-[#00486D] transition-colors text-sm">
+                    <p className="font-semibold text-gray-700 group-hover:text-[#022B51] transition-colors text-sm">
                       Add New Organisation
                     </p>
                   </div>
@@ -1361,7 +1361,7 @@ const ComplianceChat = () => {
                           }))
                         }
                         placeholder="Enter Legal Name"
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
                       />
                     </div>
                     {/* Trade Name */}
@@ -1379,7 +1379,7 @@ const ComplianceChat = () => {
                           }))
                         }
                         placeholder="Enter Trade Name"
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
                       />
                     </div>
                     {/* Category */}
@@ -1395,7 +1395,7 @@ const ComplianceChat = () => {
                             category: e.target.value,
                           }))
                         }
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors bg-white"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors bg-white"
                       >
                         <option value="">Select Category</option>
                         <option value="Individual">Individual</option>
@@ -1449,7 +1449,7 @@ const ComplianceChat = () => {
                         }
                         placeholder="Enter GSTIN"
                         maxLength={15}
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
                       />
                     </div>
                     {/* PAN Number */}
@@ -1468,7 +1468,7 @@ const ComplianceChat = () => {
                         }
                         placeholder="Enter PAN Number"
                         maxLength={10}
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
                       />
                     </div>
                     {/* Incorporation Date */}
@@ -1485,7 +1485,7 @@ const ComplianceChat = () => {
                             incorporationDate: e.target.value,
                           }))
                         }
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
                       />
                     </div>
                     {/* TAN */}
@@ -1503,7 +1503,7 @@ const ComplianceChat = () => {
                           }))
                         }
                         placeholder="Enter TAN"
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
                       />
                     </div>
                     {/* CIN */}
@@ -1521,7 +1521,7 @@ const ComplianceChat = () => {
                           }))
                         }
                         placeholder="Enter CIN"
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
                       />
                     </div>
                     {/* Organisation Type */}
@@ -1537,7 +1537,7 @@ const ComplianceChat = () => {
                             organisationType: e.target.value,
                           }))
                         }
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors bg-white"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors bg-white"
                       >
                         <option value="">Select type</option>
                         <option value="Private Limited">Private Limited</option>
@@ -1575,7 +1575,7 @@ const ComplianceChat = () => {
                               }))
                             }
                             placeholder="Enter Address Line 1"
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
                           />
                         </div>
                         {/* Address Line 2 */}
@@ -1593,7 +1593,7 @@ const ComplianceChat = () => {
                               }))
                             }
                             placeholder="Enter Address Line 2 (Optional)"
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
                           />
                         </div>
                         {/* District */}
@@ -1611,7 +1611,7 @@ const ComplianceChat = () => {
                               }))
                             }
                             placeholder="Enter District"
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
                           />
                         </div>
                         {/* State */}
@@ -1629,7 +1629,7 @@ const ComplianceChat = () => {
                               }))
                             }
                             placeholder="Enter State"
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
                           />
                         </div>
                         {/* Country */}
@@ -1647,7 +1647,7 @@ const ComplianceChat = () => {
                               }))
                             }
                             placeholder="Enter Country"
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
                           />
                         </div>
                         {/* Pincode */}
@@ -1668,7 +1668,7 @@ const ComplianceChat = () => {
                             }
                             placeholder="Enter 6-digit PIN Code"
                             maxLength={6}
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-colors"
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
                           />
                         </div>
                       </div>
@@ -1679,7 +1679,7 @@ const ComplianceChat = () => {
                     <button
                       onClick={handleCreateOrg}
                       disabled={savingOrg}
-                      className="px-6 py-2.5 bg-[#00486D] text-white text-sm font-medium rounded-lg hover:bg-[#003855] disabled:opacity-50 transition-colors shadow-sm"
+                      className="px-6 py-2.5 text-white text-sm font-medium rounded-lg disabled:opacity-50 hover:opacity-90 transition-all shadow-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       {savingOrg ? "Creating..." : "Create Organisation"}
                     </button>
@@ -1773,7 +1773,7 @@ const ComplianceChat = () => {
               {selectedOrg && (
                 <p className="text-xs text-gray-500 mt-0.5">
                   For:{" "}
-                  <span className="font-medium text-[#00486D]">
+                  <span className="font-medium text-[#022B51]">
                     {selectedOrg.legal_name}
                   </span>
                   {selectedOrg.trade_name ? ` (${selectedOrg.trade_name})` : ""}
@@ -1781,7 +1781,7 @@ const ComplianceChat = () => {
               )}
             </div>
           </div>
-          <span className="text-sm font-semibold text-[#00486D] bg-blue-50 px-3 py-1 rounded-full">
+          <span className="text-sm font-semibold text-[#022B51] bg-blue-50 px-3 py-1 rounded-full">
             {selectedCodes.length} Selected
           </span>
         </div>
@@ -1797,7 +1797,7 @@ const ComplianceChat = () => {
                 <input
                   type="text"
                   placeholder="Search compliances or categories..."
-                  className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D]"
+                  className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51]"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -1870,7 +1870,7 @@ const ComplianceChat = () => {
               <button
                 onClick={submitManualSelection}
                 disabled={selectedCodes.length === 0 || isSubmittingSelection}
-                className="w-full py-2.5 rounded-lg bg-[#00486D] text-white text-sm font-medium hover:bg-[#003855] disabled:opacity-50 shadow-lg shadow-blue-900/10"
+                className="w-full py-2.5 rounded-lg text-white text-sm font-medium disabled:opacity-50 shadow-lg shadow-blue-900/10" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 {isSubmittingSelection
                   ? "Saving..."
@@ -1899,9 +1899,9 @@ const ComplianceChat = () => {
     <div className="h-[calc(100vh-4rem)] bg-white flex flex-col overflow-hidden">
       <div className="flex bg-white items-center gap-2 px-6 py-4 border-b border-gray-100">
         <div className="w-8 h-8 rounded-full bg-[#E3F2F9] flex items-center justify-center">
-          <RiRobot2Line className="text-[#00486D]" />
+          <RiRobot2Line className="text-[#022B51]" />
         </div>
-        <span className="font-semibold text-[#00486D]">
+        <span className="font-semibold text-[#022B51]">
           Oneasy Compliance AI
         </span>
         {hasSavedResponses && (
@@ -1920,14 +1920,14 @@ const ComplianceChat = () => {
           >
             {msg.type === "bot" && (
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-semibold text-[#00486D] ml-1">
+                <span className="text-xs font-semibold text-[#022B51] ml-1">
                   Oneasy AI
                 </span>
               </div>
             )}
             {msg.type === "user" && (
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-semibold text-[#00486D] mr-1">
+                <span className="text-xs font-semibold text-[#022B51] mr-1">
                   You
                 </span>
               </div>
@@ -1935,9 +1935,9 @@ const ComplianceChat = () => {
 
             <div
               className={`max-w-[80%] md:max-w-[60%] rounded-2xl px-6 py-4 text-sm leading-relaxed shadow-sm ${msg.type === "user"
-                ? "bg-[#00486D] text-white rounded-tr-none"
+                ? "bg-[#022B51] text-white rounded-tr-none"
                 : msg.isCompliances || msg.isSummary
-                  ? "bg-gradient-to-br from-[#E3F2F9] to-[#F0F9FF] text-gray-800 rounded-tl-none border border-[#00486D]/10"
+                  ? "bg-gradient-to-br from-[#E3F2F9] to-[#F0F9FF] text-gray-800 rounded-tl-none border border-[#022B51]/10"
                   : "bg-[#F0F4F8] text-gray-800 rounded-tl-none"
                 }`}
             >
@@ -1969,7 +1969,7 @@ const ComplianceChat = () => {
                   <button
                     key={option.id}
                     onClick={() => handleOptionClick(option)}
-                    className="px-4 py-2 bg-white border border-[#00486D] text-[#00486D] rounded-full text-sm font-medium hover:bg-[#E3F2F9] transition-colors"
+                    className="px-4 py-2 bg-white border border-[#022B51] text-[#022B51] rounded-full text-sm font-medium hover:bg-[#E3F2F9] transition-colors"
                   >
                     {option.label}
                   </button>
@@ -2004,8 +2004,8 @@ const ComplianceChat = () => {
                         btn.action === "flow_existing_business" ||
                         btn.action === "existing_knows_compliance" ||
                         btn.action === "existing_no_compliance"
-                        ? "bg-[#00486D] text-white hover:bg-[#01334C]"
-                        : "bg-white border border-[#00486D] text-[#00486D] hover:bg-[#E3F2F9]"
+                        ? "bg-[#022B51] text-white hover:bg-[#015079]"
+                        : "bg-white border border-[#022B51] text-[#022B51] hover:bg-[#E3F2F9]"
                       }`}
                   >
                     {btn.label}
@@ -2019,7 +2019,7 @@ const ComplianceChat = () => {
         {isTyping && (
           <div className="flex flex-col items-start">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-semibold text-[#00486D] ml-1">
+              <span className="text-xs font-semibold text-[#022B51] ml-1">
                 Oneasy AI
               </span>
             </div>
@@ -2064,7 +2064,7 @@ const ComplianceChat = () => {
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSendMessage(inputValue)}
           placeholder="Type your answer..."
-          className="flex-1 bg-gray-50 border border-gray-200 rounded-full px-6 py-3 text-sm focus:outline-none focus:border-[#00486D] transition-colors disabled:opacity-50"
+          className="flex-1 bg-gray-50 border border-gray-200 rounded-full px-6 py-3 text-sm focus:outline-none focus:border-[#022B51] transition-colors disabled:opacity-50"
           disabled={isCompleted || isTyping || showSelectionGrid}
         />
         <button
@@ -2072,7 +2072,8 @@ const ComplianceChat = () => {
           disabled={
             !inputValue.trim() || isCompleted || isTyping || showSelectionGrid
           }
-          className="w-12 h-12 rounded-full bg-[#00486D] text-white flex items-center justify-center hover:bg-[#003855] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-12 h-12 rounded-full text-white flex items-center justify-center hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
         >
           <IoSend className="text-lg" />
         </button>

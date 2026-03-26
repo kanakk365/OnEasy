@@ -37,7 +37,7 @@ function SuccessModal({ isOpen, onClose, title, message }) {
 
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 text-sm font-medium text-white bg-[#00486D] hover:bg-[#003855] rounded-lg transition-colors duration-200"
+            className="w-full px-4 py-2 text-sm font-medium text-white rounded-lg hover:opacity-90 transition-all duration-200" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             Okay
           </button>

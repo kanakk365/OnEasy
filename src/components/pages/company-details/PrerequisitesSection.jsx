@@ -3,7 +3,7 @@ import React from "react";
 function PrerequisitesSection({ prerequisites }) {
   return (
     <div className="mt-8 bg-white p-8 rounded-lg">
-      <h2 className="text-2xl font-semibold mb-6" style={{ color: "#00486D" }}>
+      <h2 className="text-2xl font-semibold mb-6" style={{ color: "#022B51" }}>
         Pre-requisites
       </h2>
       <div className="space-y-6">
@@ -22,7 +22,7 @@ function PrerequisitesSection({ prerequisites }) {
                 className="w-6 h-6 rounded-full text-white text-xs font-medium flex items-center justify-center flex-shrink-0 mt-0.5"
                 style={{
                   background:
-                    "linear-gradient(180deg, #00486D 0%, #01334C 100%)",
+                    "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                 }}
               >
                 {index + 1}

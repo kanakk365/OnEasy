@@ -41,7 +41,7 @@ function ClientTasksTab({
                 <button
                   type="button"
                   onClick={() => setIsAddingAdminTask(true)}
-                  className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold flex items-center gap-2"
+                  className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all text-xs font-semibold flex items-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   <AiOutlinePlus className="w-3 h-3" />
                   Add Task
@@ -171,7 +171,7 @@ function ClientTasksTab({
                     <button
                       onClick={addAdminTask}
                       disabled={savingTasks}
-                      className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold disabled:opacity-50"
+                      className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all text-xs font-semibold disabled:opacity-50" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       {savingTasks
                         ? "Saving..."
@@ -186,7 +186,7 @@ function ClientTasksTab({
               {adminTasksList.length > 0 ? (
                 <div className="overflow-x-auto rounded-lg">
                   <table className="w-full text-sm">
-                    <thead className="bg-[#00486D] text-white">
+                    <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                       <tr>
                         <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                           Date
@@ -244,7 +244,7 @@ function ClientTasksTab({
                           </td>
                           <td className="p-3">
                             <button
-                              className="flex items-center gap-1 px-3 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs font-medium"
+                              className="flex items-center gap-1 px-3 py-2 text-white rounded-md hover:opacity-90 transition-all text-xs font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                             >
                               <FiEye className="w-4 h-4" />
                               View Details
@@ -273,7 +273,7 @@ function ClientTasksTab({
               {userTasksList.length > 0 ? (
                 <div className="overflow-x-auto rounded-lg">
                   <table className="w-full text-sm">
-                    <thead className="bg-[#00486D] text-white">
+                    <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                       <tr>
                         <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                           Date
@@ -331,7 +331,7 @@ function ClientTasksTab({
                           </td>
                           <td className="p-3">
                             <button
-                              className="flex items-center gap-1 px-3 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs font-medium"
+                              className="flex items-center gap-1 px-3 py-2 text-white rounded-md hover:opacity-90 transition-all text-xs font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                             >
                               <FiEye className="w-4 h-4" />
                               View Details
@@ -357,9 +357,9 @@ function ClientTasksTab({
               <button
                 onClick={handleSaveTasks}
                 disabled={savingTasks}
-                className="px-8 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-8 py-2 text-white rounded-lg hover:opacity-90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 style={{
-                  background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+                  background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                 }}
               >
                 {savingTasks ? "Saving..." : "Save Changes"}
@@ -469,7 +469,7 @@ function ClientTasksTab({
                       }}
                       className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg"
                       style={{
-                        background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+                        background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                       }}
                     >
                       Edit

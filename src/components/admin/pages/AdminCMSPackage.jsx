@@ -315,7 +315,7 @@ function AdminCMSPackage() {
 
           <button
             onClick={handleCreateNew}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-all shadow-md hover:shadow-lg font-medium"
+            className="flex items-center gap-2 px-6 py-2.5 text-white rounded-xl transition-all shadow-md hover:shadow-lg font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             <RiAddLine className="w-5 h-5" />
             <span>Add New Package</span>
@@ -333,7 +333,7 @@ function AdminCMSPackage() {
                 placeholder="Search packages by name, service or description..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow bg-white"
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow bg-white"
               />
             </div>
             <div className="w-full md:w-72">
@@ -341,7 +341,7 @@ function AdminCMSPackage() {
                 <select
                   value={selectedService}
                   onChange={(e) => setSelectedService(e.target.value)}
-                  className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow appearance-none bg-white font-medium text-gray-700"
+                  className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow appearance-none bg-white font-medium text-gray-700"
                 >
                   {serviceTypes.map((service) => (
                     <option key={service.value} value={service.value}>
@@ -358,7 +358,7 @@ function AdminCMSPackage() {
           <div className="min-h-[400px]">
             {loading ? (
               <div className="flex flex-col items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00486D]"></div>
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#022B51]"></div>
                 <p className="mt-4 text-gray-500 font-medium">
                   Loading packages...
                 </p>
@@ -383,7 +383,7 @@ function AdminCMSPackage() {
                     >
                       <div className="bg-gray-50 px-6 py-3 border-b border-gray-100 flex items-center justify-between">
                         <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-[#00486D]"></span>
+                          <span className="w-2 h-2 rounded-full bg-[#022B51]"></span>
                           {serviceTypes.find((s) => s.value === serviceType)
                             ?.label || serviceType}
                         </h3>
@@ -401,7 +401,7 @@ function AdminCMSPackage() {
                             <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                               <div className="flex-1">
                                 <div className="flex items-start gap-4 mb-2">
-                                  <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center text-xl shadow-sm text-[#00486D] font-bold">
+                                  <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center text-xl shadow-sm text-[#022B51] font-bold">
                                     {pkg.icon || "★"}
                                   </div>
                                   <div>
@@ -418,7 +418,7 @@ function AdminCMSPackage() {
                                     </div>
 
                                     <div className="flex items-baseline gap-2 mt-1">
-                                      <span className="text-2xl font-bold text-[#00486D]">
+                                      <span className="text-2xl font-bold text-[#022B51]">
                                         ₹
                                         {parseFloat(
                                           pkg.price || 0
@@ -469,7 +469,7 @@ function AdminCMSPackage() {
                               <div className="flex flex-row md:flex-col gap-2 shrink-0 md:border-l border-gray-100 md:pl-6 md:ml-2">
                                 <button
                                   onClick={() => handleEdit(pkg)}
-                                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-[#00486D] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-[#022B51] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
                                 >
                                   <RiEditLine className="w-4 h-4" /> Edit
                                 </button>
@@ -505,9 +505,9 @@ function AdminCMSPackage() {
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
               <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 {editingPackage ? (
-                  <RiEditLine className="w-5 h-5 text-[#00486D]" />
+                  <RiEditLine className="w-5 h-5 text-[#022B51]" />
                 ) : (
-                  <RiAddLine className="w-5 h-5 text-[#00486D]" />
+                  <RiAddLine className="w-5 h-5 text-[#022B51]" />
                 )}
                 {editingPackage ? "Edit Package Details" : "Create New Package"}
               </h2>
@@ -543,7 +543,7 @@ function AdminCMSPackage() {
                         value={formData.service_type}
                         onChange={handleInputChange}
                         required
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent bg-white"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#022B51] focus:border-transparent bg-white"
                       >
                         <option value="">Select Service Category</option>
                         {serviceTypes
@@ -566,7 +566,7 @@ function AdminCMSPackage() {
                         value={formData.package_name}
                         onChange={handleInputChange}
                         required
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                         placeholder="e.g. Standard Plan"
                       />
                     </div>
@@ -584,7 +584,7 @@ function AdminCMSPackage() {
                           required
                           min="0"
                           step="0.01"
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent font-medium"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#022B51] focus:border-transparent font-medium"
                         />
                       </div>
                       <div>
@@ -598,7 +598,7 @@ function AdminCMSPackage() {
                           onChange={handleInputChange}
                           min="0"
                           step="0.01"
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent text-gray-500"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#022B51] focus:border-transparent text-gray-500"
                         />
                       </div>
                     </div>
@@ -621,7 +621,7 @@ function AdminCMSPackage() {
                           value={formData.icon}
                           onChange={handleInputChange}
                           maxLength="2"
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent text-center text-lg"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#022B51] focus:border-transparent text-center text-lg"
                         />
                       </div>
                       <div className="col-span-2">
@@ -633,7 +633,7 @@ function AdminCMSPackage() {
                           name="period"
                           value={formData.period}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                           placeholder="e.g. One Time, Yearly"
                         />
                       </div>
@@ -650,7 +650,7 @@ function AdminCMSPackage() {
                           value={formData.display_order}
                           onChange={handleInputChange}
                           min="0"
-                          className="w-24 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
+                          className="w-24 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                         />
                         <div className="flex items-center px-4 py-2.5 bg-yellow-50 rounded-xl border border-yellow-100 cursor-pointer hover:bg-yellow-100 transition-colors">
                           <input
@@ -659,7 +659,7 @@ function AdminCMSPackage() {
                             name="is_highlighted"
                             checked={formData.is_highlighted}
                             onChange={handleInputChange}
-                            className="w-4 h-4 text-[#00486D] border-gray-300 rounded focus:ring-[#00486D] cursor-pointer"
+                            className="w-4 h-4 text-[#022B51] border-gray-300 rounded focus:ring-[#022B51] cursor-pointer"
                           />
                           <label
                             htmlFor="is_highlighted"
@@ -680,7 +680,7 @@ function AdminCMSPackage() {
                         value={formData.description}
                         onChange={handleInputChange}
                         rows="2"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent resize-none"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#022B51] focus:border-transparent resize-none"
                         placeholder="Brief description of the package..."
                       />
                     </div>
@@ -702,12 +702,12 @@ function AdminCMSPackage() {
                         (e.preventDefault(), handleAddFeature())
                       }
                       placeholder="Type a feature and press Enter or Click Add..."
-                      className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent shadow-sm"
+                      className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#022B51] focus:border-transparent shadow-sm"
                     />
                     <button
                       type="button"
                       onClick={handleAddFeature}
-                      className="px-6 py-2.5 bg-[#00486D] text-white rounded-xl hover:bg-[#003855] transition-colors font-medium shadow-sm"
+                      className="px-6 py-2.5 text-white rounded-xl hover:opacity-90 transition-all font-medium shadow-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       Add Feature
                     </button>
@@ -726,7 +726,7 @@ function AdminCMSPackage() {
                         {formData.features.map((feature, index) => (
                           <div
                             key={index}
-                            className="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm group hover:border-[#00486D] transition-colors"
+                            className="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm group hover:border-[#022B51] transition-colors"
                           >
                             <div className="flex items-center gap-2 overflow-hidden">
                               <span className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-xs shrink-0">
@@ -763,7 +763,7 @@ function AdminCMSPackage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-8 py-2.5 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-all shadow-md hover:shadow-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-8 py-2.5 text-white rounded-xl transition-all shadow-md hover:shadow-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 {saving ? (
                   <>

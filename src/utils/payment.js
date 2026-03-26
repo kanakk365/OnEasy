@@ -193,7 +193,7 @@ export const initPayment = async (packageData) => {
             contact: userData.phone || ''
           },
           theme: {
-            color: '#01334C'
+            color: '#022B51'
           },
           handler: function (response) {
             // Restore scroll immediately when payment succeeds
@@ -492,7 +492,7 @@ export const initPaymentWithOrderId = async (orderId, amount, registrationData =
             contact: userData.phone || ''
           },
           theme: {
-            color: '#01334C'
+            color: '#022B51'
           },
           handler: function (response) {
             const paymentTimestamp2 = new Date().toISOString();

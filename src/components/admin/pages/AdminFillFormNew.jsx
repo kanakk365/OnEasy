@@ -112,7 +112,7 @@ function AdminFillFormNew() {
           <p className="text-gray-600">Missing required information</p>
           <button
             onClick={() => navigate('/admin/new-registration')}
-            className="mt-4 px-4 py-2 bg-[#01334C] text-white rounded-lg"
+            className="mt-4 px-4 py-2 text-white rounded-lg" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             Go Back
           </button>
@@ -174,7 +174,7 @@ function AdminFillFormNew() {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading form...</p>
         </div>
       </div>
@@ -187,7 +187,7 @@ function AdminFillFormNew() {
         <p className="text-gray-600">Registration type not supported yet</p>
         <button
           onClick={() => navigate('/admin/clients')}
-          className="mt-4 px-4 py-2 bg-[#01334C] text-white rounded-lg"
+          className="mt-4 px-4 py-2 text-white rounded-lg" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
         >
           Go Back
         </button>
@@ -212,7 +212,7 @@ function PaymentLinkModal({ isOpen, userName, userEmail, packagePlan, onConfirm,
             <p className="text-sm text-gray-600 mb-2">User: <span className="font-medium">{userName}</span></p>
             <p className="text-sm text-gray-600 mb-2">Email: <span className="font-medium">{userEmail}</span></p>
             <p className="text-sm text-gray-600 mb-2">Package: <span className="font-medium">{packagePlan.name}</span></p>
-            <p className="text-sm text-gray-600 mb-4">Amount: <span className="font-semibold text-[#01334C]">₹{packagePlan.price.toLocaleString('en-IN')}</span></p>
+            <p className="text-sm text-gray-600 mb-4">Amount: <span className="font-semibold text-[#022B51]">₹{packagePlan.price.toLocaleString('en-IN')}</span></p>
           </div>
 
           <p className="text-sm text-gray-700 mb-6">
@@ -223,7 +223,7 @@ function PaymentLinkModal({ isOpen, userName, userEmail, packagePlan, onConfirm,
             <button
               onClick={onConfirm}
               disabled={loading}
-              className="flex-1 h-12 px-6 bg-[#01334C] hover:bg-[#00486D] text-white font-medium rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+              className="flex-1 h-12 px-6 text-white font-medium rounded-lg hover:opacity-90 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               {loading ? (
                 <>

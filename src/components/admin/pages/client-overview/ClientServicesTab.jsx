@@ -105,7 +105,7 @@ function ClientServicesTab({
           </button>
           <button
             onClick={() => navigate(`/admin/new-registration?userId=${userId}`)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-all duration-200 shadow-md"
+            className="flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-all duration-200 shadow-md" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             title="New Registration"
           >
             <AiOutlinePlus className="w-5 h-5" />
@@ -132,7 +132,7 @@ function ClientServicesTab({
             >
               <div className="flex items-center gap-4 flex-1">
                 {/* Avatar */}
-                <div className="w-12 h-12 rounded-full bg-[#01334C] text-white flex items-center justify-center font-semibold text-lg">
+                <div className="w-12 h-12 rounded-full text-white flex items-center justify-center font-semibold text-lg" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                   {registration.business_name
                     ? registration.business_name.charAt(0).toUpperCase()
                     : registration.ticket_id?.startsWith("PVT_")
@@ -236,7 +236,7 @@ function ClientServicesTab({
                             shouldOpenDialog,
                           );
                         }}
-                        className="px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white focus:ring-1 focus:ring-[#00486D] focus:outline-none cursor-pointer min-w-[120px]"
+                        className="px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white focus:ring-1 focus:ring-[#022B51] focus:outline-none cursor-pointer min-w-[120px]"
                       >
                         {PAYMENT_STATUS_OPTIONS.map((opt) => (
                           <option key={opt} value={opt}>
@@ -252,7 +252,7 @@ function ClientServicesTab({
                             e.target.value,
                           )
                         }
-                        className="px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white focus:ring-1 focus:ring-[#00486D] focus:outline-none cursor-pointer min-w-[140px] max-w-[200px]"
+                        className="px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white focus:ring-1 focus:ring-[#022B51] focus:outline-none cursor-pointer min-w-[140px] max-w-[200px]"
                       >
                         {[
                           ...(registration.service_status &&
@@ -433,7 +433,7 @@ function ClientServicesTab({
                           }
                         }
                       }}
-                      className="px-4 py-2 text-sm bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors whitespace-nowrap"
+                      className="px-4 py-2 text-sm text-white rounded-md hover:opacity-90 transition-all whitespace-nowrap" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       {(registration.ticket_id?.startsWith("SI_") ||
                         registration.ticket_id?.startsWith("PROP_") ||
@@ -478,7 +478,7 @@ function ClientServicesTab({
             <div className="flex-1 overflow-y-auto p-6">
               {loadingNotes ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00486D]"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#022B51]"></div>
                 </div>
               ) : notes.length === 0 ? (
                 <div className="text-center py-12 text-gray-400">

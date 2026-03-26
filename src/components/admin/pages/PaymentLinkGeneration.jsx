@@ -176,7 +176,7 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
       <div className="mb-6 md:mb-8">
         <button
           onClick={onBack}
-          className="mb-4 text-[#01334C] hover:text-[#00486D] flex items-center gap-2"
+          className="mb-4 text-[#022B51] hover:text-[#022B51] flex items-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -222,7 +222,7 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
                       setCouponCode('');
                     }
                   }}
-                  className="w-40 px-3 py-1.5 border border-gray-300 rounded-lg text-right focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                  className="w-40 px-3 py-1.5 border border-gray-300 rounded-lg text-right focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                 />
               </div>
             {appliedCoupon && appliedCoupon.valid && (
@@ -233,14 +233,14 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
                 </div>
                 <div className="flex justify-between pt-2 border-t border-gray-200">
                   <span className="text-gray-900 font-semibold">Final Price:</span>
-                  <span className="text-[#01334C] font-bold text-lg">₹{calculateFinalPrice().toLocaleString('en-IN')}</span>
+                  <span className="text-[#022B51] font-bold text-lg">₹{calculateFinalPrice().toLocaleString('en-IN')}</span>
                 </div>
               </>
             )}
             {!appliedCoupon && (
               <div className="flex justify-between pt-2 border-t border-gray-200">
                 <span className="text-gray-900 font-semibold">Final Price:</span>
-                <span className="text-[#01334C] font-bold text-lg">₹{calculateFinalPrice().toLocaleString('en-IN')}</span>
+                <span className="text-[#022B51] font-bold text-lg">₹{calculateFinalPrice().toLocaleString('en-IN')}</span>
               </div>
             )}
           </div>
@@ -263,7 +263,7 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
                 }
               }}
               placeholder="Enter coupon code"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
               disabled={validatingCoupon || generatingLink}
             />
             {appliedCoupon ? (
@@ -278,7 +278,7 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
               <button
                 onClick={handleApplyCoupon}
                 disabled={validatingCoupon || !couponCode.trim() || generatingLink}
-                className="px-4 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 {validatingCoupon ? 'Applying...' : 'Apply'}
               </button>
@@ -301,7 +301,7 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
           <button
             onClick={handleGeneratePaymentLink}
             disabled={generatingLink}
-            className="w-full px-6 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full px-6 py-3 text-white rounded-lg hover:opacity-90 transition-all font-medium disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             {generatingLink ? (
               <>
@@ -370,7 +370,7 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
               </button>
               <button
                 onClick={handleContinueToForm}
-                className="w-full px-6 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium"
+                className="w-full px-6 py-3 text-white rounded-lg hover:opacity-90 transition-all font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 Continue to Fill Form
               </button>

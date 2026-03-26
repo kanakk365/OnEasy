@@ -101,7 +101,7 @@ function PaymentMethodDialog({
                         dateOfPayment: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                     required
                   />
                 </div>
@@ -120,7 +120,7 @@ function PaymentMethodDialog({
                       })
                     }
                     placeholder="Enter person name"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                     required
                   />
                 </div>
@@ -139,7 +139,7 @@ function PaymentMethodDialog({
                       })
                     }
                     placeholder="e.g. Advance, Full payment, Adjustment"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                   />
                 </div>
 
@@ -157,7 +157,7 @@ function PaymentMethodDialog({
                       })
                     }
                     placeholder="Enter transaction/reference ID (optional)"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                   />
                 </div>
 
@@ -175,14 +175,14 @@ function PaymentMethodDialog({
                     }
                     placeholder="Enter any remarks (optional)"
                     rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                   />
                 </div>
 
                 <div className="flex gap-3 pt-2">
                   <button
                     onClick={handlePaymentFormSubmit}
-                    className="flex-1 px-4 py-2 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] font-medium transition-colors"
+                    className="flex-1 px-4 py-2 text-white rounded-md font-medium hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                   >
                     Submit
                   </button>
