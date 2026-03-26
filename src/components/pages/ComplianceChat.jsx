@@ -1270,7 +1270,7 @@ const ComplianceChat = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen pt-16 lg:pt-0 bg-white flex items-center justify-center">
+      <div className="h-[calc(100dvh-4rem-70px)] lg:h-[calc(100vh-4rem)] bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading compliance data...</p>
@@ -1282,7 +1282,7 @@ const ComplianceChat = () => {
   // --- Organisation Selection View ---
   if (showOrgSelection) {
     return (
-      <div className="h-[calc(100vh-4rem)] bg-white flex flex-col animate-in fade-in duration-300">
+      <div className="h-[calc(100dvh-4rem-70px)] lg:h-[calc(100vh-4rem)] bg-white flex flex-col animate-in fade-in duration-300">
         {/* Header */}
         <div className="p-4 border-b border-gray-100 flex items-center gap-3 bg-white shadow-sm z-10">
           <button
@@ -1798,7 +1798,7 @@ const ComplianceChat = () => {
     const selectedDetails = getSelectedItemDetails();
 
     return (
-      <div className="h-[calc(100vh-4rem)] bg-white flex flex-col animate-in fade-in duration-300">
+      <div className="h-[calc(100dvh-4rem-70px)] lg:h-[calc(100vh-4rem)] bg-white flex flex-col animate-in fade-in duration-300">
         {/* Header */}
         <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white shadow-sm z-10">
           <div className="flex items-center gap-3">
@@ -1865,8 +1865,8 @@ const ComplianceChat = () => {
             </div>
           </div>
 
-          {/* Right Column: Selection Preview */}
-          <div className="w-full lg:w-80 flex-shrink-0 flex flex-col min-h-0 border-l border-gray-100 bg-white">
+          {/* Right Column: Selection Preview — hidden on mobile, shown on lg */}
+          <div className="hidden lg:flex w-80 flex-shrink-0 flex-col min-h-0 border-l border-gray-100 bg-white">
             <div className="p-4 pb-3 border-b border-gray-100 flex justify-between items-center">
               <h3 className="text-sm font-semibold text-gray-900">
                 Selection Preview
@@ -1935,6 +1935,28 @@ const ComplianceChat = () => {
             </div>
           </div>
         </div>
+
+        {/* ── Mobile-only bottom action bar ─────────────────────────────── */}
+        <div className="lg:hidden flex-shrink-0 border-t border-gray-100 bg-white px-4 py-3 flex gap-3">
+          <button
+            onClick={() => {
+              setShowSelectionGrid(false);
+              setSelectedOrg(null);
+              setExpandedBranches(new Set());
+            }}
+            className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-100 active:scale-95 transition-all"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={submitManualSelection}
+            disabled={selectedCodes.length === 0 || isSubmittingSelection}
+            className="flex-1 py-2.5 rounded-xl text-white text-sm font-semibold disabled:opacity-50 active:scale-95 transition-all shadow-md"
+            style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
+          >
+            {isSubmittingSelection ? "Saving..." : `Confirm (${selectedCodes.length})`}
+          </button>
+        </div>
       </div>
     );
   }
@@ -1942,7 +1964,7 @@ const ComplianceChat = () => {
   // --- Normal Chat View ---
 
   return (
-    <div className="h-[calc(100vh-4rem)] bg-white flex flex-col overflow-hidden">
+    <div className="h-[calc(100dvh-4rem-70px)] lg:h-[calc(100vh-4rem)] bg-white flex flex-col overflow-hidden">
       <div className="flex bg-white items-center gap-2 px-3 sm:px-6 py-4 border-b border-gray-100">
         <div className="w-8 h-8 rounded-full bg-[#E3F2F9] flex items-center justify-center">
           <RiRobot2Line className="text-[#022B51]" />
@@ -1957,7 +1979,7 @@ const ComplianceChat = () => {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 md:px-20 py-8 space-y-6 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-8 md:px-20 py-5 sm:py-8 space-y-4 sm:space-y-6 custom-scrollbar">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -1980,12 +2002,12 @@ const ComplianceChat = () => {
             )}
 
             <div
-              className={`max-w-[90%] md:max-w-[60%] rounded-2xl px-3 sm:px-6 py-3 sm:py-4 text-sm leading-relaxed shadow-sm ${msg.type === "user"
+              className={`max-w-[88%] sm:max-w-[75%] md:max-w-[60%] rounded-2xl px-3 sm:px-5 py-3 text-sm leading-relaxed shadow-sm ${msg.type === "user"
                 ? "bg-[#022B51] text-white rounded-tr-none"
                 : msg.isCompliances || msg.isSummary
                   ? "bg-gradient-to-br from-[#E3F2F9] to-[#F0F9FF] text-gray-800 rounded-tl-none border border-[#022B51]/10"
                   : "bg-[#F0F4F8] text-gray-800 rounded-tl-none"
-                }`}
+              }`}
             >
               {msg.text.split("\n").map((line, i) => (
                 <p key={i} className={i > 0 ? "mt-2" : ""}>
@@ -2010,23 +2032,23 @@ const ComplianceChat = () => {
 
             {/* Option buttons for single_select questions */}
             {msg.options && !isCompleted && !showSelectionGrid && (
-              <div className="flex flex-wrap gap-3 mt-3">
+              <div className="flex flex-wrap gap-2 mt-3">
                 {msg.options.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => handleOptionClick(option)}
-                    className="px-4 py-2 bg-white border border-[#022B51] text-[#022B51] rounded-full text-sm font-medium hover:bg-[#E3F2F9] transition-colors"
+                    className="px-4 py-2 bg-white border border-[#022B51] text-[#022B51] rounded-full text-sm font-medium hover:bg-[#E3F2F9] active:scale-95 transition-all"
                   >
                     {option.label}
                   </button>
                 ))}
-                {/* Go Back button - show when we're past the first question */}
+                {/* Go Back button */}
                 {currentQuestionIndex > 0 &&
                   msg.questionKey ===
                   flowQuestions[currentQuestionIndex]?.key && (
                     <button
                       onClick={handleGoBack}
-                      className="px-4 py-2 bg-gray-100 border border-gray-300 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors flex items-center gap-1.5"
+                      className="px-4 py-2 bg-gray-100 border border-gray-300 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-200 active:scale-95 transition-all flex items-center gap-1.5"
                     >
                       <FiCornerUpLeft size={14} />
                       Go Back
@@ -2037,7 +2059,7 @@ const ComplianceChat = () => {
 
             {/* Action buttons at the end */}
             {msg.actionButtons && (
-              <div className="flex flex-wrap gap-3 mt-3">
+              <div className="flex flex-wrap gap-2 mt-3">
                 {msg.actionButtons.map((btn, idx) => {
                   const isGray = btn.action === "restart" || btn.action === "delete_and_restart";
                   const isFilled = btn.action === "view_recommendations" ||
@@ -2094,7 +2116,7 @@ const ComplianceChat = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="bg-white p-4 border-t border-gray-100 flex gap-2">
+      <div className="bg-white px-3 sm:px-4 py-3 border-t border-gray-100 flex gap-2">
         {/* Go Back button in the input area for text-type questions */}
         {currentQuestionIndex > 0 &&
           !isCompleted &&
@@ -2102,7 +2124,7 @@ const ComplianceChat = () => {
           flowQuestions.length > 0 && (
             <button
               onClick={handleGoBack}
-              className="px-4 py-3 bg-gray-100 border border-gray-200 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors flex items-center gap-1.5 flex-shrink-0"
+              className="p-3 bg-gray-100 border border-gray-200 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-200 active:scale-95 transition-all flex items-center gap-1.5 flex-shrink-0"
               title="Go back to previous question"
             >
               <FiCornerUpLeft size={14} />
@@ -2114,7 +2136,7 @@ const ComplianceChat = () => {
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSendMessage(inputValue)}
           placeholder="Type your answer..."
-          className="flex-1 bg-gray-50 border border-gray-200 rounded-full px-4 sm:px-6 py-3 text-sm focus:outline-none focus:border-[#022B51] transition-colors disabled:opacity-50"
+          className="flex-1 bg-gray-50 border border-gray-200 rounded-full px-4 py-3 text-sm focus:outline-none focus:border-[#022B51] transition-colors disabled:opacity-50"
           disabled={isCompleted || isTyping || showSelectionGrid}
         />
         <button
@@ -2122,7 +2144,7 @@ const ComplianceChat = () => {
           disabled={
             !inputValue.trim() || isCompleted || isTyping || showSelectionGrid
           }
-          className="w-12 h-12 rounded-full text-white flex items-center justify-center hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="w-11 h-11 sm:w-12 sm:h-12 rounded-full text-white flex items-center justify-center hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all flex-shrink-0"
           style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
         >
           <IoSend className="text-lg" />
