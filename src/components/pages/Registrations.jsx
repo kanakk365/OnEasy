@@ -752,8 +752,8 @@ function Registrations() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-[#f3f5f7] pt-16 lg:pt-0">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
         <div className="mb-6">
           {/* Back Button */}
           <button
@@ -769,7 +769,7 @@ function Registrations() {
             <h1 className="text-2xl font-semibold text-gray-900">
               Select your Services
             </h1>
-            <div className="relative w-[400px]">
+            <div className="relative w-full max-w-[400px]">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <IoSearchOutline className="h-5 w-5 text-gray-400" />
               </div>
@@ -782,8 +782,8 @@ function Registrations() {
               />
             </div>
           </div>
-          <div className="border-b border-gray-200">
-            <div className="flex space-x-8">
+          <div className="border-b border-gray-200 overflow-x-auto">
+            <div className="flex space-x-2 sm:space-x-8 min-w-max">
               <button
                 onClick={() => setView("services")}
                 className={`py-2 px-5 text-sm relative rounded-lg transition-all ${
@@ -833,7 +833,7 @@ function Registrations() {
         </div>
 
         {view === "suggested-registrations" || view === "suggested-compliances" ? (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-6">
             {suggestedLoading ? (
               <div className="text-sm text-gray-500 p-8 text-center">
                 Loading suggestions...
@@ -851,11 +851,11 @@ function Registrations() {
                         <div
                           key={set.submissionId || idx}
                           onClick={() => setSelectedSetId(set.submissionId)}
-                          className="group bg-white rounded-xl p-6 border border-gray-200 hover:border-[#022B51] hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
+                          className="group bg-white rounded-xl p-3 sm:p-6 border border-gray-200 hover:border-[#022B51] hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
                         >
                           <div className="absolute top-0 left-0 w-1 h-full bg-[#022B51] opacity-0 group-hover:opacity-100 transition-opacity"></div>
                           <div className="flex items-start justify-between">
-                            <h3 className="text-xl font-bold text-[#022B51] mb-3 line-clamp-2 pr-4">
+                            <h3 className="text-lg sm:text-xl font-bold text-[#022B51] mb-3 line-clamp-2 pr-4">
                               {getOrgName(set)}
                             </h3>
                             <div className="flex items-center gap-2 flex-shrink-0">
@@ -934,7 +934,7 @@ function Registrations() {
                                 }
                                 route ? navigate(route) : navigate(view === "suggested-registrations" ? "/registrations" : "/compliance");
                               }}
-                              className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-gray-100"
+                              className="group bg-white rounded-xl p-3 sm:p-6 hover:shadow-md hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-gray-100"
                             >
                               <div>
                                 <h3 className="text-lg font-semibold text-[#022B51] mb-1 group-hover:text-white">
@@ -1018,7 +1018,7 @@ function Registrations() {
               ].map((service, idx) => (
                 <div
                   key={idx}
-                  className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-transparent hover:border-gray-100/10"
+                  className="group bg-white rounded-xl p-3 sm:p-6 hover:shadow-md hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-transparent hover:border-gray-100/10"
                   onClick={service.onClick}
                 >
                   <div>
@@ -1096,10 +1096,10 @@ function Registrations() {
                 <table className="w-full">
                   <thead>
                     <tr className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
-                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wide first:rounded-tl-lg">
+                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-sm font-medium tracking-wide first:rounded-tl-lg">
                         Service
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wide">
+                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-sm font-medium tracking-wide">
                         Service Name
                       </th>
                       <th className="px-6 py-4 text-center text-sm font-medium tracking-wide">
@@ -1219,7 +1219,7 @@ function Registrations() {
                                 onClick={() =>
                                   navigate(`/${slug}/view/${ticketId}`)
                                 }
-                                className="px-8 py-2 text-xs font-semibold text-white rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide"
+                                className="px-4 sm:px-8 py-2 text-xs font-semibold text-white rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide"
                                 style={{
                                   background:
                                     "linear-gradient(180deg, #022B51 0%, #015079 100%)",
@@ -1230,7 +1230,7 @@ function Registrations() {
                             ) : hasDetailRoute ? (
                               <button
                                 onClick={() => navigate(detailRoute)}
-                                className="px-8 py-2 text-xs font-semibold text-white rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide"
+                                className="px-4 sm:px-8 py-2 text-xs font-semibold text-white rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide"
                                 style={{
                                   background:
                                     "linear-gradient(180deg, #022B51 0%, #015079 100%)",
@@ -1259,7 +1259,7 @@ function Registrations() {
       {confirmDeleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setConfirmDeleteId(null)}>
           <div
-            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-6"
+            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-3 sm:p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50 mx-auto mb-4">
@@ -1291,7 +1291,7 @@ function Registrations() {
       {showDeleteSuccess && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowDeleteSuccess(false)}>
           <div
-            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-6"
+            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-3 sm:p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-50 mx-auto mb-4">

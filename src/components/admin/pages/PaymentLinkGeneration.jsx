@@ -193,7 +193,7 @@ function PaymentLinkGeneration({ user, registrationType, packagePlan, onBack, on
         </p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-6 mb-6">
         {/* Package Details */}
         <div className="mb-6 pb-6 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Package Details</h2>

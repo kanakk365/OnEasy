@@ -939,7 +939,7 @@ function AdminComplianceCMS() {
             return (
             <>
               {/* Filter Bar */}
-              <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4">
+              <div className="p-3 sm:p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4">
                 <div className="relative flex-1">
                   <RiSearchLine className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
@@ -953,7 +953,7 @@ function AdminComplianceCMS() {
               </div>
 
               {/* Content */}
-              <div className="min-h-[400px] p-6 pt-6">
+              <div className="min-h-[400px] p-3 sm:p-6 pt-6">
                 {itemsLoading ? (
                   <div className="flex flex-col items-center justify-center h-64">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#022B51]"></div>
@@ -1649,7 +1649,7 @@ function AdminComplianceCMS() {
             </div>
 
             {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-5">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -1741,7 +1741,7 @@ function AdminComplianceCMS() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
+            <div className="p-3 sm:p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
               <button
                 type="button"
                 onClick={() => {
@@ -1784,7 +1784,7 @@ function AdminComplianceCMS() {
             }
           />
           <div className="relative bg-white rounded-2xl shadow-2xl w-[420px] overflow-hidden z-[110] animate-in fade-in zoom-in-95">
-            <div className="p-6 pb-4">
+            <div className="p-3 sm:p-6 pb-4">
               <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
                 <RiDeleteBinLine className="w-6 h-6 text-red-500" />
               </div>

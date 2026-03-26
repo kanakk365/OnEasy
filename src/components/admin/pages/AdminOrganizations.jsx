@@ -1367,7 +1367,7 @@ function AdminOrganizations() {
         </div>
 
         {!selectedClient ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 max-w-2xl">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-6 max-w-2xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Select Client
             </h3>
@@ -1440,7 +1440,7 @@ function AdminOrganizations() {
             </div>
 
             {/* Tab Content */}
-            <div className="p-6 min-h-[400px]">
+            <div className="p-3 sm:p-6 min-h-[400px]">
               {activeTab === "organization-details" && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2122,7 +2122,7 @@ function AdminOrganizations() {
               )}
 
               {activeTab === "attachments" && (
-                <div className="bg-[#F8F9FA] rounded-xl p-6">
+                <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Attachments
                   </h3>
@@ -3296,7 +3296,7 @@ function AdminOrganizations() {
             )}
 
             {activeDetailTab === "attachments" && (
-              <div className="bg-[#F8F9FA] rounded-xl p-6">
+              <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Attachments
                 </h3>
@@ -3621,7 +3621,7 @@ function AdminOrganizations() {
               <div className="px-6 pb-6 pt-6">
                 <div className="space-y-6">
                   {/* Admin Notes Section */}
-                  <div className="bg-[#F8F9FA] rounded-xl p-6">
+                  <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-[15px] font-medium text-gray-900">
                         Admin Notes (Editable)
@@ -4012,7 +4012,7 @@ function AdminOrganizations() {
                   </div>
 
                   {/* Client Notes Section */}
-                  <div className="bg-[#F8F9FA] rounded-xl p-6">
+                  <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
                     <h3 className="text-[15px] font-medium text-gray-900 mb-4">
                       Client Notes (Read Only)
                     </h3>
@@ -4115,7 +4115,7 @@ function AdminOrganizations() {
               <div className="px-6 pb-6 pt-6">
                 <div className="space-y-6">
                   {/* Admin Tasks Section */}
-                  <div className="bg-[#F8F9FA] rounded-xl p-6">
+                  <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-[15px] font-medium text-gray-900">
                         Admin Tasks (Editable)
@@ -4381,7 +4381,7 @@ function AdminOrganizations() {
                   </div>
 
                   {/* Client Tasks Section */}
-                  <div className="bg-[#F8F9FA] rounded-xl p-6">
+                  <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
                     <h3 className="text-[15px] font-medium text-gray-900 mb-4">
                       Client Tasks (Read Only)
                     </h3>
@@ -4672,7 +4672,7 @@ function AdminOrganizations() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
-        <div className="p-6">
+        <div className="p-3 sm:p-6">
           <div className="p-4 bg-[#f5f5f5] rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full border-separate border-spacing-0">

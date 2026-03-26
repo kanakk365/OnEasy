@@ -50,7 +50,7 @@ function ForgotPasswordModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-xl">
-      <div className="bg-white rounded-xl w-full max-w-md mx-4 shadow-2xl">
+      <div className="bg-white rounded-xl w-full max-w-[95vw] sm:max-w-md mx-4 shadow-2xl">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-start">
           <div>

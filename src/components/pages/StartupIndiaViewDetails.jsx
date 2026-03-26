@@ -140,7 +140,7 @@ function StartupIndiaViewDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading registration details...</p>
@@ -153,7 +153,7 @@ function StartupIndiaViewDetails() {
     return (
       <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
         <div className="bg-white p-8 rounded-lg shadow-md text-center">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Registration Not Found</h2>
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4">Registration Not Found</h2>
           <p className="text-gray-600 mb-6">{error || 'The requested registration could not be found.'}</p>
           <button
             onClick={() => navigate(getBackRoute())}
@@ -170,10 +170,10 @@ function StartupIndiaViewDetails() {
     <div className="min-h-screen bg-[#f3f5f7] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-3 sm:p-6 mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Startup India Registration</h1>
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Startup India Registration</h1>
               <p className="text-gray-600 mt-1">Ticket ID: {ticketId}</p>
             </div>
             <div className="flex gap-3">
@@ -223,7 +223,7 @@ function StartupIndiaViewDetails() {
         </div>
 
         {/* Registration Info */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-3 sm:p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Registration Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -318,7 +318,7 @@ function StartupIndiaViewDetails() {
         </div>
 
         {/* Step 1: Business Details */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-3 sm:p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Step 1: Business Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -481,7 +481,7 @@ function StartupIndiaViewDetails() {
         </div>
 
         {/* Step 2: Startup Information */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-3 sm:p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Step 2: Startup Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
@@ -531,7 +531,7 @@ function StartupIndiaViewDetails() {
         </div>
 
         {/* Step 3: Office Address */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-3 sm:p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Step 3: Registered Office Address</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
@@ -582,7 +582,7 @@ function StartupIndiaViewDetails() {
 
         {/* Step 4: Directors/Partners */}
         {directors.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="bg-white rounded-lg shadow-md p-3 sm:p-6 mb-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Step 4: Directors/Partners Details</h2>
             <div className="space-y-6">
               {directors.map((director, index) => (
@@ -651,7 +651,7 @@ function StartupIndiaViewDetails() {
         )}
 
         {/* Step 5: Authorization Letter */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-3 sm:p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Step 5: Authorization Letter</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {registration.authorized_representative_name && (

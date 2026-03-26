@@ -315,7 +315,7 @@ function RegistrationPackageSelection() {
 
   if (!registrationType) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 mb-4">No registration type selected</p>
           <button
@@ -332,7 +332,7 @@ function RegistrationPackageSelection() {
 
   return (
     <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <button
             onClick={() => navigate('/registration-categories')}
@@ -353,7 +353,7 @@ function RegistrationPackageSelection() {
 
         {loading && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6">
+            <div className="bg-white rounded-lg p-3 sm:p-6">
               <p className="text-gray-700">Processing payment...</p>
             </div>
           </div>

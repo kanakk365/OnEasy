@@ -131,7 +131,7 @@ function RegistrationCategories() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 bg-[#f3f5f7]">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 bg-[#f3f5f7]">
       {/* Back Button */}
       <button
         onClick={() => navigate("/registrations")}
@@ -148,7 +148,7 @@ function RegistrationCategories() {
         <h1 className="text-2xl font-semibold text-gray-900">
           Select Your Category
         </h1>
-        <div className="relative w-[300px]">
+        <div className="relative w-full max-w-[300px]">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <IoSearchOutline className="h-5 w-5 text-gray-400" />
           </div>

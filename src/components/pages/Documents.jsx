@@ -245,10 +245,10 @@ function Documents() {
   // If admin and no client selected, show client selection
   if (isAdmin && !selectedClientId) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="min-h-screen bg-[#f3f5f7] pt-16 lg:pt-0">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
           <div className="mb-6">
-            <h1 className="text-2xl font-semibold text-gray-900">Documents</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Documents</h1>
             <p className="text-gray-600 mt-1">
               Select a client to view and manage their documents
             </p>
@@ -291,7 +291,7 @@ function Documents() {
                 <div
                   key={client.user_id}
                   onClick={() => handleClientSelect(client)}
-                  className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 hover:shadow-md transition-shadow cursor-pointer"
+                  className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-4 sm:p-3 sm:p-6 hover:shadow-md transition-shadow cursor-pointer"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
@@ -379,8 +379,8 @@ function Documents() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] py-6">
-      <div className="container mx-auto px-4 md:px-8 lg:px-12">
+    <div className="min-h-screen bg-[#F8F9FA] pt-16 lg:pt-0 py-6">
+      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
@@ -397,7 +397,7 @@ function Documents() {
             >
               <FiChevronLeft className="w-6 h-6 text-gray-900" />
             </button>
-            <h1 className="text-2xl font-semibold text-gray-900">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
               {isAdmin && selectedClient ? "Client Documents" : "My Documents"}
             </h1>
           </div>
@@ -411,7 +411,7 @@ function Documents() {
         </div>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {/* Personal Documents Card */}
           <div
             onClick={() => {
@@ -421,7 +421,7 @@ function Documents() {
                 navigate("/kyc");
               }
             }}
-            className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
+            className="bg-white rounded-2xl p-4 sm:p-3 sm:p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
           >
             <div className="flex justify-between items-start mb-4">
               <div
@@ -464,7 +464,7 @@ function Documents() {
                 navigate("/organizations-list"); // Navigate to organizations list for business documents
               }
             }}
-            className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
+            className="bg-white rounded-2xl p-4 sm:p-3 sm:p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
           >
             <div className="flex justify-between items-start mb-4">
               <div

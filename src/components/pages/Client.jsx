@@ -544,7 +544,7 @@ function Client() {
   };
 
   return (
-    <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
+    <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6">
       <div className="mb-8">
         {greeting && (
           <>
@@ -559,7 +559,7 @@ function Client() {
       </div>
 
       {/* Overall Compliances Section - Wrapped in White Card */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
+      <div className="bg-white rounded-xl p-3 sm:p-6 shadow-sm border border-gray-100 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
           {/* On-Going Service Requests */}
           <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
@@ -595,10 +595,10 @@ function Client() {
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8">
         {/* Left Column: Service Requests */}
         <div className="col-span-12 lg:col-span-7">
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm h-full">
+          <div className="bg-white rounded-xl p-3 sm:p-6 border border-gray-100 shadow-sm h-full">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg font-medium text-gray-900">
                 Service Requests
@@ -636,16 +636,16 @@ function Client() {
                   Loading services...
                 </div>
               ) : filteredServices.length > 0 ? (
-                <div>
+                <div className="overflow-x-auto">
                   {/* Table Header */}
-                  <div className="grid grid-cols-12 gap-4 py-3 px-2 border-b-2 border-gray-200 mb-2">
-                    <div className="col-span-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <div className="grid grid-cols-12 gap-4 py-3 px-2 min-w-[600px] border-b-2 border-gray-200 mb-2">
+                    <div className="col-span-6 text-[10px] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Service
                     </div>
-                    <div className="col-span-3 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
+                    <div className="col-span-3 text-[10px] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
                       Status
                     </div>
-                    <div className="col-span-3 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
+                    <div className="col-span-3 text-[10px] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
                       Date
                     </div>
                   </div>
@@ -655,7 +655,7 @@ function Client() {
                     {filteredServices.slice(0, 5).map((service, idx) => (
                       <div
                         key={idx}
-                        className="grid grid-cols-12 gap-4 py-4 px-2 border-b border-gray-100 items-center last:border-0 hover:bg-white transition-colors cursor-pointer"
+                        className="grid grid-cols-12 gap-4 py-4 px-2 min-w-[600px] border-b border-gray-100 items-center last:border-0 hover:bg-white transition-colors cursor-pointer"
                         onClick={() => {
                           const type = deriveType(service);
                           const slug = getTypeSlug(type);
@@ -704,7 +704,7 @@ function Client() {
         {/* Right Column: Notice Board & Upcoming Compliances */}
         <div className="col-span-12 lg:col-span-5 space-y-8">
           {/* Notice Board */}
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-xl p-3 sm:p-6 border border-gray-100 shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-medium text-gray-900">
                 Notice Board
@@ -760,7 +760,7 @@ function Client() {
                     ...(filteredNotices.length > 1 ? [filteredNotices[0]] : []),
                   ].map((noticeItem, index) => (
                     <div key={index} className="w-full flex-shrink-0">
-                      <div className="bg-[#FFF9F0] rounded-xl p-6 border border-[#FFF0D4]">
+                      <div className="bg-[#FFF9F0] rounded-xl p-3 sm:p-6 border border-[#FFF0D4]">
                         <div className="flex items-start space-x-4">
                           <div className="bg-[#FFAB00] rounded-full p-2.5 flex-shrink-0 shadow-sm text-white">
                             <TriangleAlert className="w-5 h-5" />
@@ -815,7 +815,7 @@ function Client() {
           </div>
 
           {/* Upcoming Compliances */}
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm relative overflow-hidden">
+          <div className="bg-white rounded-xl p-3 sm:p-6 border border-gray-100 shadow-sm relative overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-medium text-gray-900">
                 Upcoming Compliances
@@ -835,7 +835,7 @@ function Client() {
               )}
             </div>
 
-            <div className="bg-[#FFF5F3] rounded-xl p-6">
+            <div className="bg-[#FFF5F3] rounded-xl p-3 sm:p-6">
               {loadingCompliances ? (
                 <div className="text-center py-6 text-gray-400 text-sm">
                   Loading compliances...
@@ -953,7 +953,7 @@ function Client() {
 
       {/* List Of Companies */}
       <div className="mt-8">
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+        <div className="bg-white rounded-xl p-3 sm:p-6 border border-gray-100 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-medium text-gray-900">
               My Organizations
@@ -969,7 +969,7 @@ function Client() {
           <div className="overflow-x-auto">
             <div className="min-w-[700px]">
               {/* Table Header */}
-              <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-[#f2f6f7] rounded-xl text-sm font-medium text-[#022B51]">
+              <div className="grid grid-cols-12 gap-4 px-3 sm:px-6 py-4 bg-[#f2f6f7] min-w-[600px] rounded-xl text-sm font-medium text-[#022B51]">
                 <div className="col-span-4">Name</div>
                 <div className="col-span-6">GST number</div>
                 <div className="col-span-2 text-right">Action</div>
@@ -983,7 +983,7 @@ function Client() {
                 organizations.map((org, index) => (
                   <div
                     key={org.id || index}
-                    className="grid grid-cols-12 gap-4 px-6 py-4 bg-white border-b border-gray-50 items-center hover:bg-gray-50 transition-colors last:border-0 cursor-pointer"
+                    className="grid grid-cols-12 gap-4 px-3 sm:px-6 py-4 bg-white min-w-[600px] border-b border-gray-50 items-center hover:bg-gray-50 transition-colors last:border-0 cursor-pointer"
                   >
                     <div className="col-span-4">
                       <span className="text-sm font-medium text-gray-900 block">

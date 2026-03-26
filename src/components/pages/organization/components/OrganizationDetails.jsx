@@ -118,7 +118,7 @@ const OrganizationDetails = ({
   ];
 
   return (
-    <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
+    <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6">
       {/* Back Button */}
       <button
         onClick={() => setSelectedOrg(null)}
@@ -176,7 +176,7 @@ const OrganizationDetails = ({
         </div>
 
         {/* Tab Content */}
-        <div className="p-6 min-h-[400px]">
+        <div className="p-3 sm:p-6 min-h-[400px]">
           {activeTab === "organization-details" && (
             <BasicDetailsSection
               editingOrg={editingOrg}
@@ -314,7 +314,7 @@ const OrganizationDetails = ({
                 <button
                   onClick={handleSaveOrganization}
                   disabled={saving}
-                  className="px-8 py-2.5 text-white rounded-lg hover:opacity-90 transition-all font-medium text-sm disabled:opacity-50" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
+                  className="px-4 sm:px-8 py-2.5 text-white rounded-lg hover:opacity-90 transition-all font-medium text-sm disabled:opacity-50" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   {saving ? "Saving..." : "Save Changes"}
                 </button>

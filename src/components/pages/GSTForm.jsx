@@ -322,7 +322,7 @@ function GSTForm() {
 
   if (loadingDraft) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading form data...</p>
@@ -520,7 +520,7 @@ function GSTForm() {
         <StepIndicator currentStep={step} totalSteps={steps.length} steps={steps} />
 
         {/* Form Content - White Box */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 mt-6">
           {renderStepContent()}
         </div>
 

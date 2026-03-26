@@ -1259,9 +1259,9 @@ function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="min-h-screen bg-white p-3 sm:p-6 pt-16 lg:pt-6">
       {/* Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
         {/* Back Button */}
         <button
           onClick={() => navigate("/client")}
@@ -1272,20 +1272,20 @@ function Settings() {
           </svg>
           Back to Dashboard
         </button>
-        <h1 className="text-2xl font-semibold text-gray-900">
+        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
           View your Profile
         </h1>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Tabs Navigation */}
-        <div className="bg-white rounded-t-xl border border-b-0 border-gray-200 px-6 pt-4">
-          <div className="flex space-x-4">
+        <div className="bg-white rounded-t-xl border border-b-0 border-gray-200 px-3 sm:px-6 pt-4 overflow-x-auto">
+          <div className="flex space-x-2 sm:space-x-4 min-w-max">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
-                className={`py-2 px-5 text-sm relative rounded-lg transition-all ${activeTab === tab.key
+                className={`py-2 px-3 sm:px-5 text-xs sm:text-sm relative rounded-lg transition-all whitespace-nowrap ${activeTab === tab.key
                   ? "text-white"
                   : "text-gray-500 hover:text-gray-900"
                   }`}
@@ -1298,7 +1298,7 @@ function Settings() {
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white rounded-b-xl border border-gray-200 p-6 min-h-[400px]">
+        <div className="bg-white rounded-b-xl border border-gray-200 p-3 sm:p-6 min-h-[400px]">
           {activeTab === "profile" && (
             <ClientProfileContent
               formData={formData}

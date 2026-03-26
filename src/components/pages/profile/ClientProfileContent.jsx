@@ -11,10 +11,10 @@ const ClientProfileContent = ({
   handleSaveClientProfile,
 }) => {
   return (
-    <div className="px-6 pb-6 pt-2">
+    <div className="px-2 sm:px-6 pb-6 pt-2">
       <div className="space-y-6">
         {/* Row 1: System Client ID, Client Status */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
           {/* System Client ID */}
           <div>
             <label className="block text-sm text-gray-700 mb-2">
@@ -41,7 +41,7 @@ const ClientProfileContent = ({
         </div>
 
         {/* Row 2: Name, Whatsapp Number */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
           <div>
             <label className="block text-sm text-gray-700 mb-2">
               Name (As per PAN)
@@ -118,7 +118,7 @@ const ClientProfileContent = ({
         </div>
 
         {/* Row 3: Email Id, Date of Birth */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
           <div>
             <label className="block text-sm text-gray-700 mb-2">Email Id</label>
             <input
@@ -147,7 +147,7 @@ const ClientProfileContent = ({
         </div>
 
         {/* Row 4: Address, Business Address */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
           <div>
             <label className="block text-sm text-gray-700 mb-2">Address</label>
             <input
@@ -176,7 +176,7 @@ const ClientProfileContent = ({
         </div>
 
         {/* Row 5: Document Uploads - Aadhar Card, Pan Card */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
           <div>
             <label className="block text-sm text-gray-700 mb-2">
               Aadhar Card

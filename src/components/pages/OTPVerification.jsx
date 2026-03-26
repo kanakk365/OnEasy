@@ -253,7 +253,7 @@ function OTPVerification() {
         </div>
 
         {/* Right Side - OTP Verification Section */}
-        <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-8">
+        <div className="w-full md:w-1/2 flex items-center justify-center p-3 sm:p-6 md:p-8">
           <div className="w-full max-w-sm">
             {/* Logo */}
             <div className="text-center mb-8">

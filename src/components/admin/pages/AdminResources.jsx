@@ -638,7 +638,7 @@ function AdminResources() {
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 p-6 relative">
+          <div className="flex-1 p-3 sm:p-6 relative">
             {loading ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500 bg-white/80 z-10">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#022B51] mb-4"></div>
@@ -875,7 +875,7 @@ function AdminResources() {
               </button>
             </div>
 
-            <form onSubmit={handleFolderSubmit} className="p-6 space-y-5">
+            <form onSubmit={handleFolderSubmit} className="p-3 sm:p-6 space-y-5">
               {!isFolderEdit && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -970,7 +970,7 @@ function AdminResources() {
               </button>
             </div>
 
-            <form onSubmit={handleDocumentSubmit} className="p-6 space-y-5">
+            <form onSubmit={handleDocumentSubmit} className="p-3 sm:p-6 space-y-5">
               {!isDocEdit && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -1059,7 +1059,7 @@ function AdminResources() {
       {showDeleteModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-fade-in-up">
-            <div className="p-6 text-center">
+            <div className="p-3 sm:p-6 text-center">
               <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FiTrash2 className="w-8 h-8 text-red-500" />
               </div>
@@ -1103,7 +1103,7 @@ function AdminResources() {
       {errorModal.isOpen && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center px-4 bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-fade-in-up">
-            <div className="p-6 text-center">
+            <div className="p-3 sm:p-6 text-center">
               <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FiAlertCircle className="w-8 h-8 text-red-500" />
               </div>

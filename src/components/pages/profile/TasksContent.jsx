@@ -131,13 +131,13 @@ const TasksContent = ({
     <div className="px-6 pb-6 pt-6">
       <div className="space-y-6">
         {/* Admin Tasks Section */}
-        <div className="bg-[#F8F9FA] rounded-xl p-6">
+        <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
           <h3 className="text-[15px] font-medium text-gray-900 mb-4">
             Admin Tasks
           </h3>
           {adminTasksList.length > 0 ? (
             <div className="overflow-x-auto rounded-lg">
-              <table className="w-full text-sm">
+              <div className="overflow-x-auto"><table className="w-full text-sm">
                 <thead className="text-white"
                   style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                   <tr>
@@ -199,7 +199,7 @@ const TasksContent = ({
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </div>
           ) : (
             <EmptySectionState title="No Admin Tasks Yet" />
@@ -207,7 +207,7 @@ const TasksContent = ({
         </div>
 
         {/* My Tasks Section */}
-        <div className="bg-[#F8F9FA] rounded-xl p-6 relative">
+        <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6 relative">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-[15px] font-medium text-gray-900">My Tasks</h3>
             {userTasksList.length > 0 && (
@@ -233,7 +233,7 @@ const TasksContent = ({
               {/* Existing Tasks Table */}
               {userTasksList.length > 0 && (
                 <div className="overflow-x-auto rounded-lg">
-                  <table className="w-full text-sm">
+                  <div className="overflow-x-auto"><table className="w-full text-sm">
                     <thead className="text-white"
                       style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                       <tr>
@@ -306,7 +306,7 @@ const TasksContent = ({
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </table></div>
                 </div>
               )}
 
@@ -419,7 +419,7 @@ const TasksContent = ({
               }
             }}
             disabled={saving}
-            className="px-8 py-2 text-white rounded-lg hover:hover:opacity-90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 sm:px-8 py-2 text-white rounded-lg hover:hover:opacity-90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             style={{
               background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
@@ -434,7 +434,7 @@ const TasksContent = ({
       {selectedAdminTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+            <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
               <h4 className="text-sm font-semibold text-gray-900">
                 Admin Task Details
               </h4>
@@ -446,7 +446,7 @@ const TasksContent = ({
                 ×
               </button>
             </div>
-            <div className="px-6 py-4 space-y-3 text-sm">
+            <div className="px-3 sm:px-6 py-3 sm:py-4 space-y-3 text-sm">
               {/* Date */}
               <div>
                 <div className="text-xs font-medium text-gray-500 mb-1">
@@ -509,7 +509,7 @@ const TasksContent = ({
       {selectedUserTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+            <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
               <h4 className="text-sm font-semibold text-gray-900">
                 {isEditingUserTask ? "Edit My Task" : "My Task Details"}
               </h4>
@@ -525,7 +525,7 @@ const TasksContent = ({
                 ×
               </button>
             </div>
-            <div className="px-6 py-4 space-y-3 text-sm">
+            <div className="px-3 sm:px-6 py-3 sm:py-4 space-y-3 text-sm">
               {/* Date */}
               <div>
                 <div className="text-xs font-medium text-gray-500 mb-1">
@@ -639,7 +639,7 @@ const TasksContent = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="px-6 py-3 border-t border-gray-100 flex justify-end gap-2">
+            <div className="px-3 sm:px-6 py-2 sm:py-3 border-t border-gray-100 flex justify-end gap-2">
               {isEditingUserTask ? (
                 <>
                   <button

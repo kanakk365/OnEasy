@@ -12,7 +12,7 @@ function LogoutModal({ isOpen, onClose, onConfirm }) {
       ></div>
       
       {/* Modal */}
-      <div className="relative bg-white rounded-lg shadow-xl w-[400px] p-6">
+      <div className="relative bg-white rounded-lg shadow-xl w-[400px] p-3 sm:p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Confirm Logout</h3>
         <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
         

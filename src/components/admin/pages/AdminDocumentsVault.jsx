@@ -120,7 +120,7 @@ function AdminDocumentsVault() {
 
         {/* Clients Table Card */}
         <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
-          <div className="p-6">
+          <div className="p-3 sm:p-6">
             <div className="p-4 bg-[#f5f5f5] rounded-xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full border-separate border-spacing-0">

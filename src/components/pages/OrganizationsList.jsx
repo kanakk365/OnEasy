@@ -70,7 +70,7 @@ function OrganizationsList() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading organizations...</p>
@@ -81,7 +81,7 @@ function OrganizationsList() {
 
   return (
     <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="mb-6">
           <button
@@ -103,7 +103,7 @@ function OrganizationsList() {
             {organizations.map((org) => (
               <div
                 key={org.id}
-                className="bg-white rounded-2xl shadow-sm border border-[#F3F3F3] p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
+                className="bg-white rounded-2xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
                 onClick={() => navigate(`/company-documents/${org.id}`)}
               >
                 <div className="flex items-start gap-4">

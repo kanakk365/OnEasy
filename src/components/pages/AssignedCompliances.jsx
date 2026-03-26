@@ -86,7 +86,7 @@ const AssignedCompliances = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6 flex justify-center items-center h-64">
+      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6 flex justify-center items-center h-64">
         <div className="text-gray-500">Loading compliances...</div>
       </div>
     );
@@ -94,14 +94,14 @@ const AssignedCompliances = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
+      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6">
         <div className="text-red-500">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
+    <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6">
       {/* Header Section */}
       <div className="mb-8">
         <button

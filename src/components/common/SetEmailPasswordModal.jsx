@@ -130,7 +130,7 @@ function SetEmailPasswordModal({ isOpen, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-xl p-4 overflow-y-auto">
-      <div className="bg-white rounded-xl w-full max-w-md mx-auto my-auto shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl w-full max-w-[95vw] sm:max-w-md mx-auto my-auto shadow-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">Complete Your Profile</h2>

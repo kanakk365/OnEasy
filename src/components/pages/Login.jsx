@@ -511,7 +511,7 @@ function Login() {
       </div>
 
       {/* Main Card */}
-      <div className="bg-white w-full max-w-[500px] p-8 md:p-10 rounded-2xl shadow-2xl z-10 relative mx-4">
+      <div className="bg-white w-full max-w-[500px] p-6 sm:p-8 md:p-10 rounded-2xl shadow-2xl z-10 relative mx-4">
         {/* Header */}
         <div className="text-center mb-8">
           <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">

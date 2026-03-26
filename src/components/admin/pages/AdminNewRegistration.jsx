@@ -976,7 +976,7 @@ function AdminNewRegistration() {
             <div
               key={type.id}
               onClick={() => handleTypeSelect(type)}
-              className="bg-white rounded-2xl p-6 border border-gray-100 cursor-pointer hover:border-[#022B51] hover:shadow-lg transition-all group"
+              className="bg-white rounded-2xl p-3 sm:p-6 border border-gray-100 cursor-pointer hover:border-[#022B51] hover:shadow-lg transition-all group"
             >
               <div className="flex items-start gap-4">
                 <div
@@ -1063,7 +1063,7 @@ function AdminNewRegistration() {
             {plans.map((plan) => (
               <div
                 key={plan.id}
-                className="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-[#022B51] hover:shadow-xl transition-all"
+                className="bg-white rounded-2xl p-3 sm:p-6 border-2 border-gray-100 hover:border-[#022B51] hover:shadow-xl transition-all"
               >
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   {plan.name}

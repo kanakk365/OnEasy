@@ -12,7 +12,7 @@ function PaymentMethodDialog({
 }) {
   return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4 max-h-[85vh] overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-xl p-3 sm:p-6 max-w-md w-full mx-4 max-h-[85vh] overflow-y-auto">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">

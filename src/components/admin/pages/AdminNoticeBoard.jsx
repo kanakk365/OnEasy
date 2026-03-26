@@ -145,7 +145,7 @@ function AdminNoticeBoard() {
                 </h2>
               </div>
 
-              <div className="p-6 space-y-6">
+              <div className="p-3 sm:p-6 space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Title

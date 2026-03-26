@@ -500,7 +500,7 @@ function ProprietorshipForm({
             </div>
           </div>
         ) : (
-          <div className="rounded-lg p-6">
+          <div className="rounded-lg p-3 sm:p-6">
           {renderStepContent()}
           
           {/* Navigation Buttons */}

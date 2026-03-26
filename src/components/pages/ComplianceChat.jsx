@@ -1224,7 +1224,7 @@ const ComplianceChat = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading compliance data...</p>
@@ -1260,7 +1260,7 @@ const ComplianceChat = () => {
           <h2 className="font-bold text-gray-800">Select Organisation</h2>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 custom-scrollbar">
           <p className="text-gray-500 text-sm mb-6">
             Choose the organisation you want to assign compliances to:
           </p>
@@ -1341,7 +1341,7 @@ const ComplianceChat = () => {
 
               {/* Inline Add Organisation Form */}
               {showAddOrgForm && (
-                <div className="mt-6 bg-gray-50 rounded-xl border border-gray-200 p-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="mt-6 bg-gray-50 rounded-xl border border-gray-200 p-3 sm:p-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <h3 className="text-lg font-bold text-gray-900 mb-5">
                     Add New Organisation
                   </h3>
@@ -1832,7 +1832,7 @@ const ComplianceChat = () => {
 
             <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
               {selectedDetails.length === 0 ? (
-                <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200 p-6">
+                <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200 p-3 sm:p-6">
                   <p className="text-gray-400 text-sm text-center">
                     No compliance selected
                   </p>
@@ -1897,7 +1897,7 @@ const ComplianceChat = () => {
 
   return (
     <div className="h-[calc(100vh-4rem)] bg-white flex flex-col overflow-hidden">
-      <div className="flex bg-white items-center gap-2 px-6 py-4 border-b border-gray-100">
+      <div className="flex bg-white items-center gap-2 px-3 sm:px-6 py-4 border-b border-gray-100">
         <div className="w-8 h-8 rounded-full bg-[#E3F2F9] flex items-center justify-center">
           <RiRobot2Line className="text-[#022B51]" />
         </div>
@@ -1934,7 +1934,7 @@ const ComplianceChat = () => {
             )}
 
             <div
-              className={`max-w-[80%] md:max-w-[60%] rounded-2xl px-6 py-4 text-sm leading-relaxed shadow-sm ${msg.type === "user"
+              className={`max-w-[90%] md:max-w-[60%] rounded-2xl px-3 sm:px-6 py-3 sm:py-4 text-sm leading-relaxed shadow-sm ${msg.type === "user"
                 ? "bg-[#022B51] text-white rounded-tr-none"
                 : msg.isCompliances || msg.isSummary
                   ? "bg-gradient-to-br from-[#E3F2F9] to-[#F0F9FF] text-gray-800 rounded-tl-none border border-[#022B51]/10"
@@ -2068,7 +2068,7 @@ const ComplianceChat = () => {
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSendMessage(inputValue)}
           placeholder="Type your answer..."
-          className="flex-1 bg-gray-50 border border-gray-200 rounded-full px-6 py-3 text-sm focus:outline-none focus:border-[#022B51] transition-colors disabled:opacity-50"
+          className="flex-1 bg-gray-50 border border-gray-200 rounded-full px-4 sm:px-6 py-3 text-sm focus:outline-none focus:border-[#022B51] transition-colors disabled:opacity-50"
           disabled={isCompleted || isTyping || showSelectionGrid}
         />
         <button

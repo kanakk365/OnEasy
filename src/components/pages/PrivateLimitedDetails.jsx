@@ -163,7 +163,7 @@ function PrivateLimitedDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading registration details...</p>
@@ -197,7 +197,7 @@ function PrivateLimitedDetails() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-bold text-[#28303F]">
+              <h1 className="text-xl sm:text-2xl font-bold text-[#28303F]">
                 {registration.business_name || 'Company Name Pending'}
               </h1>
               <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(registration.status || 'pending')}`}>
@@ -252,7 +252,7 @@ function PrivateLimitedDetails() {
         </div>
 
         {/* Registration Info */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Registration Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
@@ -284,7 +284,7 @@ function PrivateLimitedDetails() {
 
         {/* Admin Control Panel */}
         {isAdminView && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-md p-6 mb-6 border-2 border-blue-200">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-md p-3 sm:p-6 mb-6 border-2 border-blue-200">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -415,7 +415,7 @@ function PrivateLimitedDetails() {
 
         {/* User View - Status Update Notification */}
         {!isAdminView && registration.name_application_status && registration.name_application_status !== 'pending' && (
-          <div className={`rounded-lg shadow-md p-6 mb-6 border-2 ${
+          <div className={`rounded-lg shadow-md p-3 sm:p-6 mb-6 border-2 ${
             registration.name_application_status === 'approved' 
               ? 'bg-green-50 border-green-300' 
               : 'bg-yellow-50 border-yellow-300'
@@ -467,7 +467,7 @@ function PrivateLimitedDetails() {
 
         {/* Step 1: Name Application (only for true Private Limited registrations) */}
         {ticketId?.startsWith('PVT_') && (
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Step 1: Name Application</h2>
           
           {/* Name Application Status Banner */}
@@ -564,7 +564,7 @@ function PrivateLimitedDetails() {
         
         {/* Step 2: Basic Company Details (only for true Private Limited registrations) */}
         {ticketId?.startsWith('PVT_') && (
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Step 2: Basic Company Details</h2>
           
           {/* Directors & Capital Info */}
@@ -737,11 +737,11 @@ function PrivateLimitedDetails() {
 
         {/* Step 3: Directors Information */}
         {directors.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 mb-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Step 3: Directors & Shareholders Details</h2>
             <div className="space-y-6">
               {directors.map((director, idx) => (
-                <div key={idx} className="border-2 border-gray-200 rounded-lg p-6">
+                <div key={idx} className="border-2 border-gray-200 rounded-lg p-3 sm:p-6">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">
                     {director.relation_with_company || 'Director'} {idx + 1}
                   </h3>

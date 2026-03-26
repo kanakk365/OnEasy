@@ -127,7 +127,7 @@ function ProprietorshipViewDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading registration details...</p>
@@ -161,7 +161,7 @@ function ProprietorshipViewDetails() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-bold text-[#28303F]">
+              <h1 className="text-xl sm:text-2xl font-bold text-[#28303F]">
                 {registration.business_name || 'Business Name Pending'}
               </h1>
               <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(registration.status || 'pending')}`}>
@@ -216,7 +216,7 @@ function ProprietorshipViewDetails() {
         </div>
 
         {/* Registration Info */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Registration Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
@@ -247,7 +247,7 @@ function ProprietorshipViewDetails() {
         </div>
 
         {/* Section 1: Basic Business Details */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Section 1: Basic Business Details</h2>
           
           {/* Business Information */}
@@ -493,7 +493,7 @@ function ProprietorshipViewDetails() {
         </div>
 
         {/* Section 2: Basic Proprietor Details */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Section 2: Basic Proprietor Details</h2>
           
           {/* Proprietor Information */}

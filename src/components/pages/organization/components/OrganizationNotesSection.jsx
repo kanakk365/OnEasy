@@ -51,7 +51,7 @@ const OrganizationNotesSection = ({
   return (
     <div className="space-y-6">
       {/* Admin Notes Section */}
-      <div className="bg-[#F8F9FA] rounded-xl p-6">
+      <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
         <h3 className="text-[15px] font-medium text-gray-900 mb-4">
           Admin Notes
         </h3>
@@ -104,7 +104,7 @@ const OrganizationNotesSection = ({
       </div>
 
       {/* User Notes Section */}
-      <div className="bg-[#F8F9FA] rounded-xl p-6">
+      <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-[15px] font-medium text-gray-900">My Notes</h3>
           {onAddNote && (

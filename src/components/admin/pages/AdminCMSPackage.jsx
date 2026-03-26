@@ -325,7 +325,7 @@ function AdminCMSPackage() {
         {/* Filters and List */}
         <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
           {/* Filter Bar */}
-          <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4">
+          <div className="p-3 sm:p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
               <RiSearchLine className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
@@ -374,7 +374,7 @@ function AdminCMSPackage() {
                 </p>
               </div>
             ) : (
-              <div className="p-6 space-y-8">
+              <div className="p-3 sm:p-6 space-y-8">
                 {Object.entries(groupedPackages).map(
                   ([serviceType, servicePackages]) => (
                     <div
@@ -396,7 +396,7 @@ function AdminCMSPackage() {
                         {servicePackages.map((pkg) => (
                           <div
                             key={pkg.id}
-                            className="p-6 group hover:bg-[#F8FAFC] transition-colors"
+                            className="p-3 sm:p-6 group hover:bg-[#F8FAFC] transition-colors"
                           >
                             <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                               <div className="flex-1">
@@ -519,7 +519,7 @@ function AdminCMSPackage() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 bg-white">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-6 bg-white">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -752,7 +752,7 @@ function AdminCMSPackage() {
               </form>
             </div>
 
-            <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
+            <div className="p-3 sm:p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
               <button
                 type="button"
                 onClick={handleCancel}

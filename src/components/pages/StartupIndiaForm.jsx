@@ -498,7 +498,7 @@ function StartupIndiaForm() {
   // Don't check formData content - it might be empty even after loading completes
   if (loadingDraft && ticketId) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading registration data...</p>
@@ -750,7 +750,7 @@ function StartupIndiaForm() {
           </div>
         )}
 
-        <div className="rounded-lg p-6">
+        <div className="rounded-lg p-3 sm:p-6">
           {renderStepContent()}
 
           <div className="flex justify-between mt-8 mb-24">

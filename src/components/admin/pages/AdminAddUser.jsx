@@ -156,7 +156,7 @@ function AdminAddUser() {
 
       <div className="max-w-2xl mx-auto">
         {/* Form Card */}
-        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100">
+        <div className="bg-white rounded-2xl p-3 sm:p-6 md:p-8 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100">
           {/* Card Header with Icon */}
           <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
             <div

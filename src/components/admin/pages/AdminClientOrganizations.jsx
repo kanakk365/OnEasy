@@ -81,7 +81,7 @@ function AdminClientOrganizations() {
           </button>
 
           {clientInfo && (
-            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
               <h1 className="text-2xl font-semibold text-gray-900">Directors/Partners Documents</h1>
               <div className="mt-2">
                 <p className="text-gray-600">

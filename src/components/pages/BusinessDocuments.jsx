@@ -228,7 +228,7 @@ function BusinessDocuments() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading documents...</p>
@@ -239,7 +239,7 @@ function BusinessDocuments() {
 
   return (
     <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="mb-6">
           <button
@@ -258,7 +258,7 @@ function BusinessDocuments() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Directors/Partners Documents Card */}
           <div
-            className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 cursor-pointer hover:shadow-md transition-shadow"
+            className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 cursor-pointer hover:shadow-md transition-shadow"
             onClick={() => navigate("/business-directors")}
           >
             <div className="flex items-center justify-between mb-4">
@@ -296,7 +296,7 @@ function BusinessDocuments() {
           </div>
 
           {/* Organizations Documents Card */}
-          <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900">Organizations</h2>
               <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">

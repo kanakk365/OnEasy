@@ -492,8 +492,8 @@ function Compliance() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-[#f3f5f7] pt-16 lg:pt-0">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
         {/* Toast Notification */}
         {status.message && (
           <div className="fixed inset-0 z-40 flex items-start justify-end pointer-events-none">
@@ -559,8 +559,8 @@ function Compliance() {
           </button>
 
           {organization && (
-            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
-              <h1 className="text-2xl font-semibold text-gray-900">
+            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
                 {organization.legalName !== "-"
                   ? organization.legalName
                   : organization.tradeName}
@@ -599,7 +599,7 @@ function Compliance() {
           return (
             <div
               key={categoryKey}
-              className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6"
+              className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6"
             >
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 {categoryData.label}
@@ -755,7 +755,7 @@ function Compliance() {
         {/* Upload Modal */}
         {showUploadModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md">
-            <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+            <div className="bg-white rounded-xl shadow-xl max-w-[95vw] sm:max-w-md w-full mx-4 p-3 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
                   Upload Compliance Document

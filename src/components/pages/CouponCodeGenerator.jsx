@@ -162,8 +162,8 @@ function CouponCodeGenerator() {
   const parsedDiscountAmount = typeof discountAmount === 'string' ? parseFloat(discountAmount) || 0 : discountAmount;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] py-6">
-      <div className="container mx-auto px-4 md:px-8 lg:px-12">
+    <div className="min-h-screen pt-16 lg:pt-0 bg-[#F8F9FA] py-6">
+      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div className="flex items-center gap-3">
@@ -200,7 +200,7 @@ function CouponCodeGenerator() {
                     </h2>
                  </div>
                  
-                 <div className="p-6 space-y-6">
+                 <div className="p-3 sm:p-6 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                        {/* Prefix Input */}
                        <div>
@@ -363,7 +363,7 @@ function CouponCodeGenerator() {
               </div>
 
               {/* Tips Card */}
-              <div className="bg-blue-50/50 rounded-2xl p-6 border border-blue-100">
+              <div className="bg-blue-50/50 rounded-2xl p-3 sm:p-6 border border-blue-100">
                  <div className="flex items-start gap-3">
                     <div className="p-2 bg-blue-100 text-blue-600 rounded-lg shrink-0">
                        <FiInfo className="w-5 h-5" />
@@ -397,10 +397,10 @@ function CouponCodeGenerator() {
                     )}
                  </div>
 
-                 <div className="flex-1 p-6">
+                 <div className="flex-1 p-3 sm:p-6">
                     {generatedCodes.length > 0 ? (
                        <div className="space-y-4">
-                          <div className="bg-gradient-to-br from-[#022B51] to-[#015079] rounded-2xl p-6 text-center shadow-lg relative overflow-hidden group">
+                          <div className="bg-gradient-to-br from-[#022B51] to-[#015079] rounded-2xl p-3 sm:p-6 text-center shadow-lg relative overflow-hidden group">
                              <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-bl-full -mr-4 -mt-4"></div>
                              <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/5 rounded-tr-full -ml-4 -mb-4"></div>
                              

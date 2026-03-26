@@ -368,7 +368,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
   // Step 1: Show org selection if no org is selected yet
   if (!selectedOrg) {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)] p-6">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)] p-3 sm:p-6">
 
 
         {userOrgs.length === 0 ? (
@@ -588,7 +588,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
 
         {/* Right Column: Selection Preview */}
         <div className="w-full lg:w-96 flex-shrink-0 flex flex-col min-h-0 bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
-          <div className="p-6 pb-4 border-b border-gray-100 flex justify-between items-center">
+          <div className="p-3 sm:p-6 pb-4 border-b border-gray-100 flex justify-between items-center">
             <h3 className="text-base font-semibold text-gray-900">
               Selection Preview
             </h3>
@@ -597,7 +597,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
             </span>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 custom-scrollbar">
             {selectedCodes.length === 0 ? (
               <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200 p-8">
                 <p className="text-gray-400 text-sm text-center">
@@ -634,7 +634,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
             )}
           </div>
 
-          <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+          <div className="p-3 sm:p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
             <button
               className="w-full py-2.5 px-4 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-all focus:ring-4 focus:ring-[#022B51]/20 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               disabled={selectedCodes.length === 0}

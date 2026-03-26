@@ -5,7 +5,7 @@ function PaymentSuccessPopup({ isOpen = true, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-8 relative">
+      <div className="bg-white rounded-xl shadow-2xl max-w-[95vw] sm:max-w-md w-full mx-4 p-8 relative">
         {/* Close button */}
         <button
           onClick={onClose}

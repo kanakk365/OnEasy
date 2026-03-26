@@ -396,7 +396,7 @@ function Accounting() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading documents...</p>
@@ -416,7 +416,7 @@ function Accounting() {
 
   return (
     <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="mb-6">
           <button
@@ -430,7 +430,7 @@ function Accounting() {
           </button>
 
           {organization && (
-            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
               <h1 className="text-2xl font-semibold text-gray-900">
                 {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
               </h1>
@@ -472,7 +472,7 @@ function Accounting() {
         )}
 
         {/* Tally Data Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Tally Data</h3>
           {tallyData.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -523,7 +523,7 @@ function Accounting() {
         </div>
 
         {/* Workings Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Workings</h3>
           {workings.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -576,7 +576,7 @@ function Accounting() {
         {/* Upload Modal */}
         {showUploadModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md">
-            <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+            <div className="bg-white rounded-xl shadow-xl max-w-[95vw] sm:max-w-md w-full mx-4 p-3 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
                   Upload {uploadType === 'tally_data' ? 'Tally Data' : 'Workings'}

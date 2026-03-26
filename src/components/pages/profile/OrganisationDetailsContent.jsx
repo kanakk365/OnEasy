@@ -168,7 +168,7 @@ import OrganizationTasksSection from "../organization/components/OrganizationTas
 
   // Empty State Component
   const EmptySectionState = ({ title, buttonText, onAdd }) => (
-    <div className="bg-white rounded-xl py-8 px-8 flex flex-col items-center justify-center text-center">
+    <div className="bg-white rounded-xl py-8 px-4 sm:px-8 flex flex-col items-center justify-center text-center">
       <div className="mb-4">
         <img
           src="/empty.svg"
@@ -224,7 +224,7 @@ const OrganisationDetailsContent = ({
   const hasNoOrganizations = savedOrganizations.length === 0 && !selectedOrgId;
 
   return (
-    <div className="px-6 pb-6 pt-6 animate-fadeIn">
+    <div className="px-3 sm:px-6 pb-4 sm:pb-6 pt-4 sm:pt-6 animate-fadeIn">
       <div className="space-y-6">
         {/* Show table if no organization selected */}
         {savedOrganizations.length > 0 && (
@@ -243,20 +243,20 @@ const OrganisationDetailsContent = ({
               </button>
             </div>
             <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-              <table className="w-full text-sm text-left">
+              <div className="overflow-x-auto"><table className="w-full text-sm text-left">
                 <thead className="text-white uppercase text-xs"
                   style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                   <tr>
-                    <th className="px-6 py-3 font-medium border-b border-gray-200">
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 font-medium border-b border-gray-200">
                       Legal Name
                     </th>
-                    <th className="px-6 py-3 font-medium border-b border-gray-200">
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 font-medium border-b border-gray-200">
                       Trade Name
                     </th>
-                    <th className="px-6 py-3 font-medium border-b border-gray-200">
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 font-medium border-b border-gray-200">
                       GSTIN
                     </th>
-                    <th className="px-6 py-3 font-medium border-b border-gray-200 text-right">
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 font-medium border-b border-gray-200 text-right">
                       Action
                     </th>
                   </tr>
@@ -268,13 +268,13 @@ const OrganisationDetailsContent = ({
                       className="hover:bg-gray-50 cursor-pointer transition-colors"
                       onClick={() => setSelectedOrgId(org.id)}
                     >
-                      <td className="px-6 py-4 font-medium text-gray-900">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 font-medium text-gray-900">
                         {org.legalName || "-"}
                       </td>
-                      <td className="px-6 py-4 text-gray-500">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-500">
                         {org.tradeName || "-"}
                       </td>
-                      <td className="px-6 py-4 text-gray-500">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-500">
                         {org.gstin || "-"}
                       </td>
                       <td className="px-6 py-4">
@@ -285,7 +285,7 @@ const OrganisationDetailsContent = ({
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </div>
           </div>
         )}
@@ -428,12 +428,12 @@ const OrganizationFormWithTabs = ({
 
       {/* Tabs Navigation */}
       <div className="bg-white rounded-t-xl border-b border-gray-200">
-        <div className="flex space-x-1 px-4 pt-4">
+        <div className="flex space-x-1 px-2 sm:px-4 overflow-x-auto pt-4">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => handleTabClick(tab.key)}
-              className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 ${
+              className={`px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium rounded-t-lg transition-all duration-200 ${
                 activeTab === tab.key
                   ? "bg-white text-[#022B51] border-b-2 border-[#022B51] -mb-px"
                   : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
@@ -446,10 +446,10 @@ const OrganizationFormWithTabs = ({
       </div>
 
       {/* Tab Content */}
-      <div className="bg-white rounded-b-xl border border-gray-200 border-t-0 p-6 min-h-[400px]">
+      <div className="bg-white rounded-b-xl border border-gray-200 border-t-0 p-3 sm:p-6 min-h-[400px]">
         {activeTab === "organization-details" && (
-          <div className="bg-[#F8F9FA] p-6 rounded-xl">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+          <div className="bg-[#F8F9FA] p-3 sm:p-6 rounded-xl">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-4 sm:gap-y-6">
                     <StyledInput
                       label="Legal Name"
                       value={org.legalName}
@@ -614,7 +614,7 @@ const OrganizationFormWithTabs = ({
                     {/* Registered Office Address Section */}
                     <div className="col-span-1 md:col-span-2">
                       <h4 className="text-sm font-semibold text-gray-900 mb-4">Registered Office Address</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
                         {/* Address Line 1 */}
                         <div className="md:col-span-2">
                           <label className="block text-sm text-gray-700 mb-2 font-medium">
@@ -842,7 +842,7 @@ const OrganizationFormWithTabs = ({
                     />
                   ) : (
                     <div className="overflow-x-auto rounded-lg">
-                      <table className="w-full text-sm">
+                      <div className="overflow-x-auto"><table className="w-full text-sm">
                         <thead className="text-white"
                           style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           <tr>
@@ -968,7 +968,7 @@ const OrganizationFormWithTabs = ({
                             </tr>
                           ))}
                         </tbody>
-                      </table>
+                      </table></div>
                     </div>
                   )}
           </div>
@@ -1000,7 +1000,7 @@ const OrganizationFormWithTabs = ({
                     />
                   ) : (
                     <div className="overflow-x-auto rounded-lg">
-                      <table className="w-full text-sm">
+                      <div className="overflow-x-auto"><table className="w-full text-sm">
                         <thead className="text-white"
                           style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           <tr>
@@ -1088,14 +1088,14 @@ const OrganizationFormWithTabs = ({
                             </tr>
                           ))}
                         </tbody>
-                      </table>
+                      </table></div>
                     </div>
                   )}
           </div>
         )}
 
         {activeTab === "attachments" && (
-          <div className="bg-[#F8F9FA] rounded-xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <h4 className="text-[15px] font-medium text-gray-900 mb-1">
                 Attachments
@@ -1140,7 +1140,7 @@ const OrganizationFormWithTabs = ({
                     />
                   ) : (
                     <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
+                      <div className="overflow-x-auto"><table className="w-full text-sm">
                         <thead className="text-white"
                           style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           <tr>
@@ -1284,7 +1284,7 @@ const OrganizationFormWithTabs = ({
                             </tr>
                       ))}
                         </tbody>
-                      </table>
+                      </table></div>
                     </div>
                   )}
           </div>
@@ -1334,7 +1334,7 @@ const OrganizationFormWithTabs = ({
           <button
             onClick={handleSaveOrganisation}
             disabled={saving}
-            className="px-8 py-2 text-white rounded-lg hover:hover:opacity-90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 sm:px-8 py-2 text-white rounded-lg hover:hover:opacity-90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             style={{
               background:

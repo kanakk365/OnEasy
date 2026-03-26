@@ -253,8 +253,8 @@ function UdyamDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7]">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8">
         {/* My Registrations Button - Top Right */}
         <div className="flex justify-end mb-4">
           <button

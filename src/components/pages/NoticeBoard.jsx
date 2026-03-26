@@ -73,7 +73,7 @@ function NoticeBoard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
+    <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>

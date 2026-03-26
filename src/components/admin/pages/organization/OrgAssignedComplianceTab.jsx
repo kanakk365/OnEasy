@@ -500,7 +500,7 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
         )}
 
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="p-6">
+          <div className="p-3 sm:p-6">
             <p className="text-gray-500 italic mb-6">
               Configure compliance periods ({instances.length} items)
             </p>
@@ -785,7 +785,7 @@ const OrgAssignedComplianceTab = ({ userId, org }) => {
                 return (
                   <div
                     key={assignment.id}
-                    className={`bg-white border rounded-xl p-6 hover:shadow-md transition-all ${
+                    className={`bg-white border rounded-xl p-3 sm:p-6 hover:shadow-md transition-all ${
                       isItemSelected
                         ? "border-red-300 bg-red-50/30 shadow-sm"
                         : "border-gray-200"

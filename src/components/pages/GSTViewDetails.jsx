@@ -128,7 +128,7 @@ function GSTViewDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading registration details...</p>
@@ -169,7 +169,7 @@ function GSTViewDetails() {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-[#28303F]">
+            <h1 className="text-xl sm:text-2xl font-bold text-[#28303F]">
               GST Registration Details
             </h1>
             <p className="text-gray-600 mt-1">
@@ -227,7 +227,7 @@ function GSTViewDetails() {
         </div>
 
         {/* Registration Details */}
-        <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 space-y-6">
           {/* Business Information */}
           <div>
             <h2 className="text-lg font-semibold text-[#28303F] mb-4 pb-2 border-b">

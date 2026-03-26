@@ -107,17 +107,13 @@ function Sidebar() {
         <div className="lg:hidden fixed top-3 left-4 z-[70] flex items-center space-x-3">
           <button
             onClick={() => {
-              console.log(
-                "Mobile menu button clicked, current state:",
-                isMobileMenuOpen,
-              );
               setIsMobileMenuOpen(true);
             }}
             className="bg-white p-2 rounded-lg shadow-lg border border-gray-200"
           >
             <MdMenu className="w-6 h-6 text-gray-700" />
           </button>
-          <img src="/newlogo.PNG" alt="OnEasy Logo" className="h-10 w-auto" />
+          <img src="/Logo2.png" alt="OnEasy Logo" className="h-9 w-auto" />
         </div>
       )}
 
@@ -303,7 +299,7 @@ function Sidebar() {
           )}
           {/* Mobile Sidebar Header */}
           <div className="px-6 pt-4 pb-4 flex justify-between items-center border-b border-gray-200">
-            <img src="/newlogo.PNG" alt="OnEasy Logo" className="h-10 w-auto" />
+            <img src="/Logo2.png" alt="OnEasy Logo" className="h-10 w-auto" />
             <button
               onClick={() => {
                 console.log("Close button clicked");
@@ -316,7 +312,7 @@ function Sidebar() {
           </div>
 
           {/* Mobile Navigation */}
-          <nav className="flex-1 px-4 pt-3 space-y-2.5">
+          <nav className="flex-1 px-4 pt-3 space-y-2.5 overflow-y-auto min-h-0">
             {menuItems.map((item, index) => {
               const isMobileActive = item.path === "/client"
                 ? location.pathname === "/client"
@@ -342,7 +338,7 @@ function Sidebar() {
           </nav>
 
           {/* Mobile Profile Section */}
-          <div className="mt-auto p-4 border-t border-gray-200">
+          <div className="flex-shrink-0 p-4 border-t border-gray-200">
             <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg bg-gray-50">
               <div className="flex items-center space-x-3 flex-1">
                 {userData?.profile_image ? (

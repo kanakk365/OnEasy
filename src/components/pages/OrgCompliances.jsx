@@ -325,7 +325,7 @@ const OrgCompliances = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6 flex justify-center items-center h-64">
+      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6 flex justify-center items-center h-64">
         <div className="text-gray-500">Loading compliances...</div>
       </div>
     );
@@ -333,7 +333,7 @@ const OrgCompliances = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
+      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6">
         <div className="text-red-500">{error}</div>
       </div>
     );
@@ -342,7 +342,7 @@ const OrgCompliances = () => {
   const displayName = orgInfo?.legalName || "Unassigned";
 
   return (
-    <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
+    <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6">
       {/* Header Section */}
       <div className="mb-8">
         <button
@@ -411,7 +411,7 @@ const OrgCompliances = () => {
             compliances.map((item) => (
               <div
                 key={item.id}
-                className="bg-white border rounded-xl p-6 border-gray-200 hover:shadow-md transition-all"
+                className="bg-white border rounded-xl p-3 sm:p-6 border-gray-200 hover:shadow-md transition-all"
               >
                 {/* Top Row: Title, Badge, Status */}
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
@@ -514,7 +514,7 @@ const OrgCompliances = () => {
             </div>
 
             {/* Day Labels */}
-            <div className="grid grid-cols-7 border-b border-gray-100">
+            <div className="grid grid-cols-7 min-w-[400px] border-b border-gray-100">
               {DAY_LABELS.map((d) => (
                 <div
                   key={d}
@@ -526,7 +526,7 @@ const OrgCompliances = () => {
             </div>
 
             {/* Calendar Grid */}
-            <div className="grid grid-cols-7">
+            <div className="grid grid-cols-7 min-w-[400px]">
               {calendarGrid.map((cell, idx) => {
                 const hasEvents = cell.events && cell.events.length > 0;
                 const _isToday = cell.currentMonth && isToday(cell.date);

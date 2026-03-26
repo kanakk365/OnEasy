@@ -807,7 +807,7 @@ function AdminCustomPayment() {
               No pending payments found
             </div>
           ) : (
-            <div className="p-6">
+            <div className="p-3 sm:p-6">
               <div className="p-4 bg-[#f5f5f5] rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full border-separate border-spacing-0">
@@ -978,7 +978,7 @@ function AdminCustomPayment() {
                     : "No users available"}
                 </div>
               ) : (
-                <div className="p-6">
+                <div className="p-3 sm:p-6">
                   <div className="p-4 bg-[#f5f5f5] rounded-xl overflow-hidden">
                     <div className="overflow-x-auto">
                       <table className="w-full border-separate border-spacing-0">
@@ -1113,7 +1113,7 @@ function AdminCustomPayment() {
                 </div>
               </div>
 
-              <div className="p-6 max-w-2xl mx-auto">
+              <div className="p-3 sm:p-6 max-w-2xl mx-auto">
                 {/* Service Selection */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">

@@ -88,7 +88,7 @@ const ServiceNotesSection = ({ orgId }) => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#F8F9FA] rounded-xl p-6">
+      <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[15px] font-medium text-gray-900">
             Service Notes

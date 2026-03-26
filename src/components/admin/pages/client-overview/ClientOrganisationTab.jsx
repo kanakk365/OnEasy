@@ -59,7 +59,7 @@ function ClientOrganisationTab({
                 {organisations.map((org, idx) => (
                   <div
                     key={org.id}
-                    className="bg-white rounded-xl border-2 border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow"
+                    className="bg-white rounded-xl border-2 border-gray-200 shadow-sm p-3 sm:p-6 hover:shadow-md transition-shadow"
                   >
                     <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
                       <h4 className="text-xl font-bold text-gray-900">
@@ -1355,7 +1355,7 @@ function ClientOrganisationTab({
                                 return (
                                   <tr className="bg-white">
                                     <td colSpan="8" className="p-0">
-                                      <div className="bg-white rounded-xl border border-gray-200 p-6 mx-2 my-2">
+                                      <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-6 mx-2 my-2">
                                         <div className="flex justify-between items-center mb-4">
                                           <h4 className="text-lg font-semibold text-gray-900">
                                             {isEditingThisOrg

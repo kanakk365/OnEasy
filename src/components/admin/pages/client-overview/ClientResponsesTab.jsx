@@ -149,7 +149,7 @@ const ClientResponsesTab = ({ userId }) => {
       </div>
 
       {/* Main content card — matches user-side layout */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-6">
         {responseSets.length === 0 ? (
           // Empty state
           <div className="text-center py-12">
@@ -191,7 +191,7 @@ const ClientResponsesTab = ({ userId }) => {
                   <div
                     key={set.submissionId || idx}
                     onClick={() => setSelectedSetId(set.submissionId)}
-                    className="group bg-white rounded-xl p-6 border border-gray-200 hover:border-[#022B51] hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
+                    className="group bg-white rounded-xl p-3 sm:p-6 border border-gray-200 hover:border-[#022B51] hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
                   >
                     {/* Left accent bar on hover */}
                     <div className="absolute top-0 left-0 w-1 h-full bg-[#022B51] opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -316,7 +316,7 @@ const ClientResponsesTab = ({ userId }) => {
                   {filtered.map((item, idx) => (
                     <div
                       key={`${item.code}-${idx}`}
-                      className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#015079] hover:text-white transition-all duration-200 flex items-center justify-between w-full border border-gray-100"
+                      className="group bg-white rounded-xl p-3 sm:p-6 hover:shadow-md hover:bg-[#015079] hover:text-white transition-all duration-200 flex items-center justify-between w-full border border-gray-100"
                     >
                       <div>
                         <h5 className="text-base font-semibold text-[#022B51] mb-1 group-hover:text-white">
@@ -356,7 +356,7 @@ const ClientResponsesTab = ({ userId }) => {
           onClick={() => setConfirmDeleteId(null)}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-6"
+            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-3 sm:p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50 mx-auto mb-4">
@@ -394,7 +394,7 @@ const ClientResponsesTab = ({ userId }) => {
           onClick={() => setShowDeleteSuccess(false)}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-6"
+            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-3 sm:p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-50 mx-auto mb-4">

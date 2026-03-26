@@ -128,7 +128,7 @@ function ClientServicesTab({
           >
             {/* Top Section - Light Blue Background - Clickable */}
             <div
-              className="bg-blue-50 p-6 flex items-center justify-between border-b border-gray-200 rounded-t-xl"
+              className="bg-blue-50 p-3 sm:p-6 flex items-center justify-between border-b border-gray-200 rounded-t-xl"
             >
               <div className="flex items-center gap-4 flex-1">
                 {/* Avatar */}
@@ -291,7 +291,7 @@ function ClientServicesTab({
 
             {/* Bottom Section - White Background - Expandable */}
             {true && (
-              <div className="p-6">
+              <div className="p-3 sm:p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     {/* Ticket ID */}
@@ -475,7 +475,7 @@ function ClientServicesTab({
             </div>
 
             {/* Body */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-6">
               {loadingNotes ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#022B51]"></div>

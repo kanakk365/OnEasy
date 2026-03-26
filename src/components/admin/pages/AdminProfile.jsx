@@ -139,7 +139,7 @@ function AdminProfile() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Image Card */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 p-6 flex flex-col items-center text-center">
+            <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 p-3 sm:p-6 flex flex-col items-center text-center">
               <div className="relative mb-4 group">
                 <div className="w-40 h-40 rounded-full border-4 border-gray-50 overflow-hidden shadow-lg">
                   {formData.profileImage ? (
@@ -203,7 +203,7 @@ function AdminProfile() {
                 </h2>
               </div>
 
-              <div className="p-6 space-y-6">
+              <div className="p-3 sm:p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">

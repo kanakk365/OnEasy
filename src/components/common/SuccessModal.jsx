@@ -22,7 +22,7 @@ function SuccessModal({ isOpen, onClose, title, message }) {
       ></div>
 
       {/* Modal */}
-      <div className="relative bg-white rounded-lg shadow-xl w-[400px] p-6 z-[110] transform scale-100 transition-transform">
+      <div className="relative bg-white rounded-lg shadow-xl w-[400px] p-3 sm:p-6 z-[110] transform scale-100 transition-transform">
         <div className="flex flex-col items-center text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
             <FiCheckCircle className="w-8 h-8 text-green-600" />

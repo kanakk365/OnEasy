@@ -467,7 +467,7 @@ function AdminClientDirectorsDetail() {
             </div>
           )}
           
-          <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6">
             <div className="flex items-center gap-4 mb-4">
               {renderDocumentIcon(documentType)}
               <div className="flex-1">
@@ -585,7 +585,7 @@ function AdminClientDirectorsDetail() {
 
         {/* Upload Section */}
         {documents.length < 3 && (
-          <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Upload Document</h2>
             <input
               type="file"

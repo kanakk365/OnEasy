@@ -647,7 +647,7 @@ function PrivateLimitedForm({
             </div>
           )}
 
-          <div className="rounded-lg p-6">
+          <div className="rounded-lg p-3 sm:p-6">
             {renderStepContent()}
 
           <div className="flex justify-between mt-8 mb-24">
@@ -859,7 +859,7 @@ function PrivateLimitedForm({
                 </svg>
               </div>
               
-              <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
                 Thank You!
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed">
@@ -892,7 +892,7 @@ function PrivateLimitedForm({
                 </svg>
               </div>
               
-              <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
                 Successfully Submitted!
               </h3>
               <p className="text-gray-600">

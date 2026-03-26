@@ -299,8 +299,8 @@ function Resources() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] py-6">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F8F9FA] pt-16 lg:pt-0 py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div className="flex items-center gap-3">
@@ -396,7 +396,7 @@ function Resources() {
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 p-6 relative">
+          <div className="flex-1 p-3 sm:p-6 relative">
             {loading ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500 bg-white/80 z-10">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#022B51] mb-4"></div>

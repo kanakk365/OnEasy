@@ -122,7 +122,7 @@ function PersonalDocumentsUploadModal({ isOpen, onClose, onUploadSuccess }) {
       ></div>
 
       {/* Modal */}
-      <div className="relative bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-xl shadow-2xl max-w-[95vw] sm:max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-xl">
           <h2 className="text-xl font-semibold text-gray-900">Upload Personal Document</h2>
@@ -148,7 +148,7 @@ function PersonalDocumentsUploadModal({ isOpen, onClose, onUploadSuccess }) {
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-3 sm:p-6 space-y-6">
           {/* Document Type Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

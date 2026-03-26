@@ -15,7 +15,7 @@ const OrganizationList = ({
   setSelectedOrg,
 }) => {
   return (
-    <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
+    <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div className="flex items-start gap-3">
@@ -58,7 +58,7 @@ const OrganizationList = ({
       </div>
 
       {/* Table Section */}
-      <div className="p-6 rounded-xl bg-[#f5f5f5] overflow-hidden">
+      <div className="p-3 sm:p-6 rounded-xl bg-[#f5f5f5] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full border-separate border-spacing-0">
             <thead>

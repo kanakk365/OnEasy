@@ -95,7 +95,7 @@ function SuperAdminSidebar() {
           } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-gray-100`}
         >
           <img
-            src="/newlogo.PNG"
+            src="/Logo2.png"
             alt="OnEasy Logo"
             className={`${
               isCollapsed ? "h-8" : "h-10"
@@ -254,7 +254,7 @@ function SuperAdminSidebar() {
       >
         {/* Mobile Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <img src="/newlogo.PNG" alt="OnEasy Logo" className="h-10 w-auto" />
+          <img src="/Logo2.png" alt="OnEasy Logo" className="h-10 w-auto" />
           <button
             onClick={() => setIsMobileMenuOpen(false)}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"

@@ -214,7 +214,7 @@ const AssignedComplianceDetails = () => {
   const pendingItems = totalItems - doneItems;
 
   return (
-    <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
+    <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6">
       {/* Header Section */}
       <div className="mb-8">
         <div className="flex items-center justify-between flex-wrap gap-4">
@@ -225,7 +225,7 @@ const AssignedComplianceDetails = () => {
             >
               <IoChevronBackOutline className="w-6 h-6" />
             </button>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
               {complianceData.name || `Compliance ${id}`}
             </h1>
           </div>
@@ -414,7 +414,7 @@ const AssignedComplianceDetails = () => {
             </div>
 
             {/* Day Labels */}
-            <div className="grid grid-cols-7 border-b border-gray-100">
+            <div className="grid grid-cols-7 min-w-[400px] border-b border-gray-100">
               {DAY_LABELS.map((d) => (
                 <div
                   key={d}
@@ -426,7 +426,7 @@ const AssignedComplianceDetails = () => {
             </div>
 
             {/* Calendar Grid */}
-            <div className="grid grid-cols-7">
+            <div className="grid grid-cols-7 min-w-[400px]">
               {calendarGrid.map((cell, idx) => {
                 const hasEvents = cell.events && cell.events.length > 0;
                 const _isToday = cell.currentMonth && isToday(cell.date);

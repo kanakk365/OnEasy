@@ -268,7 +268,7 @@ function AdminClientDirectorsKYC() {
             return (
               <div
                 key={docType.value}
-                className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 hover:shadow-md transition-shadow cursor-pointer"
+                className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 hover:shadow-md transition-shadow cursor-pointer"
                 onClick={() => navigate(`/admin/client-directors/${userId}/${orgId}/${docType.value}`, { state: { orgId, userId } })}
               >
                 {/* Card Header */}

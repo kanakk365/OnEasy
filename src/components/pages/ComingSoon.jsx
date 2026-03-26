@@ -15,7 +15,7 @@ function ComingSoon() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-12">
+    <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-8 md:py-12">
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-16rem)] text-center">
         <div className="mb-8">
           <div className="w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>

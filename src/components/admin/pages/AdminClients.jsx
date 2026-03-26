@@ -198,7 +198,7 @@ function AdminClients() {
       </div>
 
       {/* Search & Filter Section */}
-      <div className="bg-white rounded-2xl p-6 mb-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100">
+      <div className="bg-white rounded-2xl p-3 sm:p-6 mb-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100">
         {/* Search */}
         <div className="flex items-center gap-4 mb-6">
           <div className="flex-1 relative">
@@ -282,7 +282,7 @@ function AdminClients() {
           </p>
         </div>
       ) : (
-        <div className="p-6 rounded-2xl bg-[#f2f6f7] overflow-hidden">
+        <div className="p-3 sm:p-6 rounded-2xl bg-[#f2f6f7] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full border-separate border-spacing-0">
               <thead>

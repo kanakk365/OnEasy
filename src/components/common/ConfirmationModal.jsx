@@ -12,7 +12,7 @@ function ConfirmationModal({ isOpen, onClose, onConfirm, title, message }) {
       ></div>
 
       {/* Modal */}
-      <div className="relative bg-white rounded-lg shadow-xl w-[400px] p-6 z-[110]">
+      <div className="relative bg-white rounded-lg shadow-xl w-[400px] p-3 sm:p-6 z-[110]">
         <h3 className="text-lg font-medium text-gray-900 mb-4">
           {title || "Confirm Action"}
         </h3>

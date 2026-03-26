@@ -1319,7 +1319,7 @@ function AdminServices() {
       {/* Payment Method Dialog */}
       {showPaymentMethodDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4 border border-gray-100 max-h-[85vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl p-3 sm:p-6 max-w-md w-full mx-4 border border-gray-100 max-h-[85vh] overflow-y-auto">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -1523,7 +1523,7 @@ function AdminServices() {
       {/* Add Note Modal */}
       {showNotesModal && notesSvc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4 border border-gray-100">
+          <div className="bg-white rounded-2xl shadow-xl p-3 sm:p-6 max-w-md w-full mx-4 border border-gray-100">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">

@@ -132,7 +132,7 @@ function OrganizationBusinessDocuments() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
@@ -143,7 +143,7 @@ function OrganizationBusinessDocuments() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] py-6">
-      <div className="container mx-auto px-4 md:px-8 lg:px-12">
+      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12">
         {/* Header - matching KYC layout */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
