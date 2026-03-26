@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { RiRobot2Line } from "react-icons/ri";
 import apiClient from "../../utils/api";
 import complianceApi from "../../utils/complianceApi";
 import { AUTH_CONFIG } from "../../config/auth";
@@ -544,7 +545,7 @@ function Client() {
   };
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6">
+    <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6 relative">
       <div className="mb-8">
         {greeting && (
           <>
@@ -1018,6 +1019,20 @@ function Client() {
           </div>
         </div>
       </div>
+
+      {/* Floating AI Chat Button - Desktop only (hidden on mobile as bottom nav handles it) */}
+      <button
+        onClick={() => navigate('/ai-chat')}
+        className="hidden lg:flex fixed bottom-8 right-8 z-50 items-center gap-2.5 px-5 py-3 rounded-2xl text-white text-sm font-semibold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all"
+        style={{ background: 'linear-gradient(135deg, #00486d 0%, #006a9e 100%)' }}
+        title="Open AI Compliance Chat"
+      >
+        <div className="w-7 h-7 bg-[#bd0008] rounded-full flex items-center justify-center shadow-md flex-shrink-0">
+          <RiRobot2Line className="w-4 h-4 text-white" />
+        </div>
+        Ask AI
+        <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+      </button>
     </div>
   );
 }

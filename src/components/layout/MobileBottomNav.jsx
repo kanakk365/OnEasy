@@ -93,7 +93,7 @@ const MobileBottomNav = () => {
 
       {/* Floating Center Button (Bot) */}
       <Link
-        to="/ai-agent"
+        to="/ai-chat"
         className="absolute left-1/2 bottom-[42px] -translate-x-1/2 flex items-center justify-center w-[54px] h-[54px] bg-[#bd0008] rounded-full z-[60] shadow-[0_4px_25px_rgba(189,0,8,0.8)] transition-transform hover:scale-105 active:scale-95"
       >
         <RiRobot2Line className="w-7 h-7 text-white" />
