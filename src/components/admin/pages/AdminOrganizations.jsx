@@ -1335,7 +1335,7 @@ function AdminOrganizations() {
     return (
       <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading organizations...</p>
         </div>
       </div>
@@ -1351,7 +1351,7 @@ function AdminOrganizations() {
             setIsAddingOrg(false);
             setSelectedClient(null);
           }}
-          className="mb-6 flex items-center text-[#01334C] hover:text-[#00486D] font-medium"
+          className="mb-6 flex items-center text-[#022B51] hover:text-[#022B51] font-medium"
         >
           <FiChevronLeft className="w-5 h-5 mr-2" /> Back to List
         </button>
@@ -1367,7 +1367,7 @@ function AdminOrganizations() {
         </div>
 
         {!selectedClient ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 max-w-2xl">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-6 max-w-2xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Select Client
             </h3>
@@ -1379,7 +1379,7 @@ function AdminOrganizations() {
                     clients.find((c) => c.user_id === e.target.value),
                   )
                 }
-                className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C] appearance-none"
+                className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] appearance-none"
               >
                 <option value="">Select a client...</option>
                 {clients.map((client) => (
@@ -1399,7 +1399,7 @@ function AdminOrganizations() {
               </h2>
               <button
                 onClick={() => setSelectedClient(null)}
-                className="text-sm text-[#01334C] hover:underline"
+                className="text-sm text-[#022B51] hover:underline"
               >
                 Change Client
               </button>
@@ -1429,7 +1429,7 @@ function AdminOrganizations() {
                     onClick={() => setActiveTab(tab.key)}
                     className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 ${
                       activeTab === tab.key
-                        ? "bg-white text-[#00486D] border-b-2 border-[#00486D] -mb-px"
+                        ? "bg-white text-[#022B51] border-b-2 border-[#022B51] -mb-px"
                         : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                     }`}
                   >
@@ -1440,7 +1440,7 @@ function AdminOrganizations() {
             </div>
 
             {/* Tab Content */}
-            <div className="p-6 min-h-[400px]">
+            <div className="p-3 sm:p-6 min-h-[400px]">
               {activeTab === "organization-details" && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1457,7 +1457,7 @@ function AdminOrganizations() {
                             e.target.value,
                           )
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                         placeholder="Enter legal name"
                       />
                     </div>
@@ -1474,7 +1474,7 @@ function AdminOrganizations() {
                             e.target.value,
                           )
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                         placeholder="Enter trade name"
                       />
                     </div>
@@ -1495,7 +1495,7 @@ function AdminOrganizations() {
                               e.target.value,
                             )
                           }
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C] appearance-none bg-white"
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] appearance-none bg-white"
                         >
                           <option value="">Select Category</option>
                           <option value="Private Limited Company">
@@ -1525,7 +1525,7 @@ function AdminOrganizations() {
                         onChange={(e) =>
                           updateNewOrganizationField("gstin", e.target.value)
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                         placeholder="Enter GSTIN"
                       />
                     </div>
@@ -1542,7 +1542,7 @@ function AdminOrganizations() {
                             e.target.value,
                           )
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                         placeholder="Enter PAN Number"
                       />
                     </div>
@@ -1560,7 +1560,7 @@ function AdminOrganizations() {
                               e.target.value,
                             )
                           }
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                         />
                       </div>
                     </div>
@@ -1622,7 +1622,7 @@ function AdminOrganizations() {
                             className="hidden"
                             accept=".pdf,.jpg,.jpeg,.png"
                           />
-                          <span className="px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm whitespace-nowrap">
+                          <span className="px-4 py-3 text-white rounded-xl hover:opacity-90 transition-all text-sm whitespace-nowrap" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                             {newOrganization.panFile ? "Change" : "Upload"}
                           </span>
                         </label>
@@ -1642,7 +1642,7 @@ function AdminOrganizations() {
                         onChange={(e) =>
                           updateNewOrganizationField("tan", e.target.value)
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                         placeholder="Enter TAN"
                       />
                     </div>
@@ -1656,7 +1656,7 @@ function AdminOrganizations() {
                         onChange={(e) =>
                           updateNewOrganizationField("cin", e.target.value)
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                         placeholder="Enter CIN"
                       />
                     </div>
@@ -1684,7 +1684,7 @@ function AdminOrganizations() {
                             e.target.value,
                           )
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                         placeholder="Enter Address Line 1"
                       />
                     </div>
@@ -1703,7 +1703,7 @@ function AdminOrganizations() {
                             e.target.value,
                           )
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                         placeholder="Enter Address Line 2 (Optional)"
                       />
                     </div>
@@ -1722,7 +1722,7 @@ function AdminOrganizations() {
                             e.target.value,
                           )
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                         placeholder="Enter District"
                       />
                     </div>
@@ -1741,7 +1741,7 @@ function AdminOrganizations() {
                             e.target.value,
                           )
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                         placeholder="Enter State"
                       />
                     </div>
@@ -1762,7 +1762,7 @@ function AdminOrganizations() {
                             e.target.value,
                           )
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                         placeholder="Enter Country"
                       />
                     </div>
@@ -1830,7 +1830,7 @@ function AdminOrganizations() {
                             }
                           }
                         }}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                         placeholder="Enter 6-digit PIN Code"
                         maxLength={6}
                       />
@@ -1847,7 +1847,7 @@ function AdminOrganizations() {
                     </h3>
                     <button
                       onClick={addNewDirectorPartner}
-                      className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
+                      className="flex items-center gap-2 px-4 py-2 text-white rounded-xl hover:opacity-90 transition-all text-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       <FiPlus className="w-4 h-4" /> Add Director/Partner
                     </button>
@@ -1861,7 +1861,7 @@ function AdminOrganizations() {
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
-                        <thead className="bg-[#00486D] text-white">
+                        <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           <tr>
                             <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                               Name
@@ -1900,7 +1900,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="Name"
                                 />
                               </td>
@@ -1915,7 +1915,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="DIN Number"
                                 />
                               </td>
@@ -1930,7 +1930,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="Contact"
                                 />
                               </td>
@@ -1945,7 +1945,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="Email"
                                 />
                               </td>
@@ -1960,7 +1960,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                 />
                               </td>
                               <td className="px-4 py-3">
@@ -1973,7 +1973,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                 >
                                   <option value="Active">Active</option>
                                   <option value="Inactive">Inactive</option>
@@ -2006,7 +2006,7 @@ function AdminOrganizations() {
                     </h3>
                     <button
                       onClick={addNewDigitalSignature}
-                      className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
+                      className="flex items-center gap-2 px-4 py-2 text-white rounded-xl hover:opacity-90 transition-all text-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       <FiPlus className="w-4 h-4" /> Add Digital Signature
                     </button>
@@ -2020,7 +2020,7 @@ function AdminOrganizations() {
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
-                        <thead className="bg-[#00486D] text-white">
+                        <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           <tr>
                             <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                               Name
@@ -2053,7 +2053,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="Name"
                                 />
                               </td>
@@ -2068,7 +2068,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="DSC Number"
                                 />
                               </td>
@@ -2083,7 +2083,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                 />
                               </td>
                               <td className="px-4 py-3">
@@ -2096,7 +2096,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                 >
                                   <option value="Active">Active</option>
                                   <option value="Inactive">Inactive</option>
@@ -2122,7 +2122,7 @@ function AdminOrganizations() {
               )}
 
               {activeTab === "attachments" && (
-                <div className="bg-[#F8F9FA] rounded-xl p-6">
+                <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Attachments
                   </h3>
@@ -2144,7 +2144,7 @@ function AdminOrganizations() {
                           },
                         )
                       }
-                      className="px-6 py-2 bg-[#01334C] text-white rounded-lg text-sm font-semibold hover:bg-[#00486D] transition-colors"
+                      className="px-6 py-2 text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       Go to Company Documents
                     </button>
@@ -2160,7 +2160,7 @@ function AdminOrganizations() {
                     </h3>
                     <button
                       onClick={addNewWebsite}
-                      className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
+                      className="flex items-center gap-2 px-4 py-2 text-white rounded-xl hover:opacity-90 transition-all text-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       <FiPlus className="w-4 h-4" /> Add Credential
                     </button>
@@ -2174,7 +2174,7 @@ function AdminOrganizations() {
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
-                        <thead className="bg-[#00486D] text-white">
+                        <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           <tr>
                             <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                               Type
@@ -2209,7 +2209,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                 >
                                   <option value="">Select Type</option>
                                   <option value="Income Tax">Income Tax</option>
@@ -2250,7 +2250,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="URL"
                                 />
                               </td>
@@ -2265,7 +2265,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="Login"
                                 />
                               </td>
@@ -2283,7 +2283,7 @@ function AdminOrganizations() {
                                         e.target.value,
                                       )
                                     }
-                                    className="w-full px-2 py-1 pr-8 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                    className="w-full px-2 py-1 pr-8 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                     placeholder="Password"
                                   />
                                   <button
@@ -2312,7 +2312,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="Remarks"
                                 />
                               </td>
@@ -2347,7 +2347,7 @@ function AdminOrganizations() {
                 <button
                   onClick={handleSaveNewOrganization}
                   disabled={saving}
-                  className="px-6 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors font-medium disabled:opacity-50"
+                  className="px-6 py-3 text-white rounded-xl hover:opacity-90 transition-all font-medium disabled:opacity-50" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   {saving ? "Saving..." : "Create Organization"}
                 </button>
@@ -2365,7 +2365,7 @@ function AdminOrganizations() {
       <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
         <button
           onClick={() => setSelectedOrg(null)}
-          className="mb-6 flex items-center text-[#01334C] hover:text-[#00486D] font-medium"
+          className="mb-6 flex items-center text-[#022B51] hover:text-[#022B51] font-medium"
         >
           <FiChevronLeft className="w-5 h-5 mr-2" /> Back to List
         </button>
@@ -2389,7 +2389,7 @@ function AdminOrganizations() {
             <div className="flex gap-3">
               <button
                 onClick={handleEditOrganization}
-                className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-white rounded-xl hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 <FiEdit className="w-4 h-4" /> Edit
               </button>
@@ -2431,7 +2431,7 @@ function AdminOrganizations() {
                   onClick={() => setActiveDetailTab(tab.key)}
                   className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 whitespace-nowrap ${
                     activeDetailTab === tab.key
-                      ? "bg-white text-[#00486D] border-b-2 border-[#00486D] -mb-px"
+                      ? "bg-white text-[#022B51] border-b-2 border-[#022B51] -mb-px"
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                   }`}
                 >
@@ -2458,7 +2458,7 @@ function AdminOrganizations() {
                         onChange={(e) =>
                           updateOrganizationField("legalName", e.target.value)
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                       />
                     ) : (
                       <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
@@ -2477,7 +2477,7 @@ function AdminOrganizations() {
                         onChange={(e) =>
                           updateOrganizationField("tradeName", e.target.value)
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                       />
                     ) : (
                       <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
@@ -2500,7 +2500,7 @@ function AdminOrganizations() {
                         onChange={(e) =>
                           updateOrganizationField("gstin", e.target.value)
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                       />
                     ) : (
                       <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
@@ -2519,7 +2519,7 @@ function AdminOrganizations() {
                         onChange={(e) =>
                           updateOrganizationField("panNumber", e.target.value)
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                       />
                     ) : (
                       <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
@@ -2541,7 +2541,7 @@ function AdminOrganizations() {
                             e.target.value,
                           )
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                       />
                     ) : (
                       <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
@@ -2608,7 +2608,7 @@ function AdminOrganizations() {
                             className="hidden"
                             accept=".pdf,.jpg,.jpeg,.png"
                           />
-                          <span className="px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm whitespace-nowrap">
+                          <span className="px-4 py-3 text-white rounded-xl hover:opacity-90 transition-all text-sm whitespace-nowrap" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                             {editingOrg.panFile ? "Change" : "Upload"}
                           </span>
                         </label>
@@ -2642,7 +2642,7 @@ function AdminOrganizations() {
                         onChange={(e) =>
                           updateOrganizationField("category", e.target.value)
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                       >
                         <option value="">Select Category</option>
                         <option value="Private Limited Company">
@@ -2676,7 +2676,7 @@ function AdminOrganizations() {
                         onChange={(e) =>
                           updateOrganizationField("tan", e.target.value)
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                       />
                     ) : (
                       <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
@@ -2698,7 +2698,7 @@ function AdminOrganizations() {
                         onChange={(e) =>
                           updateOrganizationField("cin", e.target.value)
                         }
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                       />
                     ) : (
                       <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-900">
@@ -2727,7 +2727,7 @@ function AdminOrganizations() {
                                 e.target.value,
                               )
                             }
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                             placeholder="Enter Address Line 1"
                           />
                         ) : (
@@ -2752,7 +2752,7 @@ function AdminOrganizations() {
                                 e.target.value,
                               )
                             }
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                             placeholder="Enter Address Line 2 (Optional)"
                           />
                         ) : (
@@ -2777,7 +2777,7 @@ function AdminOrganizations() {
                                 e.target.value,
                               )
                             }
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                             placeholder="Enter District"
                           />
                         ) : (
@@ -2802,7 +2802,7 @@ function AdminOrganizations() {
                                 e.target.value,
                               )
                             }
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                             placeholder="Enter State"
                           />
                         ) : (
@@ -2829,7 +2829,7 @@ function AdminOrganizations() {
                                 e.target.value,
                               )
                             }
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                             placeholder="Enter Country"
                           />
                         ) : (
@@ -2910,7 +2910,7 @@ function AdminOrganizations() {
                                   }
                                 }
                               }}
-                              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                               placeholder="Enter 6-digit PIN Code"
                               maxLength={6}
                             />
@@ -2936,7 +2936,7 @@ function AdminOrganizations() {
                   {editingOrg && (
                     <button
                       onClick={addDirectorPartner}
-                      className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
+                      className="flex items-center gap-2 px-4 py-2 text-white rounded-xl hover:opacity-90 transition-all text-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       <FiPlus className="w-4 h-4" /> Add Director/Partner
                     </button>
@@ -2954,7 +2954,7 @@ function AdminOrganizations() {
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-[#00486D] text-white">
+                      <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         <tr>
                           <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                             Name
@@ -3000,7 +3000,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="Name"
                                 />
                               ) : (
@@ -3021,7 +3021,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="DIN Number"
                                 />
                               ) : (
@@ -3042,7 +3042,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="Contact"
                                 />
                               ) : (
@@ -3063,7 +3063,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="Email"
                                 />
                               ) : (
@@ -3084,7 +3084,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                 />
                               ) : (
                                 <span className="text-gray-900">
@@ -3105,7 +3105,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                 >
                                   <option value="Active">Active</option>
                                   <option value="Inactive">Inactive</option>
@@ -3144,7 +3144,7 @@ function AdminOrganizations() {
                   {editingOrg && (
                     <button
                       onClick={addDigitalSignature}
-                      className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
+                      className="flex items-center gap-2 px-4 py-2 text-white rounded-xl hover:opacity-90 transition-all text-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       <FiPlus className="w-4 h-4" /> Add Digital Signature
                     </button>
@@ -3162,7 +3162,7 @@ function AdminOrganizations() {
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-[#00486D] text-white">
+                      <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         <tr>
                           <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                             Name
@@ -3202,7 +3202,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="Name"
                                 />
                               ) : (
@@ -3223,7 +3223,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="DSC Number"
                                 />
                               ) : (
@@ -3244,7 +3244,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                 />
                               ) : (
                                 <span className="text-gray-900">
@@ -3265,7 +3265,7 @@ function AdminOrganizations() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                 >
                                   <option value="Active">Active</option>
                                   <option value="Inactive">Inactive</option>
@@ -3296,7 +3296,7 @@ function AdminOrganizations() {
             )}
 
             {activeDetailTab === "attachments" && (
-              <div className="bg-[#F8F9FA] rounded-xl p-6">
+              <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Attachments
                 </h3>
@@ -3318,7 +3318,7 @@ function AdminOrganizations() {
                         },
                       )
                     }
-                    className="px-6 py-2 bg-[#01334C] text-white rounded-lg text-sm font-semibold hover:bg-[#00486D] transition-colors"
+                    className="px-6 py-2 text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                   >
                     Go to Company Documents
                   </button>
@@ -3352,7 +3352,7 @@ function AdminOrganizations() {
                           ],
                         });
                       }}
-                      className="flex items-center gap-2 px-4 py-2 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors text-sm"
+                      className="flex items-center gap-2 px-4 py-2 text-white rounded-xl hover:opacity-90 transition-all text-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       <FiPlus className="w-4 h-4" /> Add Credential
                     </button>
@@ -3369,7 +3369,7 @@ function AdminOrganizations() {
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-[#00486D] text-white">
+                      <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         <tr>
                           <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                             Type
@@ -3417,7 +3417,7 @@ function AdminOrganizations() {
                                       websites: updatedWebsites,
                                     });
                                   }}
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                 >
                                   <option value="">Select Type</option>
                                   <option value="Income Tax">Income Tax</option>
@@ -3470,7 +3470,7 @@ function AdminOrganizations() {
                                       websites: updatedWebsites,
                                     });
                                   }}
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="URL"
                                 />
                               ) : (
@@ -3497,7 +3497,7 @@ function AdminOrganizations() {
                                       websites: updatedWebsites,
                                     });
                                   }}
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="Login"
                                 />
                               ) : (
@@ -3527,7 +3527,7 @@ function AdminOrganizations() {
                                         websites: updatedWebsites,
                                       });
                                     }}
-                                    className="w-full px-2 py-1 pr-8 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                    className="w-full px-2 py-1 pr-8 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                     placeholder="Password"
                                   />
                                   <button
@@ -3581,7 +3581,7 @@ function AdminOrganizations() {
                                       websites: updatedWebsites,
                                     });
                                   }}
-                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#01334C]"
+                                  className="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#022B51]"
                                   placeholder="Remarks"
                                 />
                               ) : (
@@ -3621,7 +3621,7 @@ function AdminOrganizations() {
               <div className="px-6 pb-6 pt-6">
                 <div className="space-y-6">
                   {/* Admin Notes Section */}
-                  <div className="bg-[#F8F9FA] rounded-xl p-6">
+                  <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-[15px] font-medium text-gray-900">
                         Admin Notes (Editable)
@@ -3639,7 +3639,7 @@ function AdminOrganizations() {
                           });
                           setIsAddingNote(true);
                         }}
-                        className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold flex items-center gap-2"
+                        className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all text-xs font-semibold flex items-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                       >
                         <FiPlus className="w-3 h-3" />
                         Add Note
@@ -3750,7 +3750,7 @@ function AdminOrganizations() {
                                   ],
                                 })
                               }
-                              className="mt-1 text-xs text-[#00486D] hover:underline"
+                              className="mt-1 text-xs text-[#022B51] hover:underline"
                             >
                               + Add client action item
                             </button>
@@ -3795,7 +3795,7 @@ function AdminOrganizations() {
                                   ],
                                 })
                               }
-                              className="mt-1 text-xs text-[#00486D] hover:underline"
+                              className="mt-1 text-xs text-[#022B51] hover:underline"
                             >
                               + Add admin action item
                             </button>
@@ -3811,12 +3811,12 @@ function AdminOrganizations() {
                             className={`flex items-center justify-center gap-2 px-3 py-3 border-2 border-dashed rounded-lg ${
                               uploadingAttachments
                                 ? "border-gray-200 bg-gray-50 cursor-not-allowed"
-                                : "border-gray-200 hover:border-[#00486D] cursor-pointer bg-white"
+                                : "border-gray-200 hover:border-[#022B51] cursor-pointer bg-white"
                             }`}
                           >
                             {uploadingAttachments ? (
                               <>
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#00486D]"></div>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#022B51]"></div>
                                 <span className="text-xs text-gray-600">
                                   Uploading...
                                 </span>
@@ -3883,7 +3883,7 @@ function AdminOrganizations() {
                           <button
                             onClick={handleSaveAdminNote}
                             disabled={savingNotes}
-                            className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold disabled:opacity-50"
+                            className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all text-xs font-semibold disabled:opacity-50" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                           >
                             {savingNotes
                               ? "Saving..."
@@ -3908,7 +3908,7 @@ function AdminOrganizations() {
                       return filteredAdminNotes.length > 0 ? (
                         <div className="overflow-x-auto rounded-lg">
                           <table className="w-full text-sm">
-                            <thead className="bg-[#00486D] text-white">
+                            <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                               <tr>
                                 <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                                   Date
@@ -3966,7 +3966,7 @@ function AdminOrganizations() {
                                               ),
                                             )
                                           }
-                                          className="flex items-center gap-1 px-3 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs font-medium"
+                                          className="flex items-center gap-1 px-3 py-2 text-white rounded-md hover:opacity-90 transition-all text-xs font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                         >
                                           <FiEdit className="w-4 h-4" />
                                           Edit
@@ -4012,7 +4012,7 @@ function AdminOrganizations() {
                   </div>
 
                   {/* Client Notes Section */}
-                  <div className="bg-[#F8F9FA] rounded-xl p-6">
+                  <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
                     <h3 className="text-[15px] font-medium text-gray-900 mb-4">
                       Client Notes (Read Only)
                     </h3>
@@ -4029,7 +4029,7 @@ function AdminOrganizations() {
                       return filteredUserNotes.length > 0 ? (
                         <div className="overflow-x-auto rounded-lg">
                           <table className="w-full text-sm">
-                            <thead className="bg-[#00486D] text-white">
+                            <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                               <tr>
                                 <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                                   Date
@@ -4079,7 +4079,7 @@ function AdminOrganizations() {
                                         onClick={() =>
                                           setSelectedUserNote(note)
                                         }
-                                        className="flex items-center gap-1 px-3 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs font-medium"
+                                        className="flex items-center gap-1 px-3 py-2 text-white rounded-md hover:opacity-90 transition-all text-xs font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                       >
                                         <FiEye className="w-4 h-4" />
                                         View Details
@@ -4115,7 +4115,7 @@ function AdminOrganizations() {
               <div className="px-6 pb-6 pt-6">
                 <div className="space-y-6">
                   {/* Admin Tasks Section */}
-                  <div className="bg-[#F8F9FA] rounded-xl p-6">
+                  <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-[15px] font-medium text-gray-900">
                         Admin Tasks (Editable)
@@ -4132,7 +4132,7 @@ function AdminOrganizations() {
                           });
                           setIsAddingAdminTask(true);
                         }}
-                        className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold flex items-center gap-2"
+                        className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all text-xs font-semibold flex items-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                       >
                         <FiPlus className="w-3 h-3" />
                         Add Task
@@ -4263,7 +4263,7 @@ function AdminOrganizations() {
                           <button
                             onClick={addAdminTask}
                             disabled={savingTasks}
-                            className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold disabled:opacity-50"
+                            className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all text-xs font-semibold disabled:opacity-50" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                           >
                             {savingTasks
                               ? "Saving..."
@@ -4288,7 +4288,7 @@ function AdminOrganizations() {
                       return filteredAdminTasks.length > 0 ? (
                         <div className="overflow-x-auto rounded-lg">
                           <table className="w-full text-sm">
-                            <thead className="bg-[#00486D] text-white">
+                            <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                               <tr>
                                 <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                                   Date
@@ -4337,7 +4337,7 @@ function AdminOrganizations() {
                                             ),
                                           )
                                         }
-                                        className="flex items-center gap-1 px-3 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs font-medium"
+                                        className="flex items-center gap-1 px-3 py-2 text-white rounded-md hover:opacity-90 transition-all text-xs font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                       >
                                         <FiEdit className="w-4 h-4" />
                                         Edit
@@ -4381,7 +4381,7 @@ function AdminOrganizations() {
                   </div>
 
                   {/* Client Tasks Section */}
-                  <div className="bg-[#F8F9FA] rounded-xl p-6">
+                  <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
                     <h3 className="text-[15px] font-medium text-gray-900 mb-4">
                       Client Tasks (Read Only)
                     </h3>
@@ -4398,7 +4398,7 @@ function AdminOrganizations() {
                       return filteredUserTasks.length > 0 ? (
                         <div className="overflow-x-auto rounded-lg">
                           <table className="w-full text-sm">
-                            <thead className="bg-[#00486D] text-white">
+                            <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                               <tr>
                                 <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                                   Date
@@ -4551,7 +4551,7 @@ function AdminOrganizations() {
                                       await handleViewFile(fileUrl);
                                     }
                                   }}
-                                  className="flex items-center justify-center w-7 h-7 rounded-full bg-[#00486D] text-white hover:bg-[#01334C] flex-shrink-0"
+                                  className="flex items-center justify-center w-7 h-7 rounded-full text-white flex-shrink-0" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                   title="View file"
                                 >
                                   <FiEye className="w-4 h-4" />
@@ -4589,7 +4589,7 @@ function AdminOrganizations() {
                 </button>
                 <button
                   onClick={handleSaveOrganization}
-                  className="px-6 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors"
+                  className="px-6 py-3 text-white rounded-xl hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   {savingOrg ? "Saving..." : "Save Changes"}
                 </button>
@@ -4627,7 +4627,7 @@ function AdminOrganizations() {
         <div className="flex items-center gap-3 self-start md:self-auto">
           <button
             onClick={handleAddOrganization}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-colors shadow-sm font-medium"
+            className="flex items-center gap-2 px-4 py-2.5 text-white rounded-xl hover:opacity-90 transition-all shadow-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             <FiPlus className="w-5 h-5" /> Create New
           </button>
@@ -4636,7 +4636,7 @@ function AdminOrganizations() {
               loadClients();
               loadOrganizations();
             }}
-            className="p-2.5 text-[#00486D] bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
+            className="p-2.5 text-[#022B51] bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
           >
             <FiRefreshCw className="w-5 h-5" />
           </button>
@@ -4651,14 +4651,14 @@ function AdminOrganizations() {
             placeholder="Search organizations..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D]"
+            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
           />
         </div>
         <div className="relative">
           <select
             value={clientFilter}
             onChange={(e) => setClientFilter(e.target.value)}
-            className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] appearance-none bg-white"
+            className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] appearance-none bg-white"
           >
             <option value="">All Clients</option>
             {uniqueClients.map((c, i) => (
@@ -4672,22 +4672,22 @@ function AdminOrganizations() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
-        <div className="p-6">
+        <div className="p-3 sm:p-6">
           <div className="p-4 bg-[#f5f5f5] rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full border-separate border-spacing-0">
                 <thead>
                   <tr className="text-white">
-                    <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D] rounded-l-xl">
+                    <th className="px-6 py-4 text-left text-sm font-medium rounded-l-xl" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                       Organisation Name
                     </th>
-                    <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                    <th className="px-6 py-4 text-left text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                       Contact Person
                     </th>
-                    <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                    <th className="px-6 py-4 text-left text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                       Category
                     </th>
-                    <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D] rounded-r-xl">
+                    <th className="px-6 py-4 text-left text-sm font-medium rounded-r-xl" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                       Action
                     </th>
                   </tr>
@@ -4704,7 +4704,7 @@ function AdminOrganizations() {
                             onClick={() => handleViewAll(org)}
                             className="text-left hover:underline"
                           >
-                            <div className="text-sm font-medium text-[#01334C] hover:text-[#00486D]">
+                            <div className="text-sm font-medium text-[#022B51] hover:text-[#022B51]">
                               {org.legalName !== "-"
                                 ? org.legalName
                                 : org.tradeName}
@@ -4738,7 +4738,7 @@ function AdminOrganizations() {
                         <td className="px-6 py-4">
                           <button
                             onClick={() => handleViewAll(org)}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-[#01334C]/10 text-[#01334C] rounded-lg hover:bg-[#01334C] hover:text-white transition-colors text-xs font-medium"
+                            className="flex items-center gap-2 px-3 py-1.5 bg-[#022B51]/10 text-[#022B51] rounded-lg hover:bg-[#015079] hover:text-white transition-colors text-xs font-medium"
                           >
                             <FiEye className="w-4 h-4" /> View Details
                           </button>
@@ -4771,14 +4771,14 @@ function AdminOrganizations() {
                 <button
                   onClick={() => paginate(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="p-2 bg-[#00486D] text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#003652]"
+                  className="p-2 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   <FiChevronLeft className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => paginate(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="p-2 bg-[#00486D] text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#003652]"
+                  className="p-2 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   <FiChevronRight className="w-4 h-4" />
                 </button>

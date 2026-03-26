@@ -12,7 +12,7 @@ function LogoutModal({ isOpen, onClose, onConfirm }) {
       ></div>
       
       {/* Modal */}
-      <div className="relative bg-white rounded-lg shadow-xl w-[400px] p-6">
+      <div className="relative bg-white rounded-lg shadow-xl w-[400px] p-3 sm:p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Confirm Logout</h3>
         <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
         
@@ -25,7 +25,7 @@ function LogoutModal({ isOpen, onClose, onConfirm }) {
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 text-sm font-medium text-white bg-[#01334C] hover:bg-[#00486D] rounded-lg transition-colors duration-200"
+            className="px-4 py-2 text-sm font-medium text-white rounded-lg hover:opacity-90 transition-all duration-200" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             Logout
           </button>

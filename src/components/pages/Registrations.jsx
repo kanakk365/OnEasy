@@ -752,13 +752,13 @@ function Registrations() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-[#f3f5f7] pt-16 lg:pt-0">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
         <div className="mb-6">
           {/* Back Button */}
           <button
             onClick={() => navigate("/client")}
-            className="flex items-center gap-2 text-[#01334C] hover:text-[#00486D] mb-4 text-sm font-medium"
+            className="flex items-center gap-2 text-[#022B51] hover:text-[#022B51] mb-4 text-sm font-medium"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
@@ -769,7 +769,7 @@ function Registrations() {
             <h1 className="text-2xl font-semibold text-gray-900">
               Select your Services
             </h1>
-            <div className="relative w-[400px]">
+            <div className="relative w-full max-w-[400px]">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <IoSearchOutline className="h-5 w-5 text-gray-400" />
               </div>
@@ -778,49 +778,53 @@ function Registrations() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search for a service (e.g. GST, Income Tax, ROC)"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#01334C] focus:border-[#01334C] bg-white"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#022B51] focus:border-[#022B51] bg-white"
               />
             </div>
           </div>
-          <div className="border-b border-gray-200">
-            <div className="flex space-x-8">
+          <div className="border-b border-gray-200 overflow-x-auto">
+            <div className="flex space-x-2 sm:space-x-8 min-w-max">
               <button
                 onClick={() => setView("services")}
-                className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
+                className={`py-2 px-5 text-sm relative rounded-lg transition-all ${
                   view === "services"
-                    ? "bg-[#01466a] text-white"
+                    ? "text-white"
                     : "text-gray-500 hover:text-gray-900"
                 }`}
+                style={view === "services" ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
               >
                 Services
               </button>
               <button
                 onClick={() => setView("my")}
-                className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
+                className={`py-2 px-5 text-sm relative rounded-lg transition-all ${
                   view === "my"
-                    ? "bg-[#01466a] text-white"
+                    ? "text-white"
                     : "text-gray-500 hover:text-gray-900"
                 }`}
+                style={view === "my" ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
               >
                 My Registrations
               </button>
               <button
                 onClick={() => setView("suggested-registrations")}
-                className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
+                className={`py-2 px-5 text-sm relative rounded-lg transition-all ${
                   view === "suggested-registrations"
-                    ? "bg-[#01466a] text-white"
+                    ? "text-white"
                     : "text-gray-500 hover:text-gray-900"
                 }`}
+                style={view === "suggested-registrations" ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
               >
                 Suggested Registrations
               </button>
               <button
                 onClick={() => setView("suggested-compliances")}
-                className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
+                className={`py-2 px-5 text-sm relative rounded-lg transition-all ${
                   view === "suggested-compliances"
-                    ? "bg-[#01466a] text-white"
+                    ? "text-white"
                     : "text-gray-500 hover:text-gray-900"
                 }`}
+                style={view === "suggested-compliances" ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
               >
                 Suggested Compliances
               </button>
@@ -829,7 +833,7 @@ function Registrations() {
         </div>
 
         {view === "suggested-registrations" || view === "suggested-compliances" ? (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-6">
             {suggestedLoading ? (
               <div className="text-sm text-gray-500 p-8 text-center">
                 Loading suggestions...
@@ -847,16 +851,16 @@ function Registrations() {
                         <div
                           key={set.submissionId || idx}
                           onClick={() => setSelectedSetId(set.submissionId)}
-                          className="group bg-white rounded-xl p-6 border border-gray-200 hover:border-[#01466a] hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
+                          className="group bg-white rounded-xl p-3 sm:p-6 border border-gray-200 hover:border-[#022B51] hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
                         >
-                          <div className="absolute top-0 left-0 w-1 h-full bg-[#01466a] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          <div className="absolute top-0 left-0 w-1 h-full bg-[#022B51] opacity-0 group-hover:opacity-100 transition-opacity"></div>
                           <div className="flex items-start justify-between">
-                            <h3 className="text-xl font-bold text-[#00486D] mb-3 line-clamp-2 pr-4">
+                            <h3 className="text-lg sm:text-xl font-bold text-[#022B51] mb-3 line-clamp-2 pr-4">
                               {getOrgName(set)}
                             </h3>
                             <div className="flex items-center gap-2 flex-shrink-0">
-                              <div className="w-8 h-8 rounded-full bg-[#00486D]/10 flex items-center justify-center">
-                                <span className="text-sm font-bold text-[#00486D]">{count}</span>
+                              <div className="w-8 h-8 rounded-full bg-[#022B51]/10 flex items-center justify-center">
+                                <span className="text-sm font-bold text-[#022B51]">{count}</span>
                               </div>
                               <button
                                 onClick={(e) => handleDeleteResponseSet(e, set.submissionId)}
@@ -888,7 +892,7 @@ function Registrations() {
                   <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
                     <button
                       onClick={() => setSelectedSetId(null)}
-                      className="flex items-center text-sm font-medium text-gray-500 hover:text-[#00486D] transition-colors"
+                      className="flex items-center text-sm font-medium text-gray-500 hover:text-[#022B51] transition-colors"
                     >
                       <IoChevronBackOutline className="mr-1 w-4 h-4" />
                       Back to Organizations
@@ -930,10 +934,10 @@ function Registrations() {
                                 }
                                 route ? navigate(route) : navigate(view === "suggested-registrations" ? "/registrations" : "/compliance");
                               }}
-                              className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#01334C] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-gray-100"
+                              className="group bg-white rounded-xl p-3 sm:p-6 hover:shadow-md hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-gray-100"
                             >
                               <div>
-                                <h3 className="text-lg font-semibold text-[#00486D] mb-1 group-hover:text-white">
+                                <h3 className="text-lg font-semibold text-[#022B51] mb-1 group-hover:text-white">
                                   {item.name}
                                 </h3>
                                 <p className="text-sm text-gray-400 group-hover:text-gray-200">
@@ -941,7 +945,7 @@ function Registrations() {
                                 </p>
                               </div>
                               <div className="w-10 h-10 rounded-full bg-[#F5F7FA] group-hover:bg-[#246181] flex items-center justify-center transition-colors">
-                                <IoChevronForwardOutline className="text-[#00486D] text-xl group-hover:text-white" />
+                                <IoChevronForwardOutline className="text-[#022B51] text-xl group-hover:text-white" />
                               </div>
                             </div>
                           );
@@ -963,7 +967,8 @@ function Registrations() {
                 </p>
                 <button
                   onClick={() => navigate("/compliance")}
-                  className="px-6 py-2 bg-[#01466a] text-white rounded-lg text-sm font-medium hover:bg-[#01334C] transition-colors"
+                  className="px-6 py-2 text-white rounded-lg text-sm font-medium hover:hover:opacity-90 transition-all"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   Go to Compliance
                 </button>
@@ -1013,11 +1018,11 @@ function Registrations() {
               ].map((service, idx) => (
                 <div
                   key={idx}
-                  className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#01334C] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-transparent hover:border-gray-100/10"
+                  className="group bg-white rounded-xl p-3 sm:p-6 hover:shadow-md hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-transparent hover:border-gray-100/10"
                   onClick={service.onClick}
                 >
                   <div>
-                    <h3 className="text-lg font-semibold text-[#00486D] mb-1 group-hover:text-white">
+                    <h3 className="text-lg font-semibold text-[#022B51] mb-1 group-hover:text-white">
                       {service.title}
                     </h3>
                     <p className="text-sm text-gray-400 group-hover:text-gray-200">
@@ -1025,7 +1030,7 @@ function Registrations() {
                     </p>
                   </div>
                   <div className="w-10 h-10 rounded-full bg-[#F5F7FA] group-hover:bg-[#246181] flex items-center justify-center transition-colors">
-                    <IoChevronForwardOutline className="text-[#00486D] text-xl group-hover:text-white" />
+                    <IoChevronForwardOutline className="text-[#022B51] text-xl group-hover:text-white" />
                   </div>
                 </div>
               ))}
@@ -1070,7 +1075,8 @@ function Registrations() {
                     </p>
                     <button
                       onClick={() => setShowComingSoon(false)}
-                      className="w-full bg-[#00486D] text-white py-3 px-6 rounded-lg font-medium hover:bg-[#003855] transition-colors duration-200"
+                      className="w-full text-white py-3 px-6 rounded-lg font-medium hover:opacity-90 transition-all duration-200"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       Got it!
                     </button>
@@ -1089,11 +1095,11 @@ function Registrations() {
               ) : filtered.length > 0 ? (
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-[#00486D] text-white">
-                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wide first:rounded-tl-lg">
+                    <tr className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
+                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-sm font-medium tracking-wide first:rounded-tl-lg">
                         Service
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wide">
+                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-sm font-medium tracking-wide">
                         Service Name
                       </th>
                       <th className="px-6 py-4 text-center text-sm font-medium tracking-wide">
@@ -1213,10 +1219,10 @@ function Registrations() {
                                 onClick={() =>
                                   navigate(`/${slug}/view/${ticketId}`)
                                 }
-                                className="px-8 py-2 text-xs font-semibold text-white rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide"
+                                className="px-4 sm:px-8 py-2 text-xs font-semibold text-white rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide"
                                 style={{
                                   background:
-                                    "linear-gradient(90deg, #00486D 0%, #023752 100%)",
+                                    "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                                 }}
                               >
                                 View
@@ -1224,10 +1230,10 @@ function Registrations() {
                             ) : hasDetailRoute ? (
                               <button
                                 onClick={() => navigate(detailRoute)}
-                                className="px-8 py-2 text-xs font-semibold text-white rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide"
+                                className="px-4 sm:px-8 py-2 text-xs font-semibold text-white rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide"
                                 style={{
                                   background:
-                                    "linear-gradient(90deg, #00486D 0%, #023752 100%)",
+                                    "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                                 }}
                               >
                                 View
@@ -1253,7 +1259,7 @@ function Registrations() {
       {confirmDeleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setConfirmDeleteId(null)}>
           <div
-            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-6"
+            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-3 sm:p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50 mx-auto mb-4">
@@ -1285,7 +1291,7 @@ function Registrations() {
       {showDeleteSuccess && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowDeleteSuccess(false)}>
           <div
-            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-6"
+            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-3 sm:p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-50 mx-auto mb-4">
@@ -1300,7 +1306,7 @@ function Registrations() {
             <button
               onClick={() => setShowDeleteSuccess(false)}
               className="w-full px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors"
-              style={{ background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)" }}
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               Done
             </button>

@@ -295,7 +295,7 @@ function ClientServices() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
+    <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -304,7 +304,7 @@ function ClientServices() {
           </div>
           <button
             onClick={() => navigate('/client')}
-            className="px-4 py-2 text-sm font-medium text-[#00486D] border border-[#00486D] rounded-lg hover:bg-[#00486D] hover:text-white transition-colors"
+            className="px-4 py-2 text-sm font-medium text-[#022B51] border border-[#022B51] rounded-lg hover:bg-[#015079] hover:text-white transition-colors"
           >
             Back to Dashboard
           </button>
@@ -317,9 +317,10 @@ function ClientServices() {
                 onClick={() => setActiveServiceTab('Open')}
                 className={`pb-2 mr-4 md:mr-6 text-xs md:text-sm font-medium whitespace-nowrap transition-colors ${
                   activeServiceTab === 'Open' 
-                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
+                    ? 'text-[#022B51] border-b-2' 
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
+                style={activeServiceTab === 'Open' ? { borderImage: "linear-gradient(90deg, #022B51, #015079) 1" } : {}}
               >
                 Open
               </button>
@@ -327,9 +328,10 @@ function ClientServices() {
                 onClick={() => setActiveServiceTab('In progress')}
                 className={`pb-2 mr-4 md:mr-6 text-xs md:text-sm font-medium whitespace-nowrap transition-colors ${
                   activeServiceTab === 'In progress' 
-                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
+                    ? 'text-[#022B51] border-b-2' 
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
+                style={activeServiceTab === 'In progress' ? { borderImage: "linear-gradient(90deg, #022B51, #015079) 1" } : {}}
               >
                 In progress
               </button>
@@ -337,9 +339,10 @@ function ClientServices() {
                 onClick={() => setActiveServiceTab('Completed')}
                 className={`pb-2 text-xs md:text-sm font-medium whitespace-nowrap transition-colors ${
                   activeServiceTab === 'Completed' 
-                    ? 'text-[#01334C] border-b-2 border-[#01334C]' 
+                    ? 'text-[#022B51] border-b-2' 
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
+                style={activeServiceTab === 'Completed' ? { borderImage: "linear-gradient(90deg, #022B51, #015079) 1" } : {}}
               >
                 Completed
               </button>
@@ -349,7 +352,7 @@ function ClientServices() {
               {loadingService ? (
                 <div className="text-sm text-gray-500 p-4 text-center">Loading services...</div>
               ) : filteredServices.length > 0 ? (
-                <table className="w-full">
+                <div className="overflow-x-auto"><table className="w-full">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-200">
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -438,7 +441,7 @@ function ClientServices() {
                                     e.stopPropagation();
                                     handleServiceClick(service);
                                   }}
-                                  className="px-3 py-1 text-xs font-medium text-[#00486D] bg-white border border-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
+                                  className="px-3 py-1 text-xs font-medium text-[#022B51] bg-white border border-[#022B51] rounded-md hover:bg-[#015079] hover:text-white transition-colors"
                                 >
                                   View Details
                                 </button>
@@ -448,7 +451,7 @@ function ClientServices() {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </table></div>
               ) : (
                 <div className="text-sm text-gray-500 p-4 text-center">No services found in this category.</div>
               )}

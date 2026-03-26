@@ -1932,8 +1932,9 @@ function AdminClientOverview() {
               : r,
           ),
         );
-        // Re-fetch registrations to ensure consistency across all data sources
-        fetchAllRegistrations();
+        // Don't re-fetch registrations immediately - the local state update above is sufficient
+        // Re-fetching can cause a race condition where stale data overwrites the optimistic update,
+        // making the service card disappear from the UI
         fetchClientProfile();
         return;
       }
@@ -2116,7 +2117,7 @@ function AdminClientOverview() {
     return (
       <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading client details...</p>
         </div>
       </div>
@@ -2130,7 +2131,7 @@ function AdminClientOverview() {
           <p className="text-gray-600">Client not found</p>
           <button
             onClick={() => navigate("/admin/clients")}
-            className="mt-4 px-4 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C]"
+            className="mt-4 px-4 py-2 text-white rounded-md" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             Back to Clients
           </button>
@@ -2208,7 +2209,7 @@ function AdminClientOverview() {
                 <span
                   className={`ml-2 px-2 py-0.5 rounded-full text-xs font-semibold ${activeTab === tab.key
                     ? "bg-white/20 text-white"
-                    : "bg-[#00486D] text-white"
+                    : "bg-[#022B51] text-white"
                     }`}
                 >
                   {tab.count}
@@ -2385,7 +2386,8 @@ function AdminClientOverview() {
         <>
           <button
             onClick={() => setShowNotepad(!showNotepad)}
-            className="fixed bottom-6 right-6 w-14 h-14 bg-[#00486D] text-white rounded-full shadow-lg hover:bg-[#01334C] transition-all duration-300 flex items-center justify-center z-[9998] hover:scale-110"
+            className="fixed bottom-6 right-6 w-14 h-14 text-white rounded-full shadow-lg hover:opacity-90 transition-all duration-300 flex items-center justify-center z-[9998] hover:scale-110"
+            style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             title="Quick Notes"
           >
             <svg

@@ -61,7 +61,7 @@ const AdminServiceNotesSection = ({ userId, orgId }) => {
     return (
       <div className="flex items-center justify-center py-16">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-sm text-gray-400">Loading service notes...</p>
         </div>
       </div>
@@ -90,7 +90,7 @@ const AdminServiceNotesSection = ({ userId, orgId }) => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#F8F9FA] rounded-xl p-6">
+      <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[15px] font-medium text-gray-900">
             Service Notes
@@ -102,7 +102,7 @@ const AdminServiceNotesSection = ({ userId, orgId }) => {
 
         <div className="overflow-x-auto rounded-lg">
           <table className="w-full text-sm">
-            <thead className="bg-[#00486D] text-white">
+            <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
               <tr>
                 <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                   Date
@@ -131,7 +131,7 @@ const AdminServiceNotesSection = ({ userId, orgId }) => {
                   </td>
                   <td className="px-4 py-3">
                     {note.serviceName ? (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-[#00486D] border border-blue-100">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-[#022B51] border border-blue-100">
                         {note.serviceName}
                       </span>
                     ) : (

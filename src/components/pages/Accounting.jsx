@@ -396,9 +396,9 @@ function Accounting() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading documents...</p>
         </div>
       </div>
@@ -416,12 +416,12 @@ function Accounting() {
 
   return (
     <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="mb-6">
           <button
             onClick={() => navigate(getBackPath())}
-            className="text-[#01334C] hover:text-[#00486D] mb-4 flex items-center gap-2"
+            className="text-[#022B51] hover:text-[#022B51] mb-4 flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -430,7 +430,7 @@ function Accounting() {
           </button>
 
           {organization && (
-            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
               <h1 className="text-2xl font-semibold text-gray-900">
                 {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
               </h1>
@@ -472,7 +472,7 @@ function Accounting() {
         )}
 
         {/* Tally Data Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Tally Data</h3>
           {tallyData.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -492,7 +492,7 @@ function Accounting() {
                   <div className="flex gap-2 mt-3">
                     <button
                       onClick={() => handleViewDocument(doc.id, doc.document_url || doc.url)}
-                      className="flex-1 px-3 py-1.5 text-xs font-medium text-[#01334C] border border-[#01334C] rounded-md hover:bg-[#01334C] hover:text-white transition-colors"
+                      className="flex-1 px-3 py-1.5 text-xs font-medium text-[#022B51] border border-[#022B51] rounded-md hover:bg-[#015079] hover:text-white transition-colors"
                     >
                       View
                     </button>
@@ -523,7 +523,7 @@ function Accounting() {
         </div>
 
         {/* Workings Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Workings</h3>
           {workings.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -543,7 +543,7 @@ function Accounting() {
                   <div className="flex gap-2 mt-3">
                     <button
                       onClick={() => handleViewDocument(doc.id, doc.document_url || doc.url)}
-                      className="flex-1 px-3 py-1.5 text-xs font-medium text-[#01334C] border border-[#01334C] rounded-md hover:bg-[#01334C] hover:text-white transition-colors"
+                      className="flex-1 px-3 py-1.5 text-xs font-medium text-[#022B51] border border-[#022B51] rounded-md hover:bg-[#015079] hover:text-white transition-colors"
                     >
                       View
                     </button>
@@ -576,7 +576,7 @@ function Accounting() {
         {/* Upload Modal */}
         {showUploadModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md">
-            <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+            <div className="bg-white rounded-xl shadow-xl max-w-[95vw] sm:max-w-md w-full mx-4 p-3 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
                   Upload {uploadType === 'tally_data' ? 'Tally Data' : 'Workings'}
@@ -600,7 +600,7 @@ function Accounting() {
                     type="text"
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                     placeholder="Enter description..."
                   />
                 </div>
@@ -614,7 +614,7 @@ function Accounting() {
                     type="file"
                     onChange={handleFileSelect}
                     accept=".pdf,.xls,.xlsx,.csv,.txt"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                   />
                   {formData.file && (
                     <p className="text-xs text-gray-500 mt-1">{formData.file.name}</p>
@@ -633,7 +633,7 @@ function Accounting() {
                 <button
                   onClick={handleUpload}
                   disabled={uploading || !formData.file}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[#01334C] rounded-md hover:bg-[#00486D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   {uploading ? "Uploading..." : "Upload"}
                 </button>

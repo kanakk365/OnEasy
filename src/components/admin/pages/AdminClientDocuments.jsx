@@ -99,7 +99,7 @@ function AdminClientDocuments() {
     return (
       <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading details...</p>
         </div>
       </div>
@@ -135,19 +135,19 @@ function AdminClientDocuments() {
           {/* Personal Documents Card */}
           <div
             onClick={() => navigate(`/admin/client-kyc/${userId}`)}
-            className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
+            className="bg-white rounded-2xl p-3 sm:p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
           >
             <div className="flex justify-between items-start mb-4">
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center text-white"
                 style={{
                   background:
-                    "linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)",
+                    "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                 }}
               >
                 <RiFileTextLine className="w-6 h-6" />
               </div>
-              <div className="text-[#00486D] group-hover:text-white group-hover:translate-x-1 transition-all duration-300">
+              <div className="text-[#022B51] group-hover:text-white group-hover:translate-x-1 transition-all duration-300">
                 <BsArrowRight className="w-6 h-6" />
               </div>
             </div>
@@ -161,7 +161,7 @@ function AdminClientDocuments() {
             </p>
 
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#E6F6FD] group-hover:bg-white/20 flex items-center justify-center text-[#00486D] group-hover:text-white font-semibold text-sm transition-colors">
+              <div className="w-8 h-8 rounded-full bg-[#E6F6FD] group-hover:bg-white/20 flex items-center justify-center text-[#022B51] group-hover:text-white font-semibold text-sm transition-colors">
                 {personalDocuments.length}
               </div>
               <span className="text-gray-600 text-sm group-hover:text-white/80 transition-colors">
@@ -173,19 +173,19 @@ function AdminClientDocuments() {
           {/* Business Documents Card */}
           <div
             onClick={() => navigate(`/admin/client-organizations/${userId}`)}
-            className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
+            className="bg-white rounded-2xl p-3 sm:p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
           >
             <div className="flex justify-between items-start mb-4">
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center text-white"
                 style={{
                   background:
-                    "linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)",
+                    "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                 }}
               >
                 <RiBriefcase4Line className="w-6 h-6" />
               </div>
-              <div className="text-[#00486D] group-hover:text-white group-hover:translate-x-1 transition-all duration-300">
+              <div className="text-[#022B51] group-hover:text-white group-hover:translate-x-1 transition-all duration-300">
                 <BsArrowRight className="w-6 h-6" />
               </div>
             </div>
@@ -198,7 +198,7 @@ function AdminClientDocuments() {
             </p>
 
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#E6F6FD] group-hover:bg-white/20 flex items-center justify-center text-[#00486D] group-hover:text-white font-semibold text-sm transition-colors">
+              <div className="w-8 h-8 rounded-full bg-[#E6F6FD] group-hover:bg-white/20 flex items-center justify-center text-[#022B51] group-hover:text-white font-semibold text-sm transition-colors">
                 {organizationsCount}
               </div>
               <span className="text-gray-600 text-sm group-hover:text-white/80 transition-colors">

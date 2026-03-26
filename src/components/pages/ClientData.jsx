@@ -444,9 +444,9 @@ function ClientData() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#F8F9FA] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -455,7 +455,7 @@ function ClientData() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] py-6">
-      <div className="container mx-auto px-4 md:px-8 lg:px-12">
+      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12">
         {/* Toast Notification */}
         {status.message && (
           <div className="fixed inset-0 z-[60] flex items-start justify-end pointer-events-none">
@@ -518,7 +518,7 @@ function ClientData() {
             <span
               className={`px-3 py-1 text-sm font-medium rounded-full ${
                 totalDocs > 0
-                  ? "bg-blue-50 text-[#00486D]"
+                  ? "bg-blue-50 text-[#022B51]"
                   : "bg-gray-100 text-gray-600"
               }`}
             >
@@ -534,7 +534,7 @@ function ClientData() {
             <button
               onClick={() => handleOpenUploadModal('bank_statement')}
               className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors"
-              style={{ background: 'linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)' }}
+              style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}
             >
               + Upload Bank Statement
             </button>
@@ -709,12 +709,12 @@ function ClientData() {
                   type="text"
                   value={formData.bankName}
                   onChange={(e) => setFormData(prev => ({ ...prev, bankName: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                   placeholder="Enter bank name"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Period From <span className="text-red-500">*</span>
@@ -723,7 +723,7 @@ function ClientData() {
                     type="date"
                     value={formData.periodFrom}
                     onChange={(e) => setFormData(prev => ({ ...prev, periodFrom: e.target.value }))}
-                    className="w-full px-4 py-3 text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                    className="w-full px-4 py-3 text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                     max={formData.periodTo || undefined}
                     style={{ fontSize: '16px', minHeight: '48px' }}
                   />
@@ -736,7 +736,7 @@ function ClientData() {
                     type="date"
                     value={formData.periodTo}
                     onChange={(e) => setFormData(prev => ({ ...prev, periodTo: e.target.value }))}
-                    className="w-full px-4 py-3 text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                    className="w-full px-4 py-3 text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                     min={formData.periodFrom || undefined}
                     style={{ fontSize: '16px', minHeight: '48px' }}
                   />
@@ -756,12 +756,12 @@ function ClientData() {
                 />
                 <div
                   onClick={() => !uploading && fileInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200 ${
+                  className={`border-2 border-dashed rounded-xl p-3 sm:p-6 text-center cursor-pointer transition-all duration-200 ${
                     uploading
                       ? "border-gray-200 bg-gray-50 cursor-not-allowed"
                       : formData.file
                       ? "border-green-300 bg-green-50/30"
-                      : "border-blue-200 hover:border-[#00486D] hover:bg-blue-50/30"
+                      : "border-blue-200 hover:border-[#022B51] hover:bg-blue-50/30"
                   }`}
                 >
                   {formData.file ? (
@@ -774,7 +774,7 @@ function ClientData() {
                     </div>
                   ) : (
                     <div className="flex flex-col items-center">
-                      <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-[#00486D] mb-3">
+                      <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-[#022B51] mb-3">
                         <RiUploadCloud2Line className="w-6 h-6" />
                       </div>
                       <p className="text-gray-900 font-medium text-sm mb-1">
@@ -801,7 +801,7 @@ function ClientData() {
                 onClick={handleUpload}
                 disabled={uploading}
                 className="flex-1 px-4 py-3 text-sm font-medium text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ background: 'linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)' }}
+                style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}
               >
                 {uploading ? "Uploading..." : "Upload"}
               </button>

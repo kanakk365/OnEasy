@@ -18,7 +18,7 @@ function ClientPersonaNotepad({
   return (
     <div className="fixed bottom-24 right-6 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-[9999] overflow-hidden max-h-[calc(100vh-150px)] flex flex-col">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#00486D] to-[#01334C] px-4 py-3 flex items-center justify-between flex-shrink-0">
+      <div className="bg-gradient-to-r from-[#022B51] to-[#015079] px-4 py-3 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
           <svg
             className="w-5 h-5 text-white"
@@ -72,7 +72,7 @@ function ClientPersonaNotepad({
             </h4>
             <button
               onClick={() => setIsAddingPersona(true)}
-              className="flex items-center gap-1 px-2 py-1 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs"
+              className="flex items-center gap-1 px-2 py-1 text-white rounded-md hover:opacity-90 transition-all text-xs" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               <svg
                 className="w-3 h-3"
@@ -136,7 +136,7 @@ function ClientPersonaNotepad({
               <div className="flex gap-2">
                 <button
                   onClick={addPersonaEntry}
-                  className="flex-1 px-3 py-2 bg-[#00486D] text-white rounded-md text-sm"
+                  className="flex-1 px-3 py-2 text-white rounded-md text-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   Add
                 </button>
@@ -276,7 +276,7 @@ function ClientPersonaNotepad({
           <button
             onClick={handleSaveClientPersona}
             disabled={savingNotes}
-            className="flex-1 px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm"
+            className="flex-1 px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             {savingNotes ? (
               <span className="flex items-center justify-center gap-2">

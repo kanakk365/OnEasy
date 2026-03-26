@@ -651,7 +651,7 @@ startxref
         <button
           type="button"
           className="px-4 py-2 rounded-md text-white text-sm self-end flex items-center gap-2"
-          style={{ background: 'linear-gradient(90deg, #01334C 0%, #00486D 100%)' }}
+          style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}
           onClick={handleDownloadPDF}
         >
           <Download size={16} />
@@ -726,7 +726,7 @@ startxref
           disabled 
             ? 'border-gray-300 bg-gray-50 cursor-not-allowed' 
             : isDragging 
-              ? 'border-[#00486D] bg-[#F0F7FA] cursor-pointer' 
+              ? 'border-[#022B51] bg-[#F0F7FA] cursor-pointer' 
               : 'border-[#AFC3D2] cursor-pointer'
         }`}
         onDragOver={disabled ? undefined : handleDragOver}
@@ -736,18 +736,18 @@ startxref
       >
         <CloudUpload
           size={24}
-          className="text-[#00486D]"
+          className="text-[#022B51]"
         />
         <div className="text-sm mt-2">
           {fileName ? (
-            <span className="text-[#00486D] font-medium">✓ {fileName}</span>
+            <span className="text-[#022B51] font-medium">✓ {fileName}</span>
           ) : (
             <>
               Drag & Drop your PDF here
               <br />
               <button
                 type="button"
-                className="mt-1 text-[#00486D] underline text-sm"
+                className="mt-1 text-[#022B51] underline text-sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleBrowseClick();
@@ -765,7 +765,7 @@ startxref
           type="button"
           disabled={disabled}
           className={`px-6 py-3 rounded-md text-white text-sm ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-          style={disabled ? {} : { background: 'linear-gradient(90deg, #01334C 0%, #00486D 100%)' }}
+          style={disabled ? {} : { background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}
           onClick={() => {
             if (disabled) return;
             if (fileName) {

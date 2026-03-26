@@ -294,7 +294,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
     return (
       <div className="flex items-center justify-center py-16">
         <div className="flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00486D]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#022B51]"></div>
           <p className="text-sm text-gray-500">Loading compliances...</p>
         </div>
       </div>
@@ -307,7 +307,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
         <p className="text-red-500 mb-2">{error}</p>
         <button
           onClick={() => window.location.reload()}
-          className="text-sm text-[#00486D] underline"
+          className="text-sm text-[#022B51] underline"
         >
           Retry
         </button>
@@ -343,7 +343,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
             onClick={() => setViewMode("list")}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
               viewMode === "list"
-                ? "bg-white text-[#023752] shadow-sm"
+                ? "bg-white text-[#022B51] shadow-sm"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -354,7 +354,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
             onClick={() => setViewMode("calendar")}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
               viewMode === "calendar"
-                ? "bg-white text-[#023752] shadow-sm"
+                ? "bg-white text-[#022B51] shadow-sm"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -398,7 +398,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
             compliances.map((item) => (
               <div
                 key={item.id}
-                className="bg-white border rounded-xl p-6 border-gray-200 hover:shadow-md transition-all"
+                className="bg-white border rounded-xl p-3 sm:p-6 border-gray-200 hover:shadow-md transition-all"
               >
                 {/* Top Row: Title, Badge, Status */}
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
@@ -455,7 +455,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
                         state: item,
                       })
                     }
-                    className="h-9 px-4 rounded-full text-sm font-medium bg-[#00486D]/5 text-[#00486D] border border-[#00486D]/10 hover:bg-[#00486D]/10 transition-colors"
+                    className="h-9 px-4 rounded-full text-sm font-medium bg-[#022B51]/5 text-[#022B51] border border-[#022B51]/10 hover:bg-[#015079]/10 transition-colors"
                   >
                     View Details
                   </button>
@@ -474,7 +474,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
           {/* Calendar Panel */}
           <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             {/* Calendar Header */}
-            <div className="px-6 py-5 flex items-center justify-between bg-gradient-to-r from-[#023752] to-[#034b6e]">
+            <div className="px-6 py-5 flex items-center justify-between bg-gradient-to-r from-[#022B51] to-[#015079]">
               <div className="flex items-center gap-2">
                 <button
                   onClick={prevMonth}
@@ -501,7 +501,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
             </div>
 
             {/* Day Labels */}
-            <div className="grid grid-cols-7 border-b border-gray-100">
+            <div className="grid grid-cols-7 min-w-[400px] border-b border-gray-100">
               {DAY_LABELS.map((d) => (
                 <div
                   key={d}
@@ -513,7 +513,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
             </div>
 
             {/* Grid */}
-            <div className="grid grid-cols-7">
+            <div className="grid grid-cols-7 min-w-[400px]">
               {calendarGrid.map((cell, idx) => {
                 const hasEvents = cell.events && cell.events.length > 0;
                 const _isToday = cell.currentMonth && isToday(cell.date);
@@ -540,8 +540,8 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
                     className={`
                       relative min-h-[90px] p-2 border-b border-r border-gray-50 transition-all duration-150
                       ${!cell.currentMonth ? "bg-gray-50/50" : "bg-white"}
-                      ${cell.currentMonth && hasEvents ? "cursor-pointer hover:bg-[#023752]/[0.03]" : ""}
-                      ${_isSelected ? "bg-[#023752]/[0.06] ring-2 ring-inset ring-[#023752]/20" : ""}
+                      ${cell.currentMonth && hasEvents ? "cursor-pointer hover:bg-[#015079]/[0.03]" : ""}
+                      ${_isSelected ? "bg-[#022B51]/[0.06] ring-2 ring-inset ring-[#022B51]/20" : ""}
                     `}
                   >
                     {/* Day Number */}
@@ -550,8 +550,8 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
                         className={`
                           inline-flex items-center justify-center w-7 h-7 rounded-full text-sm font-semibold
                           ${!cell.currentMonth ? "text-gray-300" : "text-gray-700"}
-                          ${_isToday ? "bg-[#023752] text-white" : ""}
-                          ${_isSelected && !_isToday ? "bg-[#023752]/10 text-[#023752]" : ""}
+                          ${_isToday ? "bg-[#022B51] text-white" : ""}
+                          ${_isSelected && !_isToday ? "bg-[#022B51]/10 text-[#022B51]" : ""}
                         `}
                       >
                         {cell.day}
@@ -636,7 +636,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
               {/* Panel Header */}
               <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
                 <div className="flex items-center gap-2">
-                  <FiCalendar className="w-4 h-4 text-[#023752]" />
+                  <FiCalendar className="w-4 h-4 text-[#022B51]" />
                   <h3 className="font-bold text-gray-900 text-sm">
                     {selectedDate
                       ? selectedDate.toLocaleDateString("en-US", {
@@ -688,7 +688,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
                               { state: event.complianceObj },
                             )
                           }
-                          className="group p-4 rounded-xl border border-gray-100 hover:border-[#023752]/20 hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
+                          className="group p-4 rounded-xl border border-gray-100 hover:border-[#022B51]/20 hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
                         >
                           {/* Left accent bar */}
                           <div
@@ -698,7 +698,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
 
                           <div className="pl-3">
                             {/* Compliance name */}
-                            <h4 className="font-bold text-gray-900 text-sm mb-1.5 line-clamp-2 group-hover:text-[#023752] transition-colors">
+                            <h4 className="font-bold text-gray-900 text-sm mb-1.5 line-clamp-2 group-hover:text-[#022B51] transition-colors">
                               {event.complianceName}
                             </h4>
 
@@ -751,7 +751,7 @@ const UserOrgComplianceSection = ({ selectedOrg }) => {
                               </div>
                             )}
 
-                            <p className="text-[10px] text-[#023752] mt-2 font-medium group-hover:underline">
+                            <p className="text-[10px] text-[#022B51] mt-2 font-medium group-hover:underline">
                               Click to view details →
                             </p>
                           </div>

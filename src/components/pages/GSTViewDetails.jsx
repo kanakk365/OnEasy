@@ -128,9 +128,9 @@ function GSTViewDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading registration details...</p>
         </div>
       </div>
@@ -154,7 +154,7 @@ function GSTViewDetails() {
           </p>
           <button
             onClick={() => navigate(getBackRoute())}
-            className="px-6 py-3 bg-[#00486D] text-white rounded-md hover:bg-[#003855] transition-colors"
+            className="px-6 py-3 text-white rounded-md hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             Back to Dashboard
           </button>
@@ -169,11 +169,11 @@ function GSTViewDetails() {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-[#28303F]">
+            <h1 className="text-xl sm:text-2xl font-bold text-[#28303F]">
               GST Registration Details
             </h1>
             <p className="text-gray-600 mt-1">
-              Ticket ID: <span className="font-medium text-[#00486D]">{ticketId}</span>
+              Ticket ID: <span className="font-medium text-[#022B51]">{ticketId}</span>
             </p>
           </div>
           <div className="flex gap-3 items-center">
@@ -204,7 +204,7 @@ function GSTViewDetails() {
                     navigate('/gst-form');
                   }
                 }}
-                className="px-4 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors flex items-center gap-2"
+                className="px-4 py-2 text-white rounded-md hover:opacity-90 transition-all flex items-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -214,7 +214,7 @@ function GSTViewDetails() {
             )}
             <button
               onClick={() => navigate(getBackRoute())}
-              className="px-4 py-2 border border-[#00486D] text-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
+              className="px-4 py-2 border border-[#022B51] text-[#022B51] rounded-md hover:bg-[#015079] hover:text-white transition-colors"
             >
               Back to Dashboard
             </button>
@@ -227,7 +227,7 @@ function GSTViewDetails() {
         </div>
 
         {/* Registration Details */}
-        <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 space-y-6">
           {/* Business Information */}
           <div>
             <h2 className="text-lg font-semibold text-[#28303F] mb-4 pb-2 border-b">
@@ -371,7 +371,7 @@ function GSTViewDetails() {
                   <span className="text-sm font-medium text-gray-600">Electricity Bill:</span>
                   <div className="mt-1">
                     {signedUrls.electricity_bill_url ? (
-                      <a href={signedUrls.electricity_bill_url} target="_blank" rel="noopener noreferrer" className="text-[#00486D] hover:underline">View Document</a>
+                      <a href={signedUrls.electricity_bill_url} target="_blank" rel="noopener noreferrer" className="text-[#022B51] hover:underline">View Document</a>
                     ) : <span className="text-gray-500">Processing...</span>}
                   </div>
                 </div>
@@ -381,7 +381,7 @@ function GSTViewDetails() {
                   <span className="text-sm font-medium text-gray-600">Property Tax:</span>
                   <div className="mt-1">
                     {signedUrls.property_tax_url ? (
-                      <a href={signedUrls.property_tax_url} target="_blank" rel="noopener noreferrer" className="text-[#00486D] hover:underline">View Document</a>
+                      <a href={signedUrls.property_tax_url} target="_blank" rel="noopener noreferrer" className="text-[#022B51] hover:underline">View Document</a>
                     ) : <span className="text-gray-500">Processing...</span>}
                   </div>
                 </div>
@@ -391,7 +391,7 @@ function GSTViewDetails() {
                   <span className="text-sm font-medium text-gray-600">Rental Agreement/Sale Deed/Affidavit:</span>
                   <div className="mt-1">
                     {signedUrls.rental_agreement_url ? (
-                      <a href={signedUrls.rental_agreement_url} target="_blank" rel="noopener noreferrer" className="text-[#00486D] hover:underline">View Document</a>
+                      <a href={signedUrls.rental_agreement_url} target="_blank" rel="noopener noreferrer" className="text-[#022B51] hover:underline">View Document</a>
                     ) : <span className="text-gray-500">Processing...</span>}
                   </div>
                 </div>
@@ -401,7 +401,7 @@ function GSTViewDetails() {
                   <span className="text-sm font-medium text-gray-600">Landlord PAN Card:</span>
                   <div className="mt-1">
                     {signedUrls.landlord_pan_card_url ? (
-                      <a href={signedUrls.landlord_pan_card_url} target="_blank" rel="noopener noreferrer" className="text-[#00486D] hover:underline">View Document</a>
+                      <a href={signedUrls.landlord_pan_card_url} target="_blank" rel="noopener noreferrer" className="text-[#022B51] hover:underline">View Document</a>
                     ) : <span className="text-gray-500">Processing...</span>}
                   </div>
                 </div>
@@ -411,7 +411,7 @@ function GSTViewDetails() {
                   <span className="text-sm font-medium text-gray-600">Landlord Aadhaar Card:</span>
                   <div className="mt-1">
                     {signedUrls.landlord_aadhaar_card_url ? (
-                      <a href={signedUrls.landlord_aadhaar_card_url} target="_blank" rel="noopener noreferrer" className="text-[#00486D] hover:underline">View Document</a>
+                      <a href={signedUrls.landlord_aadhaar_card_url} target="_blank" rel="noopener noreferrer" className="text-[#022B51] hover:underline">View Document</a>
                     ) : <span className="text-gray-500">Processing...</span>}
                   </div>
                 </div>
@@ -421,7 +421,7 @@ function GSTViewDetails() {
                   <span className="text-sm font-medium text-gray-600">Business PAN Card:</span>
                   <div className="mt-1">
                     {signedUrls.pan_card_url ? (
-                      <a href={signedUrls.pan_card_url} target="_blank" rel="noopener noreferrer" className="text-[#00486D] hover:underline">View Document</a>
+                      <a href={signedUrls.pan_card_url} target="_blank" rel="noopener noreferrer" className="text-[#022B51] hover:underline">View Document</a>
                     ) : <span className="text-gray-500">Processing...</span>}
                   </div>
                 </div>
@@ -431,7 +431,7 @@ function GSTViewDetails() {
                   <span className="text-sm font-medium text-gray-600">Principal Place Photo:</span>
                   <div className="mt-1">
                     {signedUrls.principal_place_photo_url ? (
-                      <a href={signedUrls.principal_place_photo_url} target="_blank" rel="noopener noreferrer" className="text-[#00486D] hover:underline">View Document</a>
+                      <a href={signedUrls.principal_place_photo_url} target="_blank" rel="noopener noreferrer" className="text-[#022B51] hover:underline">View Document</a>
                     ) : <span className="text-gray-500">Processing...</span>}
                   </div>
                 </div>
@@ -441,7 +441,7 @@ function GSTViewDetails() {
                   <span className="text-sm font-medium text-gray-600">Business Bank Statement:</span>
                   <div className="mt-1">
                     {signedUrls.business_bank_statement_url ? (
-                      <a href={signedUrls.business_bank_statement_url} target="_blank" rel="noopener noreferrer" className="text-[#00486D] hover:underline">View Document</a>
+                      <a href={signedUrls.business_bank_statement_url} target="_blank" rel="noopener noreferrer" className="text-[#022B51] hover:underline">View Document</a>
                     ) : <span className="text-gray-500">Processing...</span>}
                   </div>
                 </div>
@@ -451,7 +451,7 @@ function GSTViewDetails() {
                   <span className="text-sm font-medium text-gray-600">Partnership Deed:</span>
                   <div className="mt-1">
                     {signedUrls.partnership_deed_url ? (
-                      <a href={signedUrls.partnership_deed_url} target="_blank" rel="noopener noreferrer" className="text-[#00486D] hover:underline">View Document</a>
+                      <a href={signedUrls.partnership_deed_url} target="_blank" rel="noopener noreferrer" className="text-[#022B51] hover:underline">View Document</a>
                     ) : <span className="text-gray-500">Processing...</span>}
                   </div>
                 </div>
@@ -461,7 +461,7 @@ function GSTViewDetails() {
                   <span className="text-sm font-medium text-gray-600">Certificate of Incorporation:</span>
                   <div className="mt-1">
                     {signedUrls.certificate_of_incorporation_url ? (
-                      <a href={signedUrls.certificate_of_incorporation_url} target="_blank" rel="noopener noreferrer" className="text-[#00486D] hover:underline">View Document</a>
+                      <a href={signedUrls.certificate_of_incorporation_url} target="_blank" rel="noopener noreferrer" className="text-[#022B51] hover:underline">View Document</a>
                     ) : <span className="text-gray-500">Processing...</span>}
                   </div>
                 </div>
@@ -508,7 +508,7 @@ function GSTViewDetails() {
                             <div>
                               <span className="text-sm font-medium text-gray-600">Aadhaar Card:</span>
                               <div className="mt-1">
-                                <a href={director.aadhaarCardUrl} target="_blank" rel="noopener noreferrer" className="text-[#00486D] hover:underline">View Document</a>
+                                <a href={director.aadhaarCardUrl} target="_blank" rel="noopener noreferrer" className="text-[#022B51] hover:underline">View Document</a>
                               </div>
                             </div>
                           )}
@@ -516,7 +516,7 @@ function GSTViewDetails() {
                             <div>
                               <span className="text-sm font-medium text-gray-600">PAN Card:</span>
                               <div className="mt-1">
-                                <a href={director.panCardUrl} target="_blank" rel="noopener noreferrer" className="text-[#00486D] hover:underline">View Document</a>
+                                <a href={director.panCardUrl} target="_blank" rel="noopener noreferrer" className="text-[#022B51] hover:underline">View Document</a>
                               </div>
                             </div>
                           )}
@@ -524,7 +524,7 @@ function GSTViewDetails() {
                             <div>
                               <span className="text-sm font-medium text-gray-600">Passport Photo:</span>
                               <div className="mt-1">
-                                <a href={director.passportPhotoUrl} target="_blank" rel="noopener noreferrer" className="text-[#00486D] hover:underline">View Document</a>
+                                <a href={director.passportPhotoUrl} target="_blank" rel="noopener noreferrer" className="text-[#022B51] hover:underline">View Document</a>
                               </div>
                             </div>
                           )}

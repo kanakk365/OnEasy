@@ -51,40 +51,7 @@ function ClientOrganisationTab({
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)] overflow-hidden">
-        <div
-          className="w-full px-6 py-5 flex items-center justify-between text-left"
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0"
-              style={{
-                background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
-              }}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                />
-              </svg>
-            </div>
-            <div className="text-left">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Organisation Details
-              </h3>
-              <p className="text-sm text-gray-500">
-                Company information and documents
-              </p>
-            </div>
-          </div>
-        </div>
+
         {true && (
           <div className="px-6 py-6 border-t border-gray-100 bg-[#FAFBFC]">
             {isEditingOrganisations ? (
@@ -92,7 +59,7 @@ function ClientOrganisationTab({
                 {organisations.map((org, idx) => (
                   <div
                     key={org.id}
-                    className="bg-white rounded-xl border-2 border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow"
+                    className="bg-white rounded-xl border-2 border-gray-200 shadow-sm p-3 sm:p-6 hover:shadow-md transition-shadow"
                   >
                     <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
                       <h4 className="text-xl font-bold text-gray-900">
@@ -120,7 +87,7 @@ function ClientOrganisationTab({
                               e.target.value,
                             )
                           }
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                           placeholder="Legal name as per registration"
                         />
                       </div>
@@ -155,7 +122,7 @@ function ClientOrganisationTab({
                               e.target.value,
                             )
                           }
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent bg-white"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent bg-white"
                         >
                           <option value="">Select Category</option>
                           <option value="Individual">Individual</option>
@@ -203,7 +170,7 @@ function ClientOrganisationTab({
                           onChange={(e) =>
                             updateOrganization(org.id, "gstin", e.target.value)
                           }
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent font-mono"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent font-mono"
                           placeholder="GSTIN number"
                         />
                       </div>
@@ -221,7 +188,7 @@ function ClientOrganisationTab({
                               e.target.value,
                             )
                           }
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent font-mono"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent font-mono"
                           placeholder="PAN number"
                         />
                       </div>
@@ -235,7 +202,7 @@ function ClientOrganisationTab({
                           onChange={(e) =>
                             updateOrganization(org.id, "tan", e.target.value)
                           }
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent font-mono"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent font-mono"
                           placeholder="TAN number"
                         />
                       </div>
@@ -249,7 +216,7 @@ function ClientOrganisationTab({
                           onChange={(e) =>
                             updateOrganization(org.id, "cin", e.target.value)
                           }
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent font-mono"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent font-mono"
                           placeholder="CIN number"
                         />
                       </div>
@@ -267,7 +234,7 @@ function ClientOrganisationTab({
                               e.target.value,
                             )
                           }
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                         />
                       </div>
                       {/* Registered Office Address Section */}
@@ -291,7 +258,7 @@ function ClientOrganisationTab({
                                   e.target.value,
                                 )
                               }
-                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                               placeholder="Enter Address Line 1"
                             />
                           </div>
@@ -311,7 +278,7 @@ function ClientOrganisationTab({
                                   e.target.value,
                                 )
                               }
-                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                               placeholder="Enter Address Line 2 (Optional)"
                             />
                           </div>
@@ -331,7 +298,7 @@ function ClientOrganisationTab({
                                   e.target.value,
                                 )
                               }
-                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                               placeholder="Enter District"
                             />
                           </div>
@@ -351,7 +318,7 @@ function ClientOrganisationTab({
                                   e.target.value,
                                 )
                               }
-                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                               placeholder="Enter State"
                             />
                           </div>
@@ -371,7 +338,7 @@ function ClientOrganisationTab({
                                   e.target.value,
                                 )
                               }
-                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                               placeholder="Enter Country"
                             />
                           </div>
@@ -453,7 +420,7 @@ function ClientOrganisationTab({
                                     }
                                   }
                                 }}
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                                 placeholder="Enter 6-digit PIN Code"
                                 maxLength={6}
                               />
@@ -471,7 +438,7 @@ function ClientOrganisationTab({
                         </h5>
                         <button
                           onClick={() => addDirectorPartner(org.id)}
-                          className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                          className="px-3 py-1.5 text-white rounded-md hover:opacity-90 transition-all text-sm inline-flex items-center gap-1" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                         >
                           <AiOutlinePlus className="w-4 h-4" />
                           Add Director/Partner
@@ -503,7 +470,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                       placeholder="Name"
                                     />
                                   </div>
@@ -522,7 +489,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                       placeholder="DIN/Number"
                                     />
                                   </div>
@@ -541,7 +508,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                       placeholder="Contact"
                                     />
                                   </div>
@@ -560,7 +527,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                       placeholder="Email"
                                     />
                                   </div>
@@ -579,7 +546,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                     />
                                   </div>
                                   <div>
@@ -596,7 +563,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                     >
                                       <option value="Active">Active</option>
                                       <option value="Inactive">Inactive</option>
@@ -635,7 +602,7 @@ function ClientOrganisationTab({
                         </h5>
                         <button
                           onClick={() => addDigitalSignature(org.id)}
-                          className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                          className="px-3 py-1.5 text-white rounded-md hover:opacity-90 transition-all text-sm inline-flex items-center gap-1" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                         >
                           <AiOutlinePlus className="w-4 h-4" />
                           Add Digital Signature
@@ -667,7 +634,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                       placeholder="Name"
                                     />
                                   </div>
@@ -686,7 +653,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                       placeholder="DSC Number"
                                     />
                                   </div>
@@ -705,7 +672,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                     />
                                   </div>
                                   <div>
@@ -722,7 +689,7 @@ function ClientOrganisationTab({
                                           e.target.value,
                                         )
                                       }
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                     >
                                       <option value="Active">Active</option>
                                       <option value="In-active">
@@ -813,7 +780,7 @@ function ClientOrganisationTab({
                                 </button>
                               </div>
                             ) : (
-                              <span className="px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-xs">
+                              <span className="px-3 py-2 text-white rounded-lg hover:opacity-90 transition-all inline-block text-xs" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                                 Upload File
                               </span>
                             )}
@@ -871,7 +838,7 @@ function ClientOrganisationTab({
                                 </button>
                               </div>
                             ) : (
-                              <span className="px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-xs">
+                              <span className="px-3 py-2 text-white rounded-lg hover:opacity-90 transition-all inline-block text-xs" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                                 Upload File
                               </span>
                             )}
@@ -888,7 +855,7 @@ function ClientOrganisationTab({
                         </h5>
                         <button
                           onClick={() => addWebsiteToOrg(org.id)}
-                          className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                          className="px-3 py-1.5 text-white rounded-md hover:opacity-90 transition-all text-sm inline-flex items-center gap-1" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                         >
                           <AiOutlinePlus className="w-4 h-4" />
                           Add Website
@@ -1080,7 +1047,7 @@ function ClientOrganisationTab({
                 ))}
                 <button
                   onClick={addOrganization}
-                  className="w-full py-2 border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-[#01334C] hover:text-[#01334C] transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-2 border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-[#022B51] hover:text-[#022B51] transition-colors flex items-center justify-center gap-2"
                 >
                   <AiOutlinePlus className="w-5 h-5" />
                   Add Another Organization
@@ -1100,7 +1067,7 @@ function ClientOrganisationTab({
                   <button
                     onClick={handleSaveOrganisations}
                     disabled={savingOrg}
-                    className="px-6 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors text-sm font-medium disabled:opacity-50 shadow-md hover:shadow-lg"
+                    className="px-6 py-2.5 text-white rounded-lg hover:opacity-90 transition-all text-sm font-medium disabled:opacity-50 shadow-md hover:shadow-lg" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                   >
                     {savingOrg ? "Saving..." : "Save Organizations"}
                   </button>
@@ -1210,7 +1177,7 @@ function ClientOrganisationTab({
                       }
                       setIsEditingOrganisations(true);
                     }}
-                    className="px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-flex items-center gap-2 font-medium shadow-md hover:shadow-lg"
+                    className="px-5 py-2.5 text-white rounded-lg hover:opacity-90 transition-all inline-flex items-center gap-2 font-medium shadow-md hover:shadow-lg" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                   >
                     <AiOutlinePlus className="w-5 h-5" />
                     Add Organization
@@ -1229,7 +1196,7 @@ function ClientOrganisationTab({
                         <col className="w-24" />
                         <col className="w-24" />
                       </colgroup>
-                      <thead className="bg-[#01334C]">
+                      <thead className="" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         <tr>
                           <th className="px-4 py-3 text-left font-semibold text-white text-sm">
                             ID
@@ -1388,7 +1355,7 @@ function ClientOrganisationTab({
                                 return (
                                   <tr className="bg-white">
                                     <td colSpan="8" className="p-0">
-                                      <div className="bg-white rounded-xl border border-gray-200 p-6 mx-2 my-2">
+                                      <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-6 mx-2 my-2">
                                         <div className="flex justify-between items-center mb-4">
                                           <h4 className="text-lg font-semibold text-gray-900">
                                             {isEditingThisOrg
@@ -1580,7 +1547,7 @@ function ClientOrganisationTab({
                                                   setOrganisations(updatedOrgs);
                                                   setEditingOrgId(idx);
                                                 }}
-                                                className="px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+                                                className="px-5 py-2.5 text-white rounded-lg hover:opacity-90 transition-all text-sm font-medium shadow-sm hover:shadow-md" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                               >
                                                 Edit
                                               </button>
@@ -1628,7 +1595,7 @@ function ClientOrganisationTab({
                                                   setActiveOrgTab(tab.id);
                                                 }}
                                                 className={`pb-3 px-1 text-sm font-medium transition-colors whitespace-nowrap ${activeOrgTab === tab.id
-                                                  ? "border-b-2 border-[#01334C] text-[#01334C]"
+                                                  ? "border-b-2 border-[#022B51] text-[#022B51]"
                                                   : "text-gray-500 hover:text-gray-700"
                                                   }`}
                                               >
@@ -1873,7 +1840,7 @@ function ClientOrganisationTab({
                                                           e.target.value,
                                                         )
                                                       }
-                                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                     >
                                                       <option value="">
                                                         Select Category
@@ -1995,7 +1962,7 @@ function ClientOrganisationTab({
                                                           className="hidden"
                                                           accept=".pdf,.jpg,.jpeg,.png"
                                                         />
-                                                        <span className="px-2 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-xs whitespace-nowrap">
+                                                        <span className="px-2 py-1.5 text-white rounded-md hover:opacity-90 transition-all text-xs whitespace-nowrap" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                                                           {orgInState?.panFile
                                                             ? "Change"
                                                             : "Upload"}
@@ -2314,7 +2281,7 @@ function ClientOrganisationTab({
                                                           orgInState.id,
                                                         )
                                                       }
-                                                      className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                                                      className="px-3 py-1.5 text-white rounded-md hover:opacity-90 transition-all text-sm inline-flex items-center gap-1" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                                     >
                                                       <AiOutlinePlus className="w-4 h-4" />
                                                       Add Director/Partner
@@ -2375,7 +2342,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                   placeholder="Name"
                                                                 />
                                                               ) : (
@@ -2404,7 +2371,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                   placeholder="DIN/Number"
                                                                 />
                                                               ) : (
@@ -2435,7 +2402,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                   placeholder="Contact"
                                                                 />
                                                               ) : (
@@ -2464,7 +2431,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                   placeholder="Email"
                                                                 />
                                                               ) : (
@@ -2494,7 +2461,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                 />
                                                               ) : (
                                                                 <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
@@ -2529,7 +2496,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                 >
                                                                   <option value="Active">
                                                                     Active
@@ -2601,7 +2568,7 @@ function ClientOrganisationTab({
                                                           orgInState.id,
                                                         )
                                                       }
-                                                      className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                                                      className="px-3 py-1.5 text-white rounded-md hover:opacity-90 transition-all text-sm inline-flex items-center gap-1" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                                     >
                                                       <AiOutlinePlus className="w-4 h-4" />
                                                       Add Digital Signature
@@ -2656,7 +2623,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                   placeholder="Name"
                                                                 />
                                                               ) : (
@@ -2685,7 +2652,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                   placeholder="DSC Number"
                                                                 />
                                                               ) : (
@@ -2716,7 +2683,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                 />
                                                               ) : (
                                                                 <div className="px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-700">
@@ -2751,7 +2718,7 @@ function ClientOrganisationTab({
                                                                         .value,
                                                                     )
                                                                   }
-                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                                                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                                                                 >
                                                                   <option value="Active">
                                                                     Active
@@ -2870,7 +2837,7 @@ function ClientOrganisationTab({
                                                               </button>
                                                             </div>
                                                           ) : (
-                                                            <span className="px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-xs">
+                                                            <span className="px-3 py-2 text-white rounded-lg hover:opacity-90 transition-all inline-block text-xs" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                                                               Upload File
                                                             </span>
                                                           )}
@@ -2957,7 +2924,7 @@ function ClientOrganisationTab({
                                                               </button>
                                                             </div>
                                                           ) : (
-                                                            <span className="px-3 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-block text-xs">
+                                                            <span className="px-3 py-2 text-white rounded-lg hover:opacity-90 transition-all inline-block text-xs" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                                                               Upload File
                                                             </span>
                                                           )}
@@ -3014,7 +2981,7 @@ function ClientOrganisationTab({
                                                   },
                                                 )
                                               }
-                                              className="px-6 py-2 bg-[#00486D] text-white rounded-lg text-sm font-semibold hover:bg-[#01334C] transition-colors"
+                                              className="px-6 py-2 text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                             >
                                               Go to Company Documents
                                             </button>
@@ -3037,7 +3004,7 @@ function ClientOrganisationTab({
                                                         orgInState.id,
                                                       )
                                                     }
-                                                    className="px-3 py-1.5 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm inline-flex items-center gap-1"
+                                                    className="px-3 py-1.5 text-white rounded-md hover:opacity-90 transition-all text-sm inline-flex items-center gap-1" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                                   >
                                                     <AiOutlinePlus className="w-4 h-4" />
                                                     Add Website
@@ -3388,7 +3355,7 @@ function ClientOrganisationTab({
                                                 await handleSaveOrganisations();
                                               }}
                                               disabled={savingOrg}
-                                              className="px-4 py-2 bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors text-sm disabled:opacity-50"
+                                              className="px-4 py-2 text-white rounded-md hover:opacity-90 transition-all text-sm disabled:opacity-50" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                                             >
                                               {savingOrg
                                                 ? "Saving..."
@@ -3434,7 +3401,7 @@ function ClientOrganisationTab({
                     ]);
                     setIsEditingOrganisations(true);
                   }}
-                  className="px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors inline-flex items-center gap-2 font-medium shadow-md hover:shadow-lg"
+                  className="px-5 py-2.5 text-white rounded-lg hover:opacity-90 transition-all inline-flex items-center gap-2 font-medium shadow-md hover:shadow-lg" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   <AiOutlinePlus className="w-5 h-5" />
                   Add Organization

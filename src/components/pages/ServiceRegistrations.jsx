@@ -375,7 +375,7 @@ function ServiceRegistrations() {
   const hasValidType = type && typeLabels[type];
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
+    <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7]">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -389,22 +389,22 @@ function ServiceRegistrations() {
           </div>
           <button
             onClick={() => navigate(-1)}
-            className="px-4 py-2 text-sm font-medium text-[#00486D] border border-[#00486D] rounded-lg hover:bg-[#00486D] hover:text-white transition-colors"
+            className="px-4 py-2 text-sm font-medium text-[#022B51] border border-[#022B51] rounded-lg hover:bg-[#015079] hover:text-white transition-colors"
           >
             Back
           </button>
         </div>
 
         {loading && (
-          <div className="bg-white rounded-xl shadow p-6 text-center text-gray-600">Loading...</div>
+          <div className="bg-white rounded-xl shadow p-3 sm:p-6 text-center text-gray-600">Loading...</div>
         )}
 
         {error && !loading && (
-          <div className="bg-white rounded-xl shadow p-6 text-center text-red-600">{error}</div>
+          <div className="bg-white rounded-xl shadow p-3 sm:p-6 text-center text-red-600">{error}</div>
         )}
 
         {!loading && !error && registrations.length === 0 && (
-          <div className="bg-white rounded-xl shadow p-6 text-center text-gray-600">
+          <div className="bg-white rounded-xl shadow p-3 sm:p-6 text-center text-gray-600">
             No {label} registrations found.
           </div>
         )}
@@ -429,7 +429,7 @@ function ServiceRegistrations() {
               };
               
               return (
-                <div key={reg.ticket_id || reg.id} className="bg-white rounded-xl shadow p-6">
+                <div key={reg.ticket_id || reg.id} className="bg-white rounded-xl shadow p-3 sm:p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <div className="text-sm text-gray-500 mb-1">Ticket ID</div>

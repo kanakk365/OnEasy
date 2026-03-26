@@ -12,7 +12,7 @@ function ConfirmationModal({ isOpen, onClose, onConfirm, title, message }) {
       ></div>
 
       {/* Modal */}
-      <div className="relative bg-white rounded-lg shadow-xl w-[400px] p-6 z-[110]">
+      <div className="relative bg-white rounded-lg shadow-xl w-[400px] p-3 sm:p-6 z-[110]">
         <h3 className="text-lg font-medium text-gray-900 mb-4">
           {title || "Confirm Action"}
         </h3>
@@ -29,7 +29,7 @@ function ConfirmationModal({ isOpen, onClose, onConfirm, title, message }) {
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 text-sm font-medium text-white bg-[#00486D] hover:bg-[#003855] rounded-lg transition-colors duration-200"
+            className="px-4 py-2 text-sm font-medium text-white rounded-lg hover:opacity-90 transition-all duration-200" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             Confirm
           </button>

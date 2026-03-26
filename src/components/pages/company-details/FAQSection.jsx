@@ -67,7 +67,7 @@ function FAQSection({ faqs }) {
 
   return (
     <div className=" bg-white p-8 rounded-lg shadow-sm">
-      <h2 className="text-xl mb-6 text-[#00486D] ">FAQs</h2>
+      <h2 className="text-xl mb-6 text-[#022B51] ">FAQs</h2>
       <div className="space-y-6">
         {faqsList.map((faq, index) => (
           <div key={index} className="space-y-2">

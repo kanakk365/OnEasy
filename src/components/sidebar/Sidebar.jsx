@@ -104,18 +104,17 @@ function Sidebar() {
     <>
       {/* Mobile Hamburger Menu Button */}
       {!isMobileMenuOpen && (
-        <button
-          onClick={() => {
-            console.log(
-              "Mobile menu button clicked, current state:",
-              isMobileMenuOpen,
-            );
-            setIsMobileMenuOpen(true);
-          }}
-          className="lg:hidden absolute top-3 left-4 z-[70] bg-white p-2 rounded-lg shadow-lg border border-gray-200"
-        >
-          <MdMenu className="w-6 h-6 text-gray-700" />
-        </button>
+        <div className="lg:hidden fixed top-3 left-4 z-[70] flex items-center space-x-3">
+          <button
+            onClick={() => {
+              setIsMobileMenuOpen(true);
+            }}
+            className="bg-white p-2 rounded-lg shadow-lg border border-gray-200"
+          >
+            <MdMenu className="w-6 h-6 text-gray-700" />
+          </button>
+          <img src="/Logo2.png" alt="OnEasy Logo" className="h-9 w-auto" />
+        </div>
       )}
 
       {/* Mobile Sidebar Overlay */}
@@ -139,20 +138,21 @@ function Sidebar() {
       >
         {/* Logo Section with Toggle Button */}
         <div
-          className={`${isCollapsed ? "px-3" : "px-6"
-            } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-[#26496a]/30`}
+          className={`${isCollapsed ? "px-2" : "px-6"
+            } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-white/10`}
         >
           <img
-            src="/logo.jpg"
+            src="/logo-white.png"
             alt="OnEasy Logo"
-            className={`${isCollapsed ? "h-8" : "h-10"
+            className={`${isCollapsed ? "h-7 max-w-[50px] object-contain" : "h-10"
               } w-auto transition-all duration-300 ${isCollapsed ? "mx-auto" : ""
               }`}
           />
           {!isCollapsed && (
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="bg-[#26496a] hover:bg-[#345d82] rounded-lg p-1.5 transition-colors duration-200"
+              className="rounded-lg p-1.5 hover:opacity-80 transition-all duration-200"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               <IoChevronBackOutline className="w-4 h-4 text-white" />
             </button>
@@ -163,7 +163,8 @@ function Sidebar() {
         {isCollapsed && (
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="mx-auto mt-3 mb-2 bg-[#26496a] hover:bg-[#345d82] rounded-lg p-1.5 transition-colors duration-200"
+            className="mx-auto mt-3 mb-2 rounded-lg p-1.5 hover:opacity-80 transition-all duration-200"
+            style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             <IoChevronForwardOutline className="w-4 h-4 text-white" />
           </button>
@@ -174,19 +175,22 @@ function Sidebar() {
           className={`flex-1 ${isCollapsed ? "px-2" : "px-4"
             } pt-3 space-y-2.5 transition-all duration-300`}
         >
-          {menuItems.map((item, index) => (
+          {menuItems.map((item, index) => {
+            const isActive = item.path === "/registrations"
+              ? isRegistrationsActive
+              : location.pathname === item.path;
+            return (
             <Link
               to={item.path}
               key={index}
               className={`flex items-center ${isCollapsed ? "justify-center px-2" : "space-x-3 px-3"
-                } py-2 rounded-lg transition-all duration-200 ${(
-                  item.path === "/registrations"
-                    ? isRegistrationsActive
-                    : location.pathname === item.path
-                )
-                  ? "bg-[#26496a] text-white"
-                  : "text-gray-300 hover:bg-[#26496a]/50 hover:text-white"
+                } py-2 rounded-lg transition-all duration-200 ${isActive
+                  ? "text-white"
+                  : "text-gray-300 hover:text-white"
                 } group relative`}
+              style={isActive ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
+              onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = "rgba(1,80,121,0.5)"; }}
+              onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = ""; }}
               title={isCollapsed ? item.text : ""}
             >
               <span
@@ -209,11 +213,12 @@ function Sidebar() {
                 </div>
               )}
             </Link>
-          ))}
+          );
+          })}
         </nav>
 
         {/* Profile Section */}
-        <div className="mt-auto border-t border-[#26496a]/30">
+        <div className="mt-auto border-t border-white/10">
           <div
             className={`${isCollapsed ? "p-2" : "p-4"
               } transition-all duration-300`}
@@ -225,7 +230,7 @@ function Sidebar() {
             >
               <div
                 className={`flex items-center ${isCollapsed ? "justify-center" : "space-x-3"
-                  } cursor-pointer p-2 hover:bg-[#26496a]/50 rounded-lg transition-all duration-200`}
+                  } cursor-pointer p-2 hover:bg-[#015079]/50 rounded-lg transition-all duration-200`}
               >
                 {userData?.profile_image ? (
                   <img
@@ -237,7 +242,7 @@ function Sidebar() {
                 ) : (
                   <div
                     className={`${isCollapsed ? "w-8 h-8" : "w-6 h-6"
-                      } bg-[#26496a] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
+                      } bg-[#015079] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
                   >
                     {userData?.name
                       ? userData.name.charAt(0).toUpperCase()
@@ -294,7 +299,7 @@ function Sidebar() {
           )}
           {/* Mobile Sidebar Header */}
           <div className="px-6 pt-4 pb-4 flex justify-between items-center border-b border-gray-200">
-            <img src="/logo.jpg" alt="OnEasy Logo" className="h-10 w-auto" />
+            <img src="/Logo2.png" alt="OnEasy Logo" className="h-10 w-auto" />
             <button
               onClick={() => {
                 console.log("Close button clicked");
@@ -307,31 +312,33 @@ function Sidebar() {
           </div>
 
           {/* Mobile Navigation */}
-          <nav className="flex-1 px-4 pt-3 space-y-2.5">
-            {menuItems.map((item, index) => (
+          <nav className="flex-1 px-4 pt-3 space-y-2.5 overflow-y-auto min-h-0">
+            {menuItems.map((item, index) => {
+              const isMobileActive = item.path === "/client"
+                ? location.pathname === "/client"
+                : item.text === "Registrations"
+                  ? isRegistrationsActive
+                  : location.pathname === item.path;
+              return (
               <Link
                 to={item.path}
                 key={index}
-                className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors duration-200 ${(
-                    item.path === "/client"
-                      ? location.pathname === "/client"
-                      : item.text === "Registrations"
-                        ? isRegistrationsActive
-                        : location.pathname === item.path
-                  )
-                    ? "bg-slate-800 text-white"
+                className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${isMobileActive
+                    ? "text-white"
                     : "text-gray-700 hover:bg-gray-100"
                   }`}
+                style={isMobileActive ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <span className="text-lg">{item.icon}</span>
                 <span className="font-medium">{item.text}</span>
               </Link>
-            ))}
+              );
+            })}
           </nav>
 
           {/* Mobile Profile Section */}
-          <div className="mt-auto p-4 border-t border-gray-200">
+          <div className="flex-shrink-0 p-4 border-t border-gray-200">
             <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg bg-gray-50">
               <div className="flex items-center space-x-3 flex-1">
                 {userData?.profile_image ? (
@@ -341,7 +348,7 @@ function Sidebar() {
                     className="w-8 h-8 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-8 h-8 bg-[#01334C] text-white rounded-full flex items-center justify-center text-sm font-medium">
+                  <div className="w-8 h-8 text-white rounded-full flex items-center justify-center text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                     {userData?.name
                       ? userData.name.charAt(0).toUpperCase()
                       : "A"}

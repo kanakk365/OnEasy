@@ -73,7 +73,8 @@ function Header() {
           {/* Contact my POC Button */}
           <div className="relative" ref={dropdownRef}>
             <button
-              className="hidden md:flex items-center space-x-2 bg-[#01334C] hover:bg-[#00486D] text-white px-3 py-1.5 rounded-lg transition-colors duration-200 text-sm"
+              className="hidden md:flex items-center space-x-2 text-white px-3 py-1.5 rounded-lg hover:opacity-90 transition-all duration-200 text-sm"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
               <img
@@ -139,7 +140,7 @@ function Header() {
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="w-8 h-8 rounded-full overflow-hidden hover:ring-2 hover:ring-[#00486D] transition-all duration-200"
+                className="w-8 h-8 rounded-full overflow-hidden hover:ring-2 hover:ring-[#022B51] transition-all duration-200"
               >
                 {userData?.profile_image ? (
                   <img
@@ -148,7 +149,7 @@ function Header() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-[#01334C] text-white flex items-center justify-center">
+                  <div className="w-full h-full text-white flex items-center justify-center" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                     <span className="text-sm">
                       {userData?.name
                         ? userData.name.charAt(0).toUpperCase()

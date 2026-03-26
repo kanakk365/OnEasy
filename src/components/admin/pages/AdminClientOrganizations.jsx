@@ -58,7 +58,7 @@ function AdminClientOrganizations() {
     return (
       <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading organizations...</p>
         </div>
       </div>
@@ -72,7 +72,7 @@ function AdminClientOrganizations() {
         <div className="mb-6">
           <button
             onClick={() => navigate(`/admin/client-documents/${userId}`)}
-            className="text-[#01334C] hover:text-[#00486D] mb-4 flex items-center gap-2"
+            className="text-[#022B51] hover:text-[#022B51] mb-4 flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -81,7 +81,7 @@ function AdminClientOrganizations() {
           </button>
 
           {clientInfo && (
-            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
               <h1 className="text-2xl font-semibold text-gray-900">Directors/Partners Documents</h1>
               <div className="mt-2">
                 <p className="text-gray-600">
@@ -148,7 +148,7 @@ function AdminClientOrganizations() {
                     <td className="px-6 py-4">
                       <button
                         onClick={() => navigate(`/admin/client-company-documents/${userId}/${org.id}`, { state: { orgId: org.id, userId } })}
-                        className="px-4 py-2 text-sm bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors font-medium"
+                        className="px-4 py-2 text-sm text-white rounded-md hover:opacity-90 transition-all font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                       >
                         View Documents
                       </button>

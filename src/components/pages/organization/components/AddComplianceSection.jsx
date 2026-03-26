@@ -212,8 +212,8 @@ const AddComplianceSection = ({ selectedOrg }) => {
           onClick={() => hasChildren && toggleBranchExpand(path)}
           className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all text-left ${
             isExpanded
-              ? "bg-[#00486D]/5 border border-[#00486D]/20"
-              : "bg-white border border-gray-200 hover:border-[#00486D]/30 hover:bg-gray-50"
+              ? "bg-[#022B51]/5 border border-[#022B51]/20"
+              : "bg-white border border-gray-200 hover:border-[#022B51]/30 hover:bg-gray-50"
           }`}
           style={depth > 0 ? { marginLeft: `${depth * 16}px` } : {}}
         >
@@ -221,7 +221,7 @@ const AddComplianceSection = ({ selectedOrg }) => {
             {hasChildren &&
               (isExpanded ? (
                 <FiChevronDown
-                  className="text-[#00486D] flex-shrink-0"
+                  className="text-[#022B51] flex-shrink-0"
                   size={16}
                 />
               ) : (
@@ -232,7 +232,7 @@ const AddComplianceSection = ({ selectedOrg }) => {
               ))}
             <span
               className={`text-sm font-semibold truncate ${
-                isExpanded ? "text-[#00486D]" : "text-gray-800"
+                isExpanded ? "text-[#022B51]" : "text-gray-800"
               }`}
             >
               {branch.heading}
@@ -240,7 +240,7 @@ const AddComplianceSection = ({ selectedOrg }) => {
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {selCount > 0 && (
-              <span className="text-xs font-semibold text-[#00486D] bg-[#00486D]/10 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-semibold text-[#022B51] bg-[#022B51]/10 px-2 py-0.5 rounded-full">
                 {selCount}/{totalCount}
               </span>
             )}
@@ -276,7 +276,7 @@ const AddComplianceSection = ({ selectedOrg }) => {
                       e.stopPropagation();
                       toggleAllItems(branch.items);
                     }}
-                    className="text-xs text-[#00486D] hover:underline font-medium"
+                    className="text-xs text-[#022B51] hover:underline font-medium"
                   >
                     {branch.items.every((i) => selectedCodes.includes(i.code))
                       ? "Deselect All"
@@ -291,14 +291,14 @@ const AddComplianceSection = ({ selectedOrg }) => {
                       onClick={() => toggleSelection(item.code)}
                       className={`flex items-start gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all mb-1 ${
                         isSel
-                          ? "bg-[#00486D]/5 border border-[#00486D]/30"
+                          ? "bg-[#022B51]/5 border border-[#022B51]/30"
                           : "bg-white border border-gray-100 hover:border-gray-200 hover:bg-gray-50"
                       }`}
                     >
                       <div
                         className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
                           isSel
-                            ? "bg-[#00486D] border-[#00486D]"
+                            ? "bg-[#022B51] border-[#022B51]"
                             : "bg-white border-gray-300"
                         }`}
                       >
@@ -307,7 +307,7 @@ const AddComplianceSection = ({ selectedOrg }) => {
                       <div className="flex-1 min-w-0">
                         <p
                           className={`text-sm font-medium ${
-                            isSel ? "text-[#00486D]" : "text-gray-800"
+                            isSel ? "text-[#022B51]" : "text-gray-800"
                           }`}
                         >
                           {item.name}
@@ -338,7 +338,7 @@ const AddComplianceSection = ({ selectedOrg }) => {
     return (
       <div className="flex items-center justify-center py-16">
         <div className="flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00486D]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#022B51]"></div>
           <p className="text-sm text-gray-500">
             Loading available compliances...
           </p>
@@ -353,7 +353,7 @@ const AddComplianceSection = ({ selectedOrg }) => {
         <p className="text-red-500 mb-2">{error}</p>
         <button
           onClick={fetchAvailableCompliances}
-          className="text-sm text-[#00486D] underline"
+          className="text-sm text-[#022B51] underline"
         >
           Retry
         </button>
@@ -401,7 +401,7 @@ const AddComplianceSection = ({ selectedOrg }) => {
               <input
                 type="text"
                 placeholder="Search compliances or categories..."
-                className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#00486D] focus:ring-1 focus:ring-[#00486D]/20 transition-all bg-white"
+                className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-all bg-white"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -427,7 +427,7 @@ const AddComplianceSection = ({ selectedOrg }) => {
         <div className="w-full lg:w-72 flex-shrink-0 flex flex-col min-h-0 bg-gray-50 rounded-xl border border-gray-200">
           <div className="p-4 pb-3 border-b border-gray-200 flex justify-between items-center">
             <h3 className="text-sm font-semibold text-gray-900">Selected</h3>
-            <span className="bg-[#00486D]/10 text-[#00486D] text-xs font-bold px-2.5 py-0.5 rounded-full">
+            <span className="bg-[#022B51]/10 text-[#022B51] text-xs font-bold px-2.5 py-0.5 rounded-full">
               {selectedCodes.length}
             </span>
           </div>
@@ -456,7 +456,7 @@ const AddComplianceSection = ({ selectedOrg }) => {
                     >
                       {item.name}
                     </p>
-                    <p className="text-[10px] text-[#00486D] font-medium mt-0.5">
+                    <p className="text-[10px] text-[#022B51] font-medium mt-0.5">
                       {item.category}
                     </p>
                   </div>
@@ -476,7 +476,7 @@ const AddComplianceSection = ({ selectedOrg }) => {
             <button
               onClick={submitSelection}
               disabled={selectedCodes.length === 0 || isSubmitting}
-              className="w-full py-2.5 rounded-lg bg-[#00486D] text-white text-sm font-medium hover:bg-[#003855] disabled:opacity-50 transition-colors shadow-md shadow-blue-900/10"
+              className="w-full py-2.5 rounded-lg text-white text-sm font-medium disabled:opacity-50 hover:opacity-90 transition-all shadow-md shadow-blue-900/10" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               {isSubmitting
                 ? "Assigning..."

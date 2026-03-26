@@ -113,7 +113,7 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
           <input
             type="text"
             disabled={disabled}
-            className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+            className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Proposed name of the business (As per PAN in case of Business Other than Proprietorship, Partnership Firm)"
             value={step1.businessName || ''}
             onChange={(e) => updateStep1('businessName', e.target.value)}
@@ -124,7 +124,7 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
           <input
             type="text"
             disabled={disabled}
-            className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+            className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Enter trade name if different from legal name"
             value={step1.tradeName || ''}
             onChange={(e) => updateStep1('tradeName', e.target.value)}
@@ -134,7 +134,7 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
         <Field label="Nature of the Business" required>
           <textarea
             disabled={disabled}
-            className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] min-h-[100px] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+            className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] min-h-[100px] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Describe the main line of activity in brief"
             value={step1.natureOfBusiness || ''}
             onChange={(e) => updateStep1('natureOfBusiness', e.target.value)}
@@ -155,7 +155,7 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
           <input
             type="email"
             disabled={disabled}
-            className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+            className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             placeholder="Provide an official email address for government communication"
             value={step1.businessEmail || ''}
             onChange={(e) => updateStep1('businessEmail', e.target.value)}
@@ -170,7 +170,7 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
             <input
               type="tel"
               disabled={disabled}
-              className={`flex-1 px-4 py-3 rounded-r-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+              className={`flex-1 px-4 py-3 rounded-r-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Provide a contact number for government communication"
               value={step1.contactNumber || ''}
               onChange={(e) => updateStep1('contactNumber', e.target.value)}
@@ -191,7 +191,7 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
             <input
               type="text"
               disabled={disabled}
-              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter full address matching a recent utility bill"
               value={step1.addressLine1 || ''}
               onChange={(e) => updateStep1('addressLine1', e.target.value)}
@@ -202,7 +202,7 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
             <input
               type="text"
               disabled={disabled}
-              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Area, Landmark"
               value={step1.addressLine2 || ''}
               onChange={(e) => updateStep1('addressLine2', e.target.value)}
@@ -213,7 +213,7 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
             <input
               type="text"
               disabled={disabled}
-              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter city"
               value={step1.city || ''}
               onChange={(e) => updateStep1('city', e.target.value)}
@@ -243,7 +243,7 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
             <input
               type="text"
               disabled={disabled}
-              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter pin code"
               value={step1.pincode || ''}
               onChange={(e) => updateStep1('pincode', e.target.value)}
@@ -264,7 +264,7 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
             <input
               type="text"
               disabled={disabled}
-              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter full address matching a recent utility bill"
               value={step1.additionalAddressLine1 || ''}
               onChange={(e) => updateStep1('additionalAddressLine1', e.target.value)}
@@ -275,7 +275,7 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
             <input
               type="text"
               disabled={disabled}
-              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Area, Landmark"
               value={step1.additionalAddressLine2 || ''}
               onChange={(e) => updateStep1('additionalAddressLine2', e.target.value)}
@@ -286,7 +286,7 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
             <input
               type="text"
               disabled={disabled}
-              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter city"
               value={step1.additionalCity || ''}
               onChange={(e) => updateStep1('additionalCity', e.target.value)}
@@ -307,7 +307,7 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
             <input
               type="text"
               disabled={disabled}
-              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter pin code"
               value={step1.additionalPincode || ''}
               onChange={(e) => updateStep1('additionalPincode', e.target.value)}
@@ -451,7 +451,7 @@ export function Step1Content({ formData, setFormData, disabled = false }) {
             <input
               type="text"
               disabled={disabled}
-              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+              className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               placeholder="Enter CIN/LLP Number"
               value={step1.cinLlpNumber || ''}
               onChange={(e) => updateStep1('cinLlpNumber', e.target.value)}
@@ -559,7 +559,7 @@ export function Step2Content({ formData, setFormData, disabled = false }) {
       </p>
 
       {directors.map((director, index) => (
-        <div key={index} className="border border-gray-200 rounded-lg p-6 space-y-6 mb-6">
+        <div key={index} className="border border-gray-200 rounded-lg p-3 sm:p-6 space-y-6 mb-6">
           <h3 className="text-lg font-medium text-[#28303F] mb-4">
             {isProprietorship ? 'Proprietor' : `Director/Partner ${index + 1}`} Details
           </h3>
@@ -574,7 +574,7 @@ export function Step2Content({ formData, setFormData, disabled = false }) {
               <input
                 type="text"
                 disabled={disabled}
-                className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 placeholder="Enter the name as per the PAN card"
                 value={director.name || ''}
                 onChange={(e) => updateDirector(index, 'name', e.target.value)}
@@ -585,7 +585,7 @@ export function Step2Content({ formData, setFormData, disabled = false }) {
               <input
                 type="email"
                 disabled={disabled}
-                className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 placeholder="Enter email address"
                 value={director.email || ''}
                 onChange={(e) => updateDirector(index, 'email', e.target.value)}
@@ -596,7 +596,7 @@ export function Step2Content({ formData, setFormData, disabled = false }) {
               <input
                 type="tel"
                 disabled={disabled}
-                className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 placeholder="Enter mobile number"
                 value={director.mobileNumber || ''}
                 onChange={(e) => updateDirector(index, 'mobileNumber', e.target.value)}
@@ -664,8 +664,8 @@ export function Step2Content({ formData, setFormData, disabled = false }) {
               </div>
 
               {director.isAuthorizedSignatory === 'Yes' && (
-                <div className="space-y-6 pt-6 border-t-2 border-[#00486D] bg-blue-50 rounded-lg p-6">
-                  <h4 className="text-lg font-semibold text-[#00486D] mb-4 flex items-center gap-2">
+                <div className="space-y-6 pt-6 border-t-2 border-[#022B51] bg-blue-50 rounded-lg p-3 sm:p-6">
+                  <h4 className="text-lg font-semibold text-[#022B51] mb-4 flex items-center gap-2">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
@@ -674,7 +674,7 @@ export function Step2Content({ formData, setFormData, disabled = false }) {
 
                   {/* Authorized Signatory Information */}
                   <div className="space-y-6 mb-6">
-                    <h5 className="text-sm font-semibold text-[#00486D] mb-4">
+                    <h5 className="text-sm font-semibold text-[#022B51] mb-4">
                       Personal Information
                     </h5>
                     
@@ -682,7 +682,7 @@ export function Step2Content({ formData, setFormData, disabled = false }) {
                       <input
                         type="text"
                         disabled={disabled}
-                        className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                        className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                         placeholder="Enter name of the authorised person"
                         value={director.authorizedPersonName || ''}
                         onChange={(e) => updateDirector(index, 'authorizedPersonName', e.target.value)}
@@ -694,7 +694,7 @@ export function Step2Content({ formData, setFormData, disabled = false }) {
                         <input
                           type="tel"
                           disabled={disabled}
-                          className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                          className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                           placeholder="Enter mobile number"
                           value={director.authorizedPersonMobile || ''}
                           onChange={(e) => updateDirector(index, 'authorizedPersonMobile', e.target.value)}
@@ -706,7 +706,7 @@ export function Step2Content({ formData, setFormData, disabled = false }) {
                         <input
                           type="email"
                           disabled={disabled}
-                          className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                          className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                           placeholder="Enter email address"
                           value={director.authorizedPersonEmail || ''}
                           onChange={(e) => updateDirector(index, 'authorizedPersonEmail', e.target.value)}
@@ -718,7 +718,7 @@ export function Step2Content({ formData, setFormData, disabled = false }) {
                       <input
                         type="text"
                         disabled={disabled}
-                        className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                        className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                         placeholder="Enter designation"
                         value={director.authorizedPersonDesignation || ''}
                         onChange={(e) => updateDirector(index, 'authorizedPersonDesignation', e.target.value)}
@@ -728,7 +728,7 @@ export function Step2Content({ formData, setFormData, disabled = false }) {
 
                   {/* Authorized Signatory Documents */}
                   <div className="space-y-6 pt-6 border-t border-blue-200">
-                    <h5 className="text-sm font-semibold text-[#00486D] mb-4">
+                    <h5 className="text-sm font-semibold text-[#022B51] mb-4">
                       Authorized Signatory Documents
                     </h5>
 
@@ -781,7 +781,7 @@ export function Step2Content({ formData, setFormData, disabled = false }) {
                       <input
                         type="text"
                         disabled={disabled}
-                        className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#00486D] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                        className={`w-full px-4 py-3 rounded-lg bg-white outline-none border border-gray-200 focus:border-[#022B51] ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                         placeholder="Enter optional information"
                         value={director.authorizedPersonOptionalField1 || ''}
                         onChange={(e) => updateDirector(index, 'authorizedPersonOptionalField1', e.target.value)}

@@ -227,18 +227,17 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
         {/* Branch Header */}
         <button
           onClick={() => hasChildren && toggleBranchExpand(path)}
-          className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all text-left ${
-            isExpanded
-              ? "bg-[#00486D]/5 border border-[#00486D]/20"
-              : "bg-white border border-gray-200 hover:border-[#00486D]/30 hover:bg-gray-50"
-          }`}
+          className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all text-left ${isExpanded
+              ? "bg-[#022B51]/5 border border-[#022B51]/20"
+              : "bg-white border border-gray-200 hover:border-[#022B51]/30 hover:bg-gray-50"
+            }`}
           style={depth > 0 ? { marginLeft: `${depth * 16}px` } : {}}
         >
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {hasChildren &&
               (isExpanded ? (
                 <FiChevronDown
-                  className="text-[#00486D] flex-shrink-0"
+                  className="text-[#022B51] flex-shrink-0"
                   size={16}
                 />
               ) : (
@@ -248,16 +247,15 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
                 />
               ))}
             <span
-              className={`text-sm font-semibold truncate ${
-                isExpanded ? "text-[#00486D]" : "text-gray-800"
-              }`}
+              className={`text-sm font-semibold truncate ${isExpanded ? "text-[#022B51]" : "text-gray-800"
+                }`}
             >
               {branch.heading}
             </span>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {selCount > 0 && (
-              <span className="text-xs font-semibold text-[#00486D] bg-[#00486D]/10 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-semibold text-[#022B51] bg-[#022B51]/10 px-2 py-0.5 rounded-full">
                 {selCount}/{totalCount}
               </span>
             )}
@@ -293,7 +291,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
                       e.stopPropagation();
                       toggleAllItems(branch.items);
                     }}
-                    className="text-xs text-[#00486D] hover:underline font-medium"
+                    className="text-xs text-[#022B51] hover:underline font-medium"
                   >
                     {branch.items.every((i) => selectedCodes.includes(i.code))
                       ? "Deselect All"
@@ -306,26 +304,23 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
                     <div
                       key={item.code}
                       onClick={() => toggleItem(item)}
-                      className={`flex items-start gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all mb-1 ${
-                        isSel
-                          ? "bg-[#00486D]/5 border border-[#00486D]/30"
+                      className={`flex items-start gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all mb-1 ${isSel
+                          ? "bg-[#022B51]/5 border border-[#022B51]/30"
                           : "bg-white border border-gray-100 hover:border-gray-200 hover:bg-gray-50"
-                      }`}
+                        }`}
                     >
                       <div
-                        className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
-                          isSel
-                            ? "bg-[#00486D] border-[#00486D]"
+                        className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${isSel
+                            ? "bg-[#022B51] border-[#022B51]"
                             : "bg-white border-gray-300"
-                        }`}
+                          }`}
                       >
                         {isSel && <FiCheck className="text-white w-3 h-3" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p
-                          className={`text-sm font-medium ${
-                            isSel ? "text-[#00486D]" : "text-gray-800"
-                          }`}
+                          className={`text-sm font-medium ${isSel ? "text-[#022B51]" : "text-gray-800"
+                            }`}
                         >
                           {item.name}
                         </p>
@@ -354,7 +349,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00486D]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#022B51]"></div>
       </div>
     );
   }
@@ -373,13 +368,8 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
   // Step 1: Show org selection if no org is selected yet
   if (!selectedOrg) {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)] p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          Select Organisation
-        </h2>
-        <p className="text-sm text-gray-500 mb-6">
-          Choose an organisation to assign compliance to
-        </p>
+      <div className="bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)] p-3 sm:p-6">
+
 
         {userOrgs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-200">
@@ -409,7 +399,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
               <button
                 key={org.id}
                 onClick={() => setSelectedOrg(org)}
-                className="group text-left p-5 rounded-xl border border-gray-200 bg-white hover:border-[#00486D] hover:shadow-md transition-all duration-200"
+                className="group text-left p-5 rounded-xl border border-gray-200 bg-white hover:border-[#022B51] hover:shadow-md transition-all duration-200"
               >
                 <div className="flex items-start gap-3">
                   <div
@@ -434,7 +424,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
                     </svg>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#00486D] transition-colors">
+                    <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#022B51] transition-colors">
                       {org.legal_name ||
                         org.legalName ||
                         "Unnamed Organisation"}
@@ -455,7 +445,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
                       </span>
                     )}
                   </div>
-                  <FiChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#00486D] flex-shrink-0 mt-1 transition-colors" />
+                  <FiChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#022B51] flex-shrink-0 mt-1 transition-colors" />
                 </div>
               </button>
             ))}
@@ -548,7 +538,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
             setSelectedItemsMap({});
             setExpandedBranches(new Set());
           }}
-          className="text-xs font-medium text-[#00486D] hover:underline px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors"
+          className="text-xs font-medium text-[#022B51] hover:underline px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors"
         >
           Change
         </button>
@@ -572,7 +562,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
               <input
                 type="text"
                 placeholder="Search compliances or categories..."
-                className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#00486D]"
+                className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51]"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -598,7 +588,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
 
         {/* Right Column: Selection Preview */}
         <div className="w-full lg:w-96 flex-shrink-0 flex flex-col min-h-0 bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
-          <div className="p-6 pb-4 border-b border-gray-100 flex justify-between items-center">
+          <div className="p-3 sm:p-6 pb-4 border-b border-gray-100 flex justify-between items-center">
             <h3 className="text-base font-semibold text-gray-900">
               Selection Preview
             </h3>
@@ -607,7 +597,7 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
             </span>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 custom-scrollbar">
             {selectedCodes.length === 0 ? (
               <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200 p-8">
                 <p className="text-gray-400 text-sm text-center">
@@ -644,9 +634,9 @@ function ClientComplianceAssignmentTab({ userId, organisations: orgsProp }) {
             )}
           </div>
 
-          <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+          <div className="p-3 sm:p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
             <button
-              className="w-full py-2.5 px-4 bg-[#00486D] text-white text-sm font-medium rounded-lg hover:bg-[#003855] transition-colors focus:ring-4 focus:ring-[#00486D]/20 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              className="w-full py-2.5 px-4 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-all focus:ring-4 focus:ring-[#022B51]/20 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               disabled={selectedCodes.length === 0}
               onClick={handleSaveClick}
             >

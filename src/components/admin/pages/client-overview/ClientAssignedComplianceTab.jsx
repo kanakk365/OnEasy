@@ -327,7 +327,7 @@ const ClientAssignedComplianceTab = ({ userId }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00486D]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#022B51]"></div>
       </div>
     );
   }
@@ -390,14 +390,14 @@ const ClientAssignedComplianceTab = ({ userId }) => {
         )}
 
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="p-6">
+          <div className="p-3 sm:p-6">
             <p className="text-gray-500 italic mb-6">
               Configure compliance periods ({instances.length} items)
             </p>
 
             <div className="overflow-x-auto rounded-lg border border-gray-200">
               <table className="w-full">
-                <thead className="bg-[#00486D] text-white">
+                <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold">
                       Period
@@ -421,10 +421,10 @@ const ClientAssignedComplianceTab = ({ userId }) => {
                     const date = new Date(instance.dueDate);
                     const formattedDate = !isNaN(date)
                       ? date.toLocaleDateString("en-GB", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })
                       : instance.dueDate;
 
                     // Format yearMonth (e.g. "2026-03") as full name: "March 2026"
@@ -478,7 +478,7 @@ const ClientAssignedComplianceTab = ({ userId }) => {
                               onChange={() =>
                                 toggleInstanceStatus(instance.id, isDone)
                               }
-                              className="w-5 h-5 rounded border-gray-300 text-[#00486D] focus:ring-[#00486D] cursor-pointer"
+                              className="w-5 h-5 rounded border-gray-300 text-[#022B51] focus:ring-[#022B51] cursor-pointer"
                             />
                           </div>
                         </td>
@@ -503,7 +503,7 @@ const ClientAssignedComplianceTab = ({ userId }) => {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-8 py-3 bg-[#00486D] text-white text-sm font-semibold rounded-lg hover:bg-[#003855] disabled:opacity-70 transition-colors shadow-lg shadow-blue-900/10"
+                className="px-8 py-3 text-white text-sm font-semibold rounded-lg disabled:opacity-70 hover:opacity-90 transition-all shadow-lg shadow-blue-900/10" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 {saving ? "Saving..." : "Save & Continue"}
               </button>
@@ -594,7 +594,7 @@ const ClientAssignedComplianceTab = ({ userId }) => {
                   setSelectedForDelete(new Set(allCodes));
                 }
               }}
-              className="text-sm font-medium text-[#00486D] hover:text-[#003855] hover:underline transition-colors"
+              className="text-sm font-medium text-[#022B51] hover:text-[#015079] hover:underline transition-colors"
             >
               {orgAssignments
                 .map((a) => a.compliance?.code)
@@ -624,11 +624,10 @@ const ClientAssignedComplianceTab = ({ userId }) => {
               return (
                 <div
                   key={assignment.id}
-                  className={`bg-white border rounded-xl p-6 hover:shadow-md transition-all ${
-                    isSelected
+                  className={`bg-white border rounded-xl p-3 sm:p-6 hover:shadow-md transition-all ${isSelected
                       ? "border-red-300 bg-red-50/30 shadow-sm"
                       : "border-gray-200"
-                  }`}
+                    }`}
                 >
                   {/* Top Row: Checkbox, Title, Badge, Status */}
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
@@ -675,10 +674,9 @@ const ClientAssignedComplianceTab = ({ userId }) => {
                           onClick={() => handleComplianceClick(assignment)}
                           className={`
                             h-9 px-4 rounded-full text-sm font-medium border transition-all
-                            ${
-                              instance.isDone
-                                ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
-                                : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+                            ${instance.isDone
+                              ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                              : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
                             }
                           `}
                         >
@@ -690,7 +688,7 @@ const ClientAssignedComplianceTab = ({ userId }) => {
                     {/* View Details Button as a pill */}
                     <button
                       onClick={() => handleComplianceClick(assignment)}
-                      className="h-9 px-4 rounded-full text-sm font-medium bg-[#00486D]/5 text-[#00486D] border border-[#00486D]/10 hover:bg-[#00486D]/10 transition-colors"
+                      className="h-9 px-4 rounded-full text-sm font-medium bg-[#022B51]/5 text-[#022B51] border border-[#022B51]/10 hover:bg-[#015079]/10 transition-colors"
                     >
                       View Details
                     </button>
@@ -740,10 +738,7 @@ const ClientAssignedComplianceTab = ({ userId }) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-bold text-gray-900">Assigned Compliance</h2>
-      <p className="text-sm text-gray-500 -mt-4">
-        Select an organisation to view its assigned compliances
-      </p>
+
 
       {assignments.length === 0 ? (
         <div className="text-center py-12 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
@@ -755,16 +750,16 @@ const ClientAssignedComplianceTab = ({ userId }) => {
             const progressPercent =
               orgGroup.totalInstances > 0
                 ? Math.round(
-                    (orgGroup.completedInstances / orgGroup.totalInstances) *
-                      100,
-                  )
+                  (orgGroup.completedInstances / orgGroup.totalInstances) *
+                  100,
+                )
                 : 0;
 
             return (
               <button
                 key={orgGroup.id}
                 onClick={() => setSelectedOrg(orgGroup)}
-                className="group text-left p-5 rounded-xl border border-gray-200 bg-white hover:border-[#00486D] hover:shadow-md transition-all duration-200"
+                className="group text-left p-5 rounded-xl border border-gray-200 bg-white hover:border-[#022B51] hover:shadow-md transition-all duration-200"
               >
                 <div className="flex items-start gap-3">
                   <div
@@ -791,7 +786,7 @@ const ClientAssignedComplianceTab = ({ userId }) => {
                     </svg>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#00486D] transition-colors">
+                    <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#022B51] transition-colors">
                       {orgGroup.legalName || "General (No Organisation)"}
                     </h3>
                     {orgGroup.tradeName &&
@@ -838,7 +833,7 @@ const ClientAssignedComplianceTab = ({ userId }) => {
                       </div>
                     </div>
                   </div>
-                  <FiChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#00486D] flex-shrink-0 mt-1 transition-colors" />
+                  <FiChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#022B51] flex-shrink-0 mt-1 transition-colors" />
                 </div>
               </button>
             );

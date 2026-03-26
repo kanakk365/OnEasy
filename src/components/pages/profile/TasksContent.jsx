@@ -92,7 +92,8 @@ import { BsCalendar3 } from "react-icons/bs";
         <button
           type="button"
           onClick={onAdd}
-          className="px-5 py-2.5 bg-[#01334C] text-white rounded-md hover:bg-[#01283a] transition-colors text-xs font-medium"
+          className="px-5 py-2.5 text-white rounded-md hover:opacity-90 transition-all text-xs font-medium"
+            style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
         >
           {buttonText}
         </button>
@@ -130,14 +131,15 @@ const TasksContent = ({
     <div className="px-6 pb-6 pt-6">
       <div className="space-y-6">
         {/* Admin Tasks Section */}
-        <div className="bg-[#F8F9FA] rounded-xl p-6">
+        <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
           <h3 className="text-[15px] font-medium text-gray-900 mb-4">
             Admin Tasks
           </h3>
           {adminTasksList.length > 0 ? (
             <div className="overflow-x-auto rounded-lg">
-              <table className="w-full text-sm">
-                <thead className="bg-[#00486D] text-white">
+              <div className="overflow-x-auto"><table className="w-full text-sm">
+                <thead className="text-white"
+                  style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                   <tr>
                     <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                       Date
@@ -187,7 +189,8 @@ const TasksContent = ({
                       </td>
                       <td className="p-3">
                         <button
-                          className="flex items-center gap-1 px-3 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs font-medium"
+                          className="flex items-center gap-1 px-3 py-2 text-white rounded-md hover:hover:opacity-90 transition-all text-xs font-medium"
+                            style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                         >
                           <AiOutlineEye className="w-4 h-4" />
                           View Details
@@ -196,7 +199,7 @@ const TasksContent = ({
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </div>
           ) : (
             <EmptySectionState title="No Admin Tasks Yet" />
@@ -204,14 +207,15 @@ const TasksContent = ({
         </div>
 
         {/* My Tasks Section */}
-        <div className="bg-[#F8F9FA] rounded-xl p-6 relative">
+        <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6 relative">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-[15px] font-medium text-gray-900">My Tasks</h3>
             {userTasksList.length > 0 && (
               <button
                 type="button"
                 onClick={() => setIsAddingUserTask(true)}
-                className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold flex items-center gap-2"
+                className="px-4 py-2 text-white rounded-lg hover:hover:opacity-90 transition-all text-xs font-semibold flex items-center gap-2"
+                  style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 <AiOutlinePlus className="w-3 h-3" /> Add More Tasks
               </button>
@@ -229,8 +233,9 @@ const TasksContent = ({
               {/* Existing Tasks Table */}
               {userTasksList.length > 0 && (
                 <div className="overflow-x-auto rounded-lg">
-                  <table className="w-full text-sm">
-                    <thead className="bg-[#00486D] text-white">
+                  <div className="overflow-x-auto"><table className="w-full text-sm">
+                    <thead className="text-white"
+                      style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                       <tr>
                         <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                           Date
@@ -301,7 +306,7 @@ const TasksContent = ({
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </table></div>
                 </div>
               )}
 
@@ -414,9 +419,10 @@ const TasksContent = ({
               }
             }}
             disabled={saving}
-            className="px-8 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 sm:px-8 py-2 text-white rounded-lg hover:hover:opacity-90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             style={{
-              background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+              background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
             }}
           >
             {saving ? "Saving..." : "Save Changes"}
@@ -428,7 +434,7 @@ const TasksContent = ({
       {selectedAdminTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+            <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
               <h4 className="text-sm font-semibold text-gray-900">
                 Admin Task Details
               </h4>
@@ -440,7 +446,7 @@ const TasksContent = ({
                 ×
               </button>
             </div>
-            <div className="px-6 py-4 space-y-3 text-sm">
+            <div className="px-3 sm:px-6 py-3 sm:py-4 space-y-3 text-sm">
               {/* Date */}
               <div>
                 <div className="text-xs font-medium text-gray-500 mb-1">
@@ -503,7 +509,7 @@ const TasksContent = ({
       {selectedUserTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+            <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
               <h4 className="text-sm font-semibold text-gray-900">
                 {isEditingUserTask ? "Edit My Task" : "My Task Details"}
               </h4>
@@ -519,7 +525,7 @@ const TasksContent = ({
                 ×
               </button>
             </div>
-            <div className="px-6 py-4 space-y-3 text-sm">
+            <div className="px-3 sm:px-6 py-3 sm:py-4 space-y-3 text-sm">
               {/* Date */}
               <div>
                 <div className="text-xs font-medium text-gray-500 mb-1">
@@ -530,7 +536,7 @@ const TasksContent = ({
                     type="date"
                     value={editedUserTask?.date || selectedUserTask.date || ""}
                     onChange={(e) => setEditedUserTask({ ...editedUserTask, date: e.target.value })}
-                    className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#00486D]"
+                    className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                   />
                 ) : (
                   <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800">
@@ -552,7 +558,7 @@ const TasksContent = ({
                   <select
                     value={editedUserTask?.organizationId || selectedUserTask.organizationId || ""}
                     onChange={(e) => setEditedUserTask({ ...editedUserTask, organizationId: e.target.value || null })}
-                    className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#00486D] appearance-none"
+                    className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#022B51] appearance-none"
                   >
                     <option value="">Select organization</option>
                     {organizations.map((org, idx) => (
@@ -578,7 +584,7 @@ const TasksContent = ({
                     type="text"
                     value={editedUserTask?.title || selectedUserTask.title || ""}
                     onChange={(e) => setEditedUserTask({ ...editedUserTask, title: e.target.value })}
-                    className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#00486D]"
+                    className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                     placeholder="Enter task title"
                   />
                 ) : (
@@ -597,7 +603,7 @@ const TasksContent = ({
                   <select
                     value={editedUserTask?.type || selectedUserTask.type || ""}
                     onChange={(e) => setEditedUserTask({ ...editedUserTask, type: e.target.value })}
-                    className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#00486D] appearance-none"
+                    className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#022B51] appearance-none"
                   >
                     <option value="">Select Type</option>
                     <option value="Recurring">Recurring</option>
@@ -621,7 +627,7 @@ const TasksContent = ({
                   <textarea
                     value={editedUserTask?.description || selectedUserTask.description || ""}
                     onChange={(e) => setEditedUserTask({ ...editedUserTask, description: e.target.value })}
-                    className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#00486D] min-h-[80px]"
+                    className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#022B51] min-h-[80px]"
                     placeholder="Enter task description"
                   />
                 ) : (
@@ -633,7 +639,7 @@ const TasksContent = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="px-6 py-3 border-t border-gray-100 flex justify-end gap-2">
+            <div className="px-3 sm:px-6 py-2 sm:py-3 border-t border-gray-100 flex justify-end gap-2">
               {isEditingUserTask ? (
                 <>
                   <button
@@ -661,7 +667,7 @@ const TasksContent = ({
                     disabled={saving}
                     className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg disabled:opacity-50"
                     style={{
-                      background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+                      background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                     }}
                   >
                     {saving ? "Saving..." : "Save Changes"}
@@ -676,7 +682,7 @@ const TasksContent = ({
                   }}
                   className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg"
                   style={{
-                    background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+                    background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                   }}
                 >
                   Edit

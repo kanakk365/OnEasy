@@ -755,7 +755,7 @@ function AdminCustomPayment() {
             }}
             className={`px-6 py-2.5 text-sm font-medium rounded-lg transition-all ${
               activeTab === "generate"
-                ? "bg-white shadow-sm text-[#01334C]"
+                ? "bg-white shadow-sm text-[#022B51]"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -765,7 +765,7 @@ function AdminCustomPayment() {
             onClick={() => setActiveTab("pending")}
             className={`px-6 py-2.5 text-sm font-medium rounded-lg transition-all ${
               activeTab === "pending"
-                ? "bg-white shadow-sm text-[#01334C]"
+                ? "bg-white shadow-sm text-[#022B51]"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -798,7 +798,7 @@ function AdminCustomPayment() {
 
           {loadingPending ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
               <p className="mt-4 text-gray-600">Loading pending payments...</p>
             </div>
           ) : pendingPayments.length === 0 ? (
@@ -807,31 +807,31 @@ function AdminCustomPayment() {
               No pending payments found
             </div>
           ) : (
-            <div className="p-6">
+            <div className="p-3 sm:p-6">
               <div className="p-4 bg-[#f5f5f5] rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full border-separate border-spacing-0">
                     <thead>
                       <tr className="text-white">
-                        <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D] rounded-l-xl">
+                        <th className="px-6 py-4 text-left text-sm font-medium rounded-l-xl" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           User
                         </th>
-                        <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                        <th className="px-6 py-4 text-left text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           Service
                         </th>
-                        <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                        <th className="px-6 py-4 text-left text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           Package
                         </th>
-                        <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                        <th className="px-6 py-4 text-left text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           Amount
                         </th>
-                        <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                        <th className="px-6 py-4 text-left text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           Ticket ID
                         </th>
-                        <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                        <th className="px-6 py-4 text-left text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           Created
                         </th>
-                        <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D] rounded-r-xl">
+                        <th className="px-6 py-4 text-left text-sm font-medium rounded-r-xl" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           Action
                         </th>
                       </tr>
@@ -871,7 +871,7 @@ function AdminCustomPayment() {
                           <td className="px-6 py-4 text-sm text-gray-700">
                             {item.package_name || "-"}
                           </td>
-                          <td className="px-6 py-4 text-sm font-semibold text-[#00486D]">
+                          <td className="px-6 py-4 text-sm font-semibold text-[#022B51]">
                             ₹
                             {parseFloat(
                               item.package_price || item.amount || 0
@@ -960,7 +960,7 @@ function AdminCustomPayment() {
                     placeholder="Search..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full h-11 pl-12 pr-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent text-sm"
+                    className="w-full h-11 pl-12 pr-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent text-sm"
                   />
                 </div>
               </div>
@@ -968,7 +968,7 @@ function AdminCustomPayment() {
               {/* Users List */}
               {loading ? (
                 <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
                   <p className="mt-4 text-gray-600">Loading users...</p>
                 </div>
               ) : filteredUsers.length === 0 ? (
@@ -978,22 +978,22 @@ function AdminCustomPayment() {
                     : "No users available"}
                 </div>
               ) : (
-                <div className="p-6">
+                <div className="p-3 sm:p-6">
                   <div className="p-4 bg-[#f5f5f5] rounded-xl overflow-hidden">
                     <div className="overflow-x-auto">
                       <table className="w-full border-separate border-spacing-0">
                         <thead>
                           <tr className="text-white">
-                            <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D] rounded-l-xl">
+                            <th className="px-6 py-4 text-left text-sm font-medium rounded-l-xl" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                               User Name
                             </th>
-                            <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                            <th className="px-6 py-4 text-left text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                               Email
                             </th>
-                            <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                            <th className="px-6 py-4 text-left text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                               Phone
                             </th>
-                            <th className="px-6 py-4 text-right text-sm font-medium bg-[#00486D] rounded-r-xl">
+                            <th className="px-6 py-4 text-right text-sm font-medium rounded-r-xl" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                               Action
                             </th>
                           </tr>
@@ -1017,7 +1017,7 @@ function AdminCustomPayment() {
                                       ? user.name.charAt(0).toUpperCase()
                                       : "U"}
                                   </div>
-                                  <span className="font-medium text-gray-900 group-hover:text-[#00486D] transition-colors">
+                                  <span className="font-medium text-gray-900 group-hover:text-[#022B51] transition-colors">
                                     {user.name || "-"}
                                   </span>
                                 </div>
@@ -1058,14 +1058,14 @@ function AdminCustomPayment() {
                           <button
                             onClick={() => paginate(currentPage - 1)}
                             disabled={currentPage === 1}
-                            className="p-2 py-1 rounded-lg bg-[#00486D] text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#023752] transition-colors"
+                            className="p-2 py-1 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                           >
                             <FiChevronLeft className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => paginate(currentPage + 1)}
                             disabled={currentPage === totalPages}
-                            className="p-2 py-1 rounded-lg bg-[#00486D] text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#023752] transition-colors"
+                            className="p-2 py-1 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                           >
                             <FiChevronRight className="w-4 h-4" />
                           </button>
@@ -1113,7 +1113,7 @@ function AdminCustomPayment() {
                 </div>
               </div>
 
-              <div className="p-6 max-w-2xl mx-auto">
+              <div className="p-3 sm:p-6 max-w-2xl mx-auto">
                 {/* Service Selection */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
@@ -1129,7 +1129,7 @@ function AdminCustomPayment() {
                         );
                         setSelectedService(service || null);
                       }}
-                      className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent bg-white appearance-none"
+                      className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent bg-white appearance-none"
                     >
                       <option value="">Select a service...</option>
                       {Array.from(
@@ -1177,7 +1177,7 @@ function AdminCustomPayment() {
                     placeholder="Enter amount"
                     min="1"
                     step="0.01"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                   />
                 </div>
 
@@ -1192,7 +1192,7 @@ function AdminCustomPayment() {
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Enter payment description..."
                     rows={3}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                   />
                 </div>
 
@@ -1215,7 +1215,7 @@ function AdminCustomPayment() {
                           }
                         }}
                         placeholder="Enter coupon code"
-                        className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent bg-white"
+                        className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent bg-white"
                         disabled={validatingCoupon || generatingLink}
                       />
                       {appliedCoupon ? (
@@ -1287,7 +1287,7 @@ function AdminCustomPayment() {
                             <span className="text-blue-900 font-bold">
                               Final Amount
                             </span>
-                            <span className="text-[#00486D] font-bold text-xl">
+                            <span className="text-[#022B51] font-bold text-xl">
                               ₹{calculateFinalPrice().toLocaleString("en-IN")}
                             </span>
                           </div>
@@ -1300,7 +1300,7 @@ function AdminCustomPayment() {
                             <span className="text-blue-900 font-bold">
                               Final Amount
                             </span>
-                            <span className="text-[#00486D] font-bold text-xl">
+                            <span className="text-[#022B51] font-bold text-xl">
                               ₹
                               {parseFloat(customAmount || 0).toLocaleString(
                                 "en-IN"

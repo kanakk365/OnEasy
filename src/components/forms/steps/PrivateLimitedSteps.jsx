@@ -558,7 +558,7 @@ export function OfficeAddressContent({ formData, setFormData, disabled = false }
     const showDesignation = director.relation !== 'Shareholder';
 
     return (
-      <div key={index} className="border-2 border-gray-200 rounded-lg p-6">
+      <div key={index} className="border-2 border-gray-200 rounded-lg p-3 sm:p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-6">
           {director.relation === 'Shareholder' ? 'Shareholder' : 'Director'} {index + 1}
         </h3>

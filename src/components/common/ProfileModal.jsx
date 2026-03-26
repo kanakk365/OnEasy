@@ -324,9 +324,9 @@ function ProfileModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-[95vw] sm:max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-3 sm:p-6 border-b border-gray-200">
           <h2 className="text-2xl font-semibold text-gray-900">Profile</h2>
           <button
             onClick={onClose}
@@ -337,11 +337,11 @@ function ProfileModal({ isOpen, onClose }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-3 sm:p-6 space-y-6">
           {/* Loading State */}
           {loading && !formData.name && (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#01334C]"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#022B51]"></div>
               <span className="ml-3 text-gray-600">Loading profile from database...</span>
             </div>
           )}
@@ -369,7 +369,7 @@ function ProfileModal({ isOpen, onClose }) {
               name="name"
               value={formData.name || ''}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
               placeholder="Abhishek Boddu"
             />
           </div>
@@ -386,7 +386,7 @@ function ProfileModal({ isOpen, onClose }) {
                 name="email"
                 value={formData.email || ''}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                 placeholder="abhishek@gmail.com"
               />
             </div>
@@ -401,7 +401,7 @@ function ProfileModal({ isOpen, onClose }) {
                 name="phone"
                 value={formData.phone || ''}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                 placeholder="9858015257"
               />
               {/* Debug: Show phone value */}
@@ -423,7 +423,7 @@ function ProfileModal({ isOpen, onClose }) {
                 name="dob"
                 value={formData.dob}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
               />
             </div>
 
@@ -436,7 +436,7 @@ function ProfileModal({ isOpen, onClose }) {
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent appearance-none bg-white"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent appearance-none bg-white"
               >
                 <option value="male">Male</option>
                 <option value="female">Female</option>
@@ -455,7 +455,7 @@ function ProfileModal({ isOpen, onClose }) {
                   className="w-20 h-20 rounded-full object-cover border-2 border-gray-300"
                 />
               ) : (
-                <div className="w-20 h-20 bg-[#01334C] rounded-full flex items-center justify-center text-white text-2xl font-semibold">
+                <div className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-semibold" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                   {formData.name ? formData.name.charAt(0).toUpperCase() : 'U'}
                 </div>
               )}
@@ -467,7 +467,7 @@ function ProfileModal({ isOpen, onClose }) {
                 onChange={handleImageChange}
                 className="hidden"
               />
-              <div className="flex items-center space-x-2 px-4 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors">
+              <div className="flex items-center space-x-2 px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                 <FiUpload className="w-4 h-4" />
                 <span className="text-sm font-medium">Update image</span>
               </div>
@@ -491,7 +491,7 @@ function ProfileModal({ isOpen, onClose }) {
                 <button
                   type="button"
                   onClick={() => setShowPasswordSection(true)}
-                  className="text-[#01334C] hover:text-[#00486D] text-sm font-medium"
+                  className="text-[#022B51] hover:text-[#022B51] text-sm font-medium"
                 >
                   {hasEmailPassword ? 'Change Password' : 'Set Password'}
                 </button>
@@ -511,7 +511,7 @@ function ProfileModal({ isOpen, onClose }) {
                       name="currentPassword"
                       value={passwordData.currentPassword}
                       onChange={handlePasswordChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                       placeholder="Enter current password (leave empty if setting password for first time)"
                     />
                   </div>
@@ -535,7 +535,7 @@ function ProfileModal({ isOpen, onClose }) {
                     name="password"
                     value={passwordData.password}
                     onChange={handlePasswordChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                     placeholder={hasEmailPassword ? 'Enter new password' : 'Enter password (min 6 characters)'}
                     minLength={6}
                   />
@@ -551,7 +551,7 @@ function ProfileModal({ isOpen, onClose }) {
                     name="confirmPassword"
                     value={passwordData.confirmPassword}
                     onChange={handlePasswordChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                     placeholder="Confirm password"
                   />
                 </div>
@@ -560,7 +560,7 @@ function ProfileModal({ isOpen, onClose }) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="px-6 py-2 text-white rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                   >
                     {loading ? 'Saving...' : hasEmailPassword ? 'Change Password' : 'Set Password'}
                   </button>
@@ -585,7 +585,7 @@ function ProfileModal({ isOpen, onClose }) {
             <button
               type="submit"
               disabled={loading}
-              className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              className="px-8 py-3 text-white rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               {loading ? 'Saving...' : 'Save'}
             </button>

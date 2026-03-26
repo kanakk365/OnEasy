@@ -132,9 +132,9 @@ function OrganizationBusinessDocuments() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -143,7 +143,7 @@ function OrganizationBusinessDocuments() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] py-6">
-      <div className="container mx-auto px-4 md:px-8 lg:px-12">
+      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12">
         {/* Header - matching KYC layout */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
@@ -172,7 +172,7 @@ function OrganizationBusinessDocuments() {
         {/* Company Info Card with building icon */}
         {organization && (
           <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 p-5 mb-6 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white flex-shrink-0" style={{ background: 'linear-gradient(160.12deg, #00486D 13.28%, #016599 109.67%)' }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white flex-shrink-0" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>
               <BsBuilding className="w-6 h-6" />
             </div>
             <div className="flex-1">

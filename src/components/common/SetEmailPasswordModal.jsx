@@ -130,7 +130,7 @@ function SetEmailPasswordModal({ isOpen, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-xl p-4 overflow-y-auto">
-      <div className="bg-white rounded-xl w-full max-w-md mx-auto my-auto shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl w-full max-w-[95vw] sm:max-w-md mx-auto my-auto shadow-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">Complete Your Profile</h2>
@@ -151,7 +151,7 @@ function SetEmailPasswordModal({ isOpen, onClose, onSuccess }) {
               id="name"
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+              className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
               placeholder="Enter your full name"
               disabled={loading}
               required
@@ -168,7 +168,7 @@ function SetEmailPasswordModal({ isOpen, onClose, onSuccess }) {
               id="email"
               value={formData.email}
               onChange={(e) => handleChange('email', e.target.value)}
-              className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+              className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
               placeholder="Enter your email address"
               disabled={loading}
               required
@@ -186,7 +186,7 @@ function SetEmailPasswordModal({ isOpen, onClose, onSuccess }) {
                 id="password"
                 value={formData.password}
                 onChange={(e) => handleChange('password', e.target.value)}
-                className="w-full h-12 px-4 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                className="w-full h-12 px-4 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                 placeholder="Enter password (min. 6 characters)"
                 disabled={loading}
                 required
@@ -221,7 +221,7 @@ function SetEmailPasswordModal({ isOpen, onClose, onSuccess }) {
                 id="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                className="w-full h-12 px-4 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                className="w-full h-12 px-4 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                 placeholder="Confirm password"
                 disabled={loading}
                 required
@@ -257,7 +257,7 @@ function SetEmailPasswordModal({ isOpen, onClose, onSuccess }) {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 h-12 px-6 bg-[#01334C] hover:bg-[#00486D] text-white font-medium rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+              className="flex-1 h-12 px-6 text-white font-medium rounded-lg hover:opacity-90 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               {loading ? (
                 <>

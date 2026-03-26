@@ -150,7 +150,7 @@ function AdminNoticeManagement() {
         </div>
         <button
           onClick={() => navigate("/admin/notice-board")}
-          className="px-4 py-2 text-sm bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors font-medium"
+          className="px-4 py-2 text-sm text-white rounded-md hover:opacity-90 transition-all font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
         >
           Back to Create Notice
         </button>
@@ -162,7 +162,7 @@ function AdminNoticeManagement() {
         <select
           value={selectedClientFilter}
           onChange={(e) => setSelectedClientFilter(e.target.value)}
-          className="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C] text-sm"
+          className="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51] text-sm"
         >
           <option value="">All Clients</option>
           <option value="global">Global Notices Only</option>
@@ -176,7 +176,7 @@ function AdminNoticeManagement() {
 
       {loading ? (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading notices...</p>
         </div>
       ) : notices.length === 0 ? (
@@ -214,7 +214,7 @@ function AdminNoticeManagement() {
                           type="text"
                           value={editForm.title}
                           onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                         />
                       </div>
                       <div>
@@ -222,7 +222,7 @@ function AdminNoticeManagement() {
                         <textarea
                           value={editForm.description}
                           onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C] h-24"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51] h-24"
                         />
                       </div>
                       <div>
@@ -231,7 +231,7 @@ function AdminNoticeManagement() {
                           type="text"
                           value={editForm.link}
                           onChange={(e) => setEditForm({ ...editForm, link: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                           placeholder="https://"
                         />
                       </div>
@@ -240,7 +240,7 @@ function AdminNoticeManagement() {
                         <select
                           value={editForm.user_id}
                           onChange={(e) => setEditForm({ ...editForm, user_id: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                         >
                           <option value="">All Clients (Global Notice)</option>
                           {clients.map((client) => (
@@ -260,7 +260,7 @@ function AdminNoticeManagement() {
                         <button
                           onClick={() => handleSaveEdit(notice.id)}
                           disabled={saving}
-                          className="px-4 py-2 text-sm bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors disabled:opacity-50"
+                          className="px-4 py-2 text-sm text-white rounded-md hover:opacity-90 transition-all disabled:opacity-50" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                         >
                           {saving ? "Saving..." : "Save Changes"}
                         </button>
@@ -287,7 +287,7 @@ function AdminNoticeManagement() {
                             href={notice.link}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-xs text-[#01334C] hover:underline inline-block mb-2"
+                            className="text-xs text-[#022B51] hover:underline inline-block mb-2"
                           >
                             {notice.link}
                           </a>
@@ -305,7 +305,7 @@ function AdminNoticeManagement() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(notice)}
-                          className="px-3 py-1.5 text-xs bg-[#01334C] text-white rounded-md hover:bg-[#00486D] transition-colors"
+                          className="px-3 py-1.5 text-xs text-white rounded-md hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                         >
                           Edit
                         </button>

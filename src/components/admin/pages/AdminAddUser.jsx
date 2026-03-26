@@ -156,7 +156,7 @@ function AdminAddUser() {
 
       <div className="max-w-2xl mx-auto">
         {/* Form Card */}
-        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100">
+        <div className="bg-white rounded-2xl p-3 sm:p-6 md:p-8 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100">
           {/* Card Header with Icon */}
           <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
             <div
@@ -197,7 +197,7 @@ function AdminAddUser() {
                   value={formData.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   placeholder="Enter user's name"
-                  className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent placeholder-gray-400 text-sm transition-all"
+                  className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent placeholder-gray-400 text-sm transition-all"
                   disabled={loading}
                 />
               </div>
@@ -221,7 +221,7 @@ function AdminAddUser() {
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   placeholder="user@example.com"
-                  className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent placeholder-gray-400 text-sm transition-all"
+                  className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent placeholder-gray-400 text-sm transition-all"
                   disabled={loading}
                   required
                 />
@@ -246,7 +246,7 @@ function AdminAddUser() {
                   value={formData.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
                   placeholder="Enter 10-digit mobile number"
-                  className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent placeholder-gray-400 text-sm transition-all"
+                  className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent placeholder-gray-400 text-sm transition-all"
                   disabled={loading}
                   maxLength="10"
                   required
@@ -279,7 +279,7 @@ function AdminAddUser() {
                       handleInputChange("password", e.target.value)
                     }
                     placeholder="Enter password (min. 6 characters)"
-                    className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent placeholder-gray-400 text-sm transition-all"
+                    className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent placeholder-gray-400 text-sm transition-all"
                     disabled={loading}
                     required
                   />

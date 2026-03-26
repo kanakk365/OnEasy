@@ -50,7 +50,7 @@ function ForgotPasswordModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-xl">
-      <div className="bg-white rounded-xl w-full max-w-md mx-4 shadow-2xl">
+      <div className="bg-white rounded-xl w-full max-w-[95vw] sm:max-w-md mx-4 shadow-2xl">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-start">
           <div>
@@ -88,7 +88,7 @@ function ForgotPasswordModal({ isOpen, onClose }) {
               <button
                 type="button"
                 onClick={handleClose}
-                className="w-full h-12 bg-[#01334C] hover:bg-[#00486D] text-white font-medium rounded-lg transition-colors"
+                className="w-full h-12 text-white font-medium rounded-lg hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 Back to Sign In
               </button>
@@ -104,7 +104,7 @@ function ForgotPasswordModal({ isOpen, onClose }) {
                   id="forgot-email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                  className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                   placeholder="Enter your email"
                   disabled={loading}
                   autoFocus
@@ -128,7 +128,7 @@ function ForgotPasswordModal({ isOpen, onClose }) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 h-12 px-6 bg-[#01334C] hover:bg-[#00486D] text-white font-medium rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="flex-1 h-12 px-6 text-white font-medium rounded-lg hover:opacity-90 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   {loading ? (
                     <>

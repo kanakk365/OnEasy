@@ -21,7 +21,7 @@ function TopTabs({ tabs, activeTab, onChange, disabled = false }) {
               <span
                 className={
                   isActive
-                    ? "text-[#00486D] font-medium text-lg  tracking-[0.03em]"
+                    ? "text-[#022B51] font-medium text-lg  tracking-[0.03em]"
                     : "text-[#797979]  text-lg tracking-[0.03em]"
                 }
               >
@@ -30,7 +30,7 @@ function TopTabs({ tabs, activeTab, onChange, disabled = false }) {
               <div
                 className={
                   isActive
-                    ? "absolute bottom-0 left-0 right-0 border-b-4 border-[#00486D]"
+                    ? "absolute bottom-0 left-0 right-0 border-b-4 border-[#022B51]"
                     : "absolute bottom-0 left-0 right-0 border-b-4 border-transparent"
                 }
               />

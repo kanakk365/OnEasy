@@ -866,7 +866,7 @@ function AdminServices() {
     return (
       <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading services...</p>
         </div>
       </div>
@@ -899,7 +899,7 @@ function AdminServices() {
         <div className="flex items-center gap-3 self-start md:self-auto">
           <button
             onClick={fetchServices}
-            className="p-2.5 text-[#00486D] bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
+            className="p-2.5 text-[#022B51] bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
             title="Refresh"
           >
             <FiRefreshCw className="w-5 h-5" />
@@ -911,7 +911,7 @@ function AdminServices() {
               placeholder="Search services..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent text-sm w-full md:w-64"
+              className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent text-sm w-full md:w-64"
             />
           </div>
         </div>
@@ -923,7 +923,7 @@ function AdminServices() {
           <select
             value={clientFilter}
             onChange={(e) => setClientFilter(e.target.value)}
-            className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D] appearance-none"
+            className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] appearance-none"
           >
             <option value="">All Clients</option>
             {clientsList.map((c) => (
@@ -939,7 +939,7 @@ function AdminServices() {
           <button
             type="button"
             onClick={() => setShowServiceFilterMenu((v) => !v)}
-            className="w-full flex items-center justify-between pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D]"
+            className="w-full flex items-center justify-between pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
           >
             <span className="truncate">
               {serviceFilters.length === 0
@@ -966,7 +966,7 @@ function AdminServices() {
                   >
                     <input
                       type="checkbox"
-                      className="rounded border-gray-300 text-[#00486D] focus:ring-[#00486D]"
+                      className="rounded border-gray-300 text-[#022B51] focus:ring-[#022B51]"
                       checked={serviceFilters.includes(s)}
                       onChange={() => toggleFromArray(s, setServiceFilters)}
                     />
@@ -983,7 +983,7 @@ function AdminServices() {
           <button
             type="button"
             onClick={() => setShowStatusFilterMenu((v) => !v)}
-            className="w-full flex items-center justify-between pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D]"
+            className="w-full flex items-center justify-between pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
           >
             <span className="truncate">
               {statusFilters.length === 0
@@ -1010,7 +1010,7 @@ function AdminServices() {
                   >
                     <input
                       type="checkbox"
-                      className="rounded border-gray-300 text-[#00486D] focus:ring-[#00486D]"
+                      className="rounded border-gray-300 text-[#022B51] focus:ring-[#022B51]"
                       checked={statusFilters.includes(s)}
                       onChange={() => toggleFromArray(s, setStatusFilters)}
                     />
@@ -1027,7 +1027,7 @@ function AdminServices() {
           <button
             type="button"
             onClick={() => setShowProgressFilterMenu((v) => !v)}
-            className="w-full flex items-center justify-between pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00486D]"
+            className="w-full flex items-center justify-between pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51]"
           >
             <span className="truncate">
               {progressFilters.length === 0
@@ -1053,7 +1053,7 @@ function AdminServices() {
                   >
                     <input
                       type="checkbox"
-                      className="rounded border-gray-300 text-[#00486D] focus:ring-[#00486D]"
+                      className="rounded border-gray-300 text-[#022B51] focus:ring-[#022B51]"
                       checked={progressFilters.includes(p)}
                       onChange={() => toggleFromArray(p, setProgressFilters)}
                     />
@@ -1069,7 +1069,7 @@ function AdminServices() {
       {/* Services Table Card */}
       <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-100 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-[#00486D]">
+          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-[#022B51]">
             <FiBriefcase className="w-4 h-4" />
           </div>
           <h2 className="text-lg font-semibold text-gray-900">All Services</h2>
@@ -1090,31 +1090,31 @@ function AdminServices() {
                 <table className="w-full border-separate border-spacing-0">
                   <thead>
                     <tr className="text-white">
-                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D] rounded-l-xl">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium rounded-l-xl" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         Client
                       </th>
-                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D]">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         Phone
                       </th>
-                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D]">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         Service
                       </th>
-                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D]">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         Payment Status
                       </th>
-                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D]">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         Work status
                       </th>
-                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D] hidden lg:table-cell">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium hidden lg:table-cell" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         Updated
                       </th>
-                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D]">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         Action
                       </th>
-                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D]">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         Notes
                       </th>
-                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium bg-[#00486D] rounded-r-xl">
+                      <th className="px-2 md:px-3 lg:px-4 py-3 text-left text-xs font-medium rounded-r-xl" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         Payment
                       </th>
                     </tr>
@@ -1157,7 +1157,7 @@ function AdminServices() {
                               onChange={(e) =>
                                 handlePaymentStatusUpdate(svc, e.target.value)
                               }
-                              className="max-w-[140px] md:max-w-[160px] pl-1.5 md:pl-2 pr-2 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] cursor-pointer"
+                              className="max-w-[140px] md:max-w-[160px] pl-1.5 md:pl-2 pr-2 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#022B51] cursor-pointer"
                             >
                               {PAYMENT_STATUS_OPTIONS.map((opt) => (
                                 <option key={opt} value={opt}>
@@ -1176,7 +1176,7 @@ function AdminServices() {
                               onChange={(e) =>
                                 handleWorkStatusUpdate(svc, e.target.value)
                               }
-                              className="max-w-[140px] md:max-w-[200px] pl-1.5 md:pl-2 pr-2 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#00486D] cursor-pointer"
+                              className="max-w-[140px] md:max-w-[200px] pl-1.5 md:pl-2 pr-2 py-1 md:py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#022B51] cursor-pointer"
                             >
                               {[
                                 ...(svc.service_status &&
@@ -1234,7 +1234,7 @@ function AdminServices() {
                         <td className="px-2 md:px-3 lg:px-4 py-3">
                           <button
                             onClick={() => openNotesModal(svc)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[#00486D] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-100"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[#022B51] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-100"
                             title="Add Note"
                           >
                             <FiEdit3 className="w-3 h-3" />
@@ -1271,7 +1271,7 @@ function AdminServices() {
                                   </button>
                                   <button
                                     onClick={() => handleCopyLinkClick(svc)}
-                                    className="p-1 md:p-1.5 text-[#00486D] hover:bg-blue-50 rounded-lg transition-colors"
+                                    className="p-1 md:p-1.5 text-[#022B51] hover:bg-blue-50 rounded-lg transition-colors"
                                     title="Copy Link"
                                   >
                                     <FiLink className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -1297,14 +1297,14 @@ function AdminServices() {
                     <button
                       onClick={() => paginate(currentPage - 1)}
                       disabled={currentPage === 1}
-                      className="p-2 py-1 rounded-lg bg-[#00486D] text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#023752] transition-colors"
+                      className="p-2 py-1 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       <FiChevronLeft className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => paginate(currentPage + 1)}
                       disabled={currentPage === totalPages}
-                      className="p-2 py-1 rounded-lg bg-[#00486D] text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#023752] transition-colors"
+                      className="p-2 py-1 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       <FiChevronRight className="w-4 h-4" />
                     </button>
@@ -1319,7 +1319,7 @@ function AdminServices() {
       {/* Payment Method Dialog */}
       {showPaymentMethodDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4 border border-gray-100 max-h-[85vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl p-3 sm:p-6 max-w-md w-full mx-4 border border-gray-100 max-h-[85vh] overflow-y-auto">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -1413,7 +1413,7 @@ function AdminServices() {
                         dateOfPayment: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                     required
                   />
                 </div>
@@ -1432,7 +1432,7 @@ function AdminServices() {
                       })
                     }
                     placeholder="Enter person name"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                     required
                   />
                 </div>
@@ -1451,7 +1451,7 @@ function AdminServices() {
                       })
                     }
                     placeholder="e.g. Advance, Full payment, Adjustment"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                   />
                 </div>
 
@@ -1469,7 +1469,7 @@ function AdminServices() {
                       })
                     }
                     placeholder="Enter transaction/reference ID (optional)"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                   />
                 </div>
 
@@ -1487,14 +1487,14 @@ function AdminServices() {
                     }
                     placeholder="Enter any remarks (optional)"
                     rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                   />
                 </div>
 
                 <div className="flex gap-3 pt-2">
                   <button
                     onClick={handlePaymentFormSubmit}
-                    className="flex-1 px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] font-medium transition-colors"
+                    className="flex-1 px-4 py-3 text-white rounded-xl font-medium hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                   >
                     Submit
                   </button>
@@ -1523,7 +1523,7 @@ function AdminServices() {
       {/* Add Note Modal */}
       {showNotesModal && notesSvc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4 border border-gray-100">
+          <div className="bg-white rounded-2xl shadow-xl p-3 sm:p-6 max-w-md w-full mx-4 border border-gray-100">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -1555,7 +1555,7 @@ function AdminServices() {
                 onChange={(e) => setNoteContent(e.target.value)}
                 placeholder="Enter your note here..."
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01334C] text-sm"
+                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] text-sm"
                 autoFocus
               />
             </div>
@@ -1564,7 +1564,7 @@ function AdminServices() {
               <button
                 onClick={handleAddNote}
                 disabled={savingNote || !noteContent.trim()}
-                className="flex-1 px-4 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className="flex-1 px-4 py-3 text-white rounded-xl font-medium hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 {savingNote ? "Saving..." : "Save Note"}
               </button>

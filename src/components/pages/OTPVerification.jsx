@@ -253,7 +253,7 @@ function OTPVerification() {
         </div>
 
         {/* Right Side - OTP Verification Section */}
-        <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-8">
+        <div className="w-full md:w-1/2 flex items-center justify-center p-3 sm:p-6 md:p-8">
           <div className="w-full max-w-sm">
             {/* Logo */}
             <div className="text-center mb-8">
@@ -290,7 +290,7 @@ function OTPVerification() {
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   onPaste={index === 0 ? handlePaste : undefined}
-                  className="w-10 h-10 md:w-12 md:h-12 text-center text-lg md:text-xl font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+                  className="w-10 h-10 md:w-12 md:h-12 text-center text-lg md:text-xl font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                   disabled={isLoading}
                 />
               ))}
@@ -300,7 +300,7 @@ function OTPVerification() {
             <button
               type="submit"
               disabled={isLoading || otp.join('').length !== 4}
-              style={{ background: 'linear-gradient(90deg, #01334C 0%, #00486D 100%)' }}
+              style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}
               className="w-full disabled:bg-blue-400 text-white font-medium py-2.5 md:py-3 px-4 rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center text-sm md:text-base"
             >
               {isLoading ? (

@@ -45,7 +45,8 @@ const EmptySectionState = ({ title, buttonText, onAdd }) => (
       <button
         type="button"
         onClick={onAdd}
-        className="px-5 py-2.5 bg-[#01334C] text-white rounded-md hover:bg-[#01283a] transition-colors text-xs font-medium"
+        className="px-5 py-2.5 text-white rounded-md hover:opacity-90 transition-all text-xs font-medium"
+          style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
       >
         {buttonText}
       </button>
@@ -100,7 +101,7 @@ const NotesContent = ({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="bg-[#00486D] hover:bg-[#01334C] text-white w-10 h-10 rounded-lg flex items-center justify-center transition-colors flex-shrink-0"
+          className="text-white w-10 h-10 rounded-lg flex items-center justify-center hover:opacity-90 transition-all flex-shrink-0" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
         >
           <AiOutlineDownload className="w-5 h-5" />
         </button>
@@ -143,14 +144,15 @@ const NotesContent = ({
     <div className="px-6 pb-6 pt-6">
       <div className="space-y-6">
         {/* Admin Notes Section */}
-        <div className="bg-[#F8F9FA] rounded-xl p-6">
+        <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
           <h3 className="text-[15px] font-medium text-gray-900 mb-4">
             Admin Notes
           </h3>
           {adminNotesList.length > 0 ? (
             <div className="overflow-x-auto rounded-lg">
-              <table className="w-full text-sm">
-                <thead className="bg-[#00486D] text-white">
+              <div className="overflow-x-auto"><table className="w-full text-sm">
+                <thead className="text-white"
+                  style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                   <tr>
                     <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                       Date
@@ -190,7 +192,8 @@ const NotesContent = ({
                       </td>
                       <td className="p-3">
                         <button
-                          className="flex items-center gap-1 px-3 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors text-xs font-medium"
+                          className="flex items-center gap-1 px-3 py-2 text-white rounded-md hover:hover:opacity-90 transition-all text-xs font-medium"
+                            style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                         >
                           <AiOutlineEye className="w-4 h-4" />
                           View Details
@@ -199,7 +202,7 @@ const NotesContent = ({
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </div>
           ) : (
             <EmptySectionState title="No Admin Notes Yet" />
@@ -210,7 +213,7 @@ const NotesContent = ({
         {selectedAdminNote && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
             <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+              <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
                 <h4 className="text-sm font-semibold text-gray-900">
                   Admin Note Details
                 </h4>
@@ -222,7 +225,7 @@ const NotesContent = ({
                   ×
                 </button>
               </div>
-              <div className="px-6 py-4 space-y-3 text-sm">
+              <div className="px-3 sm:px-6 py-3 sm:py-4 space-y-3 text-sm">
                 {/* Date */}
                 <div>
                   <div className="text-xs font-medium text-gray-500 mb-1">
@@ -318,7 +321,7 @@ const NotesContent = ({
                                   alert('File URL not available');
                                 }
                               }}
-                              className="p-1 text-[#00486D] hover:text-[#01334C] transition-colors flex-shrink-0"
+                              className="p-1 text-[#022B51] hover:text-[#015079] transition-colors flex-shrink-0"
                               title="View file"
                             >
                               <AiOutlineEye className="w-4 h-4" />
@@ -336,14 +339,15 @@ const NotesContent = ({
 
 
         {/* My Notes Section */}
-        <div className="bg-[#F8F9FA] rounded-xl p-6 relative">
+        <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6 relative">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-[15px] font-medium text-gray-900">My Notes</h3>
             {userNotesList.length > 0 && (
               <button
                 type="button"
                 onClick={() => setIsAddingUserNote(true)}
-                className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold flex items-center gap-2"
+                className="px-4 py-2 text-white rounded-lg hover:hover:opacity-90 transition-all text-xs font-semibold flex items-center gap-2"
+                  style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 <AiOutlinePlus className="w-3 h-3" /> Add My Notes
               </button>
@@ -361,8 +365,9 @@ const NotesContent = ({
               {/* Existing Notes Table */}
               {userNotesList.length > 0 && (
                 <div className="overflow-x-auto rounded-lg">
-                  <table className="w-full text-sm">
-                    <thead className="bg-[#00486D] text-white">
+                  <div className="overflow-x-auto"><table className="w-full text-sm">
+                    <thead className="text-white"
+                      style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                       <tr>
                         <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                           Date
@@ -404,7 +409,7 @@ const NotesContent = ({
                             </div>
                           </td>
                           <td className="p-3">
-                            <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-[#00486D] truncate">
+                            <div className="w-full px-3 py-2 bg-gray-50 rounded-md text-xs border border-gray-100 text-[#022B51] truncate">
                               {/* Displaying first attachment name or count */}
                               {note.attachments && note.attachments.length > 0
                                 ? note.attachments[0].name
@@ -430,7 +435,7 @@ const NotesContent = ({
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </table></div>
                 </div>
               )}
 
@@ -504,9 +509,10 @@ const NotesContent = ({
           <button
             onClick={handleSaveUserNote}
             disabled={saving}
-            className="px-8 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 sm:px-8 py-2 text-white rounded-lg hover:hover:opacity-90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             style={{
-              background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+              background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
             }}
           >
             {saving ? "Saving..." : "Save Changes"}
@@ -517,7 +523,7 @@ const NotesContent = ({
         {selectedUserNote && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
             <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+              <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
                 <h4 className="text-sm font-semibold text-gray-900">
                   {isEditingUserNote ? "Edit My Note" : "My Note Details"}
                 </h4>
@@ -533,7 +539,7 @@ const NotesContent = ({
                   ×
                 </button>
               </div>
-              <div className="px-6 py-4 space-y-3 text-sm">
+              <div className="px-3 sm:px-6 py-3 sm:py-4 space-y-3 text-sm">
                 {/* Organization */}
                 <div>
                   <div className="text-xs font-medium text-gray-500 mb-1">
@@ -543,7 +549,7 @@ const NotesContent = ({
                     <select
                       value={editedUserNote?.organizationId || selectedUserNote.organizationId || ""}
                       onChange={(e) => setEditedUserNote({ ...editedUserNote, organizationId: e.target.value || null })}
-                      className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#00486D]"
+                      className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                     >
                       <option value="">Select organization</option>
                       {organizations.map((org, idx) => (
@@ -569,7 +575,7 @@ const NotesContent = ({
                       type="date"
                       value={editedUserNote?.date || selectedUserNote.date || ""}
                       onChange={(e) => setEditedUserNote({ ...editedUserNote, date: e.target.value })}
-                      className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#00486D]"
+                      className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                     />
                   ) : (
                     <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-100 text-gray-800">
@@ -587,7 +593,7 @@ const NotesContent = ({
                     <textarea
                       value={editedUserNote?.description || selectedUserNote.description || ""}
                       onChange={(e) => setEditedUserNote({ ...editedUserNote, description: e.target.value })}
-                      className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#00486D] min-h-[80px]"
+                      className="w-full px-3 py-2 bg-white rounded-md border border-gray-200 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-[#022B51] min-h-[80px]"
                       placeholder="Enter note description"
                     />
                   ) : (
@@ -637,7 +643,7 @@ const NotesContent = ({
                                     handleViewFile(fileUrl);
                                   }
                                 }}
-                                className="p-1 text-[#00486D] hover:text-[#01334C] transition-colors"
+                                className="p-1 text-[#022B51] hover:text-[#015079] transition-colors"
                                 title="View file"
                               >
                                 <AiOutlineEye className="w-4 h-4" />
@@ -671,7 +677,7 @@ const NotesContent = ({
                           <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="bg-[#00486D] hover:bg-[#01334C] text-white w-8 h-8 rounded-lg flex items-center justify-center transition-colors flex-shrink-0"
+                            className="text-white w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-90 transition-all flex-shrink-0" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                           >
                             <AiOutlineDownload className="w-4 h-4" />
                           </button>
@@ -780,7 +786,7 @@ const NotesContent = ({
                                     handleViewFile(fileUrl);
                                   }
                                 }}
-                                className="p-1 text-[#00486D] hover:text-[#01334C] transition-colors"
+                                className="p-1 text-[#022B51] hover:text-[#015079] transition-colors"
                                 title="View file"
                               >
                                 <AiOutlineEye className="w-4 h-4" />
@@ -797,7 +803,7 @@ const NotesContent = ({
               </div>
 
               {/* Action Buttons */}
-              <div className="px-6 py-3 border-t border-gray-100 flex justify-between">
+              <div className="px-3 sm:px-6 py-2 sm:py-3 border-t border-gray-100 flex justify-between">
                 <div>
                   {!isEditingUserNote && (
                     <button
@@ -844,7 +850,7 @@ const NotesContent = ({
                         disabled={saving}
                         className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg disabled:opacity-50"
                         style={{
-                          background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+                          background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                         }}
                       >
                         {saving ? "Saving..." : "Save Changes"}
@@ -864,7 +870,7 @@ const NotesContent = ({
                       }}
                       className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg"
                       style={{
-                        background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+                        background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                       }}
                     >
                       Edit

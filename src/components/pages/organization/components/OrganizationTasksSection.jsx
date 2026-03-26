@@ -34,14 +34,14 @@ const OrganizationTasksSection = ({
   return (
     <div className="space-y-6">
       {/* Admin Tasks Section */}
-      <div className="bg-[#F8F9FA] rounded-xl p-6">
+      <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
         <h3 className="text-[15px] font-medium text-gray-900 mb-4">
           Admin Tasks
         </h3>
         {filteredAdminTasks.length > 0 ? (
           <div className="overflow-x-auto rounded-lg">
             <table className="w-full text-sm">
-              <thead className="bg-[#00486D] text-white">
+              <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                 <tr>
                   <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                     Date
@@ -93,14 +93,14 @@ const OrganizationTasksSection = ({
       </div>
 
       {/* User Tasks Section */}
-      <div className="bg-[#F8F9FA] rounded-xl p-6">
+      <div className="bg-[#F8F9FA] rounded-xl p-3 sm:p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-[15px] font-medium text-gray-900">My Tasks</h3>
           {onAddTask && (
             <button
               type="button"
               onClick={onAddTask}
-              className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold flex items-center gap-2"
+              className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all text-xs font-semibold flex items-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               <AiOutlinePlus className="w-3 h-3" /> Add Task
             </button>
@@ -109,7 +109,7 @@ const OrganizationTasksSection = ({
         {filteredUserTasks.length > 0 ? (
           <div className="overflow-x-auto rounded-lg">
             <table className="w-full text-sm">
-              <thead className="bg-[#00486D] text-white">
+              <thead className="text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                 <tr>
                   <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                     Date

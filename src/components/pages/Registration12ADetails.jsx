@@ -243,13 +243,13 @@ function Registration12ADetails() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7]">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8">
         {/* My Registrations Button - Top Right */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-[#01334C] hover:text-[#00486D] text-sm font-medium"
+            className="flex items-center gap-2 text-[#022B51] hover:text-[#022B51] text-sm font-medium"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
@@ -258,7 +258,8 @@ function Registration12ADetails() {
           </button>
           <button
             onClick={() => navigate('/registrations/registration-12a')}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 text-white rounded-lg hover:opacity-90 transition-all font-medium shadow-sm"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

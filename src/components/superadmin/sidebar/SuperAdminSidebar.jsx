@@ -95,7 +95,7 @@ function SuperAdminSidebar() {
           } pt-4 pb-4 flex justify-between items-center transition-all duration-300 border-b border-gray-100`}
         >
           <img
-            src="/logo.jpg"
+            src="/Logo2.png"
             alt="OnEasy Logo"
             className={`${
               isCollapsed ? "h-8" : "h-10"
@@ -127,9 +127,10 @@ function SuperAdminSidebar() {
                 isCollapsed ? "justify-center px-2" : "space-x-3 px-3"
               } py-2 rounded-lg transition-all duration-200 ${
                 location.pathname === item.path
-                  ? "bg-[#01334C] text-white"
+                  ? "text-white"
                   : "text-gray-700 hover:bg-gray-50"
               } group relative`}
+              style={location.pathname === item.path ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
               title={isCollapsed ? item.text : ""}
             >
               <span
@@ -196,7 +197,7 @@ function SuperAdminSidebar() {
                   <div
                     className={`${
                       isCollapsed ? "w-8 h-8" : "w-6 h-6"
-                    } bg-[#01334C] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
+                    } bg-[#022B51] rounded-full flex items-center justify-center text-white text-xs transition-all duration-300`}
                   >
                     {userData?.name
                       ? userData.name.charAt(0).toUpperCase()
@@ -253,7 +254,7 @@ function SuperAdminSidebar() {
       >
         {/* Mobile Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <img src="/logo.jpg" alt="OnEasy Logo" className="h-10 w-auto" />
+          <img src="/Logo2.png" alt="OnEasy Logo" className="h-10 w-auto" />
           <button
             onClick={() => setIsMobileMenuOpen(false)}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -273,7 +274,7 @@ function SuperAdminSidebar() {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center px-6 py-3 transition-all duration-200 ${
                   isActive
-                    ? "bg-gradient-to-r from-[#e8f4f8] to-transparent border-r-4 border-[#00486D] text-[#00486D]"
+                    ? "bg-gradient-to-r from-[#e8f4f8] to-transparent border-r-4 border-[#022B51] text-[#022B51]"
                     : "text-[#5A5A5A] hover:bg-gray-50"
                 }`}
               >

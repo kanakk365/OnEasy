@@ -526,7 +526,7 @@ function RegistrationsLicenses() {
             <div
               key={categoryKey}
               onClick={() => navigateTo([categoryKey])}
-              className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 cursor-pointer hover:shadow-md transition-shadow"
+              className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 cursor-pointer hover:shadow-md transition-shadow"
             >
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">{categoryData.label}</h3>
@@ -772,9 +772,9 @@ function RegistrationsLicenses() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -783,7 +783,7 @@ function RegistrationsLicenses() {
 
   return (
     <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
         {/* Toast Notification */}
         {status.message && (
           <div className="fixed inset-0 z-40 flex items-start justify-end pointer-events-none">
@@ -824,7 +824,7 @@ function RegistrationsLicenses() {
                 }
               }
             }}
-            className="text-[#01334C] hover:text-[#00486D] mb-4 flex items-center gap-2"
+            className="text-[#022B51] hover:text-[#022B51] mb-4 flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -833,7 +833,7 @@ function RegistrationsLicenses() {
           </button>
 
           {organization && (
-            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
               <h1 className="text-2xl font-semibold text-gray-900">
                 {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
               </h1>
@@ -850,7 +850,8 @@ function RegistrationsLicenses() {
             <h2 className="text-xl font-semibold text-gray-900">Registrations and Licenses Documents</h2>
             <button
               onClick={handleOpenUploadModal}
-              className="px-4 py-2 text-sm font-medium text-white bg-[#01334C] rounded-md hover:bg-[#00486D] transition-colors"
+              className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-all"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               + Upload Document
             </button>
@@ -862,7 +863,7 @@ function RegistrationsLicenses() {
           <div className="mb-4 flex items-center gap-2 text-sm">
             <button
               onClick={goToRoot}
-              className="text-[#01334C] hover:text-[#00486D] font-medium"
+              className="text-[#022B51] hover:text-[#022B51] font-medium"
             >
               Registrations & Licenses
             </button>
@@ -871,7 +872,7 @@ function RegistrationsLicenses() {
                 <span className="text-gray-400">/</span>
                 <button
                   onClick={item.onClick}
-                  className="text-[#01334C] hover:text-[#00486D] font-medium"
+                  className="text-[#022B51] hover:text-[#022B51] font-medium"
                 >
                   {item.label}
                 </button>
@@ -881,14 +882,14 @@ function RegistrationsLicenses() {
         )}
 
         {/* Main Content - Navigation Based */}
-        <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6">
           {getCurrentView()}
         </div>
 
         {/* Upload Modal */}
         {showUploadModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md">
-            <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+            <div className="bg-white rounded-xl shadow-xl max-w-[95vw] sm:max-w-md w-full mx-4 p-3 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Upload Registration/License Document</h3>
                 <button
@@ -909,7 +910,7 @@ function RegistrationsLicenses() {
                   <select
                     value={formData.category}
                     onChange={handleCategoryChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                   >
                     <option value="">Select Category</option>
                     {Object.entries(registrationsLicensesStructure).map(([key, data]) => (
@@ -926,7 +927,7 @@ function RegistrationsLicenses() {
                     <select
                       value={formData.subCategory}
                       onChange={handleSubCategoryChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                     >
                       <option value="">Select Sub-Category</option>
                       {Object.entries(registrationsLicensesStructure[formData.category].subCategories).map(([key, data]) => (
@@ -949,7 +950,7 @@ function RegistrationsLicenses() {
                     <select
                       value={formData.subSubCategory}
                       onChange={handleSubSubCategoryChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                     >
                       <option value="">Select Sub-Sub-Category</option>
                       {Object.entries(registrationsLicensesStructure[formData.category].subCategories[formData.subCategory].subSubCategories).map(([key, data]) => {
@@ -971,7 +972,7 @@ function RegistrationsLicenses() {
                     <select
                       value={formData.subSubSubCategory}
                       onChange={handleSubSubSubCategoryChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                     >
                       <option value="">Select Sub-Sub-Sub-Category</option>
                       {Object.entries(registrationsLicensesStructure[formData.category].subCategories[formData.subCategory].subSubCategories[formData.subSubCategory].subSubSubCategories).map(([key, label]) => (
@@ -989,7 +990,7 @@ function RegistrationsLicenses() {
                     type="text"
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                     placeholder="Enter description..."
                   />
                 </div>
@@ -1003,7 +1004,7 @@ function RegistrationsLicenses() {
                     type="file"
                     onChange={handleFileSelect}
                     accept=".pdf,.xls,.xlsx,.csv,.txt,.doc,.docx,.jpg,.jpeg,.png"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#01334C]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#022B51]"
                   />
                   {formData.file && (
                     <p className="text-xs text-gray-500 mt-1">{formData.file.name}</p>
@@ -1022,7 +1023,8 @@ function RegistrationsLicenses() {
                 <button
                   onClick={handleUpload}
                   disabled={uploading || !formData.file || !formData.category}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[#01334C] rounded-md hover:bg-[#00486D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                 >
                   {uploading ? "Uploading..." : "Upload"}
                 </button>

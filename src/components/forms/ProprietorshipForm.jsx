@@ -409,7 +409,7 @@ function ProprietorshipForm({
           </h1>
           {packageDetails && (
             <p className="text-sm text-gray-600">
-              Package: <span className="font-medium">{packageDetails.name}</span> - <span className="font-semibold text-[#00486D]">₹{Number(packageDetails.priceValue || packageDetails.price).toLocaleString('en-IN')}</span>
+              Package: <span className="font-medium">{packageDetails.name}</span> - <span className="font-semibold text-[#022B51]">₹{Number(packageDetails.priceValue || packageDetails.price).toLocaleString('en-IN')}</span>
             </p>
           )}
         </div>
@@ -495,12 +495,12 @@ function ProprietorshipForm({
         {loadingDraft ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
               <p className="mt-4 text-gray-600">Loading draft...</p>
             </div>
           </div>
         ) : (
-          <div className="rounded-lg p-6">
+          <div className="rounded-lg p-3 sm:p-6">
           {renderStepContent()}
           
           {/* Navigation Buttons */}
@@ -509,7 +509,7 @@ function ProprietorshipForm({
               type="button"
               onClick={handleBack}
               disabled={isSubmitting || (oneasyTeamFill && !isAdminOrSuperadmin) || (clientFillRequest && isAdminOrSuperadmin)}
-              className={`px-6 py-1.5 rounded-md border border-[#00486D] text-[#00486D] ${(isSubmitting || (oneasyTeamFill && !isAdminOrSuperadmin) || (clientFillRequest && isAdminOrSuperadmin && !isFillingOnBehalf)) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              className={`px-6 py-1.5 rounded-md border border-[#022B51] text-[#022B51] ${(isSubmitting || (oneasyTeamFill && !isAdminOrSuperadmin) || (clientFillRequest && isAdminOrSuperadmin && !isFillingOnBehalf)) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
               Back
             </button>
@@ -533,7 +533,7 @@ function ProprietorshipForm({
               } : (step < 2 ? handleNext : handleSubmit)}
               disabled={isSubmitting}
               className={`px-6 py-1.5 rounded-md text-white font-medium ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-              style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
+              style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}
             >
               {(oneasyTeamFill && !isAdminOrSuperadmin) ? 'Go to Dashboard' : (isSubmitting ? 'Submitting...' : (step === 2 ? 'Submit' : 'Next'))}
             </button>
@@ -661,7 +661,7 @@ function ProprietorshipForm({
           className={`fixed bottom-8 right-8 px-6 py-4 rounded-full shadow-2xl font-medium text-white transition-all duration-300 hover:scale-105 z-40 ${
             oneasyTeamFill 
               ? 'bg-green-600 hover:bg-green-700' 
-              : 'bg-[#01334C] hover:bg-[#00486D]'
+              : 'bg-[#022B51] hover:bg-[#015079]'
           }`}
         >
           {oneasyTeamFill ? (

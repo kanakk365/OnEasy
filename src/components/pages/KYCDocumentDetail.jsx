@@ -437,9 +437,9 @@ function KYCDocumentDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#F8F9FA] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading documents...</p>
         </div>
       </div>
@@ -448,7 +448,7 @@ function KYCDocumentDetail() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] py-6">
-      <div className="container mx-auto px-4 md:px-8 lg:px-12">
+      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12">
         {status.message && (
           <div className="fixed inset-0 z-40 flex items-start justify-end pointer-events-none">
             <div className="mt-20 mr-6 w-full max-w-xs pointer-events-auto">
@@ -497,7 +497,7 @@ function KYCDocumentDetail() {
                 (documentType === "attachment" ? documents.length >= 20 : documents.length >= 3)
                   ? "bg-red-50 text-red-600"
                   : documents.length > 0
-                  ? "bg-blue-50 text-[#00486D]"
+                  ? "bg-blue-50 text-[#022B51]"
                   : "bg-gray-100 text-gray-600"
               }`}
             >
@@ -603,7 +603,7 @@ function KYCDocumentDetail() {
             {documentType === "attachment" ? (
               <div className="space-y-4">
                 {showAddForm ? (
-                  <div className="border-2 border-dashed border-blue-200 rounded-xl p-6 space-y-4 bg-blue-50/30">
+                  <div className="border-2 border-dashed border-blue-200 rounded-xl p-3 sm:p-6 space-y-4 bg-blue-50/30">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Attachment Name *</label>
                       <input
@@ -611,7 +611,7 @@ function KYCDocumentDetail() {
                         value={attachmentName}
                         onChange={(e) => setAttachmentName(e.target.value)}
                         placeholder="Enter attachment name"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                         disabled={uploading}
                       />
                     </div>
@@ -627,7 +627,7 @@ function KYCDocumentDetail() {
                           if (attachmentFileInputRef.current) attachmentFileInputRef.current.value = "";
                         }}
                         accept="image/*,.pdf,.doc,.docx"
-                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#00486D] file:text-white hover:file:bg-[#01334C]"
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:file:text-white hover:file:" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                         disabled={uploading}
                       />
                     </div>
@@ -644,9 +644,9 @@ function KYCDocumentDetail() {
                   <button
                     onClick={() => setShowAddForm(true)}
                     disabled={uploading}
-                    className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-blue-200 rounded-xl hover:border-[#00486D] hover:bg-blue-50/30 transition-colors disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-blue-200 rounded-xl hover:border-[#022B51] hover:bg-blue-50/30 transition-colors disabled:opacity-50"
                   >
-                    <span className="w-10 h-10 rounded-full bg-[#00486D] text-white flex items-center justify-center text-xl font-bold">+</span>
+                    <span className="w-10 h-10 rounded-full text-white flex items-center justify-center text-xl font-bold" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>+</span>
                     <span className="text-gray-700 font-medium">Add Attachment</span>
                   </button>
                 )}
@@ -666,19 +666,19 @@ function KYCDocumentDetail() {
               className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${
                 uploading
                   ? "border-gray-200 bg-gray-50 cursor-not-allowed"
-                  : "border-blue-200 hover:border-[#00486D] hover:bg-blue-50/30"
+                  : "border-blue-200 hover:border-[#022B51] hover:bg-blue-50/30"
               }`}
             >
               {uploading ? (
                 <div className="flex flex-col items-center">
-                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00486D] mb-3"></div>
-                  <p className="text-[#00486D] font-medium">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#022B51] mb-3"></div>
+                  <p className="text-[#022B51] font-medium">
                     Uploading your document...
                   </p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center text-[#00486D] mb-4">
+                  <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center text-[#022B51] mb-4">
                     <RiUploadCloud2Line className="w-7 h-7" />
                   </div>
                   <p className="text-gray-900 font-medium text-lg mb-1">

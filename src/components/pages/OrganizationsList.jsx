@@ -70,9 +70,9 @@ function OrganizationsList() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading organizations...</p>
         </div>
       </div>
@@ -81,12 +81,12 @@ function OrganizationsList() {
 
   return (
     <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="mb-6">
           <button
             onClick={() => navigate("/documents")}
-            className="text-[#01334C] hover:text-[#00486D] mb-4 flex items-center gap-2"
+            className="text-[#022B51] hover:text-[#022B51] mb-4 flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -103,12 +103,12 @@ function OrganizationsList() {
             {organizations.map((org) => (
               <div
                 key={org.id}
-                className="bg-white rounded-2xl shadow-sm border border-[#F3F3F3] p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
+                className="bg-white rounded-2xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
                 onClick={() => navigate(`/company-documents/${org.id}`)}
               >
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-lg bg-[#E6F6FD] group-hover:bg-white/20 flex items-center justify-center overflow-hidden flex-shrink-0 transition-colors">
-                    <BsBuilding className="text-[#01334C] group-hover:text-white w-6 h-6 transition-colors" />
+                    <BsBuilding className="text-[#022B51] group-hover:text-white w-6 h-6 transition-colors" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-semibold text-gray-900 group-hover:text-white truncate transition-colors">

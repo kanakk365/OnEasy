@@ -163,9 +163,9 @@ function PrivateLimitedDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading registration details...</p>
         </div>
       </div>
@@ -181,7 +181,7 @@ function PrivateLimitedDetails() {
           <button
             onClick={() => navigate(getBackRoute())}
             className="px-6 py-2 text-white rounded-md"
-            style={{ background: 'linear-gradient(to right, #01334C, #00486D)' }}
+            style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}
           >
             Back to Dashboard
           </button>
@@ -197,7 +197,7 @@ function PrivateLimitedDetails() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-bold text-[#28303F]">
+              <h1 className="text-xl sm:text-2xl font-bold text-[#28303F]">
                 {registration.business_name || 'Company Name Pending'}
               </h1>
               <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(registration.status || 'pending')}`}>
@@ -234,7 +234,7 @@ function PrivateLimitedDetails() {
                     navigate('/private-limited-form');
                   }
                 }}
-                className="px-4 py-2 bg-[#00486D] text-white rounded-md hover:bg-[#01334C] transition-colors flex items-center gap-2"
+                className="px-4 py-2 text-white rounded-md hover:opacity-90 transition-all flex items-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -244,7 +244,7 @@ function PrivateLimitedDetails() {
             )}
             <button
               onClick={() => navigate(getBackRoute())}
-              className="px-4 py-2 border border-[#00486D] text-[#00486D] rounded-md hover:bg-[#00486D] hover:text-white transition-colors"
+              className="px-4 py-2 border border-[#022B51] text-[#022B51] rounded-md hover:bg-[#015079] hover:text-white transition-colors"
             >
               Back to Dashboard
             </button>
@@ -252,7 +252,7 @@ function PrivateLimitedDetails() {
         </div>
 
         {/* Registration Info */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Registration Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
@@ -284,7 +284,7 @@ function PrivateLimitedDetails() {
 
         {/* Admin Control Panel */}
         {isAdminView && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-md p-6 mb-6 border-2 border-blue-200">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-md p-3 sm:p-6 mb-6 border-2 border-blue-200">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -415,7 +415,7 @@ function PrivateLimitedDetails() {
 
         {/* User View - Status Update Notification */}
         {!isAdminView && registration.name_application_status && registration.name_application_status !== 'pending' && (
-          <div className={`rounded-lg shadow-md p-6 mb-6 border-2 ${
+          <div className={`rounded-lg shadow-md p-3 sm:p-6 mb-6 border-2 ${
             registration.name_application_status === 'approved' 
               ? 'bg-green-50 border-green-300' 
               : 'bg-yellow-50 border-yellow-300'
@@ -467,7 +467,7 @@ function PrivateLimitedDetails() {
 
         {/* Step 1: Name Application (only for true Private Limited registrations) */}
         {ticketId?.startsWith('PVT_') && (
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Step 1: Name Application</h2>
           
           {/* Name Application Status Banner */}
@@ -564,7 +564,7 @@ function PrivateLimitedDetails() {
         
         {/* Step 2: Basic Company Details (only for true Private Limited registrations) */}
         {ticketId?.startsWith('PVT_') && (
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Step 2: Basic Company Details</h2>
           
           {/* Directors & Capital Info */}
@@ -737,11 +737,11 @@ function PrivateLimitedDetails() {
 
         {/* Step 3: Directors Information */}
         {directors.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6 mb-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Step 3: Directors & Shareholders Details</h2>
             <div className="space-y-6">
               {directors.map((director, idx) => (
-                <div key={idx} className="border-2 border-gray-200 rounded-lg p-6">
+                <div key={idx} className="border-2 border-gray-200 rounded-lg p-3 sm:p-6">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">
                     {director.relation_with_company || 'Director'} {idx + 1}
                   </h3>

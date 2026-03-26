@@ -3,7 +3,7 @@ import React from "react";
 function ProcessSection({ processSteps }) {
   return (
     <div className="mt-8 bg-white rounded-lg p-8">
-      <h2 className="text-2xl font-semibold mb-8" style={{ color: "#00486D" }}>
+      <h2 className="text-2xl font-semibold mb-8" style={{ color: "#022B51" }}>
         Steps for Company Registration in India
       </h2>
 
@@ -15,7 +15,7 @@ function ProcessSection({ processSteps }) {
             )}
 
             <div className="flex-shrink-0 mr-4 relative z-10">
-              <div className="w-8 h-8 rounded-full bg-[#01334C] text-white flex items-center justify-center text-xs font-medium">
+              <div className="w-8 h-8 rounded-full text-white flex items-center justify-center text-xs font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                 {step.step}
               </div>
             </div>
@@ -34,7 +34,7 @@ function ProcessSection({ processSteps }) {
       </div>
 
       <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-3" style={{ color: "#00486D" }}>
+        <h3 className="text-lg font-semibold mb-3" style={{ color: "#022B51" }}>
           Certificate of Incorporation
         </h3>
         <p className="text-gray-600 text-sm leading-relaxed">
@@ -46,7 +46,7 @@ function ProcessSection({ processSteps }) {
       </div>
 
       <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-3" style={{ color: "#00486D" }}>
+        <h3 className="text-lg font-semibold mb-3" style={{ color: "#022B51" }}>
           Post-Registration Compliance
         </h3>
         <p className="text-gray-600 text-sm leading-relaxed">
@@ -57,7 +57,7 @@ function ProcessSection({ processSteps }) {
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold mb-3" style={{ color: "#00486D" }}>
+        <h3 className="text-lg font-semibold mb-3" style={{ color: "#022B51" }}>
           Register Your Company with Oneasy
         </h3>
         <p className="text-gray-600 text-sm leading-relaxed">

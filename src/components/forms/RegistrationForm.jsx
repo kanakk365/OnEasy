@@ -94,7 +94,7 @@ function RegistrationForm() {
             name="businessName"
             value={formData.businessName || ''}
             onChange={handleChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
             required
           />
         </div>
@@ -108,7 +108,7 @@ function RegistrationForm() {
             name="email"
             value={formData.email || ''}
             onChange={handleChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
             required
           />
         </div>
@@ -122,7 +122,7 @@ function RegistrationForm() {
             name="phone"
             value={formData.phone || ''}
             onChange={handleChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
             required
           />
         </div>
@@ -136,7 +136,7 @@ function RegistrationForm() {
             name="addressLine1"
             value={formData.addressLine1 || ''}
             onChange={handleChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
             required
           />
         </div>
@@ -151,7 +151,7 @@ function RegistrationForm() {
               name="city"
               value={formData.city || ''}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
               required
             />
           </div>
@@ -165,7 +165,7 @@ function RegistrationForm() {
               name="state"
               value={formData.state || ''}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
               required
             />
           </div>
@@ -180,7 +180,7 @@ function RegistrationForm() {
             name="pincode"
             value={formData.pincode || ''}
             onChange={handleChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
             required
           />
         </div>
@@ -201,7 +201,7 @@ function RegistrationForm() {
               name="panNumber"
               value={formData.panNumber || ''}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
               required
             />
           </div>
@@ -222,7 +222,7 @@ function RegistrationForm() {
               name="aadharNumber"
               value={formData.aadharNumber || ''}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#01334C] focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
               required
             />
           </div>
@@ -240,7 +240,7 @@ function RegistrationForm() {
           <div className="mb-6">
             <button
               onClick={() => navigate('/registration-categories')}
-              className="flex items-center gap-2 text-[#01334C] hover:text-[#00486D] mb-4"
+              className="flex items-center gap-2 text-[#022B51] hover:text-[#022B51] mb-4"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
@@ -281,7 +281,7 @@ function RegistrationForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="px-8 py-3 text-white rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 {loading ? 'Submitting...' : 'Submit Registration'}
               </button>

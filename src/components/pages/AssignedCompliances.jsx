@@ -86,7 +86,7 @@ const AssignedCompliances = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6 flex justify-center items-center h-64">
+      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6 flex justify-center items-center h-64">
         <div className="text-gray-500">Loading compliances...</div>
       </div>
     );
@@ -94,14 +94,14 @@ const AssignedCompliances = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
+      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6">
         <div className="text-red-500">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
+    <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6">
       {/* Header Section */}
       <div className="mb-8">
         <button
@@ -135,7 +135,7 @@ const AssignedCompliances = () => {
                     state: { orgData: group },
                   })
                 }
-                className="group text-left p-8 rounded-xl border border-gray-200 bg-white hover:border-[#00486D] hover:shadow-md transition-all duration-200"
+                className="group text-left p-8 rounded-xl border border-gray-200 bg-white hover:border-[#022B51] hover:shadow-md transition-all duration-200"
               >
                 <div className="flex items-start gap-3">
                   <div
@@ -151,7 +151,7 @@ const AssignedCompliances = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3
-                      className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#00486D] transition-colors"
+                      className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#022B51] transition-colors"
                       title={group.legalName || "Unassigned"}
                     >
                       {group.legalName || "Unassigned"}
@@ -202,7 +202,7 @@ const AssignedCompliances = () => {
                     </div>
                   </div>
                   <svg
-                    className="w-4 h-4 text-gray-300 flex-shrink-0 group-hover:text-[#00486D] mt-1 transition-colors"
+                    className="w-4 h-4 text-gray-300 flex-shrink-0 group-hover:text-[#022B51] mt-1 transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

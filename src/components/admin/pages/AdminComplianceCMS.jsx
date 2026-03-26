@@ -639,13 +639,13 @@ function AdminComplianceCMS() {
           onClick={() => toggleBranchExpand(path)}
           className={`group flex items-center justify-between px-4 py-3 rounded-lg transition-all cursor-pointer ${
             isExpanded
-              ? "bg-[#00486D]/5 border border-[#00486D]/20"
-              : "bg-white border border-gray-200 hover:border-[#00486D]/30 hover:bg-gray-50"
+              ? "bg-[#022B51]/5 border border-[#022B51]/20"
+              : "bg-white border border-gray-200 hover:border-[#022B51]/30 hover:bg-gray-50"
           } ${
             selectedNode &&
             selectedNode.type === "branch" &&
             selectedNode.data.id === branch.id
-              ? "ring-2 ring-[#00486D] shadow-sm"
+              ? "ring-2 ring-[#022B51] shadow-sm"
               : ""
           }`}
           style={depth > 0 ? { marginLeft: `${depth * 16}px` } : {}}
@@ -653,7 +653,7 @@ function AdminComplianceCMS() {
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {hasChildren ? (
               isExpanded ? (
-                <RiArrowDownSLine className="text-[#00486D]" size={20} />
+                <RiArrowDownSLine className="text-[#022B51]" size={20} />
               ) : (
                 <RiArrowRightSLine className="text-gray-400" size={20} />
               )
@@ -662,7 +662,7 @@ function AdminComplianceCMS() {
             )}
             <span
               className={`text-sm font-semibold truncate ${
-                isExpanded ? "text-[#00486D]" : "text-gray-800"
+                isExpanded ? "text-[#022B51]" : "text-gray-800"
               }`}
             >
               {branch.heading}
@@ -871,7 +871,7 @@ function AdminComplianceCMS() {
 
           <button
             onClick={handleCreateItem}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-all shadow-md hover:shadow-lg font-medium"
+            className="flex items-center gap-2 px-6 py-2.5 text-white rounded-xl transition-all shadow-md hover:shadow-lg font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             <RiAddLine className="w-5 h-5" />
             <span>
@@ -887,7 +887,7 @@ function AdminComplianceCMS() {
               onClick={() => setActiveTab("items")}
               className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-semibold transition-all duration-200 relative ${
                 activeTab === "items"
-                  ? "text-[#01334C] bg-white"
+                  ? "text-[#022B51] bg-white"
                   : "text-gray-400 hover:text-gray-600 bg-gray-50/50"
               }`}
             >
@@ -896,21 +896,21 @@ function AdminComplianceCMS() {
               <span
                 className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-bold ${
                   activeTab === "items"
-                    ? "bg-[#01334C] text-white"
+                    ? "bg-[#022B51] text-white"
                     : "bg-gray-200 text-gray-500"
                 }`}
               >
                 {flowBranches.length}
               </span>
               {activeTab === "items" && (
-                <div className="absolute bottom-0 left-4 right-4 h-[3px] bg-[#01334C] rounded-t-full" />
+                <div className="absolute bottom-0 left-4 right-4 h-[3px] rounded-t-full" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }} />
               )}
             </button>
             <button
               onClick={() => setActiveTab("rules")}
               className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-semibold transition-all duration-200 relative ${
                 activeTab === "rules"
-                  ? "text-[#01334C] bg-white"
+                  ? "text-[#022B51] bg-white"
                   : "text-gray-400 hover:text-gray-600 bg-gray-50/50"
               }`}
             >
@@ -919,14 +919,14 @@ function AdminComplianceCMS() {
               <span
                 className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-bold ${
                   activeTab === "rules"
-                    ? "bg-[#01334C] text-white"
+                    ? "bg-[#022B51] text-white"
                     : "bg-gray-200 text-gray-500"
                 }`}
               >
                 {flowBranches1B.length}
               </span>
               {activeTab === "rules" && (
-                <div className="absolute bottom-0 left-4 right-4 h-[3px] bg-[#01334C] rounded-t-full" />
+                <div className="absolute bottom-0 left-4 right-4 h-[3px] rounded-t-full" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }} />
               )}
             </button>
           </div>
@@ -939,7 +939,7 @@ function AdminComplianceCMS() {
             return (
             <>
               {/* Filter Bar */}
-              <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4">
+              <div className="p-3 sm:p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4">
                 <div className="relative flex-1">
                   <RiSearchLine className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
@@ -947,16 +947,16 @@ function AdminComplianceCMS() {
                     placeholder="Search by name, code, or description..."
                     value={itemSearch}
                     onChange={(e) => setItemSearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow bg-white"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow bg-white"
                   />
                 </div>
               </div>
 
               {/* Content */}
-              <div className="min-h-[400px] p-6 pt-6">
+              <div className="min-h-[400px] p-3 sm:p-6 pt-6">
                 {itemsLoading ? (
                   <div className="flex flex-col items-center justify-center h-64">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00486D]"></div>
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#022B51]"></div>
                     <p className="mt-4 text-gray-500 font-medium">
                       Loading compliance items...
                     </p>
@@ -978,7 +978,7 @@ function AdminComplianceCMS() {
                               },
                             })
                           }
-                          className="text-xs font-semibold px-4 py-2 bg-blue-50 text-[#00486D] rounded-lg hover:bg-blue-100 shadow flex items-center gap-1 transition-colors"
+                          className="text-xs font-semibold px-4 py-2 bg-blue-50 text-[#022B51] rounded-lg hover:bg-blue-100 shadow flex items-center gap-1 transition-colors"
                         >
                           <RiAddLine /> Add Root Section
                         </button>
@@ -1034,7 +1034,7 @@ function AdminComplianceCMS() {
                                     <span className="text-red-500">*</span>
                                   </label>
                                   <input
-                                    className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
+                                    className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#022B51]/30 focus:border-[#022B51] outline-none transition-all"
                                     required
                                     value={selectedNode.data.heading}
                                     onChange={(e) =>
@@ -1055,7 +1055,7 @@ function AdminComplianceCMS() {
                                   </label>
                                   <input
                                     type="number"
-                                    className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
+                                    className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#022B51]/30 focus:border-[#022B51] outline-none transition-all"
                                     required
                                     value={selectedNode.data.order}
                                     onChange={(e) =>
@@ -1079,7 +1079,7 @@ function AdminComplianceCMS() {
                                     Code <span className="text-red-500">*</span>
                                   </label>
                                   <input
-                                    className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all bg-gray-50 uppercase font-mono"
+                                    className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#022B51]/30 focus:border-[#022B51] outline-none transition-all bg-gray-50 uppercase font-mono"
                                     required
                                     value={selectedNode.data.code}
                                     onChange={(e) =>
@@ -1099,7 +1099,7 @@ function AdminComplianceCMS() {
                                     Name <span className="text-red-500">*</span>
                                   </label>
                                   <input
-                                    className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
+                                    className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#022B51]/30 focus:border-[#022B51] outline-none transition-all"
                                     required
                                     value={selectedNode.data.name}
                                     onChange={(e) =>
@@ -1121,7 +1121,7 @@ function AdminComplianceCMS() {
                                     Due Date Type
                                   </label>
                                   <select
-                                    className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
+                                    className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#022B51]/30 focus:border-[#022B51] outline-none transition-all"
                                     value={selectedNode.data.dueDateType || ""}
                                     onChange={(e) => {
                                       const newType = e.target.value;
@@ -1173,7 +1173,7 @@ function AdminComplianceCMS() {
                                       Month Basis
                                     </label>
                                     <select
-                                      className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
+                                      className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#022B51]/30 focus:border-[#022B51] outline-none transition-all"
                                       value={selectedNode.data.monthBasis || "NEXT_MONTH"}
                                       onChange={(e) =>
                                         setSelectedNode({
@@ -1197,7 +1197,7 @@ function AdminComplianceCMS() {
                                   </label>
                                   {selectedNode.data.dueDateType === "MONTHLY" ? (
                                     <select
-                                      className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
+                                      className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#022B51]/30 focus:border-[#022B51] outline-none transition-all"
                                       value={selectedNode.data.dueDate || 1}
                                       onChange={(e) =>
                                         setSelectedNode({
@@ -1294,7 +1294,7 @@ function AdminComplianceCMS() {
                                     </div>
                                   ) : (
                                     <textarea
-                                      className="w-full text-sm p-3 border border-gray-200 rounded-lg font-mono focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all resize-y text-xs"
+                                      className="w-full text-sm p-3 border border-gray-200 rounded-lg font-mono focus:ring-2 focus:ring-[#022B51]/30 focus:border-[#022B51] outline-none transition-all resize-y text-xs"
                                       rows={4}
                                       value={typeof selectedNode.data.dueDate === 'string' ? selectedNode.data.dueDate : JSON.stringify(selectedNode.data.dueDate, null, 2)}
                                       onChange={(e) =>
@@ -1326,7 +1326,7 @@ function AdminComplianceCMS() {
                                               type="number"
                                               min="1"
                                               max="31"
-                                              className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
+                                              className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#022B51]/30 focus:border-[#022B51] outline-none transition-all"
                                               value={reminderValue}
                                               onChange={(e) => {
                                                 const newReminders = [...selectedNode.data.reminders];
@@ -1367,7 +1367,7 @@ function AdminComplianceCMS() {
                                             data: { ...selectedNode.data, reminders: [...current, ""] }
                                           });
                                         }}
-                                        className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-[#00486D] bg-blue-50/50 border border-blue-100/50 hover:bg-blue-100 hover:border-blue-200 rounded-lg transition-colors w-full justify-center"
+                                        className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-[#022B51] bg-blue-50/50 border border-blue-100/50 hover:bg-blue-100 hover:border-blue-200 rounded-lg transition-colors w-full justify-center"
                                       >
                                         <RiAddLine className="w-4 h-4" />
                                         Add Reminder Day
@@ -1390,7 +1390,7 @@ function AdminComplianceCMS() {
                                                     type="number"
                                                     min="1"
                                                     max="31"
-                                                    className="flex-1 text-sm p-2 bg-white border border-gray-200 rounded shadow-sm outline-none focus:ring-2 focus:ring-[#00486D]/30"
+                                                    className="flex-1 text-sm p-2 bg-white border border-gray-200 rounded shadow-sm outline-none focus:ring-2 focus:ring-[#022B51]/30"
                                                     value={dayVal}
                                                     onChange={(e) => {
                                                       const newReminders = { ...selectedNode.data.reminders };
@@ -1423,7 +1423,7 @@ function AdminComplianceCMS() {
                                                   newReminders[q] = { ...qReminders, days: newDays };
                                                   setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, reminders: newReminders } });
                                                 }}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#00486D] bg-blue-50/50 border border-blue-100/50 hover:bg-blue-100 rounded-lg transition-colors justify-center w-full"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#022B51] bg-blue-50/50 border border-blue-100/50 hover:bg-blue-100 rounded-lg transition-colors justify-center w-full"
                                               >
                                                 <RiAddLine className="w-4 h-4" />
                                                 Add Day
@@ -1440,7 +1440,7 @@ function AdminComplianceCMS() {
                                           {(Array.isArray(selectedNode.data.reminders) ? selectedNode.data.reminders : []).map((remPair, idx) => (
                                             <div key={`rem-y-${idx}`} className="flex items-center gap-2">
                                               <select
-                                                className="flex-1 text-sm p-2 bg-white border border-gray-200 rounded shadow-sm outline-none focus:ring-2 focus:ring-[#00486D]/30"
+                                                className="flex-1 text-sm p-2 bg-white border border-gray-200 rounded shadow-sm outline-none focus:ring-2 focus:ring-[#022B51]/30"
                                                 value={remPair[0] || 1}
                                                 onChange={(e) => {
                                                   const newReminders = [...selectedNode.data.reminders];
@@ -1456,7 +1456,7 @@ function AdminComplianceCMS() {
                                                 ))}
                                               </select>
                                               <select
-                                                className="flex-1 text-sm p-2 bg-white border border-gray-200 rounded shadow-sm outline-none focus:ring-2 focus:ring-[#00486D]/30"
+                                                className="flex-1 text-sm p-2 bg-white border border-gray-200 rounded shadow-sm outline-none focus:ring-2 focus:ring-[#022B51]/30"
                                                 value={remPair[1] || 1}
                                                 onChange={(e) => {
                                                   const newReminders = [...selectedNode.data.reminders];
@@ -1486,7 +1486,7 @@ function AdminComplianceCMS() {
                                               const newReminders = [...selectedNode.data.reminders, [1, 1]];
                                               setSelectedNode({ ...selectedNode, data: { ...selectedNode.data, reminders: newReminders } });
                                             }}
-                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#00486D] bg-blue-50/50 border border-blue-100/50 hover:bg-blue-100 rounded-lg transition-colors justify-center w-full"
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#022B51] bg-blue-50/50 border border-blue-100/50 hover:bg-blue-100 rounded-lg transition-colors justify-center w-full"
                                           >
                                             <RiAddLine className="w-4 h-4" />
                                             Add Reminder Date
@@ -1496,7 +1496,7 @@ function AdminComplianceCMS() {
                                     </div>
                                   ) : (
                                     <textarea
-                                      className="w-full text-sm p-3 border border-gray-200 rounded-lg font-mono focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all resize-y text-xs"
+                                      className="w-full text-sm p-3 border border-gray-200 rounded-lg font-mono focus:ring-2 focus:ring-[#022B51]/30 focus:border-[#022B51] outline-none transition-all resize-y text-xs"
                                       rows={6}
                                       value={typeof selectedNode.data.reminders === 'string' ? selectedNode.data.reminders : JSON.stringify(selectedNode.data.reminders, null, 2)}
                                       onChange={(e) =>
@@ -1520,7 +1520,7 @@ function AdminComplianceCMS() {
                                   </label>
                                   <input
                                     type="number"
-                                    className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00486D]/30 focus:border-[#00486D] outline-none transition-all"
+                                    className="w-full text-sm p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#022B51]/30 focus:border-[#022B51] outline-none transition-all"
                                     required
                                     value={selectedNode.data.order}
                                     onChange={(e) =>
@@ -1549,7 +1549,7 @@ function AdminComplianceCMS() {
                               <button
                                 type="submit"
                                 disabled={nodeSaving}
-                                className="flex-1 py-2.5 rounded-lg bg-[#01334C] text-white text-sm font-semibold hover:bg-[#00486D] disabled:opacity-50 transition-all shadow-md active:scale-[0.98]"
+                                className="flex-1 py-2.5 rounded-lg text-white text-sm font-semibold disabled:opacity-50 transition-all shadow-md active:scale-[0.98]" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                               >
                                 {nodeSaving ? "Saving..." : "Save Changes"}
                               </button>
@@ -1629,9 +1629,9 @@ function AdminComplianceCMS() {
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
               <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 {editingItem ? (
-                  <RiEditLine className="w-5 h-5 text-[#00486D]" />
+                  <RiEditLine className="w-5 h-5 text-[#022B51]" />
                 ) : (
-                  <RiAddLine className="w-5 h-5 text-[#00486D]" />
+                  <RiAddLine className="w-5 h-5 text-[#022B51]" />
                 )}
                 {editingItem
                   ? "Edit Compliance Item"
@@ -1649,7 +1649,7 @@ function AdminComplianceCMS() {
             </div>
 
             {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-5">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -1662,7 +1662,7 @@ function AdminComplianceCMS() {
                     onChange={handleItemInputChange}
                     disabled={!!editingItem}
                     required
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 font-mono"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#022B51] focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 font-mono"
                     placeholder="e.g. GSTR3B_MONTHLY"
                   />
                 </div>
@@ -1676,7 +1676,7 @@ function AdminComplianceCMS() {
                     value={itemFormData.name}
                     onChange={handleItemInputChange}
                     required
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                     placeholder="e.g. GSTR3B - Monthly"
                   />
                 </div>
@@ -1692,7 +1692,7 @@ function AdminComplianceCMS() {
                     name="category"
                     value={itemFormData.category}
                     onChange={handleItemInputChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                     placeholder="e.g. filing, return, payment, tax_filing"
                   />
                 </div>
@@ -1705,7 +1705,7 @@ function AdminComplianceCMS() {
                     name="annexureType"
                     value={itemFormData.annexureType}
                     onChange={handleItemInputChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
                     placeholder="e.g. 1A, 1B"
                   />
                 </div>
@@ -1720,7 +1720,7 @@ function AdminComplianceCMS() {
                   value={itemFormData.description}
                   onChange={handleItemInputChange}
                   rows={2}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent resize-none"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#022B51] focus:border-transparent resize-none"
                   placeholder="Due date or filing information..."
                 />
               </div>
@@ -1734,14 +1734,14 @@ function AdminComplianceCMS() {
                   value={itemFormData.reminders}
                   onChange={handleItemInputChange}
                   rows={2}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00486D] focus:border-transparent resize-none"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#022B51] focus:border-transparent resize-none"
                   placeholder="e.g. 15th, 17th, 19th Every Month"
                 />
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
+            <div className="p-3 sm:p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
               <button
                 type="button"
                 onClick={() => {
@@ -1755,7 +1755,7 @@ function AdminComplianceCMS() {
               <button
                 onClick={handleSaveItem}
                 disabled={itemSaving}
-                className="px-8 py-2.5 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-all shadow-md hover:shadow-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-8 py-2.5 text-white rounded-xl transition-all shadow-md hover:shadow-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 {itemSaving ? (
                   <>
@@ -1784,7 +1784,7 @@ function AdminComplianceCMS() {
             }
           />
           <div className="relative bg-white rounded-2xl shadow-2xl w-[420px] overflow-hidden z-[110] animate-in fade-in zoom-in-95">
-            <div className="p-6 pb-4">
+            <div className="p-3 sm:p-6 pb-4">
               <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
                 <RiDeleteBinLine className="w-6 h-6 text-red-500" />
               </div>

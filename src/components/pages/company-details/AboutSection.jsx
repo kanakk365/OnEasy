@@ -15,7 +15,7 @@ function AboutSection({
         <div
           className="rounded-lg p-8 mb-6 relative overflow-hidden"
           style={{
-            background: "linear-gradient(90deg, #00486D 0%, #01334C 100%)",
+            background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
           }}
         >
           <div className="relative z-10 max-w-[60%]">
@@ -57,15 +57,15 @@ function AboutSection({
               >
                 <span
                   className="font-medium tracking-[0.03em]"
-                  style={{ color: "#00486D" }}
+                  style={{ color: "#022B51" }}
                 >
                   {section.title}
                 </span>
                 <span
                   className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
                     isOpen
-                      ? "bg-[#00486D] text-white"
-                      : "bg-[#c3d4dd] text-[#00486D]"
+                      ? "bg-[#022B51] text-white"
+                      : "bg-[#c3d4dd] text-[#022B51]"
                   }`}
                   aria-hidden="true"
                 >
@@ -98,7 +98,7 @@ function AboutSection({
                             className="w-6 h-6 rounded-full text-white text-xs font-medium flex items-center justify-center"
                             style={{
                               background:
-                                "linear-gradient(180deg, #00486D 0%, #01334C 100%)",
+                                "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                             }}
                           >
                             {index + 1}
@@ -123,7 +123,7 @@ function AboutSection({
                           className="w-6 h-6 rounded-full text-white text-xs font-medium flex items-center justify-center"
                           style={{
                             background:
-                              "linear-gradient(180deg, #00486D 0%, #01334C 100%)",
+                              "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                           }}
                         >
                           {index + 1}

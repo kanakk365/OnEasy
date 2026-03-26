@@ -3,7 +3,7 @@ import React from "react";
 function StepCircle({ status }) {
   if (status === "completed") {
     return (
-      <div className="w-5 h-5 rounded-full bg-[#00486D] flex items-center justify-center">
+      <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
         <svg
           width="10"
           height="10"
@@ -24,8 +24,8 @@ function StepCircle({ status }) {
   }
   if (status === "active") {
     return (
-      <div className="w-5 h-5 rounded-full border-2 border-[#00486D] flex items-center justify-center">
-        <span className="w-2 h-2 rounded-full bg-[#00486D] block" />
+      <div className="w-5 h-5 rounded-full border-2 border-[#022B51] flex items-center justify-center">
+        <span className="w-2 h-2 rounded-full bg-[#022B51] block" />
       </div>
     );
   }
@@ -38,7 +38,7 @@ function Connector({ completed }) {
   return (
     <div
       className={`flex-1 h-[2px] ${
-        completed ? "bg-[#00486D]" : "bg-[#CFD6DC]"
+        completed ? "bg-[#022B51]" : "bg-[#CFD6DC]"
       }`}
     />
   );

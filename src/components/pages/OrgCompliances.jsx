@@ -325,7 +325,7 @@ const OrgCompliances = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6 flex justify-center items-center h-64">
+      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6 flex justify-center items-center h-64">
         <div className="text-gray-500">Loading compliances...</div>
       </div>
     );
@@ -333,7 +333,7 @@ const OrgCompliances = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
+      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6">
         <div className="text-red-500">{error}</div>
       </div>
     );
@@ -342,7 +342,7 @@ const OrgCompliances = () => {
   const displayName = orgInfo?.legalName || "Unassigned";
 
   return (
-    <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
+    <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6">
       {/* Header Section */}
       <div className="mb-8">
         <button
@@ -355,8 +355,8 @@ const OrgCompliances = () => {
         {/* Org Info + View Toggle */}
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#023752]/10 flex items-center justify-center flex-shrink-0">
-              <HiOutlineBuildingOffice2 className="w-5 h-5 text-[#023752]" />
+            <div className="w-10 h-10 rounded-lg bg-[#022B51]/10 flex items-center justify-center flex-shrink-0">
+              <HiOutlineBuildingOffice2 className="w-5 h-5 text-[#022B51]" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
@@ -374,7 +374,7 @@ const OrgCompliances = () => {
               onClick={() => setViewMode("list")}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 viewMode === "list"
-                  ? "bg-white text-[#023752] shadow-sm"
+                  ? "bg-white text-[#022B51] shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -385,7 +385,7 @@ const OrgCompliances = () => {
               onClick={() => setViewMode("calendar")}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 viewMode === "calendar"
-                  ? "bg-white text-[#023752] shadow-sm"
+                  ? "bg-white text-[#022B51] shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -411,7 +411,7 @@ const OrgCompliances = () => {
             compliances.map((item) => (
               <div
                 key={item.id}
-                className="bg-white border rounded-xl p-6 border-gray-200 hover:shadow-md transition-all"
+                className="bg-white border rounded-xl p-3 sm:p-6 border-gray-200 hover:shadow-md transition-all"
               >
                 {/* Top Row: Title, Badge, Status */}
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
@@ -468,7 +468,7 @@ const OrgCompliances = () => {
                         state: item,
                       })
                     }
-                    className="h-9 px-4 rounded-full text-sm font-medium bg-[#00486D]/5 text-[#00486D] border border-[#00486D]/10 hover:bg-[#00486D]/10 transition-colors"
+                    className="h-9 px-4 rounded-full text-sm font-medium bg-[#022B51]/5 text-[#022B51] border border-[#022B51]/10 hover:bg-[#015079]/10 transition-colors"
                   >
                     View Details
                   </button>
@@ -487,7 +487,7 @@ const OrgCompliances = () => {
           {/* Calendar */}
           <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             {/* Calendar Header */}
-            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#023752] to-[#034b6e]">
+            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#022B51] to-[#015079]">
               <div className="flex items-center gap-3">
                 <button
                   onClick={prevMonth}
@@ -514,7 +514,7 @@ const OrgCompliances = () => {
             </div>
 
             {/* Day Labels */}
-            <div className="grid grid-cols-7 border-b border-gray-100">
+            <div className="grid grid-cols-7 min-w-[400px] border-b border-gray-100">
               {DAY_LABELS.map((d) => (
                 <div
                   key={d}
@@ -526,7 +526,7 @@ const OrgCompliances = () => {
             </div>
 
             {/* Calendar Grid */}
-            <div className="grid grid-cols-7">
+            <div className="grid grid-cols-7 min-w-[400px]">
               {calendarGrid.map((cell, idx) => {
                 const hasEvents = cell.events && cell.events.length > 0;
                 const _isToday = cell.currentMonth && isToday(cell.date);
@@ -556,8 +556,8 @@ const OrgCompliances = () => {
                     className={`
                       relative min-h-[90px] p-2 border-b border-r border-gray-50 transition-all duration-150
                       ${!cell.currentMonth ? "bg-gray-50/50" : "bg-white"}
-                      ${cell.currentMonth && hasEvents ? "cursor-pointer hover:bg-[#023752]/[0.03]" : ""}
-                      ${_isSelected ? "bg-[#023752]/[0.06] ring-2 ring-inset ring-[#023752]/20" : ""}
+                      ${cell.currentMonth && hasEvents ? "cursor-pointer hover:bg-[#015079]/[0.03]" : ""}
+                      ${_isSelected ? "bg-[#022B51]/[0.06] ring-2 ring-inset ring-[#022B51]/20" : ""}
                     `}
                   >
                     {/* Day Number */}
@@ -566,8 +566,8 @@ const OrgCompliances = () => {
                         className={`
                           inline-flex items-center justify-center w-7 h-7 rounded-full text-sm font-semibold
                           ${!cell.currentMonth ? "text-gray-300" : "text-gray-700"}
-                          ${_isToday ? "bg-[#023752] text-white" : ""}
-                          ${_isSelected && !_isToday ? "bg-[#023752]/10 text-[#023752]" : ""}
+                          ${_isToday ? "bg-[#022B51] text-white" : ""}
+                          ${_isSelected && !_isToday ? "bg-[#022B51]/10 text-[#022B51]" : ""}
                         `}
                       >
                         {cell.day}
@@ -654,7 +654,7 @@ const OrgCompliances = () => {
               {/* Panel Header */}
               <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
                 <div className="flex items-center gap-2">
-                  <FiCalendar className="w-4 h-4 text-[#023752]" />
+                  <FiCalendar className="w-4 h-4 text-[#022B51]" />
                   <h3 className="font-bold text-gray-900 text-sm">
                     {selectedDate
                       ? selectedDate.toLocaleDateString("en-US", {
@@ -710,7 +710,7 @@ const OrgCompliances = () => {
                               },
                             )
                           }
-                          className="group p-4 rounded-xl border border-gray-100 hover:border-[#023752]/20 hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
+                          className="group p-4 rounded-xl border border-gray-100 hover:border-[#022B51]/20 hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
                         >
                           {/* Left accent bar */}
                           <div
@@ -720,7 +720,7 @@ const OrgCompliances = () => {
 
                           <div className="pl-3">
                             {/* Compliance name */}
-                            <h4 className="font-bold text-gray-900 text-sm mb-1.5 line-clamp-2 group-hover:text-[#023752] transition-colors">
+                            <h4 className="font-bold text-gray-900 text-sm mb-1.5 line-clamp-2 group-hover:text-[#022B51] transition-colors">
                               {event.complianceName}
                             </h4>
 

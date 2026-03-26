@@ -72,7 +72,7 @@ function AdminDocumentsVault() {
     return (
       <div className="min-h-screen bg-[#f3f5f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading clients...</p>
         </div>
       </div>
@@ -113,29 +113,29 @@ function AdminDocumentsVault() {
               placeholder="Search by name, email, phone or ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D]"
+              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51]"
             />
           </div>
         </div>
 
         {/* Clients Table Card */}
         <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
-          <div className="p-6">
+          <div className="p-3 sm:p-6">
             <div className="p-4 bg-[#f5f5f5] rounded-xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full border-separate border-spacing-0">
                   <thead>
                     <tr className="text-white">
-                      <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D] rounded-l-xl">
+                      <th className="px-6 py-4 text-left text-sm font-medium rounded-l-xl" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         User ID
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                      <th className="px-6 py-4 text-left text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         Client Name
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D]">
+                      <th className="px-6 py-4 text-left text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         Contact Info
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium bg-[#00486D] rounded-r-xl">
+                      <th className="px-6 py-4 text-left text-sm font-medium rounded-r-xl" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         Action
                       </th>
                     </tr>
@@ -154,7 +154,7 @@ function AdminDocumentsVault() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-[#E0F2FE] text-[#00486D] flex items-center justify-center text-xs font-bold">
+                              <div className="w-8 h-8 rounded-full bg-[#E0F2FE] text-[#022B51] flex items-center justify-center text-xs font-bold">
                                 {client.name
                                   ? client.name.charAt(0).toUpperCase()
                                   : "C"}
@@ -179,7 +179,7 @@ function AdminDocumentsVault() {
                                   `/admin/client-documents/${client.user_id}`
                                 )
                               }
-                              className="flex items-center gap-2 px-3 py-1.5 bg-[#01334C]/10 text-[#01334C] rounded-lg hover:bg-[#01334C] hover:text-white transition-colors text-xs font-medium"
+                              className="flex items-center gap-2 px-3 py-1.5 bg-[#022B51]/10 text-[#022B51] rounded-lg hover:bg-[#015079] hover:text-white transition-colors text-xs font-medium"
                             >
                               <FiFolder className="w-4 h-4" /> View Documents
                             </button>
@@ -219,14 +219,14 @@ function AdminDocumentsVault() {
                   <button
                     onClick={() => paginate(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="p-2 bg-[#00486D] text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#003652]"
+                    className="p-2 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                   >
                     <FiChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => paginate(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="p-2 bg-[#00486D] text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#003652]"
+                    className="p-2 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                   >
                     <FiChevronRight className="w-4 h-4" />
                   </button>

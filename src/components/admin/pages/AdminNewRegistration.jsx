@@ -717,7 +717,7 @@ function AdminNewRegistration() {
                   setSearchTerm(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full h-11 pl-12 pr-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent text-sm"
+                className="w-full h-11 pl-12 pr-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent text-sm"
               />
             </div>
           </div>
@@ -725,7 +725,7 @@ function AdminNewRegistration() {
           {/* Table */}
           {loading ? (
             <div className="text-center py-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
               <p className="mt-4 text-gray-600">Loading users...</p>
             </div>
           ) : filteredUsers.length === 0 ? (
@@ -738,16 +738,16 @@ function AdminNewRegistration() {
                 <table className="w-full">
                   <thead>
                     <tr className="text-white text-left">
-                      <th className="px-6 py-4 text-sm font-medium bg-[#00486D] first:rounded-tl-none">
+                      <th className="px-6 py-4 text-sm font-medium first:rounded-tl-none" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         User
                       </th>
-                      <th className="px-6 py-4 text-sm font-medium bg-[#00486D]">
+                      <th className="px-6 py-4 text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         Email
                       </th>
-                      <th className="px-6 py-4 text-sm font-medium bg-[#00486D]">
+                      <th className="px-6 py-4 text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         Phone
                       </th>
-                      <th className="px-6 py-4 text-sm font-medium bg-[#00486D] last:rounded-tr-none">
+                      <th className="px-6 py-4 text-sm font-medium last:rounded-tr-none" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                         Action
                       </th>
                     </tr>
@@ -961,7 +961,7 @@ function AdminNewRegistration() {
               placeholder="Search services..."
               value={typeSearch}
               onChange={(e) => setTypeSearch(e.target.value)}
-              className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] focus:border-transparent bg-white"
+              className="w-full h-12 pl-12 pr-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent bg-white"
             />
           </div>
           <p className="text-xs text-gray-500 mt-2">
@@ -976,7 +976,7 @@ function AdminNewRegistration() {
             <div
               key={type.id}
               onClick={() => handleTypeSelect(type)}
-              className="bg-white rounded-2xl p-6 border border-gray-100 cursor-pointer hover:border-[#00486D] hover:shadow-lg transition-all group"
+              className="bg-white rounded-2xl p-3 sm:p-6 border border-gray-100 cursor-pointer hover:border-[#022B51] hover:shadow-lg transition-all group"
             >
               <div className="flex items-start gap-4">
                 <div
@@ -1038,7 +1038,7 @@ function AdminNewRegistration() {
 
         {packagesLoading ? (
           <div className="text-center py-16">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00486D] mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading packages...</p>
           </div>
         ) : plans.length === 0 ? (
@@ -1063,7 +1063,7 @@ function AdminNewRegistration() {
             {plans.map((plan) => (
               <div
                 key={plan.id}
-                className="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-[#00486D] hover:shadow-xl transition-all"
+                className="bg-white rounded-2xl p-3 sm:p-6 border-2 border-gray-100 hover:border-[#022B51] hover:shadow-xl transition-all"
               >
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   {plan.name}

@@ -5,7 +5,7 @@ function PaymentSuccessPopup({ isOpen = true, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-8 relative">
+      <div className="bg-white rounded-xl shadow-2xl max-w-[95vw] sm:max-w-md w-full mx-4 p-8 relative">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -55,7 +55,7 @@ function PaymentSuccessPopup({ isOpen = true, onClose }) {
         {/* Action button */}
         <button
           onClick={onClose}
-          className="w-full px-6 py-3 bg-[#00486D] text-white rounded-lg hover:bg-[#003855] transition-colors font-medium"
+          className="w-full px-6 py-3 text-white rounded-lg hover:opacity-90 transition-all font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
         >
           Got it
         </button>

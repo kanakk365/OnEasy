@@ -131,11 +131,11 @@ function RegistrationCategories() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 bg-[#f3f5f7]">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 bg-[#f3f5f7]">
       {/* Back Button */}
       <button
         onClick={() => navigate("/registrations")}
-        className="flex items-center gap-2 text-[#01334C] hover:text-[#00486D] mb-4 text-sm font-medium"
+        className="flex items-center gap-2 text-[#022B51] hover:text-[#022B51] mb-4 text-sm font-medium"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
@@ -148,7 +148,7 @@ function RegistrationCategories() {
         <h1 className="text-2xl font-semibold text-gray-900">
           Select Your Category
         </h1>
-        <div className="relative w-[300px]">
+        <div className="relative w-full max-w-[300px]">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <IoSearchOutline className="h-5 w-5 text-gray-400" />
           </div>
@@ -157,7 +157,7 @@ function RegistrationCategories() {
             placeholder="Search for a Category"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#01334C] focus:border-[#01334C] bg-white"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#022B51] focus:border-[#022B51] bg-white"
           />
         </div>
       </div>
@@ -199,14 +199,14 @@ function RegistrationCategories() {
                   });
                 }
               }}
-              className="relative cursor-pointer rounded-xl p-8 transition-all duration-200 flex flex-col items-center text-center group bg-[#FAFBFF] border border-[#EFEFEF] shadow-[0_4px_16px_0_#9797970D] hover:bg-[#01466a] hover:text-white"
+              className="relative cursor-pointer rounded-xl p-8 transition-all duration-200 flex flex-col items-center text-center group bg-[#FAFBFF] border border-[#EFEFEF] shadow-[0_4px_16px_0_#9797970D] hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] hover:text-white"
             >
-              <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4 bg-[#00486d] group-hover:bg-[#25607f]">
+              <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4 group-" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                 {React.cloneElement(registration.icon, {
                   className: "w-7 h-7 text-white",
                 })}
               </div>
-              <h3 className="text-lg font-medium mb-1 text-[#00486D] group-hover:text-white">
+              <h3 className="text-lg font-medium mb-1 text-[#022B51] group-hover:text-white">
                 {registration.title}
               </h3>
               <p className="text-sm text-gray-500 group-hover:text-gray-300">

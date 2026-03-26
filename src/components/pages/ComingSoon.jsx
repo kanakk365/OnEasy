@@ -15,10 +15,10 @@ function ComingSoon() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-12">
+    <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-8 md:py-12">
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-16rem)] text-center">
         <div className="mb-8">
-          <div className="w-24 h-24 md:w-32 md:h-32 bg-[#01334C] rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
             <svg
               className="w-12 h-12 md:w-16 md:h-16 text-white"
               fill="none"
@@ -50,7 +50,7 @@ function ComingSoon() {
         <div className="mt-8">
           <a
             href="/client"
-            className="inline-flex items-center px-6 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium"
+            className="inline-flex items-center px-6 py-3 text-white rounded-lg hover:opacity-90 transition-all font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
           >
             <svg
               className="w-5 h-5 mr-2"

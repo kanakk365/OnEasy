@@ -99,7 +99,7 @@ function SuperAdminProfile() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7] p-6">
+    <div className="min-h-screen bg-[#f3f5f7] p-3 sm:p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -198,7 +198,7 @@ function SuperAdminProfile() {
                 Profile Image
               </label>
               <div className="flex items-center gap-4">
-                <label className="px-6 py-3 bg-[#01334C] text-white rounded-lg cursor-pointer hover:bg-[#00486D] transition-colors">
+                <label className="px-6 py-3 text-white rounded-lg cursor-pointer hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                   <input
                     type="file"
                     accept="image/*"
@@ -240,7 +240,7 @@ function SuperAdminProfile() {
               <button
                 onClick={handleSave}
                 disabled={loading}
-                className="px-8 py-3 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-8 py-3 text-white rounded-lg hover:opacity-90 transition-all font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 {loading ? 'Saving...' : 'Save'}
               </button>

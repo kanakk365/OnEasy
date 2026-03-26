@@ -139,7 +139,7 @@ function AdminProfile() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Image Card */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 p-6 flex flex-col items-center text-center">
+            <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 p-3 sm:p-6 flex flex-col items-center text-center">
               <div className="relative mb-4 group">
                 <div className="w-40 h-40 rounded-full border-4 border-gray-50 overflow-hidden shadow-lg">
                   {formData.profileImage ? (
@@ -155,7 +155,7 @@ function AdminProfile() {
                   )}
                 </div>
 
-                <label className="absolute bottom-2 right-2 w-10 h-10 bg-[#00486D] text-white rounded-full flex items-center justify-center cursor-pointer shadow-md hover:bg-[#003855] transition-all hover:scale-110">
+                <label className="absolute bottom-2 right-2 w-10 h-10 text-white rounded-full flex items-center justify-center cursor-pointer shadow-md transition-all hover:scale-110" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                   <input
                     type="file"
                     accept="image/*"
@@ -198,12 +198,12 @@ function AdminProfile() {
             <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <RiUserLine className="w-5 h-5 text-[#00486D]" />
+                  <RiUserLine className="w-5 h-5 text-[#022B51]" />
                   Personal Information
                 </h2>
               </div>
 
-              <div className="p-6 space-y-6">
+              <div className="p-3 sm:p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -216,7 +216,7 @@ function AdminProfile() {
                         onChange={(e) =>
                           handleInputChange("name", e.target.value)
                         }
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
                         placeholder="Enter your full name"
                       />
                       <RiUserLine className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -234,7 +234,7 @@ function AdminProfile() {
                         onChange={(e) =>
                           handleInputChange("email", e.target.value)
                         }
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
                         placeholder="Enter your email"
                       />
                       <RiMailLine className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -268,7 +268,7 @@ function AdminProfile() {
                         onChange={(e) =>
                           handleInputChange("dateOfBirth", e.target.value)
                         }
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow"
                       />
                       <RiCalendarLine className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                     </div>
@@ -284,7 +284,7 @@ function AdminProfile() {
                         onChange={(e) =>
                           handleInputChange("gender", e.target.value)
                         }
-                        className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00486D] transition-shadow appearance-none bg-white"
+                        className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#022B51] transition-shadow appearance-none bg-white"
                       >
                         <option value="">Select Gender</option>
                         <option value="Male">Male</option>
@@ -336,7 +336,7 @@ function AdminProfile() {
                   <button
                     onClick={handleSave}
                     disabled={loading}
-                    className="px-8 py-3 bg-[#01334C] text-white rounded-xl hover:bg-[#00486D] transition-all shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed font-medium active:scale-95 flex items-center gap-2"
+                    className="px-8 py-3 text-white rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed font-medium active:scale-95 flex items-center gap-2" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                   >
                     {loading ? (
                       <>
