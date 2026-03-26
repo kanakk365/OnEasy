@@ -244,13 +244,60 @@ const ComplianceChat = () => {
     });
   };
 
+  // Transform annexure-1b branches tree → flat flowQuestions format used by chat UI
+  const transformBranchesToFlow = (branches) => {
+    return branches
+      .sort((a, b) => a.order - b.order)
+      .map((branch) => {
+        const options = (branch.options || [])
+          .sort((a, b) => a.order - b.order)
+          .map((opt) => {
+            const registrationItems = [];
+            const complianceItems = [];
+
+            // Categorise items from sub-options by their heading
+            (opt.options || []).forEach((subOpt) => {
+              const heading = (subOpt.heading || "").toLowerCase();
+              const items = subOpt.items || [];
+              if (heading.includes("registration")) {
+                registrationItems.push(...items);
+              } else {
+                // "Compliance", "Income Tax Return", filing headings, etc.
+                complianceItems.push(...items);
+              }
+            });
+
+            // Items directly on the option fall into registrations
+            (opt.items || []).forEach((item) => registrationItems.push(item));
+
+            return {
+              id: opt.id,
+              label: opt.heading,
+              value: opt.heading,
+              compliances: {
+                registration: registrationItems,
+                compliance: complianceItems,
+              },
+            };
+          });
+
+        return {
+          key: branch.id,
+          text: branch.heading,
+          type: options.length > 0 ? "single_select" : "text",
+          order: branch.order,
+          options,
+        };
+      });
+  };
+
   // Fetch flow without showing questions (for compliance extraction)
   const fetchCompleteFlowSilent = async () => {
     try {
       const token = getAuthToken();
 
       const response = await fetch(
-        `${COMPLIANCE_API_BASE}/compliance/flow/complete`,
+        `${COMPLIANCE_API_BASE}/compliance/annexure-1b/flow/complete`,
         {
           method: "GET",
           headers: {
@@ -266,9 +313,9 @@ const ComplianceChat = () => {
 
       const data = await response.json();
 
-      if (data.flow && Array.isArray(data.flow)) {
-        const sortedFlow = data.flow.sort((a, b) => a.order - b.order);
-        setFlowQuestions(sortedFlow);
+      if (data.branches && Array.isArray(data.branches)) {
+        const transformedFlow = transformBranchesToFlow(data.branches);
+        setFlowQuestions(transformedFlow);
       }
     } catch (error) {
       console.error("Error fetching flow:", error);
@@ -280,7 +327,7 @@ const ComplianceChat = () => {
       const token = getAuthToken();
 
       const response = await fetch(
-        `${COMPLIANCE_API_BASE}/compliance/flow/complete`,
+        `${COMPLIANCE_API_BASE}/compliance/annexure-1b/flow/complete`,
         {
           method: "GET",
           headers: {
@@ -296,10 +343,9 @@ const ComplianceChat = () => {
 
       const data = await response.json();
 
-      if (data.flow && Array.isArray(data.flow)) {
-        // Sort questions by order
-        const sortedFlow = data.flow.sort((a, b) => a.order - b.order);
-        setFlowQuestions(sortedFlow);
+      if (data.branches && Array.isArray(data.branches)) {
+        const transformedFlow = transformBranchesToFlow(data.branches);
+        setFlowQuestions(transformedFlow);
 
         // Add intro message
         const introMsg = {
@@ -312,8 +358,8 @@ const ComplianceChat = () => {
 
         // Show first question after a delay
         setTimeout(() => {
-          if (sortedFlow.length > 0) {
-            showQuestion(sortedFlow[0]);
+          if (transformedFlow.length > 0) {
+            showQuestion(transformedFlow[0]);
           }
         }, 1000);
       }
