@@ -638,7 +638,7 @@ function Client() {
               ) : filteredServices.length > 0 ? (
                 <div className="overflow-x-auto">
                   {/* Table Header */}
-                  <div className="grid grid-cols-12 gap-4 py-3 px-2 min-w-[600px] border-b-2 border-gray-200 mb-2">
+                  <div className="grid grid-cols-12 gap-2 sm:gap-4 py-3 px-2 border-b-2 border-gray-200 mb-2">
                     <div className="col-span-6 text-[10px] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Service
                     </div>
@@ -655,7 +655,7 @@ function Client() {
                     {filteredServices.slice(0, 5).map((service, idx) => (
                       <div
                         key={idx}
-                        className="grid grid-cols-12 gap-4 py-4 px-2 min-w-[600px] border-b border-gray-100 items-center last:border-0 hover:bg-white transition-colors cursor-pointer"
+                        className="grid grid-cols-12 gap-2 sm:gap-4 py-4 px-2 border-b border-gray-100 items-center last:border-0 hover:bg-white transition-colors cursor-pointer"
                         onClick={() => {
                           const type = deriveType(service);
                           const slug = getTypeSlug(type);
@@ -675,7 +675,7 @@ function Client() {
                         </div>
                         <div className="col-span-3 flex justify-center">
                           <span
-                            className={`px-4 py-1.5 rounded-full text-xs font-medium ${
+                            className={`px-2 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-medium text-center ${
                               service.status === "Open" ||
                               getStatusLabel(service) === "Open"
                                 ? "bg-[#D1FAE5] text-[#065F46]"
@@ -685,7 +685,7 @@ function Client() {
                             {getStatusLabel(service)}
                           </span>
                         </div>
-                        <div className="col-span-3 text-sm font-medium text-gray-700 text-right">
+                        <div className="col-span-3 text-[10px] sm:text-sm font-medium text-gray-700 text-right">
                           {formatDate(service.updated_at || service.created_at)}
                         </div>
                       </div>
@@ -967,12 +967,12 @@ function Client() {
           </div>
 
           <div className="overflow-x-auto">
-            <div className="min-w-[700px]">
+            <div className="w-full">
               {/* Table Header */}
-              <div className="grid grid-cols-12 gap-4 px-3 sm:px-6 py-4 bg-[#f2f6f7] min-w-[600px] rounded-xl text-sm font-medium text-[#022B51]">
+              <div className="grid grid-cols-12 gap-2 sm:gap-4 px-2 sm:px-6 py-4 bg-[#f2f6f7] rounded-xl text-xs sm:text-sm font-medium text-[#022B51]">
                 <div className="col-span-4">Name</div>
-                <div className="col-span-6">GST number</div>
-                <div className="col-span-2 text-right">Action</div>
+                <div className="col-span-5 sm:col-span-6">GST Number</div>
+                <div className="col-span-3 sm:col-span-2 text-right">Action</div>
               </div>
 
               {loadingOrganizations ? (
@@ -983,22 +983,22 @@ function Client() {
                 organizations.map((org, index) => (
                   <div
                     key={org.id || index}
-                    className="grid grid-cols-12 gap-4 px-3 sm:px-6 py-4 bg-white min-w-[600px] border-b border-gray-50 items-center hover:bg-gray-50 transition-colors last:border-0 cursor-pointer"
+                    className="grid grid-cols-12 gap-2 sm:gap-4 px-2 sm:px-6 py-4 bg-white border-b border-gray-50 items-center hover:bg-gray-50 transition-colors last:border-0 cursor-pointer"
                   >
                     <div className="col-span-4">
-                      <span className="text-sm font-medium text-gray-900 block">
+                      <span className="text-xs sm:text-sm font-medium text-gray-900 block truncate">
                         {org.legal_name || org.trade_name || "-"}
                       </span>
                     </div>
-                    <div className="col-span-6">
-                      <span className="text-sm text-gray-500 font-medium">
+                    <div className="col-span-5 sm:col-span-6 border-transparent">
+                      <span className="text-xs sm:text-sm text-gray-500 font-medium truncate block">
                         {org.gstin || "-"}
                       </span>
                     </div>
-                    <div className="col-span-2 text-right">
+                    <div className="col-span-3 sm:col-span-2 text-right">
                       <button
                         onClick={() => navigate("/organization")}
-                        className="text-white text-xs px-4 py-2 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer"
+                        className="text-white text-[10px] sm:text-xs px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer whitespace-nowrap"
                         style={{
                           background:
                             "linear-gradient(180deg, #022B51 0%, #015079 100%)",

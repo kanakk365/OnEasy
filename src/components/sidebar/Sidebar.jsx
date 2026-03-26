@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   RiDashboardLine,
@@ -10,8 +10,6 @@ import {
 import {
   MdOutlineSubscriptions,
   MdOutlineArticle,
-  MdMenu,
-  MdClose,
 } from "react-icons/md";
 import { HiOutlineClipboardList } from "react-icons/hi";
 import { BsBuilding } from "react-icons/bs";
@@ -28,7 +26,6 @@ import { AUTH_CONFIG } from "../../config/auth";
 
 function Sidebar() {
   const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isCollapsed, setIsCollapsed } = useSidebarStore();
   const isRegistrationsActive =
     location.pathname === "/registrations" ||
@@ -102,35 +99,6 @@ function Sidebar() {
 
   return (
     <>
-      {/* Mobile Hamburger Menu Button */}
-      {!isMobileMenuOpen && (
-        <div className="lg:hidden fixed top-3 left-4 z-[70] flex items-center space-x-3">
-          <button
-            onClick={() => {
-              setIsMobileMenuOpen(true);
-            }}
-            className="bg-white p-2 rounded-lg shadow-lg border border-gray-200"
-          >
-            <MdMenu className="w-6 h-6 text-gray-700" />
-          </button>
-          <img src="/Logo2.png" alt="OnEasy Logo" className="h-9 w-auto" />
-        </div>
-      )}
-
-      {/* Mobile Sidebar Overlay */}
-      {isMobileMenuOpen && (
-        <div
-          className="lg:hidden fixed inset-0 z-[50]"
-          style={{
-            background: "rgba(0, 0, 0, 0.15)",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            "-webkit-backdrop-filter": "blur(10px)",
-          }}
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-
       {/* Desktop Sidebar */}
       <div
         className={`${isCollapsed ? "w-[70px]" : "w-[240px]"
@@ -288,94 +256,6 @@ function Sidebar() {
           </div>
         </div>
       </div>
-
-      {/* Mobile Sidebar */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden fixed left-0 top-0 h-full w-64 bg-white shadow-xl z-[60] transform transition-transform duration-300 translate-x-0 flex flex-col">
-          {/* Debug info */}
-          {console.log(
-            "Mobile sidebar rendering, isMobileMenuOpen:",
-            isMobileMenuOpen,
-          )}
-          {/* Mobile Sidebar Header */}
-          <div className="px-6 pt-4 pb-4 flex justify-between items-center border-b border-gray-200">
-            <img src="/Logo2.png" alt="OnEasy Logo" className="h-10 w-auto" />
-            <button
-              onClick={() => {
-                console.log("Close button clicked");
-                setIsMobileMenuOpen(false);
-              }}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
-            >
-              <MdClose className="w-6 h-6 text-gray-700" />
-            </button>
-          </div>
-
-          {/* Mobile Navigation */}
-          <nav className="flex-1 px-4 pt-3 space-y-2.5 overflow-y-auto min-h-0">
-            {menuItems.map((item, index) => {
-              const isMobileActive = item.path === "/client"
-                ? location.pathname === "/client"
-                : item.text === "Registrations"
-                  ? isRegistrationsActive
-                  : location.pathname === item.path;
-              return (
-              <Link
-                to={item.path}
-                key={index}
-                className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${isMobileActive
-                    ? "text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                style={isMobileActive ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <span className="text-lg">{item.icon}</span>
-                <span className="font-medium">{item.text}</span>
-              </Link>
-              );
-            })}
-          </nav>
-
-          {/* Mobile Profile Section */}
-          <div className="flex-shrink-0 p-4 border-t border-gray-200">
-            <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg bg-gray-50">
-              <div className="flex items-center space-x-3 flex-1">
-                {userData?.profile_image ? (
-                  <img
-                    src={userData.profile_image}
-                    alt="Profile"
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-8 h-8 text-white rounded-full flex items-center justify-center text-sm font-medium" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
-                    {userData?.name
-                      ? userData.name.charAt(0).toUpperCase()
-                      : "A"}
-                  </div>
-                )}
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">
-                    {userData?.name || "User"}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {userData?.email || userData?.phone || ""}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setShowLogoutModal(true);
-                }}
-                className="p-2 hover:bg-gray-200 rounded-lg transition-colors duration-200"
-              >
-                <IoLogOutOutline className="w-4 h-4 text-gray-600" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <LogoutModal
         isOpen={showLogoutModal}

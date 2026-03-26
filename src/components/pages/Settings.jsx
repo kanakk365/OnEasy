@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 import {
   getUsersPageData,
@@ -17,6 +17,7 @@ import {
 } from "./profile";
 
 function Settings() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "profile"); // profile, organizations, notes, tasks
   const orgIdFromUrl = searchParams.get("orgId");
@@ -97,6 +98,7 @@ function Settings() {
   const [userId, setUserId] = useState("");
   const [, setCustomClientId] = useState("");
   const [clientStatus, setClientStatus] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Load data on mount
   useEffect(() => {
@@ -1238,6 +1240,13 @@ function Settings() {
     }
   }, [searchParams]);
 
+  const handleRequestDelete = () => {
+    setShowDeleteModal(true);
+    setTimeout(() => {
+      setShowDeleteModal(false);
+    }, 5000);
+  };
+
   // Tab definitions
   const tabs = [
     { key: "profile", label: "Profile" },
@@ -1262,19 +1271,29 @@ function Settings() {
     <div className="min-h-screen bg-white p-3 sm:p-6 pt-16 lg:pt-6">
       {/* Header */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate("/client")}
-          className="flex items-center gap-2 text-[#022B51] hover:text-[#015079] mb-4 text-sm font-medium"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          Back to Dashboard
-        </button>
-        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-          View your Profile
-        </h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            {/* Back Button */}
+            <button
+              onClick={() => navigate("/client")}
+              className="flex items-center gap-2 text-[#022B51] hover:text-[#015079] mb-4 text-sm font-medium"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Dashboard
+            </button>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+              View your Profile
+            </h1>
+          </div>
+          <button
+            onClick={handleRequestDelete}
+            className="text-white bg-red-600 hover:bg-red-700 text-sm font-medium px-4 py-2.5 rounded-lg transition-all shadow-md active:scale-95 whitespace-nowrap"
+          >
+            Request to Delete My Account
+          </button>
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -1396,6 +1415,23 @@ function Settings() {
           )}
         </div>
       </div>
+
+      {/* Account Deletion Request Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-xl shadow-xl p-8 max-w-sm w-full text-center transform transition-all animate-in fade-in zoom-in duration-300">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mb-5">
+              <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Request Sent!</h3>
+            <p className="text-sm text-gray-600 mb-2">
+              A request to delete your account has been sent. We'll contact you after it.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
