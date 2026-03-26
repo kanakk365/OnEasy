@@ -752,23 +752,23 @@ function Registrations() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7] pt-16 lg:pt-0">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
-        <div className="mb-6">
+    <div className="min-h-screen bg-white lg:bg-[#f3f5f7] lg:pt-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+        <div className="mb-4 lg:mb-6">
           {/* Back Button */}
           <button
             onClick={() => navigate("/client")}
-            className="flex items-center gap-2 text-[#022B51] hover:text-[#022B51] mb-4 text-sm font-medium"
+            className="flex items-center gap-1.5 text-gray-800 mb-3 text-sm font-medium"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Dashboard
+            Select your Services
           </button>
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Select your Services
-            </h1>
+
+          {/* Desktop search bar - hidden on mobile */}
+          <div className="hidden lg:flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-semibold text-gray-900">Select your Services</h1>
             <div className="relative w-full max-w-[400px]">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <IoSearchOutline className="h-5 w-5 text-gray-400" />
@@ -782,49 +782,51 @@ function Registrations() {
               />
             </div>
           </div>
-          <div className="border-b border-gray-200 overflow-x-auto">
-            <div className="flex space-x-2 sm:space-x-8 min-w-max">
+
+          {/* Tabs - pill style on mobile, underline on desktop */}
+          <div className="overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0 lg:border-b lg:border-gray-200">
+            <div className="flex gap-2 min-w-max lg:space-x-8">
               <button
                 onClick={() => setView("services")}
-                className={`py-2 px-5 text-sm relative rounded-lg transition-all ${
+                className={`py-1.5 px-4 text-xs lg:text-sm font-medium rounded-full lg:rounded-none transition-all ${
                   view === "services"
-                    ? "text-white"
-                    : "text-gray-500 hover:text-gray-900"
+                    ? "text-white lg:text-[#022B51] lg:bg-transparent lg:border-b-2 lg:border-[#022B51] lg:rounded-none"
+                    : "text-gray-500 bg-gray-100 lg:bg-transparent hover:text-gray-900"
                 }`}
-                style={view === "services" ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
+                style={view === "services" ? { background: window.innerWidth < 1024 ? "#022B51" : undefined } : {}}
               >
                 Services
               </button>
               <button
                 onClick={() => setView("my")}
-                className={`py-2 px-5 text-sm relative rounded-lg transition-all ${
+                className={`py-1.5 px-4 text-xs lg:text-sm font-medium rounded-full lg:rounded-none transition-all ${
                   view === "my"
-                    ? "text-white"
-                    : "text-gray-500 hover:text-gray-900"
+                    ? "text-white lg:text-[#022B51] lg:bg-transparent lg:border-b-2 lg:border-[#022B51] lg:rounded-none"
+                    : "text-gray-500 bg-gray-100 lg:bg-transparent hover:text-gray-900"
                 }`}
-                style={view === "my" ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
+                style={view === "my" ? { background: window.innerWidth < 1024 ? "#022B51" : undefined } : {}}
               >
                 My Registrations
               </button>
               <button
                 onClick={() => setView("suggested-registrations")}
-                className={`py-2 px-5 text-sm relative rounded-lg transition-all ${
+                className={`py-1.5 px-4 text-xs lg:text-sm font-medium rounded-full lg:rounded-none transition-all whitespace-nowrap ${
                   view === "suggested-registrations"
-                    ? "text-white"
-                    : "text-gray-500 hover:text-gray-900"
+                    ? "text-white lg:text-[#022B51] lg:bg-transparent lg:border-b-2 lg:border-[#022B51] lg:rounded-none"
+                    : "text-gray-500 bg-gray-100 lg:bg-transparent hover:text-gray-900"
                 }`}
-                style={view === "suggested-registrations" ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
+                style={view === "suggested-registrations" ? { background: window.innerWidth < 1024 ? "#022B51" : undefined } : {}}
               >
                 Suggested Registrations
               </button>
               <button
                 onClick={() => setView("suggested-compliances")}
-                className={`py-2 px-5 text-sm relative rounded-lg transition-all ${
+                className={`py-1.5 px-4 text-xs lg:text-sm font-medium rounded-full lg:rounded-none transition-all whitespace-nowrap ${
                   view === "suggested-compliances"
-                    ? "text-white"
-                    : "text-gray-500 hover:text-gray-900"
+                    ? "text-white lg:text-[#022B51] lg:bg-transparent lg:border-b-2 lg:border-[#022B51] lg:rounded-none"
+                    : "text-gray-500 bg-gray-100 lg:bg-transparent hover:text-gray-900"
                 }`}
-                style={view === "suggested-compliances" ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
+                style={view === "suggested-compliances" ? { background: window.innerWidth < 1024 ? "#022B51" : undefined } : {}}
               >
                 Suggested Compliances
               </button>
@@ -977,60 +979,55 @@ function Registrations() {
           </div>
         ) : view === "services" ? (
           <>
-            <div className="grid gap-4">
+            {/* Mobile flat list style */}
+            <div className="bg-white rounded-xl lg:rounded-none divide-y divide-gray-100 lg:divide-y-0 lg:grid lg:gap-4 border border-gray-100 lg:border-0 overflow-hidden">
               {[
                 {
-                  title: "Start up Services",
-                  desc: "Incorporation, funding, and advisory support.",
+                  title: "Startup Services",
+                  desc: "Incorporation, Funding and Advisory Support",
                   onClick: () => navigate("/company-categories"),
-                  comingSoon: false,
                 },
                 {
                   title: "Registration Services",
-                  desc: "Quick and easy business registrations.",
+                  desc: "Quick and easy business registrations",
                   onClick: () => navigate("/registration-categories"),
-                  comingSoon: false,
                 },
                 {
-                  title: "Goods and Services Tax Services",
-                  desc: "GST registration, filing, and compliance.",
+                  title: "Goods & Services Tax Services",
+                  desc: "GST Registration, Filing & Compliance",
                   onClick: () => navigate("/gst-categories"),
-                  comingSoon: false,
                 },
                 {
                   title: "ROC & MCA Services",
-                  desc: "Company law filings and MCA compliance.",
+                  desc: "Company law filings & MCA Compliance",
                   onClick: () => navigate("/roc-categories"),
-                  comingSoon: false,
                 },
                 {
                   title: "Income Tax Services",
-                  desc: "Tax planning, filing, and assessments.",
+                  desc: "Tax planning, filings & assessments.",
                   onClick: () => navigate("/tax-accounting-categories"),
-                  comingSoon: false,
                 },
                 {
                   title: "Compliance Services",
-                  desc: "End-to-end legal and regulatory compliance.",
+                  desc: "End-to-end legal and regulatory compliance",
                   onClick: () => navigate("/compliance-categories"),
-                  comingSoon: false,
                 },
               ].map((service, idx) => (
                 <div
                   key={idx}
-                  className="group bg-white rounded-xl p-3 sm:p-6 hover:shadow-md hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-transparent hover:border-gray-100/10"
+                  className="group bg-white lg:rounded-xl p-4 lg:p-6 lg:hover:shadow-md lg:hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] active:bg-gray-50 lg:active:bg-transparent transition-all duration-200 cursor-pointer flex items-center justify-between w-full lg:border lg:border-transparent lg:hover:border-gray-100/10"
                   onClick={service.onClick}
                 >
                   <div>
-                    <h3 className="text-lg font-semibold text-[#022B51] mb-1 group-hover:text-white">
+                    <h3 className="text-sm font-semibold text-gray-900 lg:text-lg lg:text-[#022B51] mb-0.5 lg:mb-1 group-hover:lg:text-white">
                       {service.title}
                     </h3>
-                    <p className="text-sm text-gray-400 group-hover:text-gray-200">
+                    <p className="text-xs lg:text-sm text-gray-400 lg:group-hover:text-gray-200">
                       {service.desc}
                     </p>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-[#F5F7FA] group-hover:bg-[#246181] flex items-center justify-center transition-colors">
-                    <IoChevronForwardOutline className="text-[#022B51] text-xl group-hover:text-white" />
+                  <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gray-50 lg:bg-[#F5F7FA] lg:group-hover:bg-[#246181] flex items-center justify-center transition-colors flex-shrink-0 ml-3">
+                    <IoChevronForwardOutline className="text-gray-400 lg:text-[#022B51] text-base lg:text-xl lg:group-hover:text-white" />
                   </div>
                 </div>
               ))}

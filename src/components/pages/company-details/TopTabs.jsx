@@ -2,9 +2,9 @@ import React from "react";
 
 function TopTabs({ tabs, activeTab, onChange, disabled = false }) {
   return (
-    <div className="bg-white rounded-t-xl">
-      <div 
-        className="grid"
+    <div className="bg-white rounded-t-xl overflow-x-auto">
+      <div
+        className="flex min-w-max lg:grid border-b border-gray-100"
         style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
       >
         {tabs.map((tab) => {
@@ -14,15 +14,15 @@ function TopTabs({ tabs, activeTab, onChange, disabled = false }) {
               key={tab.id}
               onClick={() => !disabled && onChange && onChange(tab.id)}
               disabled={disabled}
-              className={`relative flex flex-col items-center justify-center h-[53px] w-full ${
+              className={`relative flex flex-col items-center justify-center h-[44px] lg:h-[53px] px-4 lg:px-0 whitespace-nowrap ${
                 disabled && !isActive ? "cursor-default opacity-60" : "cursor-pointer"
               }`}
             >
               <span
                 className={
                   isActive
-                    ? "text-[#022B51] font-medium text-lg  tracking-[0.03em]"
-                    : "text-[#797979]  text-lg tracking-[0.03em]"
+                    ? "text-[#022B51] font-medium text-sm lg:text-lg tracking-[0.03em]"
+                    : "text-[#797979] text-sm lg:text-lg tracking-[0.03em]"
                 }
               >
                 {tab.label}
@@ -43,5 +43,6 @@ function TopTabs({ tabs, activeTab, onChange, disabled = false }) {
 }
 
 export default TopTabs;
+
 
 

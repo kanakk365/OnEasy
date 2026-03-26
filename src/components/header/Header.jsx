@@ -63,7 +63,7 @@ function Header() {
   }, []);
 
   return (
-    <header className="bg-white py-3 border-b border-gray-200 relative">
+    <header className="hidden lg:block bg-white py-3 border-b border-gray-200 relative">
       <div className="container mx-auto flex items-center justify-between px-4 md:px-8 lg:px-12">
         {/* Left side - empty placeholder for layout */}
         <div></div>

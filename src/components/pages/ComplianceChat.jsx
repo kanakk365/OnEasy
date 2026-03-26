@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { IoSend } from "react-icons/io5";
 import { RiRobot2Line } from "react-icons/ri";
+import { BsBuilding } from "react-icons/bs";
 import {
   FiSearch,
   FiCheck,
   FiX,
   FiArrowLeft,
+  FiChevronLeft,
   FiChevronRight,
   FiChevronDown,
   FiCornerUpLeft,
@@ -75,6 +77,7 @@ const ComplianceChat = () => {
   };
   const [newOrgData, setNewOrgData] = useState(emptyOrgData);
   const [savingOrg, setSavingOrg] = useState(false);
+  const [addOrgStep, setAddOrgStep] = useState(1);
 
   const [flowBranches, setFlowBranches] = useState([]);
   const [expandedBranches, setExpandedBranches] = useState(new Set());
@@ -1281,467 +1284,230 @@ const ComplianceChat = () => {
 
   // --- Organisation Selection View ---
   if (showOrgSelection) {
+    if (showAddOrgForm) {
+      return (
+        <div className="h-[calc(100dvh-4rem-70px)] lg:h-[calc(100vh-4rem)] bg-white flex flex-col animate-in fade-in duration-300">
+          <div className="pt-6 pb-4 px-5">
+            <div className="flex items-center justify-center mb-6">
+              <div className="px-10 py-1.5 bg-gray-100 rounded-full text-xs text-gray-600 font-medium">Oneasy.in</div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  if (addOrgStep === 2) {
+                    setAddOrgStep(1);
+                  } else {
+                    setShowAddOrgForm(false);
+                    setNewOrgData(emptyOrgData);
+                    setAddOrgStep(1);
+                  }
+                }}
+              >
+                <FiChevronLeft size={22} className="text-gray-800" />
+              </button>
+              <h2 className="text-sm font-medium text-gray-800">Add New Organisation</h2>
+            </div>
+            
+            <div className="flex items-center justify-center mt-6 gap-3">
+              <div className="flex items-center gap-2">
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] text-white ${addOrgStep >= 1 ? 'bg-[#022B51]' : 'bg-gray-300'}`}>✓</div>
+                <span className={`text-[10px] font-medium ${addOrgStep >= 1 ? 'text-[#022B51]' : 'text-gray-400'}`}>Organization Details</span>
+              </div>
+              <div className="w-8 h-[1px] bg-gray-300"></div>
+              <div className="flex items-center gap-2">
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] text-white ${addOrgStep >= 2 ? 'bg-[#022B51]' : 'bg-gray-300'}`}>{addOrgStep === 2 ? '✓' : '2'}</div>
+                <span className={`text-[10px] font-medium ${addOrgStep >= 2 ? 'text-[#022B51]' : 'text-gray-400'}`}>Address Details</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-5 pb-8 custom-scrollbar">
+            {addOrgStep === 1 ? (
+              <div className="bg-gray-50 rounded-xl p-4 space-y-4">
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-700 mb-1">Legal Name<span className="text-red-500">*</span></label>
+                  <input type="text" value={newOrgData.legalName} onChange={(e) => setNewOrgData((prev) => ({ ...prev, legalName: e.target.value }))} placeholder="Enter Legal Name" className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-[#022B51] bg-white"/>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-700 mb-1">Trade Name</label>
+                  <input type="text" value={newOrgData.tradeName} onChange={(e) => setNewOrgData((prev) => ({ ...prev, tradeName: e.target.value }))} placeholder="Enter Trade Name" className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-[#022B51] bg-white"/>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-700 mb-1">Category</label>
+                  <select value={newOrgData.category} onChange={(e) => setNewOrgData((prev) => ({ ...prev, category: e.target.value }))} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-[#022B51] bg-white">
+                    <option value="">Select Category</option>
+                    <option value="Individual">Individual</option>
+                    <option value="Hindu undivided family">Hindu undivided family</option>
+                    <option value="Partnership Firm">Partnership Firm</option>
+                    <option value="Limited Liability Partnership">Limited Liability Partnership</option>
+                    <option value="Private Limited Company">Private Limited Company</option>
+                    <option value="One Person Company">One Person Company</option>
+                    <option value="Section 8 Company">Section 8 Company</option>
+                    <option value="Society">Society</option>
+                    <option value="Charitable Trust">Charitable Trust</option>
+                    <option value="Government">Government</option>
+                    <option value="Association of Persons">Association of Persons</option>
+                    <option value="Body of Individuals">Body of Individuals</option>
+                    <option value="Artificial Judicial Person">Artificial Judicial Person</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-700 mb-1">GSTIN</label>
+                  <input type="text" value={newOrgData.gstin} onChange={(e) => setNewOrgData((prev) => ({ ...prev, gstin: e.target.value.toUpperCase() }))} placeholder="Enter GSTIN" maxLength={15} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-xs font-mono focus:outline-none focus:border-[#022B51] bg-white"/>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-700 mb-1">Pan Number</label>
+                  <input type="text" value={newOrgData.panNumber} onChange={(e) => setNewOrgData((prev) => ({ ...prev, panNumber: e.target.value.toUpperCase() }))} placeholder="Enter PAN Number" maxLength={10} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-xs font-mono focus:outline-none focus:border-[#022B51] bg-white"/>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-700 mb-1">Incorporation Date</label>
+                  <input type="date" value={newOrgData.incorporationDate} onChange={(e) => setNewOrgData((prev) => ({ ...prev, incorporationDate: e.target.value }))} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-[#022B51] bg-white"/>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-700 mb-1">TAN</label>
+                  <input type="text" value={newOrgData.tan} onChange={(e) => setNewOrgData((prev) => ({ ...prev, tan: e.target.value.toUpperCase() }))} placeholder="Enter TAN" className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-xs font-mono focus:outline-none focus:border-[#022B51] bg-white"/>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-700 mb-1">CIN</label>
+                  <input type="text" value={newOrgData.cin} onChange={(e) => setNewOrgData((prev) => ({ ...prev, cin: e.target.value.toUpperCase() }))} placeholder="Enter CIN" className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-xs font-mono focus:outline-none focus:border-[#022B51] bg-white"/>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-50 rounded-xl p-4 space-y-4">
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-700 mb-1">Address Line 1</label>
+                  <input type="text" value={newOrgData.registeredAddressLine1} onChange={(e) => setNewOrgData((prev) => ({ ...prev, registeredAddressLine1: e.target.value }))} placeholder="Enter Address Line 1" className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-[#022B51] bg-white"/>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-700 mb-1">Address Line 2</label>
+                  <input type="text" value={newOrgData.registeredAddressLine2} onChange={(e) => setNewOrgData((prev) => ({ ...prev, registeredAddressLine2: e.target.value }))} placeholder="Enter Address Line 2 (Optional)" className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-[#022B51] bg-white"/>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-700 mb-1">District</label>
+                  <input type="text" value={newOrgData.registeredAddressDistrict} onChange={(e) => setNewOrgData((prev) => ({ ...prev, registeredAddressDistrict: e.target.value }))} placeholder="Enter District" className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-[#022B51] bg-white"/>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-700 mb-1">State</label>
+                  <input type="text" value={newOrgData.registeredAddressState} onChange={(e) => setNewOrgData((prev) => ({ ...prev, registeredAddressState: e.target.value }))} placeholder="Enter State" className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-[#022B51] bg-white"/>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-700 mb-1">Country</label>
+                  <select value={newOrgData.registeredAddressCountry} onChange={(e) => setNewOrgData((prev) => ({ ...prev, registeredAddressCountry: e.target.value }))} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-[#022B51] bg-white">
+                    <option value="India">India</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-gray-700 mb-1">Pin Code</label>
+                  <input type="text" value={newOrgData.registeredAddressPincode} onChange={(e) => setNewOrgData((prev) => ({ ...prev, registeredAddressPincode: e.target.value.replace(/\D/g, "").slice(0, 6) }))} placeholder="Enter 6-digit PIN Code" maxLength={6} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-xs font-mono focus:outline-none focus:border-[#022B51] bg-white"/>
+                </div>
+              </div>
+            )}
+            
+            <div className="mt-6">
+              {addOrgStep === 1 ? (
+                <button
+                  onClick={() => setAddOrgStep(2)}
+                  className="w-full py-3 text-white text-[13px] font-medium rounded-lg transition-all"
+                  style={{ background: "#022B51" }}
+                >
+                  Next: Office address details
+                </button>
+              ) : (
+                <button
+                  onClick={handleCreateOrg}
+                  disabled={savingOrg}
+                  className="w-full py-3 text-white text-[13px] font-medium rounded-lg disabled:opacity-50 transition-all"
+                  style={{ background: "#022B51" }}
+                >
+                  {savingOrg ? "Creating..." : "Create Organisation"}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="h-[calc(100dvh-4rem-70px)] lg:h-[calc(100vh-4rem)] bg-white flex flex-col animate-in fade-in duration-300">
-        {/* Header */}
-        <div className="p-4 border-b border-gray-100 flex items-center gap-3 bg-white shadow-sm z-10">
-          <button
-            onClick={() => {
-              setShowOrgSelection(false);
-              setShowAddOrgForm(false);
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: Date.now(),
-                  type: "bot",
-                  text: "Organisation selection cancelled.",
-                },
-              ]);
-              startCustomFlow();
-            }}
-            className="p-2 hover:bg-gray-100 rounded-full"
-          >
-            <FiArrowLeft size={20} />
-          </button>
-          <h2 className="font-bold text-gray-800">Select Organisation</h2>
+        <div className="pt-6 pb-4 px-5">
+          <div className="flex items-center justify-center mb-6">
+            <div className="px-10 py-1.5 bg-gray-100 rounded-full text-xs text-gray-600 font-medium">Oneasy.in</div>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                setShowOrgSelection(false);
+                setShowAddOrgForm(false);
+                setMessages((prev) => [
+                  ...prev,
+                  {
+                    id: Date.now(),
+                    type: "bot",
+                    text: "Organisation selection cancelled.",
+                  },
+                ]);
+                startCustomFlow();
+              }}
+            >
+              <FiChevronLeft size={22} className="text-gray-800" />
+            </button>
+            <h2 className="text-sm font-medium text-gray-800">Select Organisation</h2>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3 sm:p-6 custom-scrollbar">
-          <p className="text-gray-500 text-sm mb-6">
-            Choose the organisation you want to assign compliances to:
+        <div className="flex-1 overflow-y-auto px-5 pb-8 custom-scrollbar">
+          <p className="text-[12px] text-gray-500 mb-6">
+            Choose the organisation to want to compliance to
           </p>
+          
           {orgLoading ? (
             <div className="flex justify-center items-center py-20">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#022B51]"></div>
             </div>
           ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {organisations.map((org) => (
-                  <div
-                    key={org.id}
-                    onClick={() => handleOrgSelect(org)}
-                    className="bg-white rounded-xl p-5 border border-gray-200 hover:border-[#022B51] hover:shadow-lg transition-all duration-200 cursor-pointer group"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="w-11 h-11 rounded-xl bg-[#022B51]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#015079]/20 transition-colors">
-                        <HiOutlineBuildingOffice2 className="w-5 h-5 text-[#022B51]" />
-                      </div>
-                      <div className="min-w-0">
-                        <h3
-                          className="font-bold text-gray-900 truncate"
-                          title={org.legal_name}
-                        >
-                          {org.legal_name}
-                        </h3>
-                        {org.trade_name && (
-                          <p
-                            className="text-sm text-gray-500 truncate mt-0.5"
-                            title={org.trade_name}
-                          >
-                            {org.trade_name}
-                          </p>
-                        )}
-                        {org.gstin && (
-                          <p className="text-xs text-gray-400 mt-1 font-mono">
-                            GSTIN: {org.gstin}
-                          </p>
-                        )}
-                        {org.category && (
-                          <span className="inline-block mt-2 px-2 py-0.5 bg-blue-50 text-[#022B51] text-xs rounded-full">
-                            {org.category}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Add New Organisation Card */}
+            <div className="space-y-4">
+              {organisations.map((org) => (
                 <div
-                  onClick={() => setShowAddOrgForm(true)}
-                  className="bg-white rounded-xl p-5 border-2 border-dashed border-gray-300 hover:border-[#022B51] hover:bg-[#015079]/5 transition-all duration-200 cursor-pointer group flex items-center justify-center min-h-[120px]"
+                  key={org.id}
+                  onClick={() => handleOrgSelect(org)}
+                  className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm transition-all duration-200 cursor-pointer"
                 >
-                  <div className="text-center">
-                    <div className="w-11 h-11 rounded-xl bg-[#022B51]/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-[#015079]/20 transition-colors">
-                      <svg
-                        className="w-6 h-6 text-[#022B51]"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 4v16m8-8H4"
-                        />
-                      </svg>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-[#022B51] flex items-center justify-center flex-shrink-0">
+                      <BsBuilding className="w-5 h-5 text-white" />
                     </div>
-                    <p className="font-semibold text-gray-700 group-hover:text-[#022B51] transition-colors text-sm">
-                      Add New Organisation
-                    </p>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-gray-900 text-[13px] truncate">
+                        {org.legal_name}
+                      </h3>
+                      <p className="text-[11px] text-gray-500 truncate mt-1">
+                        {org.cin || org.gstin || "U-..."} - <span className="font-medium text-[#022B51]">{org.category || org.organisation_type || "Private Limited"}</span>
+                      </p>
+                    </div>
                   </div>
+                </div>
+              ))}
+
+              <div
+                onClick={() => {
+                  setShowAddOrgForm(true);
+                  setAddOrgStep(1);
+                }}
+                className="bg-white rounded-xl p-4 border border-dashed border-gray-300 transition-all duration-200 cursor-pointer flex items-center justify-center min-h-[72px]"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#f0f4f8] flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#022B51]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </div>
+                  <p className="font-medium text-[#022B51] text-[13px]">
+                    Add new Organisation
+                  </p>
                 </div>
               </div>
-
-              {/* Inline Add Organisation Form */}
-              {showAddOrgForm && (
-                <div className="mt-6 bg-gray-50 rounded-xl border border-gray-200 p-3 sm:p-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <h3 className="text-lg font-bold text-gray-900 mb-5">
-                    Add New Organisation
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Legal Name */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Legal Name <span className="text-red-400">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={newOrgData.legalName}
-                        onChange={(e) =>
-                          setNewOrgData((prev) => ({
-                            ...prev,
-                            legalName: e.target.value,
-                          }))
-                        }
-                        placeholder="Enter Legal Name"
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
-                      />
-                    </div>
-                    {/* Trade Name */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Trade Name
-                      </label>
-                      <input
-                        type="text"
-                        value={newOrgData.tradeName}
-                        onChange={(e) =>
-                          setNewOrgData((prev) => ({
-                            ...prev,
-                            tradeName: e.target.value,
-                          }))
-                        }
-                        placeholder="Enter Trade Name"
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
-                      />
-                    </div>
-                    {/* Category */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Category
-                      </label>
-                      <select
-                        value={newOrgData.category}
-                        onChange={(e) =>
-                          setNewOrgData((prev) => ({
-                            ...prev,
-                            category: e.target.value,
-                          }))
-                        }
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors bg-white"
-                      >
-                        <option value="">Select Category</option>
-                        <option value="Individual">Individual</option>
-                        <option value="Hindu undivided family">
-                          Hindu undivided family
-                        </option>
-                        <option value="Partnership Firm">
-                          Partnership Firm
-                        </option>
-                        <option value="Limited Liability Partnership">
-                          Limited Liability Partnership
-                        </option>
-                        <option value="Private Limited Company">
-                          Private Limited Company
-                        </option>
-                        <option value="One Person Company">
-                          One Person Company
-                        </option>
-                        <option value="Section 8 Company">
-                          Section 8 Company
-                        </option>
-                        <option value="Society">Society</option>
-                        <option value="Charitable Trust">
-                          Charitable Trust
-                        </option>
-                        <option value="Government">Government</option>
-                        <option value="Association of Persons">
-                          Association of Persons
-                        </option>
-                        <option value="Body of Individuals">
-                          Body of Individuals
-                        </option>
-                        <option value="Artificial Judicial Person">
-                          Artificial Judicial Person
-                        </option>
-                      </select>
-                    </div>
-                    {/* GSTIN */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        GSTIN
-                      </label>
-                      <input
-                        type="text"
-                        value={newOrgData.gstin}
-                        onChange={(e) =>
-                          setNewOrgData((prev) => ({
-                            ...prev,
-                            gstin: e.target.value.toUpperCase(),
-                          }))
-                        }
-                        placeholder="Enter GSTIN"
-                        maxLength={15}
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
-                      />
-                    </div>
-                    {/* PAN Number */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        PAN Number
-                      </label>
-                      <input
-                        type="text"
-                        value={newOrgData.panNumber}
-                        onChange={(e) =>
-                          setNewOrgData((prev) => ({
-                            ...prev,
-                            panNumber: e.target.value.toUpperCase(),
-                          }))
-                        }
-                        placeholder="Enter PAN Number"
-                        maxLength={10}
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
-                      />
-                    </div>
-                    {/* Incorporation Date */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Incorporation Date
-                      </label>
-                      <input
-                        type="date"
-                        value={newOrgData.incorporationDate}
-                        onChange={(e) =>
-                          setNewOrgData((prev) => ({
-                            ...prev,
-                            incorporationDate: e.target.value,
-                          }))
-                        }
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
-                      />
-                    </div>
-                    {/* TAN */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        TAN
-                      </label>
-                      <input
-                        type="text"
-                        value={newOrgData.tan}
-                        onChange={(e) =>
-                          setNewOrgData((prev) => ({
-                            ...prev,
-                            tan: e.target.value.toUpperCase(),
-                          }))
-                        }
-                        placeholder="Enter TAN"
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
-                      />
-                    </div>
-                    {/* CIN */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        CIN
-                      </label>
-                      <input
-                        type="text"
-                        value={newOrgData.cin}
-                        onChange={(e) =>
-                          setNewOrgData((prev) => ({
-                            ...prev,
-                            cin: e.target.value.toUpperCase(),
-                          }))
-                        }
-                        placeholder="Enter CIN"
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
-                      />
-                    </div>
-                    {/* Organisation Type */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Organisation Type
-                      </label>
-                      <select
-                        value={newOrgData.organisationType}
-                        onChange={(e) =>
-                          setNewOrgData((prev) => ({
-                            ...prev,
-                            organisationType: e.target.value,
-                          }))
-                        }
-                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors bg-white"
-                      >
-                        <option value="">Select type</option>
-                        <option value="Private Limited">Private Limited</option>
-                        <option value="Public Limited">Public Limited</option>
-                        <option value="LLP">LLP</option>
-                        <option value="Partnership">Partnership</option>
-                        <option value="Proprietorship">Proprietorship</option>
-                        <option value="OPC">OPC</option>
-                        <option value="Section 8">Section 8</option>
-                        <option value="Trust">Trust</option>
-                        <option value="Society">Society</option>
-                        <option value="HUF">HUF</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-
-                    {/* --- Registered Office Address Section --- */}
-                    <div className="col-span-1 md:col-span-2 mt-2">
-                      <h4 className="text-sm font-semibold text-gray-900 mb-3">
-                        Registered Office Address
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Address Line 1 */}
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Address Line 1
-                          </label>
-                          <input
-                            type="text"
-                            value={newOrgData.registeredAddressLine1}
-                            onChange={(e) =>
-                              setNewOrgData((prev) => ({
-                                ...prev,
-                                registeredAddressLine1: e.target.value,
-                              }))
-                            }
-                            placeholder="Enter Address Line 1"
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
-                          />
-                        </div>
-                        {/* Address Line 2 */}
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Address Line 2
-                          </label>
-                          <input
-                            type="text"
-                            value={newOrgData.registeredAddressLine2}
-                            onChange={(e) =>
-                              setNewOrgData((prev) => ({
-                                ...prev,
-                                registeredAddressLine2: e.target.value,
-                              }))
-                            }
-                            placeholder="Enter Address Line 2 (Optional)"
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
-                          />
-                        </div>
-                        {/* District */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            District
-                          </label>
-                          <input
-                            type="text"
-                            value={newOrgData.registeredAddressDistrict}
-                            onChange={(e) =>
-                              setNewOrgData((prev) => ({
-                                ...prev,
-                                registeredAddressDistrict: e.target.value,
-                              }))
-                            }
-                            placeholder="Enter District"
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
-                          />
-                        </div>
-                        {/* State */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            State
-                          </label>
-                          <input
-                            type="text"
-                            value={newOrgData.registeredAddressState}
-                            onChange={(e) =>
-                              setNewOrgData((prev) => ({
-                                ...prev,
-                                registeredAddressState: e.target.value,
-                              }))
-                            }
-                            placeholder="Enter State"
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
-                          />
-                        </div>
-                        {/* Country */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Country
-                          </label>
-                          <input
-                            type="text"
-                            value={newOrgData.registeredAddressCountry}
-                            onChange={(e) =>
-                              setNewOrgData((prev) => ({
-                                ...prev,
-                                registeredAddressCountry: e.target.value,
-                              }))
-                            }
-                            placeholder="Enter Country"
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
-                          />
-                        </div>
-                        {/* Pincode */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            PIN Code
-                          </label>
-                          <input
-                            type="text"
-                            value={newOrgData.registeredAddressPincode}
-                            onChange={(e) =>
-                              setNewOrgData((prev) => ({
-                                ...prev,
-                                registeredAddressPincode: e.target.value
-                                  .replace(/\D/g, "")
-                                  .slice(0, 6),
-                              }))
-                            }
-                            placeholder="Enter 6-digit PIN Code"
-                            maxLength={6}
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-[#022B51] focus:ring-1 focus:ring-[#022B51]/20 transition-colors"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 mt-6">
-                    <button
-                      onClick={handleCreateOrg}
-                      disabled={savingOrg}
-                      className="px-6 py-2.5 text-white text-sm font-medium rounded-lg disabled:opacity-50 hover:opacity-90 transition-all shadow-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
-                    >
-                      {savingOrg ? "Creating..." : "Create Organisation"}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowAddOrgForm(false);
-                        setNewOrgData(emptyOrgData);
-                      }}
-                      className="px-6 py-2.5 border border-gray-300 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
-            </>
+            </div>
           )}
         </div>
       </div>

@@ -1,0 +1,15 @@
+9c2051f responsive issues fixed
+4efd1d4 color changes fixed
+00c0fd8 fixed color gradient issues
+3e0d3c2 fixed colors changes in registration page, service page
+aaf4e65 color changes pushed
+1139ee5 fixed login page logo
+0b1457f logo fixed
+06b0918 Merge pull request #8 from ElitCeler-Tech/samit-ui-changes
+e88a4de coupon code
+48805b8 Merge pull request #7 from ElitCeler-Tech/samit-ui-changes
+d687785 changes videos all
+996f278 Merge pull request #6 from ElitCeler-Tech/samit-ui-changes
+d768a7d functionality hanges
+0b883c5 Merge pull request #5 from ElitCeler-Tech/samit-ui-changes
+d0fb332 dropdown remove from admin

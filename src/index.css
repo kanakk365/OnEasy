@@ -5,3 +5,10 @@ body {
   font-family: "Poppins", sans-serif;
   background-color: #f8fafc;
 }
+
+/* Header is hidden on mobile — remove the pt-16 offset pages add for the header */
+@media (max-width: 1023px) {
+  .pt-16 {
+    padding-top: 0 !important;
+  }
+}

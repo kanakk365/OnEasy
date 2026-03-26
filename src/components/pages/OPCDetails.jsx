@@ -333,7 +333,7 @@ function OPCDetails() {
   const isLastStep = activeTab === "faq";
 
   return (
-    <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7]">
+    <div className="min-h-screen bg-white lg:bg-[#f3f5f7] lg:pt-0">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8">
         {/* My Registrations Button - Top Right */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
