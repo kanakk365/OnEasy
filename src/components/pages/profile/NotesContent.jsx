@@ -511,9 +511,7 @@ const NotesContent = ({
             disabled={saving}
             className="px-4 sm:px-8 py-2 text-white rounded-lg hover:hover:opacity-90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
-            style={{
-              background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
-            }}
+            
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>

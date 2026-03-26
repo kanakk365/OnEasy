@@ -358,9 +358,7 @@ function ClientTasksTab({
                 onClick={handleSaveTasks}
                 disabled={savingTasks}
                 className="px-8 py-2 text-white rounded-lg hover:opacity-90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
-                style={{
-                  background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
-                }}
+                
               >
                 {savingTasks ? "Saving..." : "Save Changes"}
               </button>

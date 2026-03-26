@@ -476,7 +476,7 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-[#002845]">
+    <div className="min-h-screen w-full flex flex-col items-center relative overflow-y-auto overflow-x-hidden bg-[#002845] py-10">
       {/* Background Pattern */}
       <div
         className="absolute inset-0 z-0"
@@ -505,13 +505,14 @@ function Login() {
         }}
       ></div>
 
-      {/* Logo */}
-      <div className="z-10 mb-8">
-        <img src={logo} alt="OneEasy" className="h-10 md:h-12" />
-      </div>
+      <div className="w-full flex-1 flex flex-col items-center justify-center z-10 px-4 my-auto relative min-h-full">
+        {/* Logo */}
+        <div className="mb-6 sm:mb-8">
+          <img src={logo} alt="OneEasy" className="h-8 sm:h-10 md:h-12" />
+        </div>
 
       {/* Main Card */}
-      <div className="bg-white w-full max-w-[500px] p-6 sm:p-8 md:p-10 rounded-2xl shadow-2xl z-10 relative mx-4">
+      <div className="bg-white w-full max-w-[500px] p-6 sm:p-8 md:p-10 rounded-2xl shadow-2xl relative">
         {/* Header */}
         <div className="text-center mb-8">
           <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">
@@ -841,7 +842,7 @@ function Login() {
       </div>
 
       {/* Footer Link */}
-      <div className="mt-8 z-10 text-gray-400 text-sm">
+      <div className="mt-6 sm:mt-8 text-gray-400 text-sm pb-4">
         {isSignupMode ? (
           <p>
             Already have an account?{" "}
@@ -863,6 +864,7 @@ function Login() {
             </button>
           </p>
         )}
+      </div>
       </div>
 
       {/* Change Password Modal */}
