@@ -42,7 +42,7 @@ function OPCRegistrations() {
           </div>
           <button
             onClick={() => navigate(-1)}
-            className="px-4 py-2 text-sm font-medium text-[#00486D] border border-[#00486D] rounded-lg hover:bg-[#00486D] hover:text-white transition-colors"
+            className="px-4 py-2 text-sm font-medium text-[#022B51] border border-[#022B51] rounded-lg hover:bg-[#015079] hover:text-white transition-colors"
           >
             Back
           </button>

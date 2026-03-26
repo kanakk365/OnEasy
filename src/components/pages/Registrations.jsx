@@ -758,7 +758,7 @@ function Registrations() {
           {/* Back Button */}
           <button
             onClick={() => navigate("/client")}
-            className="flex items-center gap-2 text-[#01334C] hover:text-[#00486D] mb-4 text-sm font-medium"
+            className="flex items-center gap-2 text-[#022B51] hover:text-[#022B51] mb-4 text-sm font-medium"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
@@ -778,7 +778,7 @@ function Registrations() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search for a service (e.g. GST, Income Tax, ROC)"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#01334C] focus:border-[#01334C] bg-white"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#022B51] focus:border-[#022B51] bg-white"
               />
             </div>
           </div>
@@ -788,7 +788,7 @@ function Registrations() {
                 onClick={() => setView("services")}
                 className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
                   view === "services"
-                    ? "bg-[#01466a] text-white"
+                    ? "bg-[#022B51] text-white"
                     : "text-gray-500 hover:text-gray-900"
                 }`}
               >
@@ -798,7 +798,7 @@ function Registrations() {
                 onClick={() => setView("my")}
                 className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
                   view === "my"
-                    ? "bg-[#01466a] text-white"
+                    ? "bg-[#022B51] text-white"
                     : "text-gray-500 hover:text-gray-900"
                 }`}
               >
@@ -808,7 +808,7 @@ function Registrations() {
                 onClick={() => setView("suggested-registrations")}
                 className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
                   view === "suggested-registrations"
-                    ? "bg-[#01466a] text-white"
+                    ? "bg-[#022B51] text-white"
                     : "text-gray-500 hover:text-gray-900"
                 }`}
               >
@@ -818,7 +818,7 @@ function Registrations() {
                 onClick={() => setView("suggested-compliances")}
                 className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${
                   view === "suggested-compliances"
-                    ? "bg-[#01466a] text-white"
+                    ? "bg-[#022B51] text-white"
                     : "text-gray-500 hover:text-gray-900"
                 }`}
               >
@@ -847,16 +847,16 @@ function Registrations() {
                         <div
                           key={set.submissionId || idx}
                           onClick={() => setSelectedSetId(set.submissionId)}
-                          className="group bg-white rounded-xl p-6 border border-gray-200 hover:border-[#01466a] hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
+                          className="group bg-white rounded-xl p-6 border border-gray-200 hover:border-[#022B51] hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
                         >
-                          <div className="absolute top-0 left-0 w-1 h-full bg-[#01466a] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          <div className="absolute top-0 left-0 w-1 h-full bg-[#022B51] opacity-0 group-hover:opacity-100 transition-opacity"></div>
                           <div className="flex items-start justify-between">
-                            <h3 className="text-xl font-bold text-[#00486D] mb-3 line-clamp-2 pr-4">
+                            <h3 className="text-xl font-bold text-[#022B51] mb-3 line-clamp-2 pr-4">
                               {getOrgName(set)}
                             </h3>
                             <div className="flex items-center gap-2 flex-shrink-0">
-                              <div className="w-8 h-8 rounded-full bg-[#00486D]/10 flex items-center justify-center">
-                                <span className="text-sm font-bold text-[#00486D]">{count}</span>
+                              <div className="w-8 h-8 rounded-full bg-[#022B51]/10 flex items-center justify-center">
+                                <span className="text-sm font-bold text-[#022B51]">{count}</span>
                               </div>
                               <button
                                 onClick={(e) => handleDeleteResponseSet(e, set.submissionId)}
@@ -888,7 +888,7 @@ function Registrations() {
                   <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
                     <button
                       onClick={() => setSelectedSetId(null)}
-                      className="flex items-center text-sm font-medium text-gray-500 hover:text-[#00486D] transition-colors"
+                      className="flex items-center text-sm font-medium text-gray-500 hover:text-[#022B51] transition-colors"
                     >
                       <IoChevronBackOutline className="mr-1 w-4 h-4" />
                       Back to Organizations
@@ -930,10 +930,10 @@ function Registrations() {
                                 }
                                 route ? navigate(route) : navigate(view === "suggested-registrations" ? "/registrations" : "/compliance");
                               }}
-                              className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#01334C] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-gray-100"
+                              className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#022B51] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-gray-100"
                             >
                               <div>
-                                <h3 className="text-lg font-semibold text-[#00486D] mb-1 group-hover:text-white">
+                                <h3 className="text-lg font-semibold text-[#022B51] mb-1 group-hover:text-white">
                                   {item.name}
                                 </h3>
                                 <p className="text-sm text-gray-400 group-hover:text-gray-200">
@@ -941,7 +941,7 @@ function Registrations() {
                                 </p>
                               </div>
                               <div className="w-10 h-10 rounded-full bg-[#F5F7FA] group-hover:bg-[#246181] flex items-center justify-center transition-colors">
-                                <IoChevronForwardOutline className="text-[#00486D] text-xl group-hover:text-white" />
+                                <IoChevronForwardOutline className="text-[#022B51] text-xl group-hover:text-white" />
                               </div>
                             </div>
                           );
@@ -963,7 +963,7 @@ function Registrations() {
                 </p>
                 <button
                   onClick={() => navigate("/compliance")}
-                  className="px-6 py-2 bg-[#01466a] text-white rounded-lg text-sm font-medium hover:bg-[#01334C] transition-colors"
+                  className="px-6 py-2 bg-[#022B51] text-white rounded-lg text-sm font-medium hover:bg-[#022B51] transition-colors"
                 >
                   Go to Compliance
                 </button>
@@ -1013,11 +1013,11 @@ function Registrations() {
               ].map((service, idx) => (
                 <div
                   key={idx}
-                  className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#01334C] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-transparent hover:border-gray-100/10"
+                  className="group bg-white rounded-xl p-6 hover:shadow-md hover:bg-[#022B51] hover:text-white transition-all duration-200 cursor-pointer flex items-center justify-between w-full border border-transparent hover:border-gray-100/10"
                   onClick={service.onClick}
                 >
                   <div>
-                    <h3 className="text-lg font-semibold text-[#00486D] mb-1 group-hover:text-white">
+                    <h3 className="text-lg font-semibold text-[#022B51] mb-1 group-hover:text-white">
                       {service.title}
                     </h3>
                     <p className="text-sm text-gray-400 group-hover:text-gray-200">
@@ -1025,7 +1025,7 @@ function Registrations() {
                     </p>
                   </div>
                   <div className="w-10 h-10 rounded-full bg-[#F5F7FA] group-hover:bg-[#246181] flex items-center justify-center transition-colors">
-                    <IoChevronForwardOutline className="text-[#00486D] text-xl group-hover:text-white" />
+                    <IoChevronForwardOutline className="text-[#022B51] text-xl group-hover:text-white" />
                   </div>
                 </div>
               ))}
@@ -1070,7 +1070,7 @@ function Registrations() {
                     </p>
                     <button
                       onClick={() => setShowComingSoon(false)}
-                      className="w-full bg-[#00486D] text-white py-3 px-6 rounded-lg font-medium hover:bg-[#003855] transition-colors duration-200"
+                      className="w-full bg-[#022B51] text-white py-3 px-6 rounded-lg font-medium hover:bg-[#015079] transition-colors duration-200"
                     >
                       Got it!
                     </button>
@@ -1089,7 +1089,7 @@ function Registrations() {
               ) : filtered.length > 0 ? (
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-[#00486D] text-white">
+                    <tr className="bg-[#022B51] text-white">
                       <th className="px-6 py-4 text-left text-sm font-medium tracking-wide first:rounded-tl-lg">
                         Service
                       </th>

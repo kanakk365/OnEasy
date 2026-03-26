@@ -114,7 +114,7 @@ import OrganizationTasksSection from "../organization/components/OrganizationTas
               document.getElementById(id).click();
             }
           }}
-          className="bg-[#00486D] text-white w-10 h-10 rounded-lg flex items-center justify-center hover:bg-[#01334C] transition-colors flex-shrink-0"
+          className="text-white w-10 h-10 rounded-lg flex items-center justify-center hover:opacity-90 transition-all flex-shrink-0" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
         >
           {fileUrl ? (
             <svg
@@ -180,7 +180,8 @@ import OrganizationTasksSection from "../organization/components/OrganizationTas
       <button
         type="button"
         onClick={onAdd}
-        className="px-5 py-2.5 bg-[#01334C] text-white rounded-md hover:bg-[#01283a] transition-colors text-xs font-medium"
+        className="px-5 py-2.5 text-white rounded-md hover:opacity-90 transition-all text-xs font-medium"
+          style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
       >
         {buttonText}
       </button>
@@ -235,14 +236,16 @@ const OrganisationDetailsContent = ({
               <button
                 type="button"
                 onClick={addOrganization}
-                className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-sm flex items-center gap-2"
+                className="px-4 py-2 text-white rounded-lg hover:hover:opacity-90 transition-all text-sm flex items-center gap-2"
+                  style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 <AiOutlinePlus className="w-4 h-4" /> Add Organization
               </button>
             </div>
             <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
               <table className="w-full text-sm text-left">
-                <thead className="bg-[#00486D] text-white uppercase text-xs">
+                <thead className="text-white uppercase text-xs"
+                  style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                   <tr>
                     <th className="px-6 py-3 font-medium border-b border-gray-200">
                       Legal Name
@@ -291,7 +294,7 @@ const OrganisationDetailsContent = ({
         {hasNoOrganizations && (
           <div className="text-center py-16 bg-white rounded-xl border border-gray-100 shadow-sm">
             <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AiOutlinePlus className="w-8 h-8 text-[#00486D]" />
+              <AiOutlinePlus className="w-8 h-8 text-[#022B51]" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               No organizations yet
@@ -303,7 +306,8 @@ const OrganisationDetailsContent = ({
             <button
               type="button"
               onClick={addOrganization}
-              className="px-6 py-3 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors font-medium text-sm inline-flex items-center gap-2"
+              className="px-6 py-3 text-white rounded-lg hover:hover:opacity-90 transition-all font-medium text-sm inline-flex items-center gap-2"
+                style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               <AiOutlinePlus className="w-5 h-5" />
               Add Organization
@@ -431,7 +435,7 @@ const OrganizationFormWithTabs = ({
               onClick={() => handleTabClick(tab.key)}
               className={`px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 ${
                 activeTab === tab.key
-                  ? "bg-white text-[#00486D] border-b-2 border-[#00486D] -mb-px"
+                  ? "bg-white text-[#022B51] border-b-2 border-[#022B51] -mb-px"
                   : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
               }`}
             >
@@ -821,7 +825,8 @@ const OrganizationFormWithTabs = ({
                     <button
                       type="button"
                       onClick={() => addDirectorPartner(org.id)}
-                      className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold flex items-center gap-2"
+                      className="px-4 py-2 text-white rounded-lg hover:hover:opacity-90 transition-all text-xs font-semibold flex items-center gap-2"
+                        style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       <AiOutlinePlus className="w-3 h-3" /> Add Directors /
                       Patners
@@ -838,7 +843,8 @@ const OrganizationFormWithTabs = ({
                   ) : (
                     <div className="overflow-x-auto rounded-lg">
                       <table className="w-full text-sm">
-                        <thead className="bg-[#00486D] text-white">
+                        <thead className="text-white"
+                          style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           <tr>
                             <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                               Name
@@ -977,7 +983,8 @@ const OrganizationFormWithTabs = ({
                     <button
                       type="button"
                       onClick={() => addDigitalSignature(org.id)}
-                      className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold flex items-center gap-2"
+                      className="px-4 py-2 text-white rounded-lg hover:hover:opacity-90 transition-all text-xs font-semibold flex items-center gap-2"
+                        style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       <AiOutlinePlus className="w-3 h-3" /> Add Digital
                       Signature
@@ -994,7 +1001,8 @@ const OrganizationFormWithTabs = ({
                   ) : (
                     <div className="overflow-x-auto rounded-lg">
                       <table className="w-full text-sm">
-                        <thead className="bg-[#00486D] text-white">
+                        <thead className="text-white"
+                          style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           <tr>
                             <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                               Name
@@ -1100,7 +1108,8 @@ const OrganizationFormWithTabs = ({
             <button
               type="button"
               onClick={() => navigate(`/company-documents/${org.id}`)}
-              className="px-6 py-2 bg-[#00486D] text-white rounded-lg text-sm font-semibold hover:bg-[#01334C] transition-colors"
+              className="px-6 py-2 text-white rounded-lg text-sm font-semibold hover:hover:opacity-90 transition-all"
+                style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               Go to Company Documents
             </button>
@@ -1116,7 +1125,8 @@ const OrganizationFormWithTabs = ({
                     <button
                       type="button"
                       onClick={() => addWebsite(org.id)}
-                      className="px-4 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors text-xs font-semibold flex items-center gap-2"
+                      className="px-4 py-2 text-white rounded-lg hover:hover:opacity-90 transition-all text-xs font-semibold flex items-center gap-2"
+                        style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                     >
                       <AiOutlinePlus className="w-3 h-3" /> Add Credentials
                     </button>
@@ -1131,7 +1141,8 @@ const OrganizationFormWithTabs = ({
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
-                        <thead className="bg-[#00486D] text-white">
+                        <thead className="text-white"
+                          style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           <tr>
                             <th className="px-4 py-3 text-left font-medium text-xs rounded-tl-lg">
                               Type
@@ -1167,7 +1178,7 @@ const OrganizationFormWithTabs = ({
                                   e.target.value
                                 )
                               }
-                                  className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#00486D]"
+                                  className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#022B51]"
                                 >
                                   <option value="">Select Type</option>
                                   {[
@@ -1205,7 +1216,7 @@ const OrganizationFormWithTabs = ({
                                   e.target.value
                                 )
                               }
-                                  className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#00486D]"
+                                  className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#022B51]"
                                   placeholder="Enter URL"
                             />
                               </td>
@@ -1221,7 +1232,7 @@ const OrganizationFormWithTabs = ({
                                   e.target.value
                                 )
                               }
-                                  className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#00486D]"
+                                  className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#022B51]"
                               placeholder="Enter Login"
                             />
                               </td>
@@ -1238,7 +1249,7 @@ const OrganizationFormWithTabs = ({
                                       e.target.value
                                     )
                                   }
-                                    className="flex-1 px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#00486D]"
+                                    className="flex-1 px-2 py-1 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:border-[#022B51]"
                                   placeholder="Enter Password"
                                 />
                                   {website.password && (
@@ -1323,10 +1334,11 @@ const OrganizationFormWithTabs = ({
           <button
             onClick={handleSaveOrganisation}
             disabled={saving}
-            className="px-8 py-2 bg-[#00486D] text-white rounded-lg hover:bg-[#01334C] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-8 py-2 text-white rounded-lg hover:hover:opacity-90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             style={{
               background:
-                "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+                "linear-gradient(180deg, #022B51 0%, #015079 100%)",
             }}
           >
             {saving ? "Saving..." : "Save Changes"}

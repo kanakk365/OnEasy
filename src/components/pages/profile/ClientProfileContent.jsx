@@ -21,7 +21,7 @@ const ClientProfileContent = ({
               System Client ID
             </label>
             <div className="w-full px-4 py-3 bg-[#F4F6F8] rounded-lg">
-              <span className="text-sm font-semibold text-[#01334C]">
+              <span className="text-sm font-semibold text-[#022B51]">
                 {userId || "ON0013"}
               </span>
             </div>
@@ -33,7 +33,7 @@ const ClientProfileContent = ({
               Client Status
             </label>
             <div className="w-full px-4 py-3 bg-[#F4F6F8] rounded-lg">
-              <span className="text-sm font-semibold text-[#01334C]">
+              <span className="text-sm font-semibold text-[#022B51]">
                 {clientStatus || "Active"}
               </span>
             </div>
@@ -189,7 +189,7 @@ const ClientProfileContent = ({
                   ? "File uploaded"
                   : "Upload file"}
               </div>
-              <label className="bg-[#00486D] text-white w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#01334C] transition-colors flex-shrink-0">
+              <label className="text-white w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer hover:opacity-90 transition-all flex-shrink-0" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                 <input
                   type="file"
                   onChange={(e) =>
@@ -246,7 +246,7 @@ const ClientProfileContent = ({
                   ? "File uploaded"
                   : "Upload file"}
               </div>
-              <label className="bg-[#00486D] text-white w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#01334C] transition-colors flex-shrink-0">
+              <label className="text-white w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer hover:opacity-90 transition-all flex-shrink-0" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                 <input
                   type="file"
                   onChange={(e) =>
@@ -301,7 +301,7 @@ const ClientProfileContent = ({
             disabled={saving}
             className="px-6 py-2 text-white rounded-lg transition-colors text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
             style={{
-              background: "linear-gradient(90deg, #01334C 0%, #00486D 100%)",
+              background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
             }}
           >
             {saving ? "Saving..." : "Save Changes"}

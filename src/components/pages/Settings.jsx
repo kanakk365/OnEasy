@@ -1251,7 +1251,7 @@ function Settings() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#01334C] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-[#022B51] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading user data...</p>
         </div>
       </div>
@@ -1265,7 +1265,7 @@ function Settings() {
         {/* Back Button */}
         <button
           onClick={() => navigate("/client")}
-          className="flex items-center gap-2 text-[#01334C] hover:text-[#00486D] mb-4 text-sm font-medium"
+          className="flex items-center gap-2 text-[#022B51] hover:text-[#015079] mb-4 text-sm font-medium"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
@@ -1277,18 +1277,19 @@ function Settings() {
         </h1>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Tabs Navigation */}
-        <div className="border-b border-gray-200 mb-6">
-          <div className="flex space-x-8">
+        <div className="bg-white rounded-t-xl border border-b-0 border-gray-200 px-6 pt-4">
+          <div className="flex space-x-4">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
-                className={`py-2 px-5 text-sm relative rounded-lg transition-colors ${activeTab === tab.key
-                  ? "bg-[#01466a] text-white"
+                className={`py-2 px-5 text-sm relative rounded-lg transition-all ${activeTab === tab.key
+                  ? "text-white"
                   : "text-gray-500 hover:text-gray-900"
                   }`}
+                style={activeTab === tab.key ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
               >
                 {tab.label}
               </button>
@@ -1297,7 +1298,7 @@ function Settings() {
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white rounded-b-xl border border-gray-200 border-t-0 p-6 min-h-[400px]">
+        <div className="bg-white rounded-b-xl border border-gray-200 border-t border-gray-200 p-6 min-h-[400px]">
           {activeTab === "profile" && (
             <ClientProfileContent
               formData={formData}

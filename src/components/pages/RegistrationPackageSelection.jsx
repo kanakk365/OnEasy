@@ -320,7 +320,7 @@ function RegistrationPackageSelection() {
           <p className="text-gray-600 mb-4">No registration type selected</p>
           <button
             onClick={() => navigate('/registration-categories')}
-            className="px-6 py-2 bg-[#01334C] text-white rounded-lg hover:bg-[#00486D]"
+            className="px-6 py-2 bg-[#022B51] text-white rounded-lg hover:bg-[#015079]"
           >
             Go Back
           </button>
@@ -335,7 +335,7 @@ function RegistrationPackageSelection() {
         <div className="mb-6">
           <button
             onClick={() => navigate('/registration-categories')}
-            className="flex items-center gap-2 text-[#01334C] hover:text-[#00486D] mb-4"
+            className="flex items-center gap-2 text-[#022B51] hover:text-[#022B51] mb-4"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
