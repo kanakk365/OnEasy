@@ -601,22 +601,24 @@ function Resources() {
               </div>
             </div>
             <div className="flex-1 bg-gray-50 relative">
-              <iframe
-                src={`https://docs.google.com/gview?url=${encodeURIComponent(viewDoc.url)}&embedded=true`}
-                className="w-full h-full border-0"
-                title={viewDoc.title}
-                onError={() => {}}
-              />
-              <div className="absolute bottom-4 right-4">
-                <a
-                  href={viewDoc.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-white px-3 py-1.5 rounded-lg shadow" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
-                >
-                  Open in new tab ↗
-                </a>
-              </div>
+              <object
+                data={viewDoc.url}
+                type="application/pdf"
+                className="w-full h-full"
+              >
+                {/* Fallback if object can't render */}
+                <div className="flex flex-col items-center justify-center h-full gap-4">
+                  <p className="text-sm text-gray-500">Unable to preview this document</p>
+                  <a
+                    href={viewDoc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-white px-4 py-2 rounded-lg" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
+                  >
+                    Open in new tab ↗
+                  </a>
+                </div>
+              </object>
             </div>
           </div>
         </div>
