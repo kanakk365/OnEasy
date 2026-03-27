@@ -6,6 +6,7 @@ import { BsFolderFill } from "react-icons/bs";
 function Resources() {
   const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [viewDoc, setViewDoc] = useState(null); // {url, title} for modal
 
   // Navigation State
   const [currentFolder, setCurrentFolder] = useState(null); // null means root
@@ -541,26 +542,25 @@ function Resources() {
                         <span className="text-sm font-medium text-gray-800 group-hover:text-white line-clamp-2 w-full break-words px-2 mb-3 transition-colors" title={doc.title}>
                           {doc.title}
                         </span>
-                        <div className="flex items-center gap-2 mt-auto">
+                        <div className="flex items-center gap-1.5 mt-auto w-full">
                           <a
                             href={doc.url || "#"}
                             download
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-white hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
+                            className="doc-btn flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-medium text-white border border-transparent transition-all"
                             title="Download file"
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            <FiDownload className="w-3 h-3" />
+                            <FiDownload className="w-3 h-3 flex-shrink-0" />
                           </a>
-                          <a
-                            href={doc.url || "#"}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-white group-hover:bg-white/20 group-hover:border-white/30 hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setViewDoc({ url: doc.url, title: doc.title }); }}
+                            className="doc-btn flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-medium text-white border border-transparent transition-all"
                             title="View file"
                           >
-                            <FiEye className="w-3 h-3" />
-                          </a>
+                            <FiEye className="w-3 h-3 flex-shrink-0" />
+                          </button>
                         </div>
                       </div>
                     ))
@@ -578,6 +578,49 @@ function Resources() {
           </div>
         </div>
       </div>
+
+      {/* Document Viewer Modal */}
+      {viewDoc && (
+        <div className="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4" onClick={() => setViewDoc(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-800 truncate flex-1 mr-4">{viewDoc.title}</h3>
+              <div className="flex items-center gap-2">
+                <a
+                  href={viewDoc.url}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
+                >
+                  <FiDownload className="w-3.5 h-3.5" /> Download
+                </a>
+                <button onClick={() => setViewDoc(null)} className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors">
+                  <FiX className="w-4 h-4 text-gray-500" />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 bg-gray-50 relative">
+              <iframe
+                src={`https://docs.google.com/gview?url=${encodeURIComponent(viewDoc.url)}&embedded=true`}
+                className="w-full h-full border-0"
+                title={viewDoc.title}
+                onError={() => {}}
+              />
+              <div className="absolute bottom-4 right-4">
+                <a
+                  href={viewDoc.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-white px-3 py-1.5 rounded-lg shadow" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
+                >
+                  Open in new tab ↗
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

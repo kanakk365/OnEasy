@@ -12,3 +12,12 @@ body {
     padding-top: 0 !important;
   }
 }
+
+/* Resource document buttons */
+.doc-btn {
+  background: linear-gradient(180deg, #022B51 0%, #015079 100%);
+}
+.group:hover .doc-btn {
+  background: transparent !important;
+  border-color: white;
+}

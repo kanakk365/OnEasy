@@ -41,6 +41,16 @@ const Layout = () => {
   }
 
   const isClientHome = location.pathname === "/client";
+  const isAIChat = location.pathname === "/ai-chat";
+
+  if (isAIChat) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Routers />
+        <MobileBottomNav />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-[90px] lg:pb-0">
@@ -52,9 +62,7 @@ const Layout = () => {
       >
         <Header />
         <main className="min-h-[calc(100vh-4rem-90px)] lg:min-h-[calc(100vh-4rem)]">
-          {/* Show mobile home cards on /client for mobile */}
           {isClientHome && <MobileHome />}
-          {/* Always show routers (desktop shows Client.jsx, mobile hides it via CSS in Client.jsx) */}
           <div className={isClientHome ? "hidden lg:block" : ""}>
             <Routers />
           </div>

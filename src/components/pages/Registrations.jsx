@@ -769,67 +769,44 @@ function Registrations() {
           {/* Desktop search bar - hidden on mobile */}
           <div className="hidden lg:flex items-center justify-between mb-6">
             <h1 className="text-2xl font-semibold text-gray-900">Select your Services</h1>
-            <div className="relative w-full max-w-[400px]">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <IoSearchOutline className="h-5 w-5 text-gray-400" />
+            {(view === "suggested-registrations" || view === "suggested-compliances") && (
+              <div className="relative w-full max-w-[400px]">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <IoSearchOutline className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search..."
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#022B51] focus:border-[#022B51] bg-white"
+                />
               </div>
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search for a service (e.g. GST, Income Tax, ROC)"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#022B51] focus:border-[#022B51] bg-white"
-              />
-            </div>
+            )}
           </div>
 
-          {/* Tabs - pill style on mobile, underline on desktop */}
-          <div className="overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0 lg:border-b lg:border-gray-200">
-            <div className="flex gap-2 min-w-max lg:space-x-8">
-              <button
-                onClick={() => setView("services")}
-                className={`py-1.5 px-4 text-xs lg:text-sm font-medium rounded-full lg:rounded-none transition-all ${
-                  view === "services"
-                    ? "text-white lg:text-[#022B51] lg:bg-transparent lg:border-b-2 lg:border-[#022B51] lg:rounded-none"
-                    : "text-gray-500 bg-gray-100 lg:bg-transparent hover:text-gray-900"
-                }`}
-                style={view === "services" ? { background: window.innerWidth < 1024 ? "#022B51" : undefined } : {}}
-              >
-                Services
-              </button>
-              <button
-                onClick={() => setView("my")}
-                className={`py-1.5 px-4 text-xs lg:text-sm font-medium rounded-full lg:rounded-none transition-all ${
-                  view === "my"
-                    ? "text-white lg:text-[#022B51] lg:bg-transparent lg:border-b-2 lg:border-[#022B51] lg:rounded-none"
-                    : "text-gray-500 bg-gray-100 lg:bg-transparent hover:text-gray-900"
-                }`}
-                style={view === "my" ? { background: window.innerWidth < 1024 ? "#022B51" : undefined } : {}}
-              >
-                My Registrations
-              </button>
-              <button
-                onClick={() => setView("suggested-registrations")}
-                className={`py-1.5 px-4 text-xs lg:text-sm font-medium rounded-full lg:rounded-none transition-all whitespace-nowrap ${
-                  view === "suggested-registrations"
-                    ? "text-white lg:text-[#022B51] lg:bg-transparent lg:border-b-2 lg:border-[#022B51] lg:rounded-none"
-                    : "text-gray-500 bg-gray-100 lg:bg-transparent hover:text-gray-900"
-                }`}
-                style={view === "suggested-registrations" ? { background: window.innerWidth < 1024 ? "#022B51" : undefined } : {}}
-              >
-                Suggested Registrations
-              </button>
-              <button
-                onClick={() => setView("suggested-compliances")}
-                className={`py-1.5 px-4 text-xs lg:text-sm font-medium rounded-full lg:rounded-none transition-all whitespace-nowrap ${
-                  view === "suggested-compliances"
-                    ? "text-white lg:text-[#022B51] lg:bg-transparent lg:border-b-2 lg:border-[#022B51] lg:rounded-none"
-                    : "text-gray-500 bg-gray-100 lg:bg-transparent hover:text-gray-900"
-                }`}
-                style={view === "suggested-compliances" ? { background: window.innerWidth < 1024 ? "#022B51" : undefined } : {}}
-              >
-                Suggested Compliances
-              </button>
+          {/* Tabs */}
+          <div className="overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
+            <div className="flex gap-2 min-w-max lg:gap-0">
+              {[
+                { key: "services", label: "Services" },
+                { key: "my", label: "My Registrations" },
+                { key: "suggested-registrations", label: "Suggested Registrations" },
+                { key: "suggested-compliances", label: "Suggested Compliances" },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setView(tab.key)}
+                  className={`py-2.5 px-5 text-xs lg:text-sm font-medium rounded-xl lg:rounded-t-xl lg:rounded-b-none transition-all whitespace-nowrap ${
+                    view === tab.key
+                      ? "text-white shadow-md"
+                      : "text-gray-500 bg-gray-100 lg:bg-gray-50 hover:text-gray-900 hover:bg-gray-200"
+                  }`}
+                  style={view === tab.key ? { background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" } : {}}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>

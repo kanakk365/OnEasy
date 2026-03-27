@@ -69,11 +69,11 @@ const menuItems = [
 
 const gradientColors = [
   '#022B51, #015079',   // Compliance
-  '#475569, #334155',   // Dashboard
-  '#047857, #059669',   // Services
-  '#6D28D9, #7C3AED',   // Registrations
-  '#D97706, #F59E0B',   // Resources
-  '#0891B2, #06B6D4',   // Documents
+  '#022B51, #015079',   // Dashboard
+  '#022B51, #015079',   // Services
+  '#022B51, #015079',   // Registrations
+  '#022B51, #015079',   // Resources
+  '#022B51, #015079',   // Documents
 ];
 
 const MobileHome = () => {
