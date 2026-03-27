@@ -24,7 +24,7 @@ const menuItems = [
     icon: '/Home.png',
     title: 'Dashboard',
     description: 'Overview of your business at a glance',
-    path: '/client',
+    path: '/client?view=dashboard',
     gradient: 'from-slate-600 to-slate-700',
     shadow: 'shadow-slate-200',
     iconBg: 'bg-slate-50',

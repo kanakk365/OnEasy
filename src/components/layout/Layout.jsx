@@ -40,7 +40,7 @@ const Layout = () => {
     );
   }
 
-  const isClientHome = location.pathname === "/client";
+  const isClientHome = location.pathname === "/client" && !location.search.includes("view=dashboard");
   const isAIChat = location.pathname === "/ai-chat";
 
   if (isAIChat) {
