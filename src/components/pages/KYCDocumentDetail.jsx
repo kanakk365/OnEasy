@@ -447,8 +447,8 @@ function KYCDocumentDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] py-6">
-      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12">
+    <div className="min-h-screen bg-[#F8F9FA] pt-16 lg:pt-0 py-4 lg:py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {status.message && (
           <div className="fixed inset-0 z-40 flex items-start justify-end pointer-events-none">
             <div className="mt-20 mr-6 w-full max-w-xs pointer-events-auto">
@@ -478,22 +478,22 @@ function KYCDocumentDetail() {
         )}
 
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="mb-6 lg:mb-8">
+          <div className="flex items-center gap-2 mb-1 lg:mb-2">
             <button
               onClick={() => navigate("/kyc")}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors -ml-1"
             >
               <FiChevronLeft className="w-6 h-6 text-gray-900" />
             </button>
-            <h1 className="text-2xl font-semibold text-gray-900">
+            <h1 className="text-xl lg:text-2xl font-semibold text-gray-900">
               {docConfig.label}
             </h1>
           </div>
-          <div className="ml-9 flex items-center justify-between">
-            <p className="text-gray-500 italic">{docConfig.description}</p>
+          <div className="ml-8 lg:ml-9 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <p className="text-gray-500 text-sm italic">{docConfig.description}</p>
             <span
-              className={`px-3 py-1 text-sm font-medium rounded-full ${
+              className={`px-3 py-1 text-xs sm:text-sm font-medium rounded-full w-max ${
                 (documentType === "attachment" ? documents.length >= 20 : documents.length >= 3)
                   ? "bg-red-50 text-red-600"
                   : documents.length > 0
@@ -507,19 +507,19 @@ function KYCDocumentDetail() {
         </div>
 
         {/* Uploaded Documents List */}
-        <div className="mb-8">
+        <div className="mb-6 lg:mb-8">
           {documents.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {documents.map((doc, index) => (
                 <div
                   key={doc.id || index}
-                  className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col justify-between group hover:shadow-lg transition-all duration-300"
+                  className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 flex flex-col justify-between group hover:shadow-lg transition-all duration-300"
                 >
-                  <div className="flex items-start gap-4 mb-3">
+                  <div className="flex items-start gap-3 sm:gap-4 mb-3">
                     {renderDocumentIcon(documentType, "sm")}
                     <div className="flex-1 min-w-0">
                       <p
-                        className="font-semibold text-gray-900 truncate"
+                        className="font-semibold text-sm sm:text-base text-gray-900 truncate"
                         title={
                           doc.name ||
                           doc.document_name ||
@@ -545,12 +545,12 @@ function KYCDocumentDetail() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-3 border-t border-gray-50">
+                  <div className="flex items-center gap-1.5 sm:gap-2 pt-3 border-t border-gray-50">
                     <button
                       onClick={() =>
                         handleViewDocument(doc.id, doc.url || doc.document_url)
                       }
-                      className="flex-1 flex items-center justify-center gap-2 p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 text-xs sm:text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                       title="View"
                     >
                       <FiEye className="w-4 h-4" /> View
@@ -563,14 +563,14 @@ function KYCDocumentDetail() {
                           doc.url || doc.document_url
                         )
                       }
-                      className="flex-1 flex items-center justify-center gap-2 p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 text-xs sm:text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                       title="Download"
                     >
                       <FiDownload className="w-4 h-4" /> Download
                     </button>
                     <button
                       onClick={() => handleDeleteDocument(doc.id)}
-                      className="flex-none p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      className="flex-none p-1.5 sm:p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       title="Delete"
                     >
                       <FiTrash2 className="w-4 h-4" />
@@ -596,8 +596,8 @@ function KYCDocumentDetail() {
 
         {/* Upload Section - Attachments: Add form with name + file */}
         {(documentType === "attachment" ? documents.length < 20 : documents.length < 3) && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-8 mt-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
               {documentType === "attachment" ? "Add Attachment" : "Upload New Document"}
             </h2>
             {documentType === "attachment" ? (
@@ -627,7 +627,7 @@ function KYCDocumentDetail() {
                           if (attachmentFileInputRef.current) attachmentFileInputRef.current.value = "";
                         }}
                         accept="image/*,.pdf,.doc,.docx"
-                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:file:text-white hover:file:" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                         disabled={uploading}
                       />
                     </div>
@@ -646,8 +646,8 @@ function KYCDocumentDetail() {
                     disabled={uploading}
                     className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-blue-200 rounded-xl hover:border-[#022B51] hover:bg-blue-50/30 transition-colors disabled:opacity-50"
                   >
-                    <span className="w-10 h-10 rounded-full text-white flex items-center justify-center text-xl font-bold" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>+</span>
-                    <span className="text-gray-700 font-medium">Add Attachment</span>
+                    <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-full text-white flex items-center justify-center text-lg sm:text-xl font-bold" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>+</span>
+                    <span className="text-gray-700 font-medium text-sm sm:text-base">Add Attachment</span>
                   </button>
                 )}
               </div>
@@ -663,7 +663,7 @@ function KYCDocumentDetail() {
                 />
                 <div
                   onClick={() => !uploading && fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${
+              className={`border-2 border-dashed rounded-xl p-4 sm:p-8 text-center cursor-pointer transition-all duration-200 ${
                 uploading
                   ? "border-gray-200 bg-gray-50 cursor-not-allowed"
                   : "border-blue-200 hover:border-[#022B51] hover:bg-blue-50/30"
@@ -671,20 +671,20 @@ function KYCDocumentDetail() {
             >
               {uploading ? (
                 <div className="flex flex-col items-center">
-                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#022B51] mb-3"></div>
-                  <p className="text-[#022B51] font-medium">
+                  <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-b-2 border-[#022B51] mb-3"></div>
+                  <p className="text-[#022B51] font-medium text-sm sm:text-base">
                     Uploading your document...
                   </p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center text-[#022B51] mb-4">
-                    <RiUploadCloud2Line className="w-7 h-7" />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-50 rounded-full flex items-center justify-center text-[#022B51] mb-3 sm:mb-4">
+                    <RiUploadCloud2Line className="w-6 h-6 sm:w-7 sm:h-7" />
                   </div>
-                  <p className="text-gray-900 font-medium text-lg mb-1">
+                  <p className="text-gray-900 font-medium text-base sm:text-lg mb-1">
                     Click to upload or drag and drop
                   </p>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-500 text-xs sm:text-sm">
                     SVG, PNG, JPG or PDF (max. 5MB)
                   </p>
                 </div>

@@ -242,7 +242,7 @@ function CompanyDocuments() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-16 lg:pt-0 bg-[#F8F9FA] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading documents...</p>
@@ -268,66 +268,66 @@ function CompanyDocuments() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] py-6">
-      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12">
+    <div className="min-h-screen bg-[#F8F9FA] py-4 lg:py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="mb-6 lg:mb-8">
+          <div className="flex items-center gap-2 mb-1 lg:mb-2">
             <button
               onClick={() => navigate("/organizations-list")}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors -ml-1"
             >
               <FiChevronLeft className="w-6 h-6 text-gray-900" />
             </button>
-            <h1 className="text-2xl font-semibold text-gray-900">Company Documents</h1>
+            <h1 className="text-xl lg:text-2xl font-semibold text-gray-900">Company Documents</h1>
           </div>
-          <p className="text-gray-500 italic ml-9">Select your document type</p>
+          <p className="text-gray-500 text-sm italic ml-8 lg:ml-9">Select your document type</p>
         </div>
 
         {/* Company Info Card */}
-        <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 p-5 mb-6 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white flex-shrink-0" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>
-            <BsBuilding className="w-6 h-6" />
+        <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 p-4 lg:p-5 mb-4 lg:mb-6 flex items-center gap-3 lg:gap-4">
+          <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center text-white flex-shrink-0" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>
+            <BsBuilding className="w-5 h-5 lg:w-6 lg:h-6" />
           </div>
-          <div className="flex-1">
-            <h2 className="text-xl font-semibold text-gray-900">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg lg:text-xl font-semibold text-gray-900 truncate">
               {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
             </h2>
             {organization.tradeName !== '-' && organization.legalName !== '-' && organization.tradeName !== organization.legalName && (
-              <p className="text-sm text-gray-500 mt-0.5">{organization.tradeName}</p>
+              <p className="text-xs lg:text-sm text-gray-500 mt-0.5 truncate">{organization.tradeName}</p>
             )}
             {organization.gstin !== '-' && (
-              <p className="text-xs text-gray-400 mt-0.5 font-mono">GSTIN: {organization.gstin}</p>
+              <p className="text-[11px] lg:text-xs text-gray-400 mt-0.5 font-mono">GSTIN: {organization.gstin}</p>
             )}
           </div>
         </div>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {/* Directors/Partners Documents Card */}
           <div
             onClick={() => navigate(`/company-documents/${orgId}/directors`, { state: { orgId } })}
-            className="bg-white rounded-2xl p-3 sm:p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
+            className="bg-white rounded-2xl p-5 lg:p-6 shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
           >
             <div className="flex justify-between items-start mb-4">
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-white"
+                className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center text-white"
                 style={{
                   background:
                     "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                 }}
               >
-                <RiUserLine className="w-6 h-6" />
+                <RiUserLine className="w-5 h-5 lg:w-6 lg:h-6" />
               </div>
               <div className="text-[#022B51] group-hover:text-white group-hover:translate-x-1 transition-all duration-300">
-                <BsArrowRight className="w-6 h-6" />
+                <BsArrowRight className="w-5 h-5 lg:w-6 lg:h-6" />
               </div>
             </div>
 
-            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-white mb-2 transition-colors">
+            <h3 className="text-lg lg:text-xl font-semibold text-gray-900 group-hover:text-white mb-1.5 lg:mb-2 transition-colors">
               Directors/Partners
             </h3>
-            <p className="text-gray-500 text-sm mb-8 leading-relaxed group-hover:text-white/80 transition-colors">
+            <p className="text-gray-500 text-xs lg:text-sm mb-6 lg:mb-8 leading-relaxed group-hover:text-white/80 transition-colors">
               View and manage directors/partners KYC documents
             </p>
 
@@ -344,27 +344,27 @@ function CompanyDocuments() {
           {/* Business Documents Card */}
           <div
             onClick={() => navigate(`/company-documents/${orgId}/business`, { state: { orgId } })}
-            className="bg-white rounded-2xl p-3 sm:p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
+            className="bg-white rounded-2xl p-5 lg:p-6 shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
           >
             <div className="flex justify-between items-start mb-4">
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-white"
+                className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center text-white"
                 style={{
                   background:
                     "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                 }}
               >
-                <RiFileTextLine className="w-6 h-6" />
+                <RiFileTextLine className="w-5 h-5 lg:w-6 lg:h-6" />
               </div>
               <div className="text-[#022B51] group-hover:text-white group-hover:translate-x-1 transition-all duration-300">
-                <BsArrowRight className="w-6 h-6" />
+                <BsArrowRight className="w-5 h-5 lg:w-6 lg:h-6" />
               </div>
             </div>
 
-            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-white mb-2 transition-colors">
+            <h3 className="text-lg lg:text-xl font-semibold text-gray-900 group-hover:text-white mb-1.5 lg:mb-2 transition-colors">
               Business Documents
             </h3>
-            <p className="text-gray-500 text-sm mb-8 leading-relaxed group-hover:text-white/80 transition-colors">
+            <p className="text-gray-500 text-xs lg:text-sm mb-6 lg:mb-8 leading-relaxed group-hover:text-white/80 transition-colors">
               Access company documents, registrations, and compliance files
             </p>
 

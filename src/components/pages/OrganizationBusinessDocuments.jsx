@@ -132,7 +132,7 @@ function OrganizationBusinessDocuments() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
@@ -142,11 +142,11 @@ function OrganizationBusinessDocuments() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] py-6">
-      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12">
+    <div className="min-h-screen bg-[#F8F9FA] py-4 lg:py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header - matching KYC layout */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="mb-6 lg:mb-8">
+          <div className="flex items-center gap-2 mb-1 lg:mb-2">
             <button
               onClick={() => {
                 if (isAdmin) {
@@ -160,43 +160,43 @@ function OrganizationBusinessDocuments() {
                   }
                 }
               }}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors -ml-1"
             >
               <FiChevronLeft className="w-6 h-6 text-gray-900" />
             </button>
-            <h1 className="text-2xl font-semibold text-gray-900">Business Documents</h1>
+            <h1 className="text-xl lg:text-2xl font-semibold text-gray-900">Business Documents</h1>
           </div>
-          <p className="text-gray-500 italic ml-9">Select a document category to view and manage</p>
+          <p className="text-gray-500 text-sm italic ml-8 lg:ml-9">Select a document category to view and manage</p>
         </div>
 
         {/* Company Info Card with building icon */}
         {organization && (
-          <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 p-5 mb-6 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white flex-shrink-0" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>
-              <BsBuilding className="w-6 h-6" />
+          <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 p-4 lg:p-5 mb-4 lg:mb-6 flex items-center gap-3 lg:gap-4">
+            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center text-white flex-shrink-0" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>
+              <BsBuilding className="w-5 h-5 lg:w-6 lg:h-6" />
             </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-semibold text-gray-900">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg lg:text-xl font-semibold text-gray-900 truncate">
                 {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
               </h2>
               {organization.tradeName !== '-' && organization.legalName !== '-' && organization.tradeName !== organization.legalName && (
-                <p className="text-sm text-gray-500 mt-0.5">{organization.tradeName}</p>
+                <p className="text-xs lg:text-sm text-gray-500 mt-0.5 truncate">{organization.tradeName}</p>
               )}
               {organization.gstin !== '-' && (
-                <p className="text-xs text-gray-400 mt-0.5 font-mono">GSTIN: {organization.gstin}</p>
+                <p className="text-[11px] lg:text-xs text-gray-400 mt-0.5 font-mono">GSTIN: {organization.gstin}</p>
               )}
             </div>
           </div>
         )}
 
         {/* Business Categories - Vertical list like KYC */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {businessCategories.map((category) => {
             const colorClasses = getColorClasses(category.color);
             return (
               <div
                 key={category.id}
-                className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer transition-all duration-300 group hover:shadow-lg hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] flex items-center justify-between"
+                className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 cursor-pointer transition-all duration-300 group hover:shadow-lg hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] flex items-center justify-between"
                 onClick={() => {
                   if (category.id === "company-master-data") {
                     if (isAdmin) {
@@ -213,18 +213,22 @@ function OrganizationBusinessDocuments() {
                   }
                 }}
               >
-                <div className="flex items-center gap-4">
-                  <div className={`w-14 h-14 ${colorClasses.iconBg} group-hover:bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors`}>
-                    {category.icon}
+                <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+                  <div className={`w-12 h-12 lg:w-14 lg:h-14 ${colorClasses.iconBg} group-hover:bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors`}>
+                    <div className="w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center">
+                      {category.icon}
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-white transition-colors">{category.title}</h3>
-                    <p className="text-sm text-gray-400 group-hover:text-white/60 mt-0.5 transition-colors">{category.description}</p>
+                  <div className="mt-1 sm:mt-0">
+                    <h3 className="text-base lg:text-lg font-semibold text-gray-900 group-hover:text-white transition-colors">{category.title}</h3>
+                    <p className="text-xs lg:text-sm text-gray-400 group-hover:text-white/60 mt-0.5 lg:mt-1 transition-colors leading-relaxed pr-2">{category.description}</p>
                   </div>
                 </div>
-                <svg className="w-5 h-5 text-gray-400 group-hover:text-white flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <div className="flex-shrink-0">
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6 text-gray-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
               </div>
             );
           })}

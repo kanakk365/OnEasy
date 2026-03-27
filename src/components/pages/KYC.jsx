@@ -323,28 +323,28 @@ function KYC() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] py-6">
-      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12">
+    <div className="min-h-screen bg-[#F8F9FA] pt-16 lg:pt-0 py-4 lg:py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="mb-6 lg:mb-8">
+          <div className="flex items-center gap-2 mb-1 lg:mb-2">
             <button
               onClick={() => navigate("/documents")}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors -ml-1"
             >
               <FiChevronLeft className="w-6 h-6 text-gray-900" />
             </button>
-            <h1 className="text-2xl font-semibold text-gray-900">
+            <h1 className="text-xl lg:text-2xl font-semibold text-gray-900">
               KYC Documents
             </h1>
           </div>
-          <p className="text-gray-500 italic ml-9">
+          <p className="text-gray-500 text-sm italic ml-8 lg:ml-9">
             View all your Uploaded documents here
           </p>
         </div>
 
         {/* Document List */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {documentTypes.map((docType) => {
             const docList = documents[docType.value] || [];
             const isUploaded = docList.length > 0;
@@ -353,7 +353,7 @@ function KYC() {
               <div
                 key={docType.value}
                 onClick={() => navigate(`/kyc/${docType.value}`)}
-                className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer transition-all duration-300 group hover:shadow-lg hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] flex items-center justify-between"
+                className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 cursor-pointer transition-all duration-300 group hover:shadow-lg hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)] flex items-center justify-between"
               >
                 <div className="flex items-center gap-4">
                   <div
@@ -366,24 +366,21 @@ function KYC() {
                     {renderDocumentIcon(docType.value)}
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 group-hover:text-white transition-colors">
+                    <h3 className="text-base lg:text-lg font-medium text-gray-900 group-hover:text-white transition-colors">
                       {docType.label}
                     </h3>
-                    <p className="text-sm text-gray-400 group-hover:text-white/60 transition-colors mt-0.5">
-                      {docType.description}
-                    </p>
                   </div>
                 </div>
 
                 {isUploaded ? (
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-600 rounded-full group-hover:bg-white/20 group-hover:text-white transition-colors">
-                    <FiCheckCircle className="w-4 h-4" />
-                    <span className="text-sm font-medium">Uploaded</span>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-600 rounded-full group-hover:bg-white/20 group-hover:text-white transition-colors">
+                    <FiCheckCircle className="w-3.5 h-3.5" />
+                    <span className="text-xs font-medium">Uploaded</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 text-gray-500 rounded-full group-hover:bg-white/20 group-hover:text-white transition-colors">
-                    <FiXCircle className="w-4 h-4" />
-                    <span className="text-sm font-medium">Not Uploaded</span>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 text-gray-500 rounded-full group-hover:bg-white/20 group-hover:text-white transition-colors">
+                    <FiXCircle className="w-3.5 h-3.5" />
+                    <span className="text-xs font-medium border-0 border-transparent bg-transparent lg:border-white">Not Uploaded</span>
                   </div>
                 )}
               </div>

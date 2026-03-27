@@ -85,14 +85,14 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
   };
 
   return (
-    <div className="mt-8">
+    <div className="mt-6 md:mt-8">
       {/* Coupon Code Section - TOP of packages */}
-      <div className="max-w-md mx-auto mb-8">
+      <div className="max-w-md mx-auto mb-6 md:mb-8 px-4 sm:px-0">
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Have a coupon code?
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
               value={couponCode}
@@ -104,13 +104,13 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
                 }
               }}
               placeholder="Enter coupon code"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent text-sm sm:text-base"
               disabled={validatingCoupon}
             />
             {appliedCoupon ? (
               <button
                 onClick={handleRemoveCoupon}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                className="w-full sm:w-auto px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm sm:text-base"
               >
                 Remove
               </button>
@@ -118,7 +118,7 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
               <button
                 onClick={handleApplyCoupon}
                 disabled={validatingCoupon || !couponCode.trim()}
-                className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
+                className="w-full sm:w-auto px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed text-sm sm:text-base" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
               >
                 {validatingCoupon ? "Applying..." : "Apply"}
               </button>
@@ -139,26 +139,26 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
         </div>
       </div>
 
-      <h2 className="text-2xl font-semibold text-center mb-2">
+      <h2 className="text-xl md:text-2xl font-semibold text-center mb-2 px-4">
         Choose your Package
       </h2>
-      <p className="text-center text-gray-600 mb-8">
+      <p className="text-sm md:text-base text-center text-gray-600 mb-6 md:mb-8 px-4">
         Our carefully designed pricing plans take into consideration the needs
         of teams of various sizes.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-9">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-9 px-4 sm:px-6 lg:px-8">
         {packages.map((pkg, index) => (
           <div
             key={index}
-            className={`relative flex flex-col h-full transition-all duration-300 cursor-pointer group rounded-[36px] p-10 shadow-sm ${
+            className={`relative flex flex-col h-full transition-all duration-300 cursor-pointer group rounded-3xl md:rounded-[36px] p-6 md:p-10 shadow-sm ${
               pkg.isHighlighted
                 ? "bg-gradient-to-b from-[#022B51] to-[#015079] text-white hover:shadow-lg"
                 : "bg-gradient-to-b from-white to-[#EAEAEA] border border-[#E2E2E2] text-[#101828] hover:shadow-md"
             }`}
           >
             <div
-              className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 text-xl ${
+              className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center mb-4 text-lg md:text-xl ${
                 pkg.isHighlighted
                   ? "bg-white/15 text-white"
                   : "bg-[#ED1C25] text-white"
@@ -169,8 +169,8 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
             <h3
               className={`mb-2 font-medium ${
                 pkg.isHighlighted
-                  ? "text-white text-2xl"
-                  : "text-[#101828] text-2xl"
+                  ? "text-white text-xl md:text-2xl"
+                  : "text-[#101828] text-xl md:text-2xl"
               }`}
             >
               {pkg.name}
@@ -179,8 +179,8 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
               <span
                 className={`font-medium ${
                   pkg.isHighlighted
-                    ? "text-5xl text-white"
-                    : "text-5xl text-[#101828]"
+                    ? "text-4xl md:text-5xl text-white"
+                    : "text-4xl md:text-5xl text-[#101828]"
                 }`}
               >
                 ₹{pkg.price}
@@ -190,7 +190,7 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
                   <span
                     className={`line-through ${
                       pkg.isHighlighted ? "text-white/90" : "text-[#101828]"
-                    } text-base`}
+                    } text-sm md:text-base`}
                   >
                     ₹{pkg.originalPrice}
                   </span>
@@ -198,7 +198,7 @@ function PackagesSection({ packages, onGetStarted, serviceName = null }) {
               </div>
             </div>
             <p
-              className={`mb-6 text-base ${
+              className={`mb-6 text-sm md:text-base ${
                 pkg.isHighlighted ? "text-white/80" : "text-[#101828]/80"
               }`}
             >

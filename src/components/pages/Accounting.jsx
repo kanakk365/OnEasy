@@ -415,46 +415,46 @@ function Accounting() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-[#F8F9FA]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-4 lg:mb-6">
           <button
             onClick={() => navigate(getBackPath())}
-            className="text-[#022B51] hover:text-[#022B51] mb-4 flex items-center gap-2"
+            className="text-[#022B51] hover:text-[#022B51] mb-4 flex items-center gap-2 -ml-1 lg:ml-0"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to {isAdmin ? 'Company Documents' : 'Company Master Data'}
+            <span className="text-sm lg:text-base">Back to {isAdmin ? 'Company Documents' : 'Company Master Data'}</span>
           </button>
 
           {organization && (
-            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
-              <h1 className="text-2xl font-semibold text-gray-900">
+            <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 p-4 sm:p-6 mb-4 lg:mb-6">
+              <h1 className="text-xl lg:text-2xl font-semibold text-gray-900">
                 {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
               </h1>
               {organization.tradeName !== '-' && organization.legalName !== '-' && organization.tradeName !== organization.legalName && (
-                <p className="text-gray-600 mt-1">{organization.tradeName}</p>
+                <p className="text-sm lg:text-base text-gray-600 mt-1">{organization.tradeName}</p>
               )}
               {organization.gstin !== '-' && (
-                <p className="text-sm text-gray-500 mt-1 font-mono">GSTIN: {organization.gstin}</p>
+                <p className="text-xs lg:text-sm text-gray-500 mt-1 font-mono">GSTIN: {organization.gstin}</p>
               )}
             </div>
           )}
 
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Accounting</h2>
-            <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 lg:mb-6">
+            <h2 className="text-lg lg:text-xl font-semibold text-gray-900">Accounting</h2>
+            <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-2 w-full sm:w-auto">
               <button
                 onClick={() => handleOpenUploadModal('tally_data')}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                className="w-full sm:w-auto px-4 py-2.5 sm:py-2 text-sm lg:text-base font-medium text-white bg-blue-600 rounded-lg lg:rounded-md hover:bg-blue-700 transition-colors shadow-sm"
               >
                 + Upload Tally Data
               </button>
               <button
                 onClick={() => handleOpenUploadModal('workings')}
-                className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors"
+                className="w-full sm:w-auto px-4 py-2.5 sm:py-2 text-sm lg:text-base font-medium text-white bg-green-600 rounded-lg lg:rounded-md hover:bg-green-700 transition-colors shadow-sm"
               >
                 + Upload Workings
               </button>
@@ -464,7 +464,7 @@ function Accounting() {
 
         {/* Status Message */}
         {status.message && (
-          <div className={`mb-4 p-4 rounded-md ${
+          <div className={`mb-4 lg:mb-6 p-4 rounded-xl text-sm ${
             status.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
           }`}>
             {status.message}
@@ -472,39 +472,40 @@ function Accounting() {
         )}
 
         {/* Tally Data Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Tally Data</h3>
+        <div className="bg-white rounded-xl lg:rounded-2xl shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 p-4 sm:p-6 mb-4 lg:mb-6">
+          <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Tally Data</h3>
           {tallyData.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
               {tallyData.map((doc) => (
-                <div key={doc.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div key={doc.id} className="border border-gray-100 rounded-xl p-4 hover:shadow-md hover:border-gray-200 transition-all bg-gray-50/50">
                   <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900">{doc.document_name || 'Tally Data'}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm lg:text-base text-gray-900 truncate" title={doc.document_name || 'Tally Data'}>{doc.document_name || 'Tally Data'}</p>
                       {doc.description && (
-                        <p className="text-xs text-gray-500 mt-1">{doc.description}</p>
+                        <p className="text-[11px] lg:text-xs text-gray-500 mt-1 truncate" title={doc.description}>{doc.description}</p>
                       )}
                       {doc.uploaded_at && (
-                        <p className="text-xs text-gray-400 mt-1">Uploaded: {formatDate(doc.uploaded_at)}</p>
+                        <p className="text-[11px] lg:text-xs text-gray-400 mt-1">Uploaded: {formatDate(doc.uploaded_at)}</p>
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2 mt-3">
+                  <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200">
                     <button
                       onClick={() => handleViewDocument(doc.id, doc.document_url || doc.url)}
-                      className="flex-1 px-3 py-1.5 text-xs font-medium text-[#022B51] border border-[#022B51] rounded-md hover:bg-[#015079] hover:text-white transition-colors"
+                      className="flex-1 px-3 py-2 text-xs lg:text-sm font-medium text-[#022B51] border border-[#022B51] rounded-lg hover:bg-[#015079] hover:text-white transition-colors"
                     >
                       View
                     </button>
                     <button
                       onClick={() => handleDownloadDocument(doc.id, doc.document_name, doc.document_url || doc.url)}
-                      className="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 border border-green-600 rounded-md hover:bg-green-600 hover:text-white transition-colors"
+                      className="flex-1 px-3 py-2 text-xs lg:text-sm font-medium text-green-600 border border-green-600 rounded-lg hover:bg-green-600 hover:text-white transition-colors"
                     >
                       Download
                     </button>
                     <button
                       onClick={() => handleDeleteDocument(doc.id)}
-                      className="px-3 py-1.5 text-xs font-medium text-red-600 border border-red-600 rounded-md hover:bg-red-600 hover:text-white transition-colors"
+                      className="flex-none px-3 py-2 text-xs lg:text-sm font-medium text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-colors"
+                      title="Delete"
                     >
                       Delete
                     </button>
@@ -513,49 +514,50 @@ function Accounting() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="text-center py-8 lg:py-10 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+              <svg className="w-12 h-12 lg:w-16 lg:h-16 text-gray-400 mx-auto mb-3 lg:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <p className="text-gray-500 text-sm">No tally data uploaded yet</p>
+              <p className="text-gray-500 text-sm lg:text-base">No tally data uploaded yet</p>
             </div>
           )}
         </div>
 
         {/* Workings Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Workings</h3>
+        <div className="bg-white rounded-xl lg:rounded-2xl shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 p-4 sm:p-6 mb-4 lg:mb-6">
+          <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Workings</h3>
           {workings.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
               {workings.map((doc) => (
-                <div key={doc.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div key={doc.id} className="border border-gray-100 rounded-xl p-4 hover:shadow-md hover:border-gray-200 transition-all bg-gray-50/50">
                   <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900">{doc.document_name || 'Workings'}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm lg:text-base text-gray-900 truncate" title={doc.document_name || 'Workings'}>{doc.document_name || 'Workings'}</p>
                       {doc.description && (
-                        <p className="text-xs text-gray-500 mt-1">{doc.description}</p>
+                        <p className="text-[11px] lg:text-xs text-gray-500 mt-1 truncate" title={doc.description}>{doc.description}</p>
                       )}
                       {doc.uploaded_at && (
-                        <p className="text-xs text-gray-400 mt-1">Uploaded: {formatDate(doc.uploaded_at)}</p>
+                        <p className="text-[11px] lg:text-xs text-gray-400 mt-1">Uploaded: {formatDate(doc.uploaded_at)}</p>
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2 mt-3">
+                  <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200">
                     <button
                       onClick={() => handleViewDocument(doc.id, doc.document_url || doc.url)}
-                      className="flex-1 px-3 py-1.5 text-xs font-medium text-[#022B51] border border-[#022B51] rounded-md hover:bg-[#015079] hover:text-white transition-colors"
+                      className="flex-1 px-3 py-2 text-xs lg:text-sm font-medium text-[#022B51] border border-[#022B51] rounded-lg hover:bg-[#015079] hover:text-white transition-colors"
                     >
                       View
                     </button>
                     <button
                       onClick={() => handleDownloadDocument(doc.id, doc.document_name, doc.document_url || doc.url)}
-                      className="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 border border-green-600 rounded-md hover:bg-green-600 hover:text-white transition-colors"
+                      className="flex-1 px-3 py-2 text-xs lg:text-sm font-medium text-green-600 border border-green-600 rounded-lg hover:bg-green-600 hover:text-white transition-colors"
                     >
                       Download
                     </button>
                     <button
                       onClick={() => handleDeleteDocument(doc.id)}
-                      className="px-3 py-1.5 text-xs font-medium text-red-600 border border-red-600 rounded-md hover:bg-red-600 hover:text-white transition-colors"
+                      className="flex-none px-3 py-2 text-xs lg:text-sm font-medium text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-colors"
+                      title="Delete"
                     >
                       Delete
                     </button>
@@ -564,11 +566,11 @@ function Accounting() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="text-center py-8 lg:py-10 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+              <svg className="w-12 h-12 lg:w-16 lg:h-16 text-gray-400 mx-auto mb-3 lg:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <p className="text-gray-500 text-sm">No workings uploaded yet</p>
+              <p className="text-gray-500 text-sm lg:text-base">No workings uploaded yet</p>
             </div>
           )}
         </div>
@@ -576,8 +578,8 @@ function Accounting() {
         {/* Upload Modal */}
         {showUploadModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-md">
-            <div className="bg-white rounded-xl shadow-xl max-w-[95vw] sm:max-w-md w-full mx-4 p-3 sm:p-6">
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-white rounded-2xl shadow-xl max-w-[95vw] sm:max-w-md w-full mx-4 p-4 sm:p-6 lg:p-8 border border-gray-100">
+              <div className="flex items-center justify-between mb-4 lg:mb-6">
                 <h3 className="text-lg font-semibold text-gray-900">
                   Upload {uploadType === 'tally_data' ? 'Tally Data' : 'Workings'}
                 </h3>

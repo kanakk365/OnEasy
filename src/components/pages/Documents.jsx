@@ -245,24 +245,24 @@ function Documents() {
   // If admin and no client selected, show client selection
   if (isAdmin && !selectedClientId) {
     return (
-      <div className="min-h-screen bg-[#f3f5f7] pt-16 lg:pt-0">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
-          <div className="mb-6">
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Documents</h1>
-            <p className="text-gray-600 mt-1">
+      <div className="min-h-screen bg-[#F8F9FA] py-4 lg:py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-4 lg:mb-6">
+            <h1 className="text-xl lg:text-2xl font-semibold text-gray-900">Documents</h1>
+            <p className="text-sm lg:text-base text-gray-600 mt-1">
               Select a client to view and manage their documents
             </p>
           </div>
 
           {/* Search Bar */}
-          <div className="mb-6">
+          <div className="mb-4 lg:mb-6">
             <div className="relative">
               <input
                 type="text"
                 placeholder="Search clients by name, email, phone, or ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51]"
+                className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#022B51] text-sm lg:text-base"
               />
               <svg
                 className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
@@ -286,30 +286,30 @@ function Documents() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51]"></div>
             </div>
           ) : filteredClients.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
               {filteredClients.map((client) => (
                 <div
                   key={client.user_id}
                   onClick={() => handleClientSelect(client)}
-                  className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-4 sm:p-3 sm:p-6 hover:shadow-md transition-shadow cursor-pointer"
+                  className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 p-4 sm:p-6 hover:shadow-md transition-shadow cursor-pointer"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
+                        <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
                           {client.name
                             ? client.name.charAt(0).toUpperCase()
                             : "C"}
                         </div>
                         <div className="flex-1 min-w-0 overflow-hidden">
                           <h3
-                            className="text-lg font-semibold text-gray-900 truncate"
+                            className="text-base lg:text-lg font-semibold text-gray-900 truncate"
                             title={client.name || "-"}
                           >
                             {client.name || "-"}
                           </h3>
                           <p
-                            className="text-xs text-gray-500 font-mono truncate"
+                            className="text-[11px] lg:text-xs text-gray-500 font-mono truncate"
                             title={client.user_id}
                           >
                             {client.user_id}
@@ -318,7 +318,7 @@ function Documents() {
                       </div>
                       {client.email && (
                         <p
-                          className="text-sm text-gray-600 truncate mb-1"
+                          className="text-xs lg:text-sm text-gray-600 truncate mb-1"
                           title={client.email}
                         >
                           {client.email}
@@ -326,7 +326,7 @@ function Documents() {
                       )}
                       {client.phone && (
                         <p
-                          className="text-sm text-gray-600 truncate"
+                          className="text-xs lg:text-sm text-gray-600 truncate"
                           title={client.phone}
                         >
                           {client.phone}
@@ -334,7 +334,7 @@ function Documents() {
                       )}
                     </div>
                     <svg
-                      className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2"
+                      className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2 mt-3"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -351,9 +351,9 @@ function Documents() {
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-12 text-center">
+            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-8 lg:p-12 text-center">
               <svg
-                className="w-16 h-16 text-gray-400 mx-auto mb-4"
+                className="w-12 h-12 lg:w-16 lg:h-16 text-gray-400 mx-auto mb-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -379,11 +379,11 @@ function Documents() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] pt-16 lg:pt-0 py-6">
-      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12">
+    <div className="min-h-screen bg-[#F8F9FA] py-4 lg:py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="mb-6 lg:mb-8">
+          <div className="flex items-center gap-2 mb-1 lg:mb-2">
             <button
               onClick={() => {
                 if (isAdmin && selectedClientId) {
@@ -393,15 +393,15 @@ function Documents() {
                   window.history.back();
                 }
               }}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors -ml-1"
             >
               <FiChevronLeft className="w-6 h-6 text-gray-900" />
             </button>
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+            <h1 className="text-xl lg:text-2xl font-semibold text-gray-900">
               {isAdmin && selectedClient ? "Client Documents" : "My Documents"}
             </h1>
           </div>
-          <p className="text-gray-500 italic ml-9">
+          <p className="text-gray-500 text-sm italic ml-8 lg:ml-9">
             {isAdmin && selectedClient
               ? `Viewing documents for ${
                   selectedClient.name || selectedClient.user_id
@@ -421,27 +421,27 @@ function Documents() {
                 navigate("/kyc");
               }
             }}
-            className="bg-white rounded-2xl p-4 sm:p-3 sm:p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
+            className="bg-white rounded-2xl p-5 lg:p-6 shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
           >
             <div className="flex justify-between items-start mb-4">
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-white"
+                className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center text-white"
                 style={{
                   background:
                     "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                 }}
               >
-                <RiFileTextLine className="w-6 h-6" />
+                <RiFileTextLine className="w-5 h-5 lg:w-6 lg:h-6" />
               </div>
               <div className="text-[#022B51] group-hover:text-white group-hover:translate-x-1 transition-all duration-300">
-                <BsArrowRight className="w-6 h-6" />
+                <BsArrowRight className="w-5 h-5 lg:w-6 lg:h-6" />
               </div>
             </div>
 
-            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-white mb-2 transition-colors">
+            <h3 className="text-lg lg:text-xl font-semibold text-gray-900 group-hover:text-white mb-1.5 lg:mb-2 transition-colors">
               Personal Documents
             </h3>
-            <p className="text-gray-500 text-sm mb-8 leading-relaxed group-hover:text-white/80 transition-colors">
+            <p className="text-gray-500 text-xs lg:text-sm mb-6 lg:mb-8 leading-relaxed group-hover:text-white/80 transition-colors">
               Manage your KYC and personal identification documents
             </p>
 
@@ -464,28 +464,28 @@ function Documents() {
                 navigate("/organizations-list"); // Navigate to organizations list for business documents
               }
             }}
-            className="bg-white rounded-2xl p-4 sm:p-3 sm:p-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
+            className="bg-white rounded-2xl p-5 lg:p-6 shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 group hover:bg-[linear-gradient(180deg,#022B51_0%,#015079_100%)]"
           >
             <div className="flex justify-between items-start mb-4">
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-white"
+                className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center text-white"
                 style={{
                   background:
                     "linear-gradient(180deg, #022B51 0%, #015079 100%)",
                 }}
               >
-                <RiBriefcase4Line className="w-6 h-6" />
+                <RiBriefcase4Line className="w-5 h-5 lg:w-6 lg:h-6" />
               </div>
               <div className="text-[#022B51] group-hover:text-white group-hover:translate-x-1 transition-all duration-300">
-                <BsArrowRight className="w-6 h-6" />
+                <BsArrowRight className="w-5 h-5 lg:w-6 lg:h-6" />
               </div>
             </div>
 
-            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-white mb-2 transition-colors">
+            <h3 className="text-lg lg:text-xl font-semibold text-gray-900 group-hover:text-white mb-1.5 lg:mb-2 transition-colors">
               Business Documents
             </h3>
-            <p className="text-gray-500 text-sm mb-8 leading-relaxed group-hover:text-white/80 transition-colors">
-              Access company documents , registrations , and compliance files
+            <p className="text-gray-500 text-xs lg:text-sm mb-6 lg:mb-8 leading-relaxed group-hover:text-white/80 transition-colors">
+              Access company documents, registrations, and compliance files
             </p>
 
             <div className="flex items-center gap-3">
@@ -504,3 +504,4 @@ function Documents() {
 }
 
 export default Documents;
+

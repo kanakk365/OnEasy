@@ -454,12 +454,12 @@ function ClientData() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] py-6">
-      <div className="container mx-auto px-3 sm:px-4 md:px-8 lg:px-12">
+    <div className="min-h-screen bg-[#F8F9FA] py-4 lg:py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Toast Notification */}
         {status.message && (
           <div className="fixed inset-0 z-[60] flex items-start justify-end pointer-events-none">
-            <div className="mt-20 mr-6 w-full max-w-xs pointer-events-auto">
+            <div className="mt-20 mr-4 sm:mr-6 w-full max-w-xs pointer-events-auto">
               <div
                 className={`rounded-xl px-4 py-3 text-sm shadow-lg border flex items-start justify-between gap-3 ${status.type === "error"
                     ? "bg-red-50 text-red-800 border-red-200"
@@ -485,8 +485,8 @@ function ClientData() {
         )}
 
         {/* Header - matching KYCDocumentDetail layout */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="mb-6 lg:mb-8">
+          <div className="flex items-center gap-2 mb-1 lg:mb-2">
             <button
               onClick={() => {
                 const effectiveUserId = userIdFromParams || location.state?.userId;
@@ -507,16 +507,16 @@ function ClientData() {
                   }
                 }
               }}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors -ml-1"
             >
               <FiChevronLeft className="w-6 h-6 text-gray-900" />
             </button>
-            <h1 className="text-2xl font-semibold text-gray-900">Client Data</h1>
+            <h1 className="text-xl lg:text-2xl font-semibold text-gray-900">Client Data</h1>
           </div>
-          <div className="ml-9 flex items-center justify-between">
-            <p className="text-gray-500 italic">Upload and manage bank & loan statements</p>
+          <div className="ml-8 lg:ml-9 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mt-3 sm:mt-0">
+            <p className="text-gray-500 text-sm italic">Upload and manage bank & loan statements</p>
             <span
-              className={`px-3 py-1 text-sm font-medium rounded-full ${
+              className={`px-3 py-1.5 text-xs lg:text-sm font-medium rounded-full ${
                 totalDocs > 0
                   ? "bg-blue-50 text-[#022B51]"
                   : "bg-gray-100 text-gray-600"
@@ -528,23 +528,23 @@ function ClientData() {
         </div>
 
         {/* Bank Statements Section */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Bank Statements</h2>
+        <div className="mb-6 lg:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+            <h2 className="text-lg lg:text-xl font-semibold text-gray-900">Bank Statements</h2>
             <button
               onClick={() => handleOpenUploadModal('bank_statement')}
-              className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors"
+              className="w-full sm:w-auto px-4 py-2.5 sm:py-2 text-sm lg:text-base font-medium text-white rounded-lg transition-colors shadow-sm"
               style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}
             >
               + Upload Bank Statement
             </button>
           </div>
           {bankStatements.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {bankStatements.map((doc) => (
                 <div
                   key={doc.id}
-                  className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col justify-between group hover:shadow-lg transition-all duration-300"
+                  className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 flex flex-col justify-between group hover:shadow-lg transition-all duration-300"
                 >
                   <div className="flex items-start gap-4 mb-3">
                     {renderStatementIcon("bank_statement")}
@@ -552,70 +552,70 @@ function ClientData() {
                       <p className="font-semibold text-gray-900 truncate" title={doc.bank_name}>
                         {doc.bank_name}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-[11px] lg:text-xs text-gray-500 mt-1">
                         {formatDate(doc.period_from)} - {formatDate(doc.period_to)}
                       </p>
                       {doc.document_name && (
-                        <p className="text-xs text-gray-400 mt-1 truncate" title={doc.document_name}>{doc.document_name}</p>
+                        <p className="text-[11px] lg:text-xs text-gray-400 mt-1 truncate" title={doc.document_name}>{doc.document_name}</p>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-3 border-t border-gray-50">
+                  <div className="flex items-center gap-1.5 lg:gap-2 pt-3 border-t border-gray-50">
                     <button
                       onClick={() => handleViewDocument(doc.id, doc.document_url || doc.url)}
-                      className="flex-1 flex items-center justify-center gap-2 p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 lg:gap-2 p-2 text-xs lg:text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                       title="View"
                     >
-                      <FiEye className="w-4 h-4" /> View
+                      <FiEye className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> View
                     </button>
                     <button
                       onClick={() => handleDownloadDocument(doc.id, doc.document_name, doc.document_url || doc.url)}
-                      className="flex-1 flex items-center justify-center gap-2 p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 lg:gap-2 p-2 text-xs lg:text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                       title="Download"
                     >
-                      <FiDownload className="w-4 h-4" /> Download
+                      <FiDownload className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> Download
                     </button>
                     <button
                       onClick={() => handleDeleteDocument(doc.id)}
                       className="flex-none p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       title="Delete"
                     >
-                      <FiTrash2 className="w-4 h-4" />
+                      <FiTrash2 className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
                     </button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
-              <div className="mx-auto mb-4 flex justify-center">
+            <div className="text-center py-10 lg:py-12 bg-white rounded-2xl border border-dashed border-gray-200">
+              <div className="mx-auto mb-4 flex justify-center scale-90 lg:scale-100">
                 {renderStatementIcon("bank_statement")}
               </div>
-              <p className="text-gray-500 font-medium">No bank statements uploaded yet</p>
-              <p className="text-gray-400 text-sm mt-1">Upload your bank statements to get started</p>
+              <p className="text-gray-500 font-medium text-sm lg:text-base">No bank statements uploaded yet</p>
+              <p className="text-gray-400 text-xs lg:text-sm mt-1">Upload your bank statements to get started</p>
             </div>
           )}
         </div>
 
         {/* Loan Statements Section */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Loan Statements</h2>
+        <div className="mb-6 lg:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+            <h2 className="text-lg lg:text-xl font-semibold text-gray-900">Loan Statements</h2>
             <button
               onClick={() => handleOpenUploadModal('loan_statement')}
-              className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors"
+              className="w-full sm:w-auto px-4 py-2.5 sm:py-2 text-sm lg:text-base font-medium text-white rounded-lg transition-colors shadow-sm"
               style={{ background: 'linear-gradient(160.12deg, #065F46 13.28%, #10B981 109.67%)' }}
             >
               + Upload Loan Statement
             </button>
           </div>
           {loanStatements.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {loanStatements.map((doc) => (
                 <div
                   key={doc.id}
-                  className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col justify-between group hover:shadow-lg transition-all duration-300"
+                  className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 flex flex-col justify-between group hover:shadow-lg transition-all duration-300"
                 >
                   <div className="flex items-start gap-4 mb-3">
                     {renderStatementIcon("loan_statement")}
@@ -623,48 +623,48 @@ function ClientData() {
                       <p className="font-semibold text-gray-900 truncate" title={doc.bank_name}>
                         {doc.bank_name}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-[11px] lg:text-xs text-gray-500 mt-1">
                         {formatDate(doc.period_from)} - {formatDate(doc.period_to)}
                       </p>
                       {doc.document_name && (
-                        <p className="text-xs text-gray-400 mt-1 truncate" title={doc.document_name}>{doc.document_name}</p>
+                        <p className="text-[11px] lg:text-xs text-gray-400 mt-1 truncate" title={doc.document_name}>{doc.document_name}</p>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-3 border-t border-gray-50">
+                  <div className="flex items-center gap-1.5 lg:gap-2 pt-3 border-t border-gray-50">
                     <button
                       onClick={() => handleViewDocument(doc.id, doc.document_url || doc.url)}
-                      className="flex-1 flex items-center justify-center gap-2 p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 lg:gap-2 p-2 text-xs lg:text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                       title="View"
                     >
-                      <FiEye className="w-4 h-4" /> View
+                      <FiEye className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> View
                     </button>
                     <button
                       onClick={() => handleDownloadDocument(doc.id, doc.document_name, doc.document_url || doc.url)}
-                      className="flex-1 flex items-center justify-center gap-2 p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 lg:gap-2 p-2 text-xs lg:text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                       title="Download"
                     >
-                      <FiDownload className="w-4 h-4" /> Download
+                      <FiDownload className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> Download
                     </button>
                     <button
                       onClick={() => handleDeleteDocument(doc.id)}
                       className="flex-none p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       title="Delete"
                     >
-                      <FiTrash2 className="w-4 h-4" />
+                      <FiTrash2 className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
                     </button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
-              <div className="mx-auto mb-4 flex justify-center">
+            <div className="text-center py-10 lg:py-12 bg-white rounded-2xl border border-dashed border-gray-200">
+              <div className="mx-auto mb-4 flex justify-center scale-90 lg:scale-100">
                 {renderStatementIcon("loan_statement")}
               </div>
-              <p className="text-gray-500 font-medium">No loan statements uploaded yet</p>
-              <p className="text-gray-400 text-sm mt-1">Upload your loan statements to get started</p>
+              <p className="text-gray-500 font-medium text-sm lg:text-base">No loan statements uploaded yet</p>
+              <p className="text-gray-400 text-xs lg:text-sm mt-1">Upload your loan statements to get started</p>
             </div>
           )}
         </div>

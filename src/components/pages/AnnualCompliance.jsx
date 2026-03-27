@@ -356,12 +356,12 @@ function AnnualCompliance() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-[#F8F9FA]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
         {/* Toast Notification */}
         {status.message && (
           <div className="fixed inset-0 z-40 flex items-start justify-end pointer-events-none">
-            <div className="mt-20 mr-6 w-full max-w-xs pointer-events-auto">
+            <div className="mt-20 mr-4 sm:mr-6 w-full max-w-xs pointer-events-auto">
               <div
                 className={`rounded-xl px-4 py-3 text-sm shadow-lg border flex items-start justify-between gap-3 animate-fade-in ${
                   status.type === "error"
@@ -369,7 +369,12 @@ function AnnualCompliance() {
                     : "bg-green-50 text-green-800 border-green-200"
                 }`}
               >
-                <p>{status.message}</p>
+                <div className="flex-1">
+                  <p className="font-medium">
+                    {status.type === "error" ? "Error" : "Success"}
+                  </p>
+                  <p className="mt-1 text-xs">{status.message}</p>
+                </div>
                 <button
                   onClick={() => setStatus({ type: null, message: "" })}
                   className="ml-2 text-xs font-semibold opacity-70 hover:opacity-100"
@@ -382,7 +387,7 @@ function AnnualCompliance() {
         )}
 
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-4 lg:mb-6">
           <button
             onClick={() => {
               if (isAdmin && userIdFromParams) {
@@ -398,33 +403,33 @@ function AnnualCompliance() {
                 }
               }
             }}
-            className="text-[#022B51] hover:text-[#022B51] mb-4 flex items-center gap-2"
+            className="text-[#022B51] hover:text-[#022B51] mb-4 flex items-center gap-2 -ml-1 lg:ml-0"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Company Master Data
+            <span className="text-sm lg:text-base">Back to Company Master Data</span>
           </button>
 
           {organization && (
-            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
-              <h1 className="text-2xl font-semibold text-gray-900">
+            <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 p-4 sm:p-6 mb-4 lg:mb-6">
+              <h1 className="text-xl lg:text-2xl font-semibold text-gray-900">
                 {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
               </h1>
               {organization.tradeName !== '-' && organization.legalName !== '-' && organization.tradeName !== organization.legalName && (
-                <p className="text-gray-600 mt-1">{organization.tradeName}</p>
+                <p className="text-sm lg:text-base text-gray-600 mt-1">{organization.tradeName}</p>
               )}
               {organization.gstin !== '-' && (
-                <p className="text-sm text-gray-500 mt-1 font-mono">GSTIN: {organization.gstin}</p>
+                <p className="text-xs lg:text-sm text-gray-500 mt-1 font-mono">GSTIN: {organization.gstin}</p>
               )}
             </div>
           )}
 
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Annual Compliance Documents</h2>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 lg:mb-6">
+            <h2 className="text-lg lg:text-xl font-semibold text-gray-900">Annual Compliance Documents</h2>
             <button
               onClick={handleOpenUploadModal}
-              className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
+              className="w-full sm:w-auto px-4 py-2.5 sm:py-2 text-sm lg:text-base font-medium text-white rounded-lg lg:rounded-md hover:opacity-90 transition-all shadow-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               + Upload Document
             </button>
@@ -437,46 +442,49 @@ function AnnualCompliance() {
           const categoryDocs = documents[categoryKey] || {};
           
           return (
-            <div key={categoryKey} className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">{categoryData.label}</h3>
+            <div key={categoryKey} className="bg-white rounded-xl lg:rounded-2xl shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 p-4 sm:p-6 mb-4 lg:mb-6">
+              <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">{categoryData.label}</h3>
               
               {Object.keys(categoryDocs).length === 0 ? (
-                <p className="text-gray-500 text-sm">No documents uploaded yet</p>
+                <div className="text-center py-8 lg:py-10 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+                  <p className="text-gray-500 text-sm lg:text-base">No documents uploaded yet</p>
+                </div>
               ) : (
                 <div className="space-y-4">
                   {Object.entries(categoryDocs).map(([subCatKey, docs]) => (
-                    <div key={subCatKey} className="border-l-4 border-orange-500 pl-4">
-                      <h4 className="text-md font-medium text-gray-800 mb-2">
+                    <div key={subCatKey} className="border-l-4 border-orange-500 pl-4 mb-4">
+                      <h4 className="text-sm lg:text-base font-medium text-gray-800 mb-3">
                         {getSubCategoryLabel(categoryKey, subCatKey)}
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                         {docs.map((doc) => (
-                          <div key={doc.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <div key={doc.id} className="bg-gray-50/50 hover:bg-gray-50 rounded-xl p-4 border border-gray-100 transition-all hover:shadow-md hover:border-gray-200">
                             <div className="flex items-start justify-between mb-2">
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 truncate">{doc.document_name || 'Document'}</p>
-                                <p className="text-xs text-gray-500 mt-1">{formatDate(doc.uploaded_at)}</p>
+                                <p className="text-sm lg:text-base font-medium text-gray-900 truncate" title={doc.document_name || 'Document'}>{doc.document_name || 'Document'}</p>
+                                <p className="text-[11px] lg:text-xs text-gray-400 mt-1">{formatDate(doc.uploaded_at)}</p>
                                 {doc.description && (
-                                  <p className="text-xs text-gray-600 mt-1">{doc.description}</p>
+                                  <p className="text-[11px] lg:text-xs text-gray-500 mt-1 truncate" title={doc.description}>{doc.description}</p>
                                 )}
                               </div>
                             </div>
-                            <div className="flex gap-2 mt-3">
+                            <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200">
                               <button
                                 onClick={() => handleViewDocument(doc)}
-                                className="flex-1 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
+                                className="flex-1 px-3 py-2 text-xs lg:text-sm font-medium text-[#022B51] border border-[#022B51] rounded-lg hover:bg-[#015079] hover:text-white transition-colors"
                               >
                                 View
                               </button>
                               <button
                                 onClick={() => handleDownloadDocument(doc)}
-                                className="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-50 rounded hover:bg-green-100 transition-colors"
+                                className="flex-1 px-3 py-2 text-xs lg:text-sm font-medium text-green-600 border border-green-600 rounded-lg hover:bg-green-600 hover:text-white transition-colors"
                               >
                                 Download
                               </button>
                               <button
                                 onClick={() => handleDeleteDocument(doc.id)}
-                                className="flex-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded hover:bg-red-100 transition-colors"
+                                className="flex-none px-3 py-2 text-xs lg:text-sm font-medium text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-colors"
+                                title="Delete"
                               >
                                 Delete
                               </button>

@@ -347,7 +347,7 @@ function Correspondence() {
   // Render root view
   const renderRootView = () => {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
         {Object.keys(correspondenceStructure).map((categoryKey) => {
           const categoryData = correspondenceStructure[categoryKey];
           const categoryDocs = documents[categoryKey] || {};
@@ -357,16 +357,16 @@ function Correspondence() {
             <div
               key={categoryKey}
               onClick={() => navigateTo([categoryKey])}
-              className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 cursor-pointer hover:shadow-md transition-shadow"
+              className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 cursor-pointer hover:shadow-md hover:border-gray-200 transition-all"
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">{categoryData.label}</h3>
+                <h3 className="text-base lg:text-lg font-semibold text-gray-900">{categoryData.label}</h3>
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>
               {hasDocuments && (
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-xs lg:text-sm text-gray-500 mt-2">
                   {Object.keys(categoryDocs).length} {Object.keys(categoryDocs).length === 1 ? 'category' : 'categories'}
                 </p>
               )}
@@ -383,7 +383,7 @@ function Correspondence() {
     const categoryDocs = documents[categoryKey] || {};
     
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
         {Object.entries(categoryData.subCategories).map(([subCatKey, subCatLabel]) => {
           const subCatDocs = categoryDocs[subCatKey] || [];
           const hasDocs = Array.isArray(subCatDocs) && subCatDocs.length > 0;
@@ -392,16 +392,16 @@ function Correspondence() {
             <div
               key={subCatKey}
               onClick={() => navigateTo([categoryKey, subCatKey])}
-              className="bg-white rounded-lg shadow-sm border border-[#F3F3F3] p-4 cursor-pointer hover:shadow-md transition-shadow"
+              className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 cursor-pointer hover:shadow-md hover:border-gray-200 transition-all"
             >
               <div className="flex items-center justify-between">
-                <h4 className="text-md font-medium text-gray-800">{subCatLabel}</h4>
+                <h4 className="text-sm lg:text-base font-medium text-gray-800">{subCatLabel}</h4>
                 <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>
               {hasDocs && (
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs lg:text-sm text-gray-500 mt-2">
                   {subCatDocs.length} {subCatDocs.length === 1 ? 'document' : 'documents'}
                 </p>
               )}
@@ -415,38 +415,43 @@ function Correspondence() {
   // Render documents view
   const renderDocumentsView = (docs) => {
     if (!Array.isArray(docs) || docs.length === 0) {
-      return <p className="text-gray-500 text-sm">No documents uploaded yet</p>;
+      return (
+        <div className="text-center py-8 lg:py-10 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+          <p className="text-gray-500 text-sm lg:text-base">No documents uploaded yet</p>
+        </div>
+      );
     }
     
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
         {docs.map((doc) => (
-          <div key={doc.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <div key={doc.id} className="bg-gray-50/50 hover:bg-gray-50 rounded-xl p-4 border border-gray-100 transition-all hover:shadow-md hover:border-gray-200">
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{doc.document_name || 'Document'}</p>
-                <p className="text-xs text-gray-500 mt-1">{formatDate(doc.uploaded_at)}</p>
+                <p className="text-sm lg:text-base font-medium text-gray-900 truncate" title={doc.document_name || 'Document'}>{doc.document_name || 'Document'}</p>
+                <p className="text-[11px] lg:text-xs text-gray-400 mt-1">{formatDate(doc.uploaded_at)}</p>
                 {doc.description && (
-                  <p className="text-xs text-gray-600 mt-1">{doc.description}</p>
+                  <p className="text-[11px] lg:text-xs text-gray-500 mt-1 truncate" title={doc.description}>{doc.description}</p>
                 )}
               </div>
             </div>
-            <div className="flex gap-2 mt-3">
+            <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200">
               <button
                 onClick={() => handleViewDocument(doc)}
-                className="flex-1 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
+                className="flex-1 px-3 py-2 text-xs lg:text-sm font-medium text-[#022B51] border border-[#022B51] rounded-lg hover:bg-[#015079] hover:text-white transition-colors"
               >
                 View
               </button>
               <button
                 onClick={() => handleDownloadDocument(doc)}
-                className="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 bg-green-50 rounded hover:bg-green-100 transition-colors"
+                className="flex-1 px-3 py-2 text-xs lg:text-sm font-medium text-green-600 border border-green-600 rounded-lg hover:bg-green-600 hover:text-white transition-colors"
               >
                 Download
               </button>
               <button
                 onClick={() => handleDeleteDocument(doc.id)}
-                className="flex-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded hover:bg-red-100 transition-colors"
+                className="flex-none px-3 py-2 text-xs lg:text-sm font-medium text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-colors"
+                title="Delete"
               >
                 Delete
               </button>
@@ -491,7 +496,7 @@ function Correspondence() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#022B51] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
@@ -501,12 +506,12 @@ function Correspondence() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f5f7]">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-[#F8F9FA]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
         {/* Toast Notification */}
         {status.message && (
           <div className="fixed inset-0 z-40 flex items-start justify-end pointer-events-none">
-            <div className="mt-20 mr-6 w-full max-w-xs pointer-events-auto">
+            <div className="mt-20 mr-4 sm:mr-6 w-full max-w-xs pointer-events-auto">
               <div
                 className={`rounded-xl px-4 py-3 text-sm shadow-lg border flex items-start justify-between gap-3 animate-fade-in ${
                   status.type === "error"
@@ -514,7 +519,12 @@ function Correspondence() {
                     : "bg-green-50 text-green-800 border-green-200"
                 }`}
               >
-                <p>{status.message}</p>
+                <div className="flex-1">
+                  <p className="font-medium">
+                    {status.type === "error" ? "Error" : "Success"}
+                  </p>
+                  <p className="mt-1 text-xs">{status.message}</p>
+                </div>
                 <button
                   onClick={() => setStatus({ type: null, message: "" })}
                   className="ml-2 text-xs font-semibold opacity-70 hover:opacity-100"
@@ -527,7 +537,7 @@ function Correspondence() {
         )}
 
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-4 lg:mb-6">
           <button
             onClick={() => {
               if (isAdmin && userIdFromParams) {
@@ -543,33 +553,33 @@ function Correspondence() {
                 }
               }
             }}
-            className="text-[#022B51] hover:text-[#022B51] mb-4 flex items-center gap-2"
+            className="text-[#022B51] hover:text-[#022B51] mb-4 flex items-center gap-2 -ml-1 lg:ml-0"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Business Documents
+            <span className="text-sm lg:text-base">Back to Business Documents</span>
           </button>
 
           {organization && (
-            <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6 mb-6">
-              <h1 className="text-2xl font-semibold text-gray-900">
+            <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 p-4 sm:p-6 mb-4 lg:mb-6">
+              <h1 className="text-xl lg:text-2xl font-semibold text-gray-900">
                 {organization.legalName !== '-' ? organization.legalName : organization.tradeName}
               </h1>
               {organization.tradeName !== '-' && organization.legalName !== '-' && organization.tradeName !== organization.legalName && (
-                <p className="text-gray-600 mt-1">{organization.tradeName}</p>
+                <p className="text-sm lg:text-base text-gray-600 mt-1">{organization.tradeName}</p>
               )}
               {organization.gstin !== '-' && (
-                <p className="text-sm text-gray-500 mt-1 font-mono">GSTIN: {organization.gstin}</p>
+                <p className="text-xs lg:text-sm text-gray-500 mt-1 font-mono">GSTIN: {organization.gstin}</p>
               )}
             </div>
           )}
 
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Correspondence Documents</h2>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 lg:mb-6">
+            <h2 className="text-lg lg:text-xl font-semibold text-gray-900">Correspondence Documents</h2>
             <button
               onClick={handleOpenUploadModal}
-              className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
+              className="w-full sm:w-auto px-4 py-2.5 sm:py-2 text-sm lg:text-base font-medium text-white rounded-lg lg:rounded-md hover:opacity-90 transition-all shadow-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
             >
               + Upload Document
             </button>
@@ -578,7 +588,7 @@ function Correspondence() {
 
         {/* Breadcrumb Navigation */}
         {navigationPath.length > 0 && (
-          <div className="mb-4 flex items-center gap-2 text-sm">
+          <div className="mb-4 lg:mb-6 flex items-center gap-2 text-sm lg:text-base overflow-x-auto pb-2 sm:pb-0 whitespace-nowrap hide-scrollbar">
             <button
               onClick={goToRoot}
               className="text-[#022B51] hover:text-[#022B51] font-medium"
@@ -600,7 +610,7 @@ function Correspondence() {
         )}
 
         {/* Main Content - Navigation Based */}
-        <div className="bg-white rounded-xl shadow-sm border border-[#F3F3F3] p-3 sm:p-6">
+        <div className="bg-white rounded-xl lg:rounded-2xl shadow-[0_2px_8px_rgba(0,-0,0,0.05)] border border-gray-100 p-4 sm:p-6 mb-4 lg:mb-6">
           {getCurrentView()}
         </div>
 
