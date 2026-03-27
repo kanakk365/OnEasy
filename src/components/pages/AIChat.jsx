@@ -55,10 +55,10 @@ function MessageBubble({ message }) {
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'} mb-4`}>
       {/* Avatar */}
       <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm ${isUser ? 'bg-[#00486d]' : 'bg-[#bd0008]'}`}>
-        {isUser ? 'U' : <RiRobot2Line className="w-4 h-4" />}
+        {isUser ? 'U' : <img src="/agent.png" alt="AI" className="w-4 h-4 brightness-0 invert" />}
       </div>
       {/* Bubble */}
-      <div className={`max-w-[78%] px-4 py-3 rounded-2xl text-sm shadow-sm ${isUser ? 'bg-[#00486d] text-white rounded-tr-none' : 'bg-white text-gray-800 border border-gray-100 rounded-tl-none'}`}>
+      <div className={`max-w-[78%] px-4 py-3 rounded-2xl text-sm shadow-sm ${isUser ? 'text-white rounded-tr-none' : 'bg-white text-gray-800 border border-gray-100 rounded-tl-none'}`} style={isUser ? { background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' } : {}}>
         {isUser ? <p className="leading-relaxed">{message.content}</p> : <RenderMarkdown text={message.content} />}
         {message.timestamp && (
           <p className={`text-[10px] mt-1 ${isUser ? 'text-blue-200 text-right' : 'text-gray-400'}`}>
@@ -75,7 +75,7 @@ function TypingIndicator({ status }) {
   return (
     <div className="flex gap-3 mb-4">
       <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-[#bd0008] text-white shadow-sm">
-        <RiRobot2Line className="w-4 h-4" />
+        <img src="/agent.png" alt="AI" className="w-4 h-4 brightness-0 invert" />
       </div>
       <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm">
         {status ? (
@@ -348,14 +348,14 @@ export default function AIChat() {
       )}
 
       {/* ── Sidebar ──────────────────────────────────────────────────────── */}
-      <aside className={`fixed lg:relative inset-y-0 left-0 z-50 w-72 bg-[#00486d] text-white flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+      <aside className={`fixed lg:relative inset-y-0 left-0 z-50 w-72 text-white flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`} style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>
         {/* Sidebar Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-[#bd0008] rounded-full flex items-center justify-center shadow-md">
-              <RiRobot2Line className="w-4 h-4 text-white" />
+              <img src="/agent.png" alt="AI" className="w-4 h-4 brightness-0 invert" />
             </div>
-            <span className="font-semibold text-base">AI Compliance Chat</span>
+            <span className="font-semibold text-base">OnEasy AI Assistance</span>
           </div>
           <button className="lg:hidden text-white/70 hover:text-white" onClick={() => setSidebarOpen(false)}>
             <HiOutlineX className="w-5 h-5" />
@@ -428,11 +428,11 @@ export default function AIChat() {
           </button>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-[#bd0008] rounded-full flex items-center justify-center shadow-sm">
-              <RiRobot2Line className="w-4 h-4 text-white" />
+              <img src="/agent.png" alt="AI" className="w-4 h-4 brightness-0 invert" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-800">AI Compliance Assistant</p>
-              <p className="text-[10px] text-gray-400">Powered by OnEasy AI</p>
+              <p className="text-sm font-semibold text-gray-800">OnEasy AI Assistance</p>
+              <p className="text-[10px] text-gray-400">Powered by OnEasy</p>
             </div>
           </div>
           <div className="ml-auto flex items-center gap-1.5">
@@ -446,10 +446,10 @@ export default function AIChat() {
           {/* Empty state */}
           {messages.length === 0 && !loadingMessages && !streaming && (
             <div className="h-full flex flex-col items-center justify-center text-center gap-4 max-w-md mx-auto">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#00486d] to-[#bd0008] rounded-2xl flex items-center justify-center shadow-lg">
-                <RiRobot2Line className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 bg-[#bd0008] rounded-2xl flex items-center justify-center shadow-lg">
+                <img src="/agent.png" alt="AI" className="w-8 h-8 brightness-0 invert" />
               </div>
-              <h2 className="text-xl font-bold text-gray-800">AI Compliance Chat</h2>
+              <h2 className="text-xl font-bold text-gray-800">OnEasy AI Assistance</h2>
               <p className="text-sm text-gray-500">Ask me anything about your compliance tasks, upcoming deadlines, registrations, or any business queries.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full mt-2">
                 {[
@@ -461,7 +461,7 @@ export default function AIChat() {
                   <button
                     key={suggestion}
                     onClick={() => { setInput(suggestion); textareaRef.current?.focus(); }}
-                    className="text-left px-3 py-2.5 text-xs text-gray-700 bg-white border border-gray-200 rounded-xl hover:border-[#00486d] hover:text-[#00486d] transition-colors shadow-sm"
+                    className="text-left px-3 py-2.5 text-xs text-gray-700 bg-white border border-gray-200 rounded-xl hover:border-[#bd0008] hover:text-[#bd0008] transition-colors shadow-sm"
                   >
                     {suggestion}
                   </button>
@@ -514,7 +514,8 @@ export default function AIChat() {
             <button
               onClick={sendMessage}
               disabled={!input.trim() || streaming}
-              className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all ${input.trim() && !streaming ? 'bg-[#00486d] text-white hover:bg-[#003d5c] shadow-md' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+              className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all ${input.trim() && !streaming ? 'text-white hover:opacity-90 shadow-md' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+              style={input.trim() && !streaming ? { background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' } : {}}
             >
               <HiOutlinePaperAirplane className="w-4 h-4 rotate-90" />
             </button>

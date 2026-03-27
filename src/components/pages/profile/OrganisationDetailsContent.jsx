@@ -230,7 +230,7 @@ const OrganisationDetailsContent = ({
         {savedOrganizations.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 hidden">
                 Organizations
               </h3>
               <button

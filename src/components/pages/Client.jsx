@@ -563,33 +563,33 @@ function Client() {
       <div className="bg-white rounded-xl p-3 sm:p-6 shadow-sm border border-gray-100 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
           {/* On-Going Service Requests */}
-          <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
-            <div className="text-3xl font-semibold text-[#022B51] mb-2">
+          <div className="rounded-xl p-5 text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
+            <div className="text-3xl font-semibold mb-2">
               {complianceStats.ongoing}
             </div>
-            <div className="text-sm font-medium text-gray-700">
+            <div className="text-sm font-medium text-white/80">
               On-Going Service Requests
             </div>
           </div>
           {/* Up-coming Compliances */}
-          <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
-            <div className="text-3xl font-semibold text-[#022B51] mb-2">
+          <div className="rounded-xl p-5 text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
+            <div className="text-3xl font-semibold mb-2">
                {apiComplianceStats 
                 ? (apiComplianceStats?.upcomingCount ?? 0)
                 : complianceStats.upcoming}
             </div>
-            <div className="text-sm font-medium text-gray-700">
+            <div className="text-sm font-medium text-white/80">
               Up-coming Compliances
             </div>
           </div>
           {/* Overdue Compliances */}
-          <div className="bg-[#ebf0f3] rounded-xl p-5 border border-blue-50">
-            <div className="text-3xl font-semibold text-[#022B51] mb-2">
+          <div className="rounded-xl p-5 text-white" style={{ background: "linear-gradient(135deg, #8B0000 0%, #bd0008 100%)" }}>
+            <div className="text-3xl font-semibold mb-2">
               {apiComplianceStats
                 ? (apiComplianceStats?.overdueCount ?? 0)
                 : complianceStats.overdue}
             </div>
-            <div className="text-sm font-medium text-gray-700">
+            <div className="text-sm font-medium text-white/80">
               Overdue Compliances
             </div>
           </div>
@@ -1020,19 +1020,7 @@ function Client() {
         </div>
       </div>
 
-      {/* Floating AI Chat Button - Desktop only (hidden on mobile as bottom nav handles it) */}
-      <button
-        onClick={() => navigate('/ai-chat')}
-        className="hidden lg:flex fixed bottom-8 right-8 z-50 items-center gap-2.5 px-5 py-3 rounded-2xl text-white text-sm font-semibold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all"
-        style={{ background: 'linear-gradient(135deg, #00486d 0%, #006a9e 100%)' }}
-        title="Open AI Compliance Chat"
-      >
-        <div className="w-7 h-7 bg-[#bd0008] rounded-full flex items-center justify-center shadow-md flex-shrink-0">
-          <RiRobot2Line className="w-4 h-4 text-white" />
-        </div>
-        Ask AI
-        <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-      </button>
+      {/* AI Chat handled by AIAgentFAB in Layout */}
     </div>
   );
 }

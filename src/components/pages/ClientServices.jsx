@@ -297,20 +297,21 @@ function ClientServices() {
   return (
     <div className="min-h-screen pt-16 lg:pt-0 bg-[#f3f5f7]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-6">
+        {/* Header */}
+        <div className="rounded-2xl p-5 mb-6 text-white flex items-center justify-between" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Service Requests</h1>
-            <p className="text-gray-600 mt-1">View and manage all your service requests</p>
+            <h1 className="text-xl font-semibold">Service Requests</h1>
+            <p className="text-white/70 text-sm mt-1">View and manage all your service requests</p>
           </div>
           <button
             onClick={() => navigate('/client')}
-            className="px-4 py-2 text-sm font-medium text-[#022B51] border border-[#022B51] rounded-lg hover:bg-[#015079] hover:text-white transition-colors"
+            className="px-4 py-2 text-sm font-medium text-white border border-white/30 rounded-xl hover:bg-white/10 transition-colors"
           >
-            Back to Dashboard
+            Back
           </button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-[#F3F3F3]">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
           <div className="p-5">
             <div className="flex border-b border-gray-100 mb-4 overflow-x-auto">
               <button 

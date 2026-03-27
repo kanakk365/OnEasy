@@ -300,25 +300,16 @@ function Resources() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] pt-16 lg:pt-0 py-6">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-2">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div className="rounded-2xl p-5 mb-8 text-white" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
           <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0"
-              style={{
-                background: "linear-gradient(180deg, #022B51 0%, #015079 100%)",
-              }}
-            >
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
               <BsFolderFill className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900 mb-1">
-                Resources
-              </h1>
-              <p className="text-gray-500 italic ml-1">
-                Browse available resources and documents
-              </p>
+              <h1 className="text-xl font-semibold">Resources</h1>
+              <p className="text-white/70 text-sm">Browse available resources and documents</p>
             </div>
           </div>
         </div>
@@ -474,7 +465,7 @@ function Resources() {
                               href={item.url || "#"}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#022B51] text-[#022B51] hover:hover:text-white hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                               title="View file"
                               onClick={(e) => e.stopPropagation()}
                             >
@@ -513,7 +504,9 @@ function Resources() {
                     className="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-blue-100 group text-center relative"
                   >
                     <div className="opacity-90 group-hover:opacity-100 transition-opacity w-full flex flex-col items-center">
-                      <BsFolderFill className="w-16 h-16 text-blue-400 group-hover:text-blue-500 mb-3 drop-shadow-sm transition-colors" />
+                      <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 shadow-sm" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}>
+                        <BsFolderFill className="w-8 h-8 text-white" />
+                      </div>
                       <span className="text-sm font-medium text-gray-800 line-clamp-2 w-full px-2" title={folder.name}>
                         {folder.name}
                       </span>
@@ -537,12 +530,15 @@ function Resources() {
                     currentDocuments.map((doc) => (
                       <div
                         key={doc.id}
-                        className="flex flex-col items-center p-4 rounded-xl bg-white hover:bg-gray-50 transition-colors border border-gray-100 hover:border-blue-100 group text-center"
+                        className="flex flex-col items-center p-4 rounded-xl bg-white hover:text-white transition-all duration-200 border border-gray-100 group text-center cursor-pointer"
+                        style={{ }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(180deg, #022B51 0%, #015079 100%)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
                       >
-                        <div className="w-16 h-16 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-white transition-colors shadow-sm group-hover:shadow text-gray-400 group-hover:text-blue-500">
+                        <div className="w-16 h-16 bg-gray-50 group-hover:bg-white/15 border border-gray-100 group-hover:border-white/20 rounded-lg flex items-center justify-center mb-3 transition-colors shadow-sm text-gray-400 group-hover:text-white">
                           <FiFileText className="w-8 h-8" />
                         </div>
-                        <span className="text-sm font-medium text-gray-800 line-clamp-2 w-full break-words px-2 mb-3" title={doc.title}>
+                        <span className="text-sm font-medium text-gray-800 group-hover:text-white line-clamp-2 w-full break-words px-2 mb-3 transition-colors" title={doc.title}>
                           {doc.title}
                         </span>
                         <div className="flex items-center gap-2 mt-auto">
@@ -555,17 +551,15 @@ function Resources() {
                             title="Download file"
                           >
                             <FiDownload className="w-3 h-3" />
-
                           </a>
                           <a
                             href={doc.url || "#"}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#022B51] text-[#022B51] hover:hover:text-white hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-white group-hover:bg-white/20 group-hover:border-white/30 hover:opacity-90 transition-all" style={{ background: "linear-gradient(180deg, #022B51 0%, #015079 100%)" }}
                             title="View file"
                           >
                             <FiEye className="w-3 h-3" />
-
                           </a>
                         </div>
                       </div>
