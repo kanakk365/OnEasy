@@ -209,87 +209,86 @@ export default function AIChat() {
       const decoder = new TextDecoder();
       let accumulated = '';
       let buffer = '';
+      let rawDebug = ''; // collect everything for debugging
       setStreamingStatus('Processing...');
 
-      if (reader) {
-      while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+      const SKIP_TYPES = new Set(['process', 'ready', 'start', 'end', 'error']);
 
-          buffer += decoder.decode(value, { stream: true });
+      // Try to extract a content token from a JSON string
+      const extractToken = (jsonStr) => {
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const type = parsed?.type || parsed?.event;
 
-          // Process complete lines from buffer
-          const lines = buffer.split('\n');
-          // Keep the last (potentially incomplete) line in the buffer
-          buffer = lines.pop() ?? '';
-
-          for (const line of lines) {
-            const trimmed = line.trim();
-            if (!trimmed || trimmed === '') continue;
-
-            // SSE "data:" lines
-            if (trimmed.startsWith('data:')) {
-              const raw = trimmed.slice(5).trim();
-
-              // Stream end sentinel
-              if (raw === '[DONE]') continue;
-
-              try {
-                const parsed = JSON.parse(raw);
-                const type = parsed?.type || parsed?.event;
-
-                // Show status messages as live indicator
-                if (type === 'status' && parsed?.message) {
-                  setStreamingStatus(parsed.message);
-                  continue;
-                }
-
-                if (type === 'process' || type === 'ready' || type === 'start' || type === 'end' || type === 'error') continue;
-
-                const token =
-                  parsed?.content ||
-                  parsed?.token ||
-                  parsed?.text ||
-                  parsed?.delta ||
-                  parsed?.choices?.[0]?.delta?.content ||
-                  '';
-
-                if (token) {
-                  accumulated += token;
-                  setStreamingStatus('');
-                  setStreamingText(accumulated);
-                }
-              } catch {
-                if (raw && raw !== 'process' && raw !== 'ready' && raw !== 'start' && raw !== 'end') {
-                  accumulated += raw;
-                  setStreamingStatus('');
-                  setStreamingText(accumulated);
-                }
-              }
-            }
+          if (type === 'status' && parsed?.message) {
+            setStreamingStatus(parsed.message);
+            return null;
           }
+          if (SKIP_TYPES.has(type)) return null;
+
+          return parsed?.content || parsed?.token || parsed?.text || parsed?.delta || parsed?.choices?.[0]?.delta?.content || parsed?.message || null;
+        } catch {
+          return null;
+        }
+      };
+
+      const processLine = (trimmed) => {
+        if (!trimmed || trimmed === '[DONE]') return;
+
+        // Strip "data:" prefix if present
+        let raw = trimmed;
+        if (raw.startsWith('data:')) {
+          raw = raw.slice(5).trim();
+        }
+        if (!raw || raw === '[DONE]') return;
+        if (SKIP_TYPES.has(raw)) return;
+
+        // Try JSON parse first
+        const token = extractToken(raw);
+        if (token) {
+          accumulated += token;
+          setStreamingStatus('');
+          setStreamingText(accumulated);
+          return;
         }
 
-        // Flush any remaining buffer content
-        if (buffer.trim()) {
-          try {
-            const parsed = JSON.parse(buffer.trim());
-            const token = parsed?.content || parsed?.token || parsed?.text || '';
-            if (token) accumulated += token;
-          } catch { /* ignore */ }
+        // If not valid JSON and not a skip keyword, treat as raw text
+        if (raw && !raw.startsWith('{') && !raw.startsWith('[')) {
+          accumulated += raw;
+          setStreamingStatus('');
+          setStreamingText(accumulated);
         }
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        rawDebug += chunk;
+        buffer += chunk;
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+
+        for (const line of lines) {
+          processLine(line.trim());
+        }
+      }
+
+      // Flush remaining buffer
+      if (buffer.trim()) {
+        processLine(buffer.trim());
       }
 
       // Finalise: commit streamed text into messages list
       setStreamingStatus('');
       if (!accumulated) {
-        // Backend connected but sent no content — likely a backend-side issue
         setMessages(prev => [
           ...prev,
           {
             id: Date.now() + 1,
             role: 'assistant',
-            content: '⚠️ The server is processing your request but no response was returned. Please try again in a moment.',
+            content: '⚠️ The AI service connected but did not return a response. This is likely a backend issue — please check the server logs for the compliance-chat service or try again later.',
             timestamp: new Date().toISOString(),
           },
         ]);
