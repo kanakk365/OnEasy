@@ -1,68 +1,219 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSessions, getSessionMessages, streamQuestion } from '../../utils/aiChatApi';
+import apiClient from '../../utils/api';
 import { HiOutlinePlusCircle, HiOutlineChatAlt2, HiOutlineMenu, HiOutlineX, HiOutlinePaperAirplane } from 'react-icons/hi';
-import { RiRobot2Line } from 'react-icons/ri';
 
-// ─── Markdown-like rendering (bold, inline code, code blocks) ────────────────
+// ─── Markdown-like rendering ──────────────────────────────────────────────────
 function RenderMarkdown({ text }) {
   if (!text) return null;
 
-  // Split into code blocks and regular text
   const parts = text.split(/(```[\s\S]*?```)/g);
 
+  const docLinkRegex = /^\[([^\]]+)\]\(([^)]+)\)(?:\s*-\s*Filename:\s*(.+))?$/;
+
+  const renderInline = (str) => {
+    // Handle ***bold italic***, **bold**, *italic*, `code`, [links](url), bare URLs
+    const tokens = str.split(/(\*\*\*[^*]+\*\*\*|\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\([^)]+\)|https?:\/\/[^\s<)]+)/g);
+    return tokens.map((t, j) => {
+      if (!t) return null;
+      if (t.startsWith('***') && t.endsWith('***'))
+        return <strong key={j} className="font-semibold italic text-gray-900">{t.slice(3, -3)}</strong>;
+      if (t.startsWith('**') && t.endsWith('**'))
+        return <strong key={j} className="font-semibold text-gray-900">{t.slice(2, -2)}</strong>;
+      if (t.startsWith('*') && t.endsWith('*'))
+        return <em key={j} className="italic text-gray-700">{t.slice(1, -1)}</em>;
+      if (t.startsWith('`') && t.endsWith('`'))
+        return <code key={j} className="bg-gray-100 text-red-600 px-1.5 py-0.5 rounded text-[13px] font-mono">{t.slice(1, -1)}</code>;
+      const linkMatch = t.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+      if (linkMatch)
+        return <a key={j} href={linkMatch[2]} target="_blank" rel="noopener noreferrer" className="text-[#00486d] underline underline-offset-2 hover:text-[#bd0008] transition-colors">{linkMatch[1]}</a>;
+      if (/^https?:\/\//.test(t))
+        return <a key={j} href={t} target="_blank" rel="noopener noreferrer" className="text-[#00486d] underline underline-offset-2 break-all hover:text-[#bd0008] transition-colors">{t}</a>;
+      return t;
+    });
+  };
+
+  const renderDocCard = (name, url, filename, key) => (
+    <a
+      key={key}
+      href="#"
+      onClick={async (e) => {
+        e.preventDefault();
+        try {
+          if (url.includes('.s3.') || url.includes('amazonaws.com')) {
+            const response = await apiClient.post('/admin/get-signed-url', { s3Url: url });
+            if (response.success && response.signedUrl) {
+              window.open(response.signedUrl, '_blank');
+              return;
+            }
+          }
+          window.open(url, '_blank');
+        } catch {
+          window.open(url, '_blank');
+        }
+      }}
+      className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 bg-white hover:bg-blue-50 hover:border-blue-300 transition-all group shadow-sm"
+    >
+      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#00486d] flex items-center justify-center">
+        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[13px] font-medium text-gray-800 group-hover:text-blue-700 truncate">{name}</p>
+        {filename && <p className="text-[11px] text-gray-400 truncate mt-0.5">{filename}</p>}
+      </div>
+      <svg className="w-4 h-4 text-gray-300 group-hover:text-blue-500 flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+      </svg>
+    </a>
+  );
+
+  const renderBlock = (block) => {
+    const lines = block.split('\n');
+    const elements = [];
+    let listItems = [];
+    let listType = null;
+    let docCards = [];
+    let pendingDocName = null;
+
+    const flushList = () => {
+      if (listItems.length === 0) return;
+      const Tag = listType === 'ol' ? 'ol' : 'ul';
+      const cls = listType === 'ol' ? 'list-decimal' : 'list-disc';
+      elements.push(<Tag key={`l${elements.length}`} className={`${cls} pl-5 space-y-1.5 my-2 text-[13px] leading-relaxed text-gray-700`}>{listItems}</Tag>);
+      listItems = [];
+      listType = null;
+    };
+
+    const flushDocs = () => {
+      if (docCards.length === 0) return;
+      elements.push(<div key={`d${elements.length}`} className="space-y-2 my-3">{docCards}</div>);
+      docCards = [];
+    };
+
+    const flushPending = (idx) => {
+      if (!pendingDocName) return;
+      if (listType !== 'ul') flushList();
+      listType = 'ul';
+      listItems.push(<li key={`p${idx}`}>{renderInline(pendingDocName)}</li>);
+      pendingDocName = null;
+    };
+
+    lines.forEach((line, idx) => {
+      const trimmed = line.trim();
+      if (!trimmed) { flushPending(idx); flushList(); flushDocs(); return; }
+
+      // Horizontal rule: ---, ***, ___
+      if (/^[-*_]{3,}$/.test(trimmed)) {
+        flushPending(idx); flushList(); flushDocs();
+        elements.push(<hr key={idx} className="my-3 border-gray-200" />);
+        return;
+      }
+
+      if (pendingDocName) {
+        const viewMatch = trimmed.match(/^\[([^\]]+)\]\(([^)]+)\)(?:\s*-\s*Filename:\s*(.+))?$/);
+        if (viewMatch) {
+          flushList();
+          docCards.push(renderDocCard(pendingDocName, viewMatch[2], viewMatch[3], idx));
+          pendingDocName = null;
+          return;
+        }
+        flushPending(idx);
+      }
+
+      const listContent = trimmed.match(/^[-*•]\s+(.*)/)?.[1] || trimmed.match(/^\d+[.)]\s+(.*)/)?.[1];
+      if (listContent) {
+        const singleLineDoc = listContent.match(docLinkRegex);
+        if (singleLineDoc && singleLineDoc[2].startsWith('http')) {
+          flushList();
+          docCards.push(renderDocCard(singleLineDoc[1], singleLineDoc[2], singleLineDoc[3], idx));
+          return;
+        }
+      }
+
+      flushDocs();
+
+      const ulMatch = trimmed.match(/^[-*•]\s+(.*)/);
+      const olMatch = !ulMatch && trimmed.match(/^\d+[.)]\s+(.*)/);
+
+      if (ulMatch) {
+        pendingDocName = ulMatch[1];
+        return;
+      }
+
+      if (olMatch) {
+        if (listType !== 'ol') flushList();
+        listType = 'ol';
+        listItems.push(<li key={idx}>{renderInline(olMatch[1])}</li>);
+      } else {
+        flushList();
+        // Check if plain line is a doc link: [Name](url) - Filename: xyz
+        const plainDocMatch = trimmed.match(docLinkRegex);
+        if (plainDocMatch && plainDocMatch[2].startsWith('http')) {
+          docCards.push(renderDocCard(plainDocMatch[1], plainDocMatch[2], plainDocMatch[3], idx));
+        } else if (trimmed.startsWith('### '))
+          elements.push(<h3 key={idx} className="font-semibold text-[13px] text-gray-900 mt-4 mb-1.5">{renderInline(trimmed.slice(4))}</h3>);
+        else if (trimmed.startsWith('## '))
+          elements.push(<h2 key={idx} className="font-bold text-[14px] text-gray-900 mt-4 mb-1.5">{renderInline(trimmed.slice(3))}</h2>);
+        else if (trimmed.startsWith('# '))
+          elements.push(<h1 key={idx} className="font-bold text-[15px] text-gray-900 mt-4 mb-1.5">{renderInline(trimmed.slice(2))}</h1>);
+        else
+          elements.push(<p key={idx} className="text-[13px] leading-relaxed text-gray-700">{renderInline(trimmed)}</p>);
+      }
+    });
+    flushPending(lines.length);
+    flushList();
+    flushDocs();
+    return elements;
+  };
+
   return (
-    <div className="leading-relaxed space-y-2">
+    <div className="space-y-1.5">
       {parts.map((part, i) => {
         if (part.startsWith('```')) {
           const code = part.replace(/^```[^\n]*\n?/, '').replace(/```$/, '');
           return (
-            <pre key={i} className="bg-gray-900 text-green-400 rounded-lg p-3 text-xs overflow-x-auto font-mono whitespace-pre-wrap">
+            <pre key={i} className="bg-gray-900 text-green-300 rounded-xl p-4 text-[12px] overflow-x-auto font-mono whitespace-pre-wrap leading-relaxed my-3">
               {code}
             </pre>
           );
         }
-
-        // Process inline: bold, inline-code, newlines
-        const inline = part.split(/(\*\*[^*]+\*\*|`[^`]+`|\n)/g);
-        return (
-          <span key={i}>
-            {inline.map((chunk, j) => {
-              if (chunk.startsWith('**') && chunk.endsWith('**')) {
-                return <strong key={j}>{chunk.slice(2, -2)}</strong>;
-              }
-              if (chunk.startsWith('`') && chunk.endsWith('`')) {
-                return (
-                  <code key={j} className="bg-gray-100 text-red-600 px-1 py-0.5 rounded text-xs font-mono">
-                    {chunk.slice(1, -1)}
-                  </code>
-                );
-              }
-              if (chunk === '\n') return <br key={j} />;
-              return chunk;
-            })}
-          </span>
-        );
+        return <div key={i}>{renderBlock(part)}</div>;
       })}
     </div>
   );
+}
+
+// ─── Format timestamp with date & time ────────────────────────────────────────
+function formatTimestamp(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const isYesterday = d.toDateString() === yesterday.toDateString();
+  const time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  if (isToday) return `Today, ${time}`;
+  if (isYesterday) return `Yesterday, ${time}`;
+  return `${d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}, ${time}`;
 }
 
 // ─── Single chat message bubble ───────────────────────────────────────────────
 function MessageBubble({ message }) {
   const isUser = message.role === 'user';
   return (
-    <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'} mb-4`}>
-      {/* Avatar */}
-      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm ${isUser ? 'bg-[#00486d]' : 'bg-[#bd0008]'}`}>
+    <div className={`flex gap-2.5 ${isUser ? 'flex-row-reverse' : 'flex-row'} mb-5`}>
+      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow ${isUser ? 'bg-[#00486d]' : 'bg-[#bd0008]'}`}>
         {isUser ? 'U' : <img src="/agent.png" alt="AI" className="w-4 h-4 brightness-0 invert" />}
       </div>
-      {/* Bubble */}
-      <div className={`max-w-[78%] px-4 py-3 rounded-2xl text-sm shadow-sm ${isUser ? 'text-white rounded-tr-none' : 'bg-white text-gray-800 border border-gray-100 rounded-tl-none'}`} style={isUser ? { background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' } : {}}>
-        {isUser ? <p className="leading-relaxed">{message.content}</p> : <RenderMarkdown text={message.content} />}
+      <div className={`max-w-[80%] px-4 py-3 rounded-2xl shadow-sm ${isUser ? 'text-white rounded-tr-sm' : 'bg-white text-gray-800 border border-gray-100 rounded-tl-sm'}`} style={isUser ? { background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' } : {}}>
+        {isUser ? <p className="text-[13px] leading-relaxed">{message.content}</p> : <RenderMarkdown text={message.content} />}
         {message.timestamp && (
-          <p className={`text-[10px] mt-1 ${isUser ? 'text-blue-200 text-right' : 'text-gray-400'}`}>
-            {new Date(message.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+          <p className={`text-[10px] mt-2 ${isUser ? 'text-blue-200/70 text-right' : 'text-gray-300'}`}>
+            {formatTimestamp(message.timestamp)}
           </p>
         )}
       </div>
@@ -336,7 +487,7 @@ export default function AIChat() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-[100dvh] pb-[70px] lg:pb-0 bg-gray-50 overflow-hidden">
 
       {/* ── Sidebar Overlay (mobile) ──────────────────────────────────────── */}
       {sidebarOpen && (
@@ -434,9 +585,20 @@ export default function AIChat() {
               <p className="text-[10px] text-gray-400">Powered by OnEasy</p>
             </div>
           </div>
-          <div className="ml-auto flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-xs text-gray-500">Online</span>
+          <div className="ml-auto flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-xs text-gray-500">Online</span>
+            </div>
+            <button
+              onClick={() => navigate('/client')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4" />
+              </svg>
+              <span className="hidden sm:inline">Dashboard</span>
+            </button>
           </div>
         </div>
 

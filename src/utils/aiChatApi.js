@@ -39,3 +39,4 @@ export const streamQuestion = async (question, sessionId) => {
   if (!res.ok) throw new Error('Failed to send message');
   return res;
 };
+
