@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import apiClient from '../../../utils/api';
-import { HiOutlinePlus, HiOutlineX, HiOutlineLink, HiOutlineUpload, HiOutlineEye, HiOutlinePencil } from 'react-icons/hi';
+import { HiOutlinePlus, HiOutlineX, HiOutlineLink, HiOutlineUpload, HiOutlinePencil, HiOutlineFilter } from 'react-icons/hi';
+import { FiSearch, FiEye } from 'react-icons/fi';
 
 const STATUS_TABS = ['ALL', 'DRAFT', 'PUBLISHED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
 const TASK_TYPES = ['DEFAULT_TASK', 'OPEN_TO_PAY'];
@@ -14,25 +15,129 @@ export default function AdminTasks() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [clientFilter, setClientFilter] = useState('');
+  const [executorFilter, setExecutorFilter] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState('admin'); // 'admin', 'templates', or 'executor'
+
+  // Executor tasks
+  const [executorTasks, setExecutorTasks] = useState([]);
+
+  // Create/Edit task
   const [showCreate, setShowCreate] = useState(false);
-  const [detailTask, setDetailTask] = useState(null);
+  const [editingTask, setEditingTask] = useState(null);
   const [form, setForm] = useState({ title: '', description: '', type: 'DEFAULT_TASK', clientUserId: '', executorUserId: '', dueDate: '' });
   const [saving, setSaving] = useState(false);
 
+  // Detail
+  const [detailTask, setDetailTask] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+
   // Templates
   const [templates, setTemplates] = useState([]);
-  const [showTemplates, setShowTemplates] = useState(false);
+  const [showCreateTemplate, setShowCreateTemplate] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState(null);
+  const [templateForm, setTemplateForm] = useState({ title: '', description: '', type: 'DEFAULT_TASK' });
+  const [templateSaving, setTemplateSaving] = useState(false);
 
+  // ── Fetch tasks with all filters ──
   const fetchTasks = useCallback(async () => {
     setLoading(true);
     try {
-      const params = statusFilter !== 'ALL' ? `?status=${statusFilter}` : '';
-      const res = await apiClient.get(`/admin/tasks${params}`);
+      const params = new URLSearchParams();
+      if (statusFilter !== 'ALL') params.set('status', statusFilter);
+      if (clientFilter.trim()) params.set('clientUserId', clientFilter.trim());
+      if (executorFilter.trim()) params.set('executorUserId', executorFilter.trim());
+      const qs = params.toString() ? `?${params.toString()}` : '';
+      const res = await apiClient.get(`/admin/tasks${qs}`);
       setTasks(res?.data || res?.tasks || (Array.isArray(res) ? res : []));
     } catch (e) { console.error(e); }
     setLoading(false);
-  }, [statusFilter]);
+  }, [statusFilter, clientFilter, executorFilter]);
 
+  useEffect(() => { fetchTasks(); }, [fetchTasks]);
+
+  // ── Executor: fetch my tasks ──
+  const fetchExecutorTasks = async () => {
+    setLoading(true);
+    try {
+      const res = await apiClient.get('/executor/tasks');
+      setExecutorTasks(res?.data || res?.tasks || (Array.isArray(res) ? res : []));
+    } catch (e) { console.error(e); }
+    setLoading(false);
+  };
+
+  // ── Executor: update task status ──
+  const updateExecutorStatus = async (taskId, status) => {
+    try {
+      await apiClient.patch(`/executor/tasks/${taskId}/status`, { status });
+      fetchExecutorTasks();
+    } catch (e) { console.error(e); alert('Failed to update status'); }
+  };
+
+  useEffect(() => { if (viewMode === 'executor') fetchExecutorTasks(); }, [viewMode]);
+
+  // ── Get single task detail ──
+  const viewTaskDetail = async (taskId) => {
+    setDetailLoading(true);
+    try {
+      const res = await apiClient.get(`/admin/tasks/${taskId}`);
+      setDetailTask(res?.data || res?.task || res);
+    } catch (e) {
+      console.error(e);
+      alert('Failed to load task details');
+    }
+    setDetailLoading(false);
+  };
+
+  // ── Create task ──
+  const createTask = async () => {
+    if (!form.title.trim()) return;
+    setSaving(true);
+    try {
+      await apiClient.post('/admin/tasks', form);
+      setShowCreate(false);
+      resetForm();
+      fetchTasks();
+    } catch (e) { console.error(e); alert('Failed to create task'); }
+    setSaving(false);
+  };
+
+  // ── Update task (PATCH) ──
+  const updateTask = async () => {
+    if (!editingTask || !form.title.trim()) return;
+    setSaving(true);
+    try {
+      await apiClient.patch(`/admin/tasks/${editingTask.id}`, form);
+      setEditingTask(null);
+      setShowCreate(false);
+      resetForm();
+      fetchTasks();
+    } catch (e) { console.error(e); alert('Failed to update task'); }
+    setSaving(false);
+  };
+
+  // ── Publish ──
+  const publishTask = async (taskId) => {
+    try {
+      await apiClient.post(`/admin/tasks/${taskId}/publish`);
+      fetchTasks();
+      if (detailTask?.id === taskId) viewTaskDetail(taskId);
+    } catch (e) { console.error(e); alert('Failed to publish'); }
+  };
+
+  // ── Generate Payment Link ──
+  const generatePaymentLink = async (taskId) => {
+    try {
+      const res = await apiClient.post(`/admin/tasks/${taskId}/payment-link`);
+      const link = res?.paymentLink || res?.data?.paymentLink || 'Generated';
+      alert(`Payment link: ${link}`);
+      fetchTasks();
+      if (detailTask?.id === taskId) viewTaskDetail(taskId);
+    } catch (e) { console.error(e); alert('Failed to generate payment link'); }
+  };
+
+  // ── Templates CRUD ──
   const fetchTemplates = async () => {
     try {
       const res = await apiClient.get('/admin/tasks/templates');
@@ -40,93 +145,167 @@ export default function AdminTasks() {
     } catch (e) { console.error(e); }
   };
 
-  useEffect(() => { fetchTasks(); }, [fetchTasks]);
-
-  const createTask = async () => {
-    if (!form.title.trim()) return;
-    setSaving(true);
+  const createTemplate = async () => {
+    if (!templateForm.title.trim()) return;
+    setTemplateSaving(true);
     try {
-      await apiClient.post('/admin/tasks', form);
-      setShowCreate(false);
-      setForm({ title: '', description: '', type: 'DEFAULT_TASK', clientUserId: '', executorUserId: '', dueDate: '' });
-      fetchTasks();
-    } catch (e) { console.error(e); alert('Failed to create task'); }
-    setSaving(false);
+      await apiClient.post('/admin/tasks/templates', templateForm);
+      setShowCreateTemplate(false);
+      setTemplateForm({ title: '', description: '', type: 'DEFAULT_TASK' });
+      fetchTemplates();
+    } catch (e) { console.error(e); alert('Failed to create template'); }
+    setTemplateSaving(false);
   };
 
-  const publishTask = async (taskId) => {
+  const updateTemplate = async () => {
+    if (!editingTemplate || !templateForm.title.trim()) return;
+    setTemplateSaving(true);
     try {
-      await apiClient.post(`/admin/tasks/${taskId}/publish`);
-      fetchTasks();
-    } catch (e) { console.error(e); alert('Failed to publish'); }
-  };
-
-  const generatePaymentLink = async (taskId) => {
-    try {
-      const res = await apiClient.post(`/admin/tasks/${taskId}/payment-link`);
-      alert(`Payment link: ${res?.paymentLink || res?.data?.paymentLink || 'Generated'}`);
-      fetchTasks();
-    } catch (e) { console.error(e); alert('Failed to generate payment link'); }
+      await apiClient.patch(`/admin/tasks/templates/${editingTemplate.id}`, templateForm);
+      setEditingTemplate(null);
+      setShowCreateTemplate(false);
+      setTemplateForm({ title: '', description: '', type: 'DEFAULT_TASK' });
+      fetchTemplates();
+    } catch (e) { console.error(e); alert('Failed to update template'); }
+    setTemplateSaving(false);
   };
 
   const applyTemplate = (t) => {
     setForm(prev => ({ ...prev, title: t.title || '', description: t.description || '', type: t.type || 'DEFAULT_TASK' }));
-    setShowTemplates(false);
+    setViewMode('admin');
     setShowCreate(true);
+    setEditingTask(null);
+  };
+
+  const openEditTask = (task) => {
+    setEditingTask(task);
+    setForm({
+      title: task.title || '',
+      description: task.description || '',
+      type: task.type || 'DEFAULT_TASK',
+      clientUserId: task.clientUserId || '',
+      executorUserId: task.executorUserId || '',
+      dueDate: task.dueDate ? task.dueDate.split('T')[0] : '',
+    });
+    setShowCreate(true);
+    setDetailTask(null);
+  };
+
+  const openEditTemplate = (t) => {
+    setEditingTemplate(t);
+    setTemplateForm({ title: t.title || '', description: t.description || '', type: t.type || 'DEFAULT_TASK' });
+    setShowCreateTemplate(true);
+  };
+
+  const resetForm = () => {
+    setForm({ title: '', description: '', type: 'DEFAULT_TASK', clientUserId: '', executorUserId: '', dueDate: '' });
+    setEditingTask(null);
   };
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+    <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold text-[#022B51]">Tasks</h1>
-        <div className="flex gap-2">
-          <button onClick={() => { fetchTemplates(); setShowTemplates(true); }} className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">Templates</button>
-          <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm text-white rounded-lg" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>
-            <HiOutlinePlus className="w-4 h-4" /> Create Task
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-1">Tasks</h1>
+        <p className="text-gray-500 italic">Manage tasks, templates and executor assignments</p>
+      </div>
+
+      {/* Controls */}
+      <div className="bg-white rounded-2xl p-3 sm:p-6 mb-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100">
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="flex gap-2">
+            <button onClick={() => setShowFilters(!showFilters)} className={`p-2.5 border rounded-xl transition-all ${showFilters ? 'text-white border-transparent' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`} style={showFilters ? { background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' } : {}}>
+              <HiOutlineFilter className="w-4 h-4" />
+            </button>
+          </div>
+          <button onClick={() => { 
+            if (viewMode === 'templates') { 
+              setEditingTemplate(null); setTemplateForm({ title: '', description: '', type: 'DEFAULT_TASK' }); setShowCreateTemplate(true); 
+            } else { 
+              resetForm(); setShowCreate(true); 
+            }
+          }} className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-medium text-white rounded-xl transition-all hover:opacity-90" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>
+            <HiOutlinePlus className="w-4 h-4" /> {viewMode === 'templates' ? 'New Template' : 'Create Task'}
           </button>
+        </div>
+
+        {/* View Mode Tabs */}
+        <div className="flex gap-3 flex-wrap">
+          {[{ key: 'admin', label: 'Tasks' }, { key: 'templates', label: 'Templates' }, { key: 'executor', label: 'Executor' }].map(tab => (
+            <button key={tab.key} onClick={() => { setViewMode(tab.key); if (tab.key === 'templates') fetchTemplates(); }} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${viewMode === tab.key ? 'text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`} style={viewMode === tab.key ? { background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' } : {}}>
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Status Tabs */}
-      <div className="flex gap-1 mb-4 overflow-x-auto pb-1">
-        {STATUS_TABS.map(s => (
-          <button key={s} onClick={() => setStatusFilter(s)} className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-colors ${statusFilter === s ? 'bg-[#022B51] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-            {s.replace('_', ' ')}
-          </button>
-        ))}
-      </div>
+      {/* Filters - admin only */}
+      {viewMode === 'admin' && showFilters && (
+        <div className="bg-white rounded-2xl p-4 sm:p-6 mb-6 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100">
+          <div className="flex gap-3 flex-wrap">
+            <div className="flex-1 min-w-[160px] relative">
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input value={clientFilter} onChange={e => setClientFilter(e.target.value)} placeholder="Client User ID" className="w-full pl-10 pr-4 py-2.5 bg-[#F8F9FA] border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all" />
+            </div>
+            <div className="flex-1 min-w-[160px] relative">
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input value={executorFilter} onChange={e => setExecutorFilter(e.target.value)} placeholder="Executor User ID" className="w-full pl-10 pr-4 py-2.5 bg-[#F8F9FA] border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all" />
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Tasks Table */}
-      {loading ? (
-        <div className="text-center py-12 text-gray-500">Loading tasks...</div>
+      {/* Status Tabs - admin */}
+      {viewMode === 'admin' && (
+        <div className="flex gap-3 mb-6 overflow-x-auto pb-1 flex-wrap">
+          {STATUS_TABS.map(s => (
+            <button key={s} onClick={() => setStatusFilter(s)} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${statusFilter === s ? 'text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`} style={statusFilter === s ? { background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' } : {}}>
+              {s.replace('_', ' ')}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Admin Tasks Table */}
+      {viewMode === 'admin' && (loading ? (
+        <div className="bg-white rounded-2xl p-12 text-center shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#022B51] mx-auto"></div>
+          <p className="mt-4 text-gray-500">Loading tasks...</p>
+        </div>
       ) : tasks.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">No tasks found</div>
+        <div className="bg-white rounded-2xl p-12 text-center shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100">
+          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Tasks Found</h3>
+          <p className="text-gray-500">Create your first task to get started.</p>
+        </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="p-3 sm:p-6 rounded-2xl bg-[#f2f6f7] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Title</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Type</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Due Date</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
+            <table className="w-full border-separate border-spacing-0">
+              <thead>
+                <tr className="text-white">
+                  <th className="px-4 py-3 text-left text-sm font-medium rounded-l-xl" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>Title</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>Type</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>Status</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>Due Date</th>
+                  <th className="px-4 py-3 text-center text-sm font-medium rounded-r-xl" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-100">
                 {tasks.map(task => (
-                  <tr key={task.id} className="border-b last:border-0 hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-800">{task.title}</td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{task.type?.replace('_', ' ')}</td>
-                    <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor(task.status)}`}>{task.status}</span></td>
-                    <td className="px-4 py-3 text-gray-500">{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '—'}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => setDetailTask(task)} className="p-1.5 hover:bg-gray-100 rounded-lg" title="View"><HiOutlineEye className="w-4 h-4 text-gray-500" /></button>
-                        {task.status === 'DRAFT' && <button onClick={() => publishTask(task.id)} className="p-1.5 hover:bg-blue-50 rounded-lg" title="Publish"><HiOutlineUpload className="w-4 h-4 text-blue-600" /></button>}
-                        {task.type === 'OPEN_TO_PAY' && <button onClick={() => generatePaymentLink(task.id)} className="p-1.5 hover:bg-green-50 rounded-lg" title="Payment Link"><HiOutlineLink className="w-4 h-4 text-green-600" /></button>}
+                  <tr key={task.id} className="bg-white hover:bg-blue-50/50 transition-colors">
+                    <td className="px-4 py-4 font-medium text-gray-900 text-sm">{task.title}</td>
+                    <td className="px-4 py-4 text-gray-500 text-sm">{task.type?.replace('_', ' ')}</td>
+                    <td className="px-4 py-4"><span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${statusColor(task.status)}`}>{task.status?.replace('_', ' ')}</span></td>
+                    <td className="px-4 py-4 text-gray-500 text-sm">{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '—'}</td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <button onClick={() => viewTaskDetail(task.id)} className="p-2 text-white rounded-lg hover:opacity-90 transition-opacity" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }} title="View"><FiEye className="w-4 h-4" /></button>
+                        <button onClick={() => openEditTask(task)} className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors" title="Edit"><HiOutlinePencil className="w-4 h-4" /></button>
+                        {task.status === 'DRAFT' && <button onClick={() => publishTask(task.id)} className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors" title="Publish"><HiOutlineUpload className="w-4 h-4" /></button>}
+                        {task.type === 'OPEN_TO_PAY' && <button onClick={() => generatePaymentLink(task.id)} className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors" title="Payment Link"><HiOutlineLink className="w-4 h-4" /></button>}
                       </div>
                     </td>
                   </tr>
@@ -135,30 +314,72 @@ export default function AdminTasks() {
             </table>
           </div>
         </div>
-      )}
+      ))}
 
-      {/* Create Task Modal */}
-      {showCreate && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowCreate(false)}>
-          <div className="bg-white rounded-xl w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-[#022B51]">Create Task</h2>
-              <button onClick={() => setShowCreate(false)}><HiOutlineX className="w-5 h-5 text-gray-400" /></button>
+      {/* Executor View */}
+      {viewMode === 'executor' && (loading ? (
+        <div className="bg-white rounded-2xl p-12 text-center shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#022B51] mx-auto"></div>
+          <p className="mt-4 text-gray-500">Loading tasks...</p>
+        </div>
+      ) : executorTasks.length === 0 ? (
+        <div className="bg-white rounded-2xl p-12 text-center shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Assigned Tasks</h3>
+          <p className="text-gray-500">Tasks assigned to you will appear here.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {executorTasks.map(task => (
+            <div key={task.id} className="bg-white rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 text-sm">{task.title}</h3>
+                  {task.description && <p className="text-sm text-gray-500 mt-1">{task.description}</p>}
+                  <div className="flex items-center gap-3 mt-3">
+                    <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${statusColor(task.status)}`}>{task.status?.replace('_', ' ')}</span>
+                    {task.dueDate && <span className="text-xs text-gray-400">{new Date(task.dueDate).toLocaleDateString()}</span>}
+                  </div>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  {task.status === 'PUBLISHED' && (
+                    <button onClick={() => updateExecutorStatus(task.id, 'IN_PROGRESS')} className="px-4 py-2 text-xs font-medium text-white rounded-xl hover:opacity-90 transition-all" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>
+                      Start Task
+                    </button>
+                  )}
+                  {task.status === 'IN_PROGRESS' && (
+                    <button onClick={() => updateExecutorStatus(task.id, 'COMPLETED')} className="px-4 py-2 text-xs font-medium text-white bg-green-600 rounded-xl hover:bg-green-700 transition-colors">
+                      Mark Complete
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-            <div className="space-y-3">
-              <input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder="Task title" className="w-full px-3 py-2 border rounded-lg text-sm" />
-              <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Description" rows={3} className="w-full px-3 py-2 border rounded-lg text-sm resize-none" />
-              <select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))} className="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+          ))}
+        </div>
+      ))}
+
+      {/* Create / Edit Task Modal */}
+      {showCreate && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => { setShowCreate(false); resetForm(); }}>
+          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-semibold text-gray-900">{editingTask ? 'Edit Task' : 'Create Task'}</h2>
+              <button onClick={() => { setShowCreate(false); resetForm(); }} className="p-1 hover:bg-gray-100 rounded-lg"><HiOutlineX className="w-5 h-5 text-gray-400" /></button>
+            </div>
+            <div className="space-y-4">
+              <input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder="Task title" className="w-full px-4 py-2.5 bg-[#F8F9FA] border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all" />
+              <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Description" rows={3} className="w-full px-4 py-2.5 bg-[#F8F9FA] border border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all" />
+              <select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))} className="w-full px-4 py-2.5 bg-[#F8F9FA] border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all">
                 {TASK_TYPES.map(t => <option key={t} value={t}>{t.replace('_', ' ')}</option>)}
               </select>
-              <input value={form.clientUserId} onChange={e => setForm(p => ({ ...p, clientUserId: e.target.value }))} placeholder="Client User ID" className="w-full px-3 py-2 border rounded-lg text-sm" />
-              <input value={form.executorUserId} onChange={e => setForm(p => ({ ...p, executorUserId: e.target.value }))} placeholder="Executor User ID" className="w-full px-3 py-2 border rounded-lg text-sm" />
-              <input type="date" value={form.dueDate} onChange={e => setForm(p => ({ ...p, dueDate: e.target.value }))} className="w-full px-3 py-2 border rounded-lg text-sm" />
+              <input value={form.clientUserId} onChange={e => setForm(p => ({ ...p, clientUserId: e.target.value }))} placeholder="Client User ID" className="w-full px-4 py-2.5 bg-[#F8F9FA] border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all" />
+              <input value={form.executorUserId} onChange={e => setForm(p => ({ ...p, executorUserId: e.target.value }))} placeholder="Executor User ID" className="w-full px-4 py-2.5 bg-[#F8F9FA] border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all" />
+              <input type="date" value={form.dueDate} onChange={e => setForm(p => ({ ...p, dueDate: e.target.value }))} className="w-full px-4 py-2.5 bg-[#F8F9FA] border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all" />
             </div>
-            <div className="flex justify-end gap-2 mt-5">
-              <button onClick={() => setShowCreate(false)} className="px-4 py-2 text-sm text-gray-600 border rounded-lg hover:bg-gray-50">Cancel</button>
-              <button onClick={createTask} disabled={saving || !form.title.trim()} className="px-4 py-2 text-sm text-white rounded-lg disabled:opacity-50" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>
-                {saving ? 'Creating...' : 'Create'}
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => { setShowCreate(false); resetForm(); }} className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">Cancel</button>
+              <button onClick={editingTask ? updateTask : createTask} disabled={saving || !form.title.trim()} className="px-5 py-2.5 text-sm font-medium text-white rounded-xl disabled:opacity-50 hover:opacity-90 transition-all" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>
+                {saving ? 'Saving...' : editingTask ? 'Update' : 'Create'}
               </button>
             </div>
           </div>
@@ -168,42 +389,107 @@ export default function AdminTasks() {
       {/* Task Detail Modal */}
       {detailTask && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setDetailTask(null)}>
-          <div className="bg-white rounded-xl w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-[#022B51]">{detailTask.title}</h2>
-              <button onClick={() => setDetailTask(null)}><HiOutlineX className="w-5 h-5 text-gray-400" /></button>
-            </div>
-            <div className="space-y-3 text-sm">
-              <div><span className="text-gray-500">Status:</span> <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor(detailTask.status)}`}>{detailTask.status}</span></div>
-              <div><span className="text-gray-500">Type:</span> {detailTask.type?.replace('_', ' ')}</div>
-              {detailTask.dueDate && <div><span className="text-gray-500">Due:</span> {new Date(detailTask.dueDate).toLocaleDateString()}</div>}
-              {detailTask.description && <div><span className="text-gray-500">Description:</span><p className="mt-1 text-gray-700">{detailTask.description}</p></div>}
-              {detailTask.paymentLink && <div><span className="text-gray-500">Payment Link:</span> <a href={detailTask.paymentLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">{detailTask.paymentLink}</a></div>}
-            </div>
+          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+            {detailLoading ? (
+              <div className="text-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#022B51] mx-auto"></div></div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-lg font-semibold text-gray-900">{detailTask.title}</h2>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => openEditTask(detailTask)} className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors" title="Edit"><HiOutlinePencil className="w-4 h-4" /></button>
+                    <button onClick={() => setDetailTask(null)} className="p-1 hover:bg-gray-100 rounded-lg"><HiOutlineX className="w-5 h-5 text-gray-400" /></button>
+                  </div>
+                </div>
+                <div className="space-y-4 text-sm">
+                  <div className="flex items-center gap-2"><span className="text-gray-500 w-24">Status:</span> <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${statusColor(detailTask.status)}`}>{detailTask.status?.replace('_', ' ')}</span></div>
+                  <div className="flex items-center gap-2"><span className="text-gray-500 w-24">Type:</span> <span className="text-gray-900">{detailTask.type?.replace('_', ' ')}</span></div>
+                  {detailTask.dueDate && <div className="flex items-center gap-2"><span className="text-gray-500 w-24">Due:</span> <span className="text-gray-900">{new Date(detailTask.dueDate).toLocaleDateString()}</span></div>}
+                  {detailTask.clientUserId && <div className="flex items-center gap-2"><span className="text-gray-500 w-24">Client ID:</span> <span className="text-gray-900">{detailTask.clientUserId}</span></div>}
+                  {detailTask.executorUserId && <div className="flex items-center gap-2"><span className="text-gray-500 w-24">Executor ID:</span> <span className="text-gray-900">{detailTask.executorUserId}</span></div>}
+                  {detailTask.description && <div><span className="text-gray-500">Description:</span><p className="mt-1 text-gray-700 bg-[#F8F9FA] rounded-xl p-3">{detailTask.description}</p></div>}
+                  {detailTask.paymentLink && <div><span className="text-gray-500">Payment Link:</span> <a href={detailTask.paymentLink} target="_blank" rel="noopener noreferrer" className="text-[#022B51] underline break-all">{detailTask.paymentLink}</a></div>}
+                </div>
+                <div className="flex gap-3 mt-6">
+                  {detailTask.status === 'DRAFT' && <button onClick={() => publishTask(detailTask.id)} className="px-4 py-2 text-sm font-medium text-white rounded-xl hover:opacity-90 transition-all" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>Publish</button>}
+                  {detailTask.type === 'OPEN_TO_PAY' && <button onClick={() => generatePaymentLink(detailTask.id)} className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-xl hover:bg-green-700 transition-colors">Generate Payment Link</button>}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
 
-      {/* Templates Modal */}
-      {showTemplates && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowTemplates(false)}>
-          <div className="bg-white rounded-xl w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-[#022B51]">Task Templates</h2>
-              <button onClick={() => setShowTemplates(false)}><HiOutlineX className="w-5 h-5 text-gray-400" /></button>
-            </div>
-            {templates.length === 0 ? (
-              <p className="text-gray-400 text-sm text-center py-6">No templates found</p>
-            ) : (
-              <div className="space-y-2 max-h-80 overflow-y-auto">
+      {/* Templates View */}
+      {viewMode === 'templates' && (loading ? (
+        <div className="bg-white rounded-2xl p-12 text-center shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#022B51] mx-auto"></div>
+          <p className="mt-4 text-gray-500">Loading templates...</p>
+        </div>
+      ) : templates.length === 0 ? (
+        <div className="bg-white rounded-2xl p-12 text-center shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-gray-100">
+          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z" /></svg>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Templates</h3>
+          <p className="text-gray-500 mb-4">Create reusable task templates to speed up task creation.</p>
+          <button onClick={() => { setEditingTemplate(null); setTemplateForm({ title: '', description: '', type: 'DEFAULT_TASK' }); setShowCreateTemplate(true); }} className="px-5 py-2.5 text-sm font-medium text-white rounded-xl hover:opacity-90 transition-all" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>
+            Create First Template
+          </button>
+        </div>
+      ) : (
+        <div className="p-3 sm:p-6 rounded-2xl bg-[#f2f6f7] overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full border-separate border-spacing-0">
+              <thead>
+                <tr className="text-white">
+                  <th className="px-4 py-3 text-left text-sm font-medium rounded-l-xl" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>Title</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>Description</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>Type</th>
+                  <th className="px-4 py-3 text-center text-sm font-medium rounded-r-xl" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
                 {templates.map(t => (
-                  <button key={t.id} onClick={() => applyTemplate(t)} className="w-full text-left p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                    <p className="font-medium text-gray-800 text-sm">{t.title}</p>
-                    {t.description && <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{t.description}</p>}
-                  </button>
+                  <tr key={t.id} className="bg-white hover:bg-blue-50/50 transition-colors">
+                    <td className="px-4 py-4 font-medium text-gray-900 text-sm">{t.title}</td>
+                    <td className="px-4 py-4 text-gray-500 text-sm max-w-xs truncate">{t.description || '—'}</td>
+                    <td className="px-4 py-4 text-gray-500 text-sm">{t.type?.replace('_', ' ') || '—'}</td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <button onClick={() => applyTemplate(t)} className="px-3 py-1.5 text-xs font-medium text-white rounded-lg hover:opacity-90 transition-all" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>Use</button>
+                        <button onClick={() => openEditTemplate(t)} className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors" title="Edit"><HiOutlinePencil className="w-4 h-4" /></button>
+                      </div>
+                    </td>
+                  </tr>
                 ))}
-              </div>
-            )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ))}
+
+      {/* Create / Edit Template Modal */}
+      {showCreateTemplate && (
+        <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4" onClick={() => { setShowCreateTemplate(false); setEditingTemplate(null); }}>
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-semibold text-gray-900">{editingTemplate ? 'Edit Template' : 'New Template'}</h2>
+              <button onClick={() => { setShowCreateTemplate(false); setEditingTemplate(null); }} className="p-1 hover:bg-gray-100 rounded-lg"><HiOutlineX className="w-5 h-5 text-gray-400" /></button>
+            </div>
+            <div className="space-y-4">
+              <input value={templateForm.title} onChange={e => setTemplateForm(p => ({ ...p, title: e.target.value }))} placeholder="Template title" className="w-full px-4 py-2.5 bg-[#F8F9FA] border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all" />
+              <textarea value={templateForm.description} onChange={e => setTemplateForm(p => ({ ...p, description: e.target.value }))} placeholder="Description" rows={3} className="w-full px-4 py-2.5 bg-[#F8F9FA] border border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all" />
+              <select value={templateForm.type} onChange={e => setTemplateForm(p => ({ ...p, type: e.target.value }))} className="w-full px-4 py-2.5 bg-[#F8F9FA] border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#022B51] focus:border-transparent transition-all">
+                {TASK_TYPES.map(t => <option key={t} value={t}>{t.replace('_', ' ')}</option>)}
+              </select>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => { setShowCreateTemplate(false); setEditingTemplate(null); }} className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">Cancel</button>
+              <button onClick={editingTemplate ? updateTemplate : createTemplate} disabled={templateSaving || !templateForm.title.trim()} className="px-5 py-2.5 text-sm font-medium text-white rounded-xl disabled:opacity-50 hover:opacity-90 transition-all" style={{ background: 'linear-gradient(180deg, #022B51 0%, #015079 100%)' }}>
+                {templateSaving ? 'Saving...' : editingTemplate ? 'Update' : 'Create'}
+              </button>
+            </div>
           </div>
         </div>
       )}

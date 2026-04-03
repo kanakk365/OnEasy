@@ -271,15 +271,15 @@ export default function AIChat() {
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [showOrgPicker, setShowOrgPicker] = useState(false);
   const [orgLoading, setOrgLoading] = useState(false);
-  const [pendingQuestion, setPendingQuestion] = useState('');
 
-  // Fetch user's organisations
+  // Fetch user's organisations and auto-select if only one
   const fetchOrganisations = useCallback(async () => {
     setOrgLoading(true);
     try {
       const data = await getUsersPageData();
       const orgs = data?.data?.organisations || data?.data?.user?.organisations || [];
       setOrganisations(orgs);
+      if (orgs.length === 1) setSelectedOrg(orgs[0]);
       return orgs;
     } catch (err) {
       console.error('Failed to fetch organisations:', err);
@@ -355,13 +355,6 @@ export default function AIChat() {
   const sendMessage = async (overrideQuestion, overrideOrgId) => {
     const question = overrideQuestion || input.trim();
     if (!question || streaming) return;
-
-    // If orgs exist and none selected yet, show picker
-    if (!overrideOrgId && !selectedOrg && organisations.length > 0) {
-      setPendingQuestion(question);
-      setShowOrgPicker(true);
-      return;
-    }
 
     const orgId = overrideOrgId || selectedOrg?.id || null;
 
@@ -524,11 +517,6 @@ export default function AIChat() {
   const handleOrgSelect = (org) => {
     setSelectedOrg(org);
     setShowOrgPicker(false);
-    if (pendingQuestion) {
-      setInput('');
-      sendMessage(pendingQuestion, org.id);
-      setPendingQuestion('');
-    }
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -712,7 +700,7 @@ export default function AIChat() {
             <div className="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-xl">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm font-medium text-gray-700">Select an organisation</p>
-                <button onClick={() => { setShowOrgPicker(false); setPendingQuestion(''); }} className="text-gray-400 hover:text-gray-600">
+                <button onClick={() => setShowOrgPicker(false)} className="text-gray-400 hover:text-gray-600">
                   <HiOutlineX className="w-4 h-4" />
                 </button>
               </div>
@@ -724,7 +712,7 @@ export default function AIChat() {
                     <button
                       key={org.id}
                       onClick={() => handleOrgSelect(org)}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-[#022B51]/5 border border-transparent hover:border-[#022B51]/20 transition-all"
+                      className={`w-full text-left px-3 py-2 rounded-lg hover:bg-[#022B51]/5 border transition-all ${selectedOrg?.id === org.id ? 'border-[#022B51]/30 bg-[#022B51]/5' : 'border-transparent hover:border-[#022B51]/20'}`}
                     >
                       <p className="text-sm font-medium text-gray-800">{org.legal_name || org.trade_name}</p>
                       {org.trade_name && org.legal_name && <p className="text-xs text-gray-500">{org.trade_name}</p>}
@@ -735,15 +723,17 @@ export default function AIChat() {
             </div>
           )}
 
-          {/* Selected Org Badge */}
-          {selectedOrg && !showOrgPicker && (
+          {/* Selected Org Badge — click to change */}
+          {organisations.length > 0 && !showOrgPicker && (
             <div className="mb-2 flex items-center gap-2">
-              <span className="text-xs bg-[#022B51]/10 text-[#022B51] px-2 py-1 rounded-full font-medium">
-                {selectedOrg.legal_name || selectedOrg.trade_name}
-              </span>
-              <button onClick={() => setSelectedOrg(null)} className="text-gray-400 hover:text-gray-600">
-                <HiOutlineX className="w-3 h-3" />
+              <button onClick={() => setShowOrgPicker(true)} className="text-xs bg-[#022B51]/10 text-[#022B51] px-2 py-1 rounded-full font-medium hover:bg-[#022B51]/20 transition-colors">
+                {selectedOrg ? (selectedOrg.legal_name || selectedOrg.trade_name) : 'Select Organisation'}
               </button>
+              {selectedOrg && (
+                <button onClick={() => setSelectedOrg(null)} className="text-gray-400 hover:text-gray-600">
+                  <HiOutlineX className="w-3 h-3" />
+                </button>
+              )}
             </div>
           )}
           <div className="flex items-end gap-3 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-2.5 focus-within:border-[#00486d] focus-within:ring-2 focus-within:ring-[#00486d]/10 transition-all">
