@@ -219,6 +219,22 @@ class APIClient {
     return response;
   }
 
+  async appleLogin({ id_token, user }) {
+    const response = await this.post(
+      AUTH_CONFIG.ENDPOINTS.APPLE_LOGIN,
+      { id_token, user },
+      { includeAuth: false }
+    );
+    if (response.success && response.token) {
+      localStorage.setItem(AUTH_CONFIG.STORAGE_KEYS.TOKEN, response.token);
+      localStorage.setItem(AUTH_CONFIG.STORAGE_KEYS.USER, JSON.stringify(response.user));
+      if (response.refreshToken) {
+        localStorage.setItem(AUTH_CONFIG.STORAGE_KEYS.REFRESH_TOKEN, response.refreshToken);
+      }
+    }
+    return response;
+  }
+
   async logout() {
     try {
       await this.post(AUTH_CONFIG.ENDPOINTS.LOGOUT);

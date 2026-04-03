@@ -20,6 +20,7 @@ import ComplianceChat from "../pages/ComplianceChat";
 import Resources from "../pages/Resources";
 import TaxAccountingCategories from "../pages/TaxAccountingCategories";
 import AssignedCompliances from "../pages/AssignedCompliances";
+import ClientTasks from "../pages/ClientTasks";
 import AssignedComplianceDetails from "../pages/AssignedComplianceDetails";
 import OrgCompliances from "../pages/OrgCompliances";
 import RegistrationPackageSelection from "../pages/RegistrationPackageSelection";
@@ -151,6 +152,7 @@ import AdminClientCompanyDocuments from "../admin/pages/AdminClientCompanyDocume
 import AdminOrganizations from "../admin/pages/AdminOrganizations";
 import AdminDirectors from "../admin/pages/AdminDirectors";
 import AdminCouponManagement from "../admin/pages/AdminCouponManagement";
+import AdminTasks from "../admin/pages/AdminTasks";
 import SuperAdminLayout from "../superadmin/layout/SuperAdminLayout";
 import SuperAdminClients from "../superadmin/pages/SuperAdminClients";
 import SuperAdminProfile from "../superadmin/pages/SuperAdminProfile";
@@ -286,6 +288,14 @@ function Routers() {
         element={
           <ProtectedRoute>
             <AssignedComplianceDetails />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tasks"
+        element={
+          <ProtectedRoute>
+            <ClientTasks />
           </ProtectedRoute>
         }
       />
@@ -1280,6 +1290,7 @@ function Routers() {
         <Route path="coupon-management" element={<AdminCouponManagement />} />
         <Route path="cms-package" element={<AdminCMSPackage />} />
         <Route path="compliance-cms" element={<AdminComplianceCMS />} />
+        <Route path="tasks" element={<AdminTasks />} />
         <Route path="profile" element={<AdminProfile />} />
         <Route
           path="client-details/:ticketId"

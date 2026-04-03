@@ -85,6 +85,7 @@ function Sidebar() {
       text: "Assigned Compliances",
       path: "/assigned-compliances",
     },
+    { icon: <RiTaskLine />, text: "Tasks", path: "/tasks" },
     { icon: <RiRobot2Line />, text: "AI Agent", path: "/ai-agent" },
     { icon: <TbCopy />, text: "Resources", path: "/resources" },
     { icon: <RiFileEditLine />, text: "My Documents", path: "/documents" },

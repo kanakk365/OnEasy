@@ -13,6 +13,7 @@ export const AUTH_CONFIG = {
     PHONE_LOGIN: '/auth/phone-login',
     VERIFY_OTP: '/auth/verify-otp',
     GOOGLE_LOGIN: '/auth/google-login',
+    APPLE_LOGIN: '/auth/apple-login',
     REFRESH_TOKEN: '/auth/refresh-token',
     GET_ME: '/auth/me',
     UPDATE_PROFILE: '/auth/profile',

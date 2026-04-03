@@ -9,6 +9,7 @@ import {
   RiFolderSettingsLine,
   RiMoneyDollarCircleLine,
   RiFileList3Line,
+  RiTaskLine,
 } from "react-icons/ri";
 import { BsBuilding } from "react-icons/bs";
 import { HiOutlineUsers } from "react-icons/hi";
@@ -140,6 +141,7 @@ function AdminSidebar() {
       text: "Compliance CMS",
       path: "/admin/compliance-cms",
     },
+    { icon: <RiTaskLine />, text: "Tasks", path: "/admin/tasks" },
     { icon: <RiUser3Line />, text: "Profile", path: "/admin/profile" },
   ];
 

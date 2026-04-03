@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSessions, getSessionMessages, streamQuestion } from '../../utils/aiChatApi';
 import apiClient from '../../utils/api';
+import { getUsersPageData } from '../../utils/usersPageApi';
 import { HiOutlinePlusCircle, HiOutlineChatAlt2, HiOutlineMenu, HiOutlineX, HiOutlinePaperAirplane } from 'react-icons/hi';
 
 // ─── Markdown-like rendering ──────────────────────────────────────────────────
@@ -265,6 +266,32 @@ export default function AIChat() {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
+  // Organization selection
+  const [organisations, setOrganisations] = useState([]);
+  const [selectedOrg, setSelectedOrg] = useState(null);
+  const [showOrgPicker, setShowOrgPicker] = useState(false);
+  const [orgLoading, setOrgLoading] = useState(false);
+  const [pendingQuestion, setPendingQuestion] = useState('');
+
+  // Fetch user's organisations
+  const fetchOrganisations = useCallback(async () => {
+    setOrgLoading(true);
+    try {
+      const data = await getUsersPageData();
+      const orgs = data?.data?.organisations || data?.data?.user?.organisations || [];
+      setOrganisations(orgs);
+      return orgs;
+    } catch (err) {
+      console.error('Failed to fetch organisations:', err);
+      return [];
+    } finally {
+      setOrgLoading(false);
+    }
+  }, []);
+
+  // Load orgs on mount
+  useEffect(() => { fetchOrganisations(); }, [fetchOrganisations]);
+
   // ── Scroll to bottom whenever messages change ──────────────────────────────
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -325,9 +352,18 @@ export default function AIChat() {
   };
 
   // ── Send message & stream response ────────────────────────────────────────
-  const sendMessage = async () => {
-    const question = input.trim();
+  const sendMessage = async (overrideQuestion, overrideOrgId) => {
+    const question = overrideQuestion || input.trim();
     if (!question || streaming) return;
+
+    // If orgs exist and none selected yet, show picker
+    if (!overrideOrgId && !selectedOrg && organisations.length > 0) {
+      setPendingQuestion(question);
+      setShowOrgPicker(true);
+      return;
+    }
+
+    const orgId = overrideOrgId || selectedOrg?.id || null;
 
     const userMsg = {
       id: Date.now(),
@@ -346,7 +382,7 @@ export default function AIChat() {
 
     try {
       const sessionId = activeSessionId?.startsWith('temp-') ? undefined : activeSessionId;
-      const response = await streamQuestion(question, sessionId);
+      const response = await streamQuestion(question, sessionId, orgId);
 
       if (!response.ok) {
         const errText = await response.text();
@@ -483,6 +519,16 @@ export default function AIChat() {
     setInput(e.target.value);
     e.target.style.height = 'auto';
     e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+  };
+
+  const handleOrgSelect = (org) => {
+    setSelectedOrg(org);
+    setShowOrgPicker(false);
+    if (pendingQuestion) {
+      setInput('');
+      sendMessage(pendingQuestion, org.id);
+      setPendingQuestion('');
+    }
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -661,6 +707,45 @@ export default function AIChat() {
 
         {/* Input Area */}
         <div className="px-4 sm:px-6 py-4 bg-white border-t border-gray-100">
+          {/* Org Picker Overlay */}
+          {showOrgPicker && (
+            <div className="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-xl">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-gray-700">Select an organisation</p>
+                <button onClick={() => { setShowOrgPicker(false); setPendingQuestion(''); }} className="text-gray-400 hover:text-gray-600">
+                  <HiOutlineX className="w-4 h-4" />
+                </button>
+              </div>
+              {orgLoading ? (
+                <p className="text-xs text-gray-500">Loading...</p>
+              ) : (
+                <div className="space-y-1 max-h-48 overflow-y-auto">
+                  {organisations.map(org => (
+                    <button
+                      key={org.id}
+                      onClick={() => handleOrgSelect(org)}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-[#022B51]/5 border border-transparent hover:border-[#022B51]/20 transition-all"
+                    >
+                      <p className="text-sm font-medium text-gray-800">{org.legal_name || org.trade_name}</p>
+                      {org.trade_name && org.legal_name && <p className="text-xs text-gray-500">{org.trade_name}</p>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Selected Org Badge */}
+          {selectedOrg && !showOrgPicker && (
+            <div className="mb-2 flex items-center gap-2">
+              <span className="text-xs bg-[#022B51]/10 text-[#022B51] px-2 py-1 rounded-full font-medium">
+                {selectedOrg.legal_name || selectedOrg.trade_name}
+              </span>
+              <button onClick={() => setSelectedOrg(null)} className="text-gray-400 hover:text-gray-600">
+                <HiOutlineX className="w-3 h-3" />
+              </button>
+            </div>
+          )}
           <div className="flex items-end gap-3 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-2.5 focus-within:border-[#00486d] focus-within:ring-2 focus-within:ring-[#00486d]/10 transition-all">
             <textarea
               ref={textareaRef}
